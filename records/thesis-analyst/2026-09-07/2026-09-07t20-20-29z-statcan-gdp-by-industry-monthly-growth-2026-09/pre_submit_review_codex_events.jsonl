@@ -1,0 +1,4 @@
+{"type": "thread.started", "thread_id": "01a07d89-4ac0-7da0-a952-8111d43228dd"}
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "{\"summary\":\"Draft is publishable with only minor clarity improvements; resolver, unit, first-print rule, date, prior/update math, interval, tails, and JSON fields are coherent with the target contract.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"State explicitly that the six-month same-series first-print mean is the time-series prior, or that no separate AR/model prior is used because the available pre-forecast first-print sample is short.\",\"Clarify whether interval endpoints are inclusive when saying prints above 0.5% or below -0.1% fall outside the interval.\"]}"}}
+{"type": "turn.completed", "usage": {"input_tokens": 19504, "cached_input_tokens": 9600, "output_tokens": 639, "reasoning_output_tokens": 516}}

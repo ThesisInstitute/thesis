@@ -72,6 +72,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Provision custody replay runtime
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+
       - name: Select docket targets
         env:
           SERIES: ${{ inputs.series }}
@@ -186,6 +191,7 @@ jobs:
               exit 1
             fi
             git pull --rebase origin main
+            uv sync --locked --extra custody
             uv run --locked --extra custody python scripts/verify_record_chain.py records
             while IFS= read -r -d '' root; do
               python3 scripts/verify_custody.py "$(dirname "$root")"
@@ -517,6 +523,7 @@ jobs:
               exit 1
             fi
             git pull --rebase origin main
+            uv sync --locked --extra custody
             uv run --locked --extra custody python scripts/verify_record_chain.py records
             while IFS= read -r -d '' root; do
               python3 scripts/verify_custody.py "$(dirname "$root")"

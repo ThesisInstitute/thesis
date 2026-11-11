@@ -1,0 +1,54 @@
+# Thesis pre-submit forecast review
+
+You are a reviewer for a forecast before publication. Review the draft forecast, the target spec, cited public evidence, and any relevant local repo context or prior traces if useful. This extra context is optional; do not require it when the draft is already clear. Do not use future outcomes, private knowledge, or hidden chain-of-thought. Do not produce a replacement forecast.
+
+# Target
+- series: statcan.cpi.allitems.yoy
+- period: 2026-09
+- conditional: null
+
+
+# Canonical ledger target context
+Use these ledger fields as the target contract for slug, unit, dataPointId, resolutionDate, and resolver text. The cell's unit must equal targetUnit below byte-for-byte, even when it is not a member of the contract's exploratory unit menu. If you find a concrete ledger error, keep the forecast tied to the same target and state the discrepancy in reasoning rather than silently changing the target.
+- catalogSlug: "canada-cpi-annual-rate-september-2026"
+- country: "CA"
+- targetUnit: "percent"
+- dataPointId: "statcan.cpi.allitems.yoy.2026_09.first_print"
+- expectedReleaseWindow: {"end": "2026-10-19", "start": "2026-10-19"}
+- sourceBinding: {"adapter": "statcan-wds", "allowedHosts": ["www150.statcan.gc.ca"], "expectedReleaseWindow": {"end": "2026-10-19", "start": "2026-10-19"}, "field": "v41690973", "releasePolicy": "first_print", "sourceSeriesId": "v41690973", "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods", "table": "Consumer Price Index, Table 18-10-0004-01 (all-items, Canada)", "transform": {"factor": 1, "operation": "percent_change_year_ago"}}
+- targetRegistrationPath: "records/targets/2026-09-07-30e18f817d32a7f592e96369a07833d40974bb0a480ea38e5a77847b642a9af6.json"
+- targetContentHash: "30e18f817d32a7f592e96369a07833d40974bb0a480ea38e5a77847b642a9af6"
+- registrationCommit: "f1baea413714fe099f71118840f6363977fcdb5c"
+- registeredAtUtc: "2026-09-07T20:04:45Z"
+# Rubric
+Check these items and name concrete fixes when needed:
+1. Exact resolver, source, first-print rule, and resolution date.
+2. Base-rate or persistence prior stated before inside-view updates.
+3. Time-series/model prior used or explicitly ruled out.
+4. Current evidence justifies material movement from the prior.
+5. Interval size comes from realized volatility or explicit uncertainty.
+6. A compact Prior/update/interval step names the prior, historical sample, adjustment components, interval method, and implied bounds.
+7. Tail scenarios are concrete and tied to the target.
+8. Point, interval, final forecast step, and JSON fields are coherent.
+9. No leakage, catalog point/interval circularity, subjective resolver, or unit ambiguity.
+
+# Required response
+Return JSON only, with this shape:
+{
+  "summary": "one sentence",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver|base_rate|model_prior|update|interval|prior_update_interval|tails|coherence|leakage",
+      "severity": "warning|blocking",
+      "summary": "specific issue",
+      "actionRequested": "specific change requested"
+    }
+  ],
+  "optionalSuggestions": ["short suggestions"]
+}
+
+# Original forecaster prompt hash material
+c520b9e3865d244900ebf6e27e7678856b2a33ddefb6227f15f2e88d36daabe2
+
+# Draft forecast response
+{"slug":"canada-cpi-annual-rate-september-2026","country":"CA","type":"data","title":"Canada CPI YoY Sep 2026","question":"What will Statistics Canada first print as the Consumer Price Index, all-items, Canada, not seasonally adjusted, 12-month percent change for September 2026?","unit":"percent","pointEstimate":3,"ciLow":2.5,"ciHigh":3.5,"confidence":0.8,"resolutionDate":"2026-10-19","resolutionSource":"Statistics Canada Consumer Price Index, monthly, not seasonally adjusted, Table 18-10-0004-01","resolutionSourceUrl":"https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods","resolutionRule":"Resolve to the first Statistics Canada print for vector v41690973, Consumer Price Index all-items Canada from Table 18-10-0004-01, transformed as percent change from the same month one year earlier and rounded to one decimal percent. Use the first official release only; ignore later revisions or corrections unless Statistics Canada withdraws the first print before resolution.","dataPointId":"statcan.cpi.allitems.yoy.2026_09.first_print","historicalContext":[{"period":{"type":"month","value":"2025-08"},"label":"2025-08","value":1.9},{"period":{"type":"month","value":"2025-09"},"label":"2025-09","value":2.4},{"period":{"type":"month","value":"2025-10"},"label":"2025-10","value":2.2},{"period":{"type":"month","value":"2025-11"},"label":"2025-11","value":2.2},{"period":{"type":"month","value":"2025-12"},"label":"2025-12","value":2.4},{"period":{"type":"month","value":"2026-01"},"label":"2026-01","value":2.3},{"period":{"type":"month","value":"2026-02"},"label":"2026-02","value":1.8},{"period":{"type":"month","value":"2026-03"},"label":"2026-03","value":2.4},{"period":{"type":"month","value":"2026-04"},"label":"2026-04","value":2.8},{"period":{"type":"month","value":"2026-05"},"label":"2026-05","value":3.2},{"period":{"type":"month","value":"2026-06"},"label":"2026-06","value":2.8},{"period":{"type":"month","value":"2026-07"},"label":"2026-07","value":3}],"drivers":["July annual CPI inflation already at 3.0 percent","Recent four-print average near 3.0 percent","July-to-September seasonal index change usually small","September 2025 base index was 164.9","Core inflation measures remain near 2 percent"],"sourceContext":["https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods","https://www150.statcan.gc.ca/n1/dai-quo/ssi/homepage/schedule-key_indicators-eng.json","https://www.statcan.gc.ca/en/developers/schedule-key_indicators-eng-json","https://www.statcan.gc.ca/en/subjects-start/prices_and_price_indexes/consumer_price_indexes","https://www.bankofcanada.ca/stats/cpi"],"runAt":"2026-09-07T20:22:52Z","reasoning":[{"kind":"heading","text":"Canada September 2026 CPI annual rate"},{"kind":"text","text":"The target is the first-print 12-month percent change for Statistics Canada all-items CPI, Canada, not seasonally adjusted, vector v41690973 in Table 18-10-0004-01. The resolution date is tied to the official Statistics Canada release-calendar basis for Consumer Price Index, September 2026 on 2026-10-19."},{"kind":"tool","tool":"official.lookup","call":"Checked Statistics Canada schedule documentation and release calendar endpoint for key indicators.","result":"The schedule-key_indicators-eng.json service is the Statistics Canada major-indicator schedule with future release dates; the target schedule row used here is Consumer Price Index, September 2026 on 2026-10-19, with Daily releases normally posted at 8:30 a.m. Eastern."},{"kind":"tool","tool":"official.lookup","call":"Checked Statistics Canada CPI portal for current Canada CPI status and next-release context.","result":"Statistics Canada CPI portal showed Canada Consumer Price Index July 2026 12-month change at 3.0 percent, annual average CPI 2025 at 164.2, and the next CPI release for August 2026 on 2026-09-14."},{"kind":"tool","tool":"official.lookup","call":"Fetched recent CANSIM v41690973 annual CPI rates from a public official table mirror carrying the Statistics Canada vector identifiers.","result":"Recent v41690973 annual rates: 2025-08 1.9, 2025-09 2.4, 2025-10 2.2, 2025-11 2.2, 2025-12 2.4, 2026-01 2.3, 2026-02 1.8, 2026-03 2.4, 2026-04 2.8, 2026-05 3.2, 2026-06 2.8, 2026-07 3.0 percent."},{"kind":"tool","tool":"official.lookup","call":"Fetched level anchors for the all-items not seasonally adjusted CPI index path.","result":"Total CPI index anchors: 2026-07 169.9, 2026-06 169.0, 2026-05 169.6, 2025-09 164.9, 2024-09 161.1, 2023-09 158.5."},{"kind":"text","text":"The reference class base rate is the recent monthly annual inflation path for the same variant: not seasonally adjusted all-items CPI, Canada. The latest 12 fetched annual rates average 2.45 percent, while the latest four average 2.95 percent, so persistence around 3.0 percent is a better near-term prior than the full-year mean."},{"kind":"math","text":"Prior/update/interval: Persistence prior is July 2026 annual CPI inflation at 3.0 percent, using the latest 12 fetched v41690973 annual rates as the historical sample. Level effect: July 2026 index was 169.9 and September 2025 base was 164.9. Momentum and seasonality: 2021-2025 July-to-September index changes were +0.6, -0.4, +0.4, -1.0, and 0.0 index points, average -0.08, implying September 2026 index 169.82. Point arithmetic: (169.82 / 164.9 - 1) * 100 = 2.98, rounded to 3.0 percent. Interval method: successive changes in the 12 fetched annual rates were +0.5, -0.2, 0.0, +0.2, -0.1, -0.5, +0.6, +0.4, +0.4, -0.4, +0.2, so sigma = 0.37; 1.28*sigma = 0.47, giving an 80 percent interval about 3.0 +/- 0.5, or 2.5 to 3.5 percent."},{"kind":"text","text":"Upside risk is a gasoline or food jump through August and September, or renewed shelter acceleration, which would land above the interval if the September index reaches roughly 170.7 or higher. Downside risk is a broad energy pullback or softer travel/vehicle prices, which would land below the interval if the September index is roughly 168.9 or lower. An outside the interval result would therefore most likely reflect a large two-month level surprise rather than rounding noise."},{"kind":"forecast","point":3,"ciLow":2.5,"ciHigh":3.5}]}

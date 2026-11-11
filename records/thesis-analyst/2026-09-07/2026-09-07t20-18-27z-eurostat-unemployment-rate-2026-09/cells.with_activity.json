@@ -1,0 +1,1266 @@
+[
+  {
+    "slug": "euro-area-unemployment-rate-september-2026",
+    "country": "EA",
+    "type": "data",
+    "title": "Euro area unemployment, September 2026",
+    "question": "What will Eurostat first publish for the euro area 21-country seasonally adjusted total unemployment rate, unit PC_ACT, series une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21, for September 2026?",
+    "unit": "percent",
+    "pointEstimate": 6.4,
+    "ciLow": 6.2,
+    "ciHigh": 6.6,
+    "confidence": 0.8,
+    "resolutionDate": "2026-11-09",
+    "resolutionSource": "Eurostat Unemployment by sex and age monthly data, une_rt_m, euro area 21, seasonally adjusted total, PC_ACT",
+    "resolutionSourceUrl": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21?format=JSON",
+    "resolutionRule": "Resolve from Eurostat dataset une_rt_m, frequency M, seasonally adjusted SA, age TOTAL, unit PC_ACT, sex T, geo EA21, period 2026-09, first print only as captured between monthly Euro indicators releases. Use the value rounded to one decimal percentage point; ignore later revisions or backfills. The official Eurostat euro-indicators calendar schedules the September 2026 unemployment release inside the registered expectedReleaseWindow, and the registered ledger target uses the window end 2026-11-09 as the contractual resolutionDate.",
+    "dataPointId": "eurostat.unemployment_rate.euro_area.september_2026.first_print",
+    "historicalContext": [
+      {
+        "label": "January 2026",
+        "value": 6.1,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "February 2026",
+        "value": 6.2,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "March 2026",
+        "value": 6.2,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 6.3,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 6.2,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 6.3,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": 6.4,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      }
+    ],
+    "drivers": [
+      "latest first print rose to 6.4 percent",
+      "same-series unemployment count flat from June to July",
+      "recent one-decimal first-print changes remain small",
+      "two unpublished monthly observations before target month",
+      "first-print revisions do not count for settlement"
+    ],
+    "sourceContext": [
+      "https://ec.europa.eu/eurostat/news/euro-indicators/release-calendar",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01092026-bp",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-30072026-bp",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-02072026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01062026-ap",
+      "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/3-01042026-ap",
+      "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/3-04032026-ap",
+      "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21?format=JSON"
+    ],
+    "runAt": "2026-09-07T20:20:28Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Eurostat September 2026 unemployment first print"
+      },
+      {
+        "kind": "text",
+        "text": "Framing and exact resolver: this targets Eurostat une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21, monthly euro area 21 unemployment, seasonally adjusted, total age, total sex, percentage of the labour force, for September 2026. The settlement value is the first official print only, rounded to one decimal, with later revisions ignored."
+      },
+      {
+        "kind": "text",
+        "text": "Official timing check: Eurostat's euro-indicators release calendar is the public schedule source for unemployment releases. The registered official window is 2026-11-01 to 2026-11-09, and this cell keeps the ledger contract's 2026-11-09 resolutionDate rather than inferring a day from cadence."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Opened Eurostat 1 September 2026 unemployment release for July 2026.",
+        "result": "Fetched July 2026 euro area seasonally adjusted unemployment rate 6.4%, EU rate 6.1%, euro area unemployed persons 11.264 million, and next release date 1 October 2026."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the July 2026 Eurostat unemployment release table for recent same-variant values.",
+        "result": "Fetched current-table same-variant euro area rates: April 2026 6.4, May 2026 6.3, June 2026 6.4, July 2026 6.4; unemployed persons were 11.245 million, 11.199 million, 11.264 million, and 11.264 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Opened earlier Eurostat monthly unemployment releases to recover first-print reference history.",
+        "result": "Fetched first-print headline values for the same SA total PC_ACT variant: January 2026 6.1%, February 2026 6.2%, March 2026 6.2%, April 2026 6.3%, May 2026 6.2%, June 2026 6.3%, July 2026 6.4%."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate / reference class: the relevant reference class is recent first prints of the same Eurostat euro area SA total unemployment rate. The one-decimal series moved from 6.1 to 6.4 over January-July, but every adjacent first-print change was between -0.1 and +0.1 percentage point, so last-print persistence is the base rate model."
+      },
+      {
+        "kind": "text",
+        "text": "Level, momentum, and mechanism: the level is still low by euro-area history but no longer falling. Momentum is mildly upward because the latest first print is 6.4 after 6.2-6.3 earlier in 2026; the July release also shows the euro area unemployed count unchanged from June at 11.264 million, so the increase signal is not strong enough to push the modal September print above 6.4."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior is 6.4 from the July 2026 first print; historical sample is the fetched first-print sequence 6.1, 6.2, 6.2, 6.3, 6.2, 6.3, 6.4. Adjustment components are level 0.00, momentum +0.02 from the January-July rise, one-off/revision-policy 0.00 because only first prints count, and policy-mechanism 0.00 because no direct September labor-market shock was fetched, leaving a rounded point of 6.4. Successive changes are +0.1, 0.0, +0.1, -0.1, +0.1, +0.1; RMS monthly sigma = sqrt((0.01+0.00+0.01+0.01+0.01+0.01)/6) = 0.09. For two unpublished monthly steps from July to September, sigma = 0.09*sqrt(2) = 0.13, and 1.28*sigma = 1.28*0.13 = 0.17; widened only to the one-decimal practical band, the final implied 80% bounds are 6.2 to 6.6."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-consideration: upside risk is a genuine August-September weakening in large labor markets such as France, Italy, or Germany that would land above the interval at 6.7% or higher. Downside risk is renewed employment growth, falling layoffs, or a labor-force denominator increase that would land below the interval at 6.1% or lower. Outside the interval would require two monthly moves larger or more persistent than the recent fetched first-print pattern."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the reviewer suggestions to clarify that April-July values from the September table are current-table values while the January-July sequence is the first-print history, to omit the nonessential prior-run note, and to make the downside scenario more concrete."
+      },
+      {
+        "kind": "forecast",
+        "point": 6.4,
+        "ciLow": 6.2,
+        "ciHigh": 6.6
+      }
+    ],
+    "agentReportedRunAt": "2026-09-07T20:18:37Z",
+    "runStartedAt": "2026-09-07T20:18:27Z",
+    "promptMode": "fast",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "targetContentHash": "233992db438bc52d1f79f1d0e676ac61ba4b526f50fbfbcc6e76f4996094e095",
+    "targetRegistrationPath": "records/targets/2026-09-07-233992db438bc52d1f79f1d0e676ac61ba4b526f50fbfbcc6e76f4996094e095.json",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 5.9,
+        "upper": 6.9
+      },
+      "points": [
+        {
+          "value": 5.9,
+          "probability": 0.0
+        },
+        {
+          "value": 5.905,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 5.91,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 5.915,
+          "probability": 0.005
+        },
+        {
+          "value": 5.92,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 5.925,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 5.93,
+          "probability": 0.01
+        },
+        {
+          "value": 5.935,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 5.94,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 5.945,
+          "probability": 0.015
+        },
+        {
+          "value": 5.95,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 5.955,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 5.96,
+          "probability": 0.02
+        },
+        {
+          "value": 5.965,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 5.97,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 5.975,
+          "probability": 0.025
+        },
+        {
+          "value": 5.98,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 5.985,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 5.99,
+          "probability": 0.03
+        },
+        {
+          "value": 5.995,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 6.0,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 6.005,
+          "probability": 0.035
+        },
+        {
+          "value": 6.01,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 6.015,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 6.02,
+          "probability": 0.04
+        },
+        {
+          "value": 6.025,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 6.03,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 6.035,
+          "probability": 0.045
+        },
+        {
+          "value": 6.04,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 6.045,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 6.05,
+          "probability": 0.05
+        },
+        {
+          "value": 6.055,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 6.06,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 6.065,
+          "probability": 0.055
+        },
+        {
+          "value": 6.07,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 6.075,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 6.08,
+          "probability": 0.06
+        },
+        {
+          "value": 6.085,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 6.09,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 6.095,
+          "probability": 0.065
+        },
+        {
+          "value": 6.1,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 6.105,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 6.11,
+          "probability": 0.07
+        },
+        {
+          "value": 6.115,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 6.12,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 6.125,
+          "probability": 0.075
+        },
+        {
+          "value": 6.13,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 6.135,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 6.14,
+          "probability": 0.08
+        },
+        {
+          "value": 6.145,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 6.15,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 6.155,
+          "probability": 0.085
+        },
+        {
+          "value": 6.16,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 6.165,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 6.17,
+          "probability": 0.09
+        },
+        {
+          "value": 6.175,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 6.18,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 6.185,
+          "probability": 0.095
+        },
+        {
+          "value": 6.19,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 6.195,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 6.2,
+          "probability": 0.1
+        },
+        {
+          "value": 6.205,
+          "probability": 0.11
+        },
+        {
+          "value": 6.21,
+          "probability": 0.12
+        },
+        {
+          "value": 6.215,
+          "probability": 0.13
+        },
+        {
+          "value": 6.22,
+          "probability": 0.14
+        },
+        {
+          "value": 6.225,
+          "probability": 0.15
+        },
+        {
+          "value": 6.23,
+          "probability": 0.16
+        },
+        {
+          "value": 6.235,
+          "probability": 0.17
+        },
+        {
+          "value": 6.24,
+          "probability": 0.18
+        },
+        {
+          "value": 6.245,
+          "probability": 0.19
+        },
+        {
+          "value": 6.25,
+          "probability": 0.2
+        },
+        {
+          "value": 6.255,
+          "probability": 0.21
+        },
+        {
+          "value": 6.26,
+          "probability": 0.22
+        },
+        {
+          "value": 6.265,
+          "probability": 0.23
+        },
+        {
+          "value": 6.27,
+          "probability": 0.24
+        },
+        {
+          "value": 6.275,
+          "probability": 0.25
+        },
+        {
+          "value": 6.28,
+          "probability": 0.26
+        },
+        {
+          "value": 6.285,
+          "probability": 0.27
+        },
+        {
+          "value": 6.29,
+          "probability": 0.28
+        },
+        {
+          "value": 6.295,
+          "probability": 0.29
+        },
+        {
+          "value": 6.3,
+          "probability": 0.3
+        },
+        {
+          "value": 6.305,
+          "probability": 0.31
+        },
+        {
+          "value": 6.31,
+          "probability": 0.32
+        },
+        {
+          "value": 6.315,
+          "probability": 0.33
+        },
+        {
+          "value": 6.32,
+          "probability": 0.34
+        },
+        {
+          "value": 6.325,
+          "probability": 0.35
+        },
+        {
+          "value": 6.33,
+          "probability": 0.36
+        },
+        {
+          "value": 6.335,
+          "probability": 0.37
+        },
+        {
+          "value": 6.34,
+          "probability": 0.38
+        },
+        {
+          "value": 6.345,
+          "probability": 0.39
+        },
+        {
+          "value": 6.35,
+          "probability": 0.4
+        },
+        {
+          "value": 6.355,
+          "probability": 0.41
+        },
+        {
+          "value": 6.36,
+          "probability": 0.42
+        },
+        {
+          "value": 6.365,
+          "probability": 0.43
+        },
+        {
+          "value": 6.37,
+          "probability": 0.44
+        },
+        {
+          "value": 6.375,
+          "probability": 0.45
+        },
+        {
+          "value": 6.38,
+          "probability": 0.46
+        },
+        {
+          "value": 6.385,
+          "probability": 0.47
+        },
+        {
+          "value": 6.39,
+          "probability": 0.48
+        },
+        {
+          "value": 6.395,
+          "probability": 0.49
+        },
+        {
+          "value": 6.4,
+          "probability": 0.5
+        },
+        {
+          "value": 6.405,
+          "probability": 0.51
+        },
+        {
+          "value": 6.41,
+          "probability": 0.52
+        },
+        {
+          "value": 6.415,
+          "probability": 0.53
+        },
+        {
+          "value": 6.42,
+          "probability": 0.54
+        },
+        {
+          "value": 6.425,
+          "probability": 0.55
+        },
+        {
+          "value": 6.43,
+          "probability": 0.56
+        },
+        {
+          "value": 6.435,
+          "probability": 0.57
+        },
+        {
+          "value": 6.44,
+          "probability": 0.58
+        },
+        {
+          "value": 6.445,
+          "probability": 0.59
+        },
+        {
+          "value": 6.45,
+          "probability": 0.6
+        },
+        {
+          "value": 6.455,
+          "probability": 0.61
+        },
+        {
+          "value": 6.46,
+          "probability": 0.62
+        },
+        {
+          "value": 6.465,
+          "probability": 0.63
+        },
+        {
+          "value": 6.47,
+          "probability": 0.64
+        },
+        {
+          "value": 6.475,
+          "probability": 0.65
+        },
+        {
+          "value": 6.48,
+          "probability": 0.66
+        },
+        {
+          "value": 6.485,
+          "probability": 0.67
+        },
+        {
+          "value": 6.49,
+          "probability": 0.68
+        },
+        {
+          "value": 6.495,
+          "probability": 0.69
+        },
+        {
+          "value": 6.5,
+          "probability": 0.7
+        },
+        {
+          "value": 6.505,
+          "probability": 0.71
+        },
+        {
+          "value": 6.51,
+          "probability": 0.72
+        },
+        {
+          "value": 6.515,
+          "probability": 0.73
+        },
+        {
+          "value": 6.52,
+          "probability": 0.74
+        },
+        {
+          "value": 6.525,
+          "probability": 0.75
+        },
+        {
+          "value": 6.53,
+          "probability": 0.76
+        },
+        {
+          "value": 6.535,
+          "probability": 0.77
+        },
+        {
+          "value": 6.54,
+          "probability": 0.78
+        },
+        {
+          "value": 6.545,
+          "probability": 0.79
+        },
+        {
+          "value": 6.55,
+          "probability": 0.8
+        },
+        {
+          "value": 6.555,
+          "probability": 0.81
+        },
+        {
+          "value": 6.56,
+          "probability": 0.82
+        },
+        {
+          "value": 6.565,
+          "probability": 0.83
+        },
+        {
+          "value": 6.57,
+          "probability": 0.84
+        },
+        {
+          "value": 6.575,
+          "probability": 0.85
+        },
+        {
+          "value": 6.58,
+          "probability": 0.86
+        },
+        {
+          "value": 6.585,
+          "probability": 0.87
+        },
+        {
+          "value": 6.59,
+          "probability": 0.88
+        },
+        {
+          "value": 6.595,
+          "probability": 0.89
+        },
+        {
+          "value": 6.6,
+          "probability": 0.9
+        },
+        {
+          "value": 6.605,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 6.61,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 6.615,
+          "probability": 0.905
+        },
+        {
+          "value": 6.62,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 6.625,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 6.63,
+          "probability": 0.91
+        },
+        {
+          "value": 6.635,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 6.64,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 6.645,
+          "probability": 0.915
+        },
+        {
+          "value": 6.65,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 6.655,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 6.66,
+          "probability": 0.92
+        },
+        {
+          "value": 6.665,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 6.67,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 6.675,
+          "probability": 0.925
+        },
+        {
+          "value": 6.68,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 6.685,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 6.69,
+          "probability": 0.93
+        },
+        {
+          "value": 6.695,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 6.7,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 6.705,
+          "probability": 0.935
+        },
+        {
+          "value": 6.71,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 6.715,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 6.72,
+          "probability": 0.94
+        },
+        {
+          "value": 6.725,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 6.73,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 6.735,
+          "probability": 0.945
+        },
+        {
+          "value": 6.74,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 6.745,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 6.75,
+          "probability": 0.95
+        },
+        {
+          "value": 6.755,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 6.76,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 6.765,
+          "probability": 0.955
+        },
+        {
+          "value": 6.77,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 6.775,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 6.78,
+          "probability": 0.96
+        },
+        {
+          "value": 6.785,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 6.79,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 6.795,
+          "probability": 0.965
+        },
+        {
+          "value": 6.8,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 6.805,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 6.81,
+          "probability": 0.97
+        },
+        {
+          "value": 6.815,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 6.82,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 6.825,
+          "probability": 0.975
+        },
+        {
+          "value": 6.83,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 6.835,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 6.84,
+          "probability": 0.98
+        },
+        {
+          "value": 6.845,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 6.85,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 6.855,
+          "probability": 0.985
+        },
+        {
+          "value": 6.86,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 6.865,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 6.87,
+          "probability": 0.99
+        },
+        {
+          "value": 6.875,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 6.88,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 6.885,
+          "probability": 0.995
+        },
+        {
+          "value": 6.89,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 6.895,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 6.9,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 6.4,
+        "median": 6.4,
+        "interval80": {
+          "lower": 6.2,
+          "upper": 6.6
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/prompt.md",
+        "sha256": "056b52fcad98be2751d07342c1408b653c0d05934255fd414a9eb352727634b4",
+        "bytes": 10589,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_command.json",
+        "sha256": "f198d6f12b7dfc053b1ad498ccf551f64978ab2df77528067e21168095d0c5f7",
+        "bytes": 756,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_codex_stdout.jsonl",
+        "sha256": "7e92d4f1ef221c8ae58fced9cc17de03bd7fbbb5235f0354223430012fef18fc",
+        "bytes": 1412672,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_codex_stderr.log",
+        "sha256": "d042bf89e2800c0912bd69b71b129a2a08e76b8b2c8e229aaba06516d2de3851",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_codex_events.jsonl",
+        "sha256": "654e978ff9f7d88c34fb416c41f9c6e6cfad83a912de4aa421ee8669364b5bbf",
+        "bytes": 1412992,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_codex_last_message.txt",
+        "sha256": "3e8611afbe2eba08792f0d7019dda7e9190095d168f0516af51e5de8e71ed2b0",
+        "bytes": 7097,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_codex_trace.json",
+        "sha256": "b3a161979569b92c90b7804083906db237b525b83469715d2b56e3535fdf0373",
+        "bytes": 560,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_stdout.txt",
+        "sha256": "3e8611afbe2eba08792f0d7019dda7e9190095d168f0516af51e5de8e71ed2b0",
+        "bytes": 7097,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_stderr.txt",
+        "sha256": "052a705c892296efb45d6b2292e89b0d520237cdc7aa8319309c7172cff7e0c8",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_prompt.md",
+        "sha256": "91d3cc896fbbb46a44baed84e0ce378b01d1b447aa61528cad475e22c34ba72f",
+        "bytes": 10458,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_command.json",
+        "sha256": "db5d268f0d3224f74453025e50e8d3e46641a11e265244f39d447aa7dd27a35b",
+        "bytes": 752,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "b33881a84e3555a9693aa19f4727f7eacfe3ef8af45dc93a14a81f00f92ce5dd",
+        "bytes": 1140,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_codex_stderr.log",
+        "sha256": "6c617cce111befbef6c30f8f5d2d573da0f9ae7e64c40d92577a54622f1ee486",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_codex_events.jsonl",
+        "sha256": "3fea3ebcb2964961e4a4286a2367ca5992a7c35821bba820edb8922694bce960",
+        "bytes": 1162,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_codex_last_message.txt",
+        "sha256": "ab66f99386c548cb6b33926dec23068ab02ab90a828257487b7772bfbef0bd2b",
+        "bytes": 801,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_codex_trace.json",
+        "sha256": "110306c4d1728a919f5c6cb8189beb80652c4f733cf3a62208d27964426c17f0",
+        "bytes": 555,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_stdout.txt",
+        "sha256": "ab66f99386c548cb6b33926dec23068ab02ab90a828257487b7772bfbef0bd2b",
+        "bytes": 801,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_stderr.txt",
+        "sha256": "831b1411f53ce5e5e5c8b9893ae3dc0ae9932a8b23076c58faabe3ea8f1cc4c3",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/revision_prompt.md",
+        "sha256": "54cabdd8a10c6f33500722f8899a2498a259c623acf82d265dd8be99d2f19d26",
+        "bytes": 19423,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/command.json",
+        "sha256": "ead1c70a05ec24506de10a98c355c4a1f73897fe5359c76146d6bf6af3a9a69e",
+        "bytes": 750,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/codex_stdout.jsonl",
+        "sha256": "d95067bf6b11dee7d8d486fa3d3e8b84361ae5de3351c4889084bd2f765f0e88",
+        "bytes": 7713,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/codex_stderr.log",
+        "sha256": "7fa0c634627fd3ce270f24f76d749fe250092e3be4b2085c960b411b450372a6",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/codex_events.jsonl",
+        "sha256": "754a952670a955a87b6bea7a09b1bbfc25ba80d7c9e02f5c57923b50661b1233",
+        "bytes": 7735,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/codex_last_message.txt",
+        "sha256": "525b626074da7d86061db577062fe9403a0bf1400b43bc4430eb91831504d899",
+        "bytes": 7071,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/codex_trace.json",
+        "sha256": "80f29fef1be48121af52db3bfafbca9f3df7ee1ebb66ee7972128333f897cda2",
+        "bytes": 555,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/stdout.txt",
+        "sha256": "525b626074da7d86061db577062fe9403a0bf1400b43bc4430eb91831504d899",
+        "bytes": 7071,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/stderr.txt",
+        "sha256": "e6f32289126c443cbbbb2230693a386a3adb0881866b76eec9845fabb18374b3",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/raw_response.txt",
+        "sha256": "525b626074da7d86061db577062fe9403a0bf1400b43bc4430eb91831504d899",
+        "bytes": 7071,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/parsed_cells.json",
+        "sha256": "92537721c3fc3c28cae7b65a849cb1bb4f546e7aa8e22586ad7d8d6c407516bd",
+        "bytes": 8338,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/normalized_cells.json",
+        "sha256": "efe07dc04f0c0b90b35e4c68ab45d09655d3cf8d81b83e03a21dc1d76e53eab0",
+        "bytes": 25460,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/distribution.json",
+        "sha256": "1bd8cb01740f93ae38ccfa19cc698aebf8bb3a8c337f1d985e933495e2e6d0d2",
+        "bytes": 13338,
+        "createdAt": "2026-09-07T20:18:27Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/validation.json",
+        "sha256": "f74a11334aac78ca45cdfb195e4a6b667d07b1d167ec207d4f15aa0ab31422fd",
+        "bytes": 143,
+        "createdAt": "2026-09-07T20:18:27Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-07T20:18:27Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "c90e274dc1600ecf94fa90d515e41660161d027a78e827dde35123c9f62fbdd7"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-18-27z-eurostat-unemployment-rate-2026-09/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Clarify that the April-July values read from the September Eurostat table may be revised current table values, while the separate January-July sequence is the intended first-print history."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Consider removing or shortening the prior Thesis August-run sentence, since it is not needed for the forecast and can invite catalog-circularity concerns even though it says it was not used as evidence."
+        },
+        {
+          "findingId": "review.suggestion.3",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Make the downside tail a little more concrete by naming the kind of labor-market improvement or denominator shift that would produce 6.1 percent or lower."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the reviewer suggestions to clarify that April-July values from the September table are current-table values while the January-July sequence is the first-print history, to omit the nonessential prior-run note, and to make the downside scenario more concrete.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the reviewer suggestions to clarify that April-July values from the September table are current-table values while the January-July sequence is the first-print history, to omit the nonessential prior-run note, and to make the downside scenario more concrete.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.3",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the reviewer suggestions to clarify that April-July values from the September table are current-table values while the January-July sequence is the first-print history, to omit the nonessential prior-run note, and to make the downside scenario more concrete.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "Draft is publishable with no blocking issues; it matches the ledger target and gives a coherent persistence-based forecast with an explicit volatility interval."
+    }
+  }
+]

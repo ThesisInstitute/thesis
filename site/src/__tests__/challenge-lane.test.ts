@@ -1,14 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   CHALLENGE_SUBMISSIONS,
   listChallengeSubmissions,
 } from "@/data/challenge";
-import {
-  FORECAST_CELLS,
-  getForecastRunEntries,
-} from "@/data/forecast-cells";
+import { FORECAST_CELLS, getForecastRunEntries } from "@/data/forecast-cells";
 import {
   buildBrierAgentLeaderboard,
   buildBrierRewardExport,
@@ -18,6 +15,24 @@ import {
   buildPredictionSpecs,
   buildRecordedPredictionRunRecords,
 } from "@/data/prediction-specs";
+
+// These fixtures test challenge attribution propagation after a submission passes publication eligibility.
+// The production verification boundary is exercised without mocks in
+// published-scoring-gate.test.ts and forecast-publication.test.ts.
+vi.mock("@/lib/forecast-publication", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/forecast-publication")>();
+  return {
+    ...actual,
+    verifyForecastRun: () => ({
+      eligible: true,
+      reason: "Downstream scoring fixture",
+    }),
+    filterPublishedForecasts: (
+      forecasts: import("@/data/forecast-cells").ForecastCell[],
+    ) => forecasts,
+  };
+});
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
 
@@ -95,10 +110,14 @@ describe("challenge registry", () => {
       // Content binding, not just existence: the digest must carry this
       // challenger's row for this target.
       const digest = fs.readFileSync(digestFile, "utf8");
-      expect(digest, `${record.recordsDigest} names ${record.challenger}`)
-        .toContain(record.challenger);
-      expect(digest, `${record.recordsDigest} names ${record.dataPointId}`)
-        .toContain(record.dataPointId);
+      expect(
+        digest,
+        `${record.recordsDigest} names ${record.challenger}`,
+      ).toContain(record.challenger);
+      expect(
+        digest,
+        `${record.recordsDigest} names ${record.dataPointId}`,
+      ).toContain(record.dataPointId);
     }
   });
 
@@ -140,9 +159,9 @@ describe("external attribution propagation", () => {
     }
   });
 
-  it("carries attribution through the real reward export", () => {
-    // The identical construction the calibration page performs — if the
-    // buildRewardRow copy of externalSubmission disappears, this fails.
+  it("carries eligible submission attribution through the reward export", () => {
+    // Exercise attribution mapping after the separately tested publication
+    // gate. If buildRewardRow drops externalSubmission, this fails.
     const specs = buildPredictionSpecs(FORECAST_CELLS);
     const runs = buildRecordedPredictionRunRecords(FORECAST_CELLS, specs);
     const rewardExport = buildBrierRewardExport({
@@ -235,9 +254,7 @@ describe("external attribution propagation", () => {
     ]);
     const byAgent = new Map(pure.map((row) => [row.agent, row]));
     expect(byAgent.get("github:pure-ext")?.external).toBe(true);
-    expect(byAgent.get("github:pure-ext")?.externalSystemTypes).toEqual([
-      "ai",
-    ]);
+    expect(byAgent.get("github:pure-ext")?.externalSystemTypes).toEqual(["ai"]);
     expect(byAgent.get("thesis.analyst")?.external).toBe(false);
 
     expect(() =>

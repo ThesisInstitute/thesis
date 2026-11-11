@@ -1,0 +1,623 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "ledger_witness",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/official-observations.jsonl.gz",
+      "sha256": "2239faaef5c1c2a5a8ace63f50355e9c31f6d7dfb6e0f549085f742663deb401",
+      "bytes": 46669,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/series-catalog.json.gz",
+      "sha256": "6a61cd2f42daab06613136dc0eaf463c5cabd0129013c691127afbf2632727eb",
+      "bytes": 18179,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-branch-commit.json.gz",
+      "sha256": "a14c3c6ec654a9f6e073993b49bcf1fc5d71dcab44b492a2e5407259f6e096da",
+      "bytes": 5168,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-main-commit.json.gz",
+      "sha256": "a46fa736a7eb9e60ff22271c9d09f5e9ad75c03cfa3f32a26271041a72cf6f15",
+      "bytes": 19612,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-commit-tree.json.gz",
+      "sha256": "ef49ef82edeb287f05f0773d5fac4bb0ad625052e3fe1a631f6c67cfe3437523",
+      "bytes": 921,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-releases-tree.json.gz",
+      "sha256": "07a2dd23fe49142e0767f2c4c42cb6cb9f05a7295aa6c709e697712d9264053f",
+      "bytes": 328,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-manifests-tree.json.gz",
+      "sha256": "620e9e1b59d232148d3a825ec4eee55c69336058ba29a25d7af477a99f5552be",
+      "bytes": 3203,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-0a39e7f5fa773e21024e78513c5a47b25f096f635dd247a57af4ce6cef8be32e.gz",
+      "sha256": "8f0c397f1871a5d3fc16499426423f5164339aca9ae143f3ce076b59a2ca14d1",
+      "bytes": 4646,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-066f5369e3b7c9c0fbd80f648dde7b4637938a354f5ccefd753fcb4b83a867de.gz",
+      "sha256": "4240e10e4a6e2b2eeba9a13866359e9e8ea3e921ef3f3bfac7b42512dfa7cf15",
+      "bytes": 3003,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-33205bea3cf55cc47b60421befad39472123d9e348da1594236a50ee7964e4a9.gz",
+      "sha256": "f8b1f6f3500a479499b74d4d2fb7fce12349ca4ca8aa577540a4cee214c7f4ad",
+      "bytes": 345,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-0e3fc72c63dcbf133452a5da16ba1023e05a672773affa03ab9febc605ec9cb2.gz",
+      "sha256": "e362e9fa572e38d724f1990faaf7aacee0a408a68a338163550f942bf0499f2e",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-89628dad4bc59859cc402a362fb1ecf8cc633ccd4f721eca0c9e62d389b92909.gz",
+      "sha256": "67210525e18b84130c08566f082dd8b1525e63a763c7f123be29ac3b8ae6de21",
+      "bytes": 4652,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-5c6b8060b222aeaa726972f848ba3b7e98ef800d18da78f7715d8344d897662c.gz",
+      "sha256": "8113d3148b9a751d58d4456052463a8a41dcb53e3d52e05511bd96f4379dd3cd",
+      "bytes": 3001,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-34a6415c6aebd34039c1f8f343248a2eb78549df7691c9e6d20b53544a7d0a8d.gz",
+      "sha256": "962a7d3ace708cdd06f9bbffb0db57de7936eecf9848900b1cf70039361a800c",
+      "bytes": 450,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-6ffe957e60c93145bfd9ab840352c2a14ecba64682888ca0fe9ea67968537d5e.gz",
+      "sha256": "00ba8004a4b98e033e5d09580fd327e4ea8959ce6bba3a33f6a08020f9936bb0",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-a188274f65022d808e7788b68db97a9b915ec769d2950bdd55059aa2f286398a.gz",
+      "sha256": "423b100d89bb8f45068dbf36d62b69fb8e36b49766fe55ab2d436ca45ecfaaa3",
+      "bytes": 4646,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-9bc2505aff8aa875aea277ab50d1ed410f42e101aeae79912e3102982415cd13.gz",
+      "sha256": "0ac4418846bb308c0e80557b866aa98e1a93cd75f6141cf16aed8c902d21a1d7",
+      "bytes": 3004,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-5309744ee8ca047ea38826d95ab570d375b95f50c983cf4d3facade46e7e79b6.gz",
+      "sha256": "ca843d034a64e2f54c592ba698b6db61a675993742def1ff45cf698cf6d6b1da",
+      "bytes": 449,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-208f84fdb610dd6934a30b15940e5bb5fb90ebb1d99896a985b36b9adea57c34.gz",
+      "sha256": "9e1ab94fc8ba4b2557f17617f930973366d5269cb3f4ce5eca9d6d7e87cf278e",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-7e474bbe8be34680b61a6f33cae376925017340e215ccd5278feeeba6d157e4a.gz",
+      "sha256": "f2b25ecff59101a5f3126d7a0c7aee6c735a0c46ae89e81e16e2338326ef4e5f",
+      "bytes": 4648,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-ecbe3e1e22127342ead67c89622d8bb41b2f117a2ce35174badc31dc2176c104.gz",
+      "sha256": "134913ffac8498d00da7bb73737e0362fc901deb522509184a3724bb8103b8a0",
+      "bytes": 3006,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-54002731f4d2cd6f38b6a11c5939e461ae0df920281daa4030cc8c41c16d378a.gz",
+      "sha256": "5d6855b2c2b6f12e96c147346480fefd76c32b0d949cd4d3a76939122a5d6637",
+      "bytes": 450,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-ea532ec6c141ded985c013758b38d9847e4961ce9b8701a76f8aa99794943811.gz",
+      "sha256": "bdca0242a3382489b546229e394c12316af0093bf0913f63642f265c7faaf32e",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-13b9872e95029b112d4afd6ba82337176f647afd1e7ea9b6c35b6765148d6849.gz",
+      "sha256": "1275800ae3e91bc97016362c051ccf87ac6689a3d3fa30618b10d0da972fc653",
+      "bytes": 4647,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-30d18289d52db32208550a59762d932a1aa01de1661bfb4a7a4cfb5a333a11c5.gz",
+      "sha256": "3af9c4386e38e6c48de6a972f4e28f618281e14ea190de6cea7342a8d4a469a5",
+      "bytes": 3004,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-8c3a7b7b4bd3f91aabf315bd93a399d90091fdf070a0ecddfbd808f0c380daa1.gz",
+      "sha256": "77d2da9e625279c4564a097ec0150c2065c2662dea1770b11f9896892b2f0188",
+      "bytes": 448,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-d92f47c5a878dfe4bc7a794f147719b8036d2f415de8433129ae95a70675828b.gz",
+      "sha256": "9191a98d9d7467449e8593c1fecb39894855873d0395c425716599e4c347b7c2",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-a8dd54b3bd18a4a8a6725940bd50f2e68a7499f9a04cc86f4a438435881894bf.gz",
+      "sha256": "50e056879a47328abded4d15de0b866a237dada3216e6137cb74b35de105e834",
+      "bytes": 4650,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-0fd45156459217d1d6fbb96a69c61a898775b41ec2db8cbbb0dffca8257926c3.gz",
+      "sha256": "e42cf250b0a79196dc724c6a26d6ca98a0c61d0344294b569b63f2700793984c",
+      "bytes": 3002,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-8b170803d3a8a496e3f98e88c560c2bc9cc22262acafd7d52770f1d2df4938a5.gz",
+      "sha256": "95f48234aedcb1c14eb8eb3b439cb27b95ad496c380338badf5aef55c3a3c708",
+      "bytes": 452,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-7e4826135969eb267547b576c7f9a6ef5f42f8e419b5e8c797d907b63ca9da73.gz",
+      "sha256": "d351de73e8c6d53926d6eccaceeb25596c05cf2d60452768f2872a080a14992d",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-6acbca65894cd2cafbf8b6523b888ab6a569399006615e4918d441385475c980.gz",
+      "sha256": "52a3635c35b35d7171094dfe420c73978ee5042b518785ddc48486d7f8c04244",
+      "bytes": 4650,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-dbefa80a04110d8da0cb941c581aea89367f67f019aedfc3b1556d4d8f09856c.gz",
+      "sha256": "94d5f0fe63e04ce2cef1bbc14981932b5c9f4c4bfafade83b26e55c9508e87f7",
+      "bytes": 3000,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-402a05f9e9215821ad872d2ba1c1a56bc915265ba15d4768970ebff0bbabf665.gz",
+      "sha256": "8df67ee2f2a3e9a1b9253dc3b75d7aa7c2af72330ca2988aabd962ada58c1c02",
+      "bytes": 449,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-4a0bb578e0b4f7fba1ec5e9dd349a8970f9aa12bc088ee3ce57b6e71774d18ee.gz",
+      "sha256": "5ac6da385a55dbe2f2df8b14143d4de665ccfa0053f6d9ada9b7019840591998",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-765f6eccef3c17461ba728b053cd472756c2d5ee50559bc5b74eb1ae57c41593.gz",
+      "sha256": "8a389ecbd32a52ff5279b2d9a534ef1de8110bb819c09b85fbcac1033f7b181d",
+      "bytes": 4648,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-9ccabd76becddc4061ee374f9fcbb1f6bd225eba630ee92c5cd845903b18c835.gz",
+      "sha256": "bb32708c245171613eea7fd3083df33c35e67192e95dc0c6601da5ead08ababf",
+      "bytes": 3005,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-f77d5a0cf79bd79a5aaef218e70969eb32b01676a9669409b098f939efb96ec3.gz",
+      "sha256": "ce092c19f387373827966f0abef17aa31139ee08bf24e17b726b1f94d0765150",
+      "bytes": 449,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-959e1b442020e2bbf59c56819fbb391af14911fe697e405c7527f95d1413ea73.gz",
+      "sha256": "2124d82b03775767064cfa53d7fdd2b81305cfebe2cae2520d827ddcb6ade348",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-bd31b0676fdbb74d8369c367f8c5a4b7dffd0915dc65a24d0788d6634e5feed1.gz",
+      "sha256": "e39c8430153192e4adb036e207b509ee725960c4bb6d5b7cbda76707b55e6e2f",
+      "bytes": 4648,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-b5e8c35bd03a7fb65a013a68813e7bc8baba31e3f0abd3cc97602b810f03e23e.gz",
+      "sha256": "81a2aee8b6b9bdba733f34ac0254aadcd5d48474d5c0a0054d777a0fd35522fc",
+      "bytes": 3003,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-c43bb109f6d2a87bb7e90d9429e730a543c0624997a71660cc6f08fdaf997786.gz",
+      "sha256": "83a43ad679a2e74f413c5864db9849ada40facc1606cb77aa5e8e72ec1e41df3",
+      "bytes": 449,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-acde675779452bff5182b3eb81070c9c45ed87666b285fc342fbb35c6d6a058c.gz",
+      "sha256": "63d78b7a7d9a1e24e22c848bfb999ff17e61dd4c78fbadd1d0e97941ec4192fb",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-d5e5dcf6c731697edeba1a1eb61999c8e1555649c366605c69f23fe0204582b8.gz",
+      "sha256": "27d75d3c8d5543646cd836beed544323797b9dd5ed5f07826c8ab7666f713342",
+      "bytes": 4648,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-18491ae3c18d376efd0ae3723b0a387032b459dfdb3bf5ad41bdb03b6a3ccb7a.gz",
+      "sha256": "9cdf02e0001cedc55c696b0f431b21b9cf2e2061748123ea3f6c69b71d9d5ece",
+      "bytes": 3002,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-25c034992cbcd06bc715704d3437b31193c43d806cc02070afbb32543dc4913a.gz",
+      "sha256": "39e9ec7bec903783227141ab7ff51f32573ec94353081a6dee323af5ea753804",
+      "bytes": 454,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-c6bce35e23f6cf8097baab3383d339623a01e45bbcf1edc13b4871f5a9ff1be8.gz",
+      "sha256": "e7fa77ed72ec64f06dd4f2a948b4dc55e67b4f14ddb00267676b516664642185",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-93364c38e1a38447d7058eb9931ef254abd2659103c7449d11383eea56aedc19.gz",
+      "sha256": "7849cacabd363776525fc0d10f5d27788de112584f7ef55cbb28c44bb4a8ab51",
+      "bytes": 4647,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-b33d95496d3e5827791cd9d4532cf7370d1d0ef64808af64ba2c9935d1fa097c.gz",
+      "sha256": "ce97834967071a1ffe073e910e20c7571ca731e0f3178ceb521e6f3a848885f3",
+      "bytes": 3002,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-bdfd6429c0ee26e07bbd47442b1a7913a13d775ee09703e9700c1cc14c75e7b3.gz",
+      "sha256": "3e544b596f76e78a6b415fceadcf5c04f66c3335b67b76e503b3bf188262d5c1",
+      "bytes": 453,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-3a60f395dbe193969c10acdf85c904709b1f5318b87809c99ea6fcc1ffac73eb.gz",
+      "sha256": "642d52f9487e6129c402a665b5c0c6dcf0e6e9ff91418a136043156d0dc54034",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-aafbdec9f1acd6e8a5e8a0f8dbc856c53234cd0c57bff69c2b12200582dac248.gz",
+      "sha256": "fa79a3ebca8f09f6ed89934e2cf104b0a0ada36438acfb2d18f8f7cad54b310e",
+      "bytes": 4647,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-818a110d3dcbb8cd65c2417616b2c2d5acb3053b0b9882dfd200686940913de0.gz",
+      "sha256": "01359caf9fcab8323736a3a9c339d50cf4011733b4eef75f3b807ab31b28fa78",
+      "bytes": 3002,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-535776ff1c9b634c8ef7ab8fb8ee0d37d82744e6c4e370b7d6b92f1d2e91d11d.gz",
+      "sha256": "0416bda64dacea1b8eed22187a5918055ccfde2f7dd4157e47898bd58e149f9d",
+      "bytes": 455,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-f05a2da62af4c41b1684580915bfd12093268954ee5ff07eb783503270b9a1ee.gz",
+      "sha256": "c3c43cf18e826153487d4981a777fb06db2999c822eff1ee0d81dc09675b5b2e",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-cd77dae03598380bcddf4b605fa66f05326defbf850493a07ad889ebe7b7266b.gz",
+      "sha256": "f90099f87232b50ca8d3f05ac2474d9cf261b0808c06a3c094e7b80a17f66e8c",
+      "bytes": 4649,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-13c5119c059b9db7fe64a61d5f3548c4faa2e21b550c6cb49917a5969a5c4551.gz",
+      "sha256": "c6249a9e634385333594edc525c5be463327c534c31443395f76291e57c9f2a6",
+      "bytes": 3004,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-13d5861bd0d5f4ba53542a20790b3d8622cd3f61e7acfd6108ce264cabb9e60c.gz",
+      "sha256": "f8983089defaab100d1ee81248e37b0d9ed04c878a297497468495f474f6fd0a",
+      "bytes": 454,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-9ff60a015bd514c7a36d12e7c7f11a8f00b8cac1276553e7b737dca300adf461.gz",
+      "sha256": "6d07f6c51b6d0a2c316a43b61dce6b4536af6b47a57cd7bf528705c67f69206b",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-ffa56f8cccd0bdd12c900773158fcc256885646298a803738b0ae22abe5355af.gz",
+      "sha256": "be4c50ff04f8a97a7e1f7679682177a912c8bd2ecd629058159d77e99eb6a7ae",
+      "bytes": 4645,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-e9e31d8fb033bb84ae3d2f768fe41c78719113cff3029846db9f685ccd1eb5f7.gz",
+      "sha256": "004510aadff65646ef1d20cfe735c8e0bc6c1a0ca3f7e3f16af823b88ac5fff5",
+      "bytes": 3005,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-e8d7b6bf9b689366b968bd6e48b043ba0afbfe9aceac81ea510d32334affd52b.gz",
+      "sha256": "514f30b03e761acf1c9ba9eaa93c6bccb4da350077e64c65594ee7cac5d23d76",
+      "bytes": 453,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-8e2724c201c004ba6df02a1c2aba751604001973ecee95caedc551b948bcc01c.gz",
+      "sha256": "055e1c7fa16b03f4b0b045d0d172bdbf3df748f4abd15a6716a6ada306ba6c6a",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-4bb02f971d2e85afa22ff1941e0f928d5c3ba903fc0543ad9024f49cffd0a1e2.gz",
+      "sha256": "817900ef6d180f251e31206e89c99dabeb143d800c1245acaca64bc670937fdc",
+      "bytes": 4644,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-5d2e59a5aea7cc32b3fe8c51b9a58b2d53727e2d526d65c45fa9ea598347834e.gz",
+      "sha256": "5201174a2d2aa37e022e9f0e9934f1d3264b16e164a2c53f787f8a0929e574d8",
+      "bytes": 3006,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-57ba9f87ecf4a5e49547e4ddd0df2012930761802520651ba3f733f24368573b.gz",
+      "sha256": "8440ebc8ed33e94cd894552ed1ff7eff3ec68acabf49c97839cdbf15ea8dedc6",
+      "bytes": 453,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-843d80fbe7ad5b353d2a564493e0f7f5040e182813653c756525914799ba48a1.gz",
+      "sha256": "19a6e290508bc2934eb661fae84aa63366b4d407e19c197461a83990119121fc",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-09759d3d07c765272bf8ba68058987d7da7968cdde0ef6832efc3bb47f681118.gz",
+      "sha256": "b10ea401cafd308773e661b8b54dd044f1f662d247f343175ac957229ee44e3a",
+      "bytes": 4648,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-00f1994e0705aaebf1d76637fff59266e0a1102c2bbbbf07d06a67211ca8966f.gz",
+      "sha256": "7b17c34724cc5ea44378ef206166d8da3bd7b1b73775e26f869845da855862a4",
+      "bytes": 3003,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-e7c55bddb03b3acad61012476832c6ab78be975f23f5ef50ac7cb004fa3282f5.gz",
+      "sha256": "770eea937b627e5ddb11e190d9f7baca697e341edfc56c5e96468be1b00abb52",
+      "bytes": 453,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-9390e5605178706a1a9d757b11a79611fafbf5f0b0d347149c3d0b5c540560a5.gz",
+      "sha256": "32aff750daea6f4817cc93996e876a6b966721f3021872502061b1f8495d848e",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-605c4855bff954d6fbf495e05b22f5295926e8ad3f1cefc398d0e1db8e2d3068.gz",
+      "sha256": "897d915e6e812643180d7051ece8330aa74a6bc8caca4045038be69f59cc50b3",
+      "bytes": 4645,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-9c250d884236db0240f3353ddb8f71b0d1672247b2452cf7649c582d27b3d5d1.gz",
+      "sha256": "455bdf172ffd2c2c3d2ae20a81438f3697570245a72e4dbd25cc8e814d9433ff",
+      "bytes": 3005,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-8ce5a604e36ee5500d49728d0096a519e411b91a39c2740757f0af56044a5fb5.gz",
+      "sha256": "1c08630161b58cb7acbb1b57bf822bda0e9b0630a89b08647484bc406c56ae44",
+      "bytes": 455,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-4450a1775a899eb2ad7ca27678de7435bf5e3fea95ac76b545d035b6b87313ec.gz",
+      "sha256": "949e1a9e229b42bc7f73c03081c5d0ac5b2128a2c8907c34a34c617d61637173",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-a16077f24f2b8a08c9228c981072fe2b8722dd189de55800f794b8ddc830a937.gz",
+      "sha256": "471be5700e44bbb955d4e8cd0b0b00b89c9a6ce3267392928036bf46244c2fe7",
+      "bytes": 4648,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-749e50359c7097d6db9699cde15f009690efacd0ab37f8a31b933a8f41f25cf0.gz",
+      "sha256": "96fb74717a0b4235ed6f65669191ddc0cc861aa9186c069174a55af3fcd68eda",
+      "bytes": 3003,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-8f141e4eae6fb232c93bfad9aece6dffe9195a6efaa20dc1cca73c62344667d1.gz",
+      "sha256": "c738005168b969e2a66777d5d777f1b7c0c19089f75e5191fdc0ba6648060b72",
+      "bytes": 456,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-c41431caca4bfbd2cfd1b7b446ad31d5a54ad3c5cb5dd571ba23983be3150e5d.gz",
+      "sha256": "cd19cb7eedafb6e5e348ec0f8bbd0bc17b4e99f51bcaa7e099f77a100f94702a",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-25b670db641d94843f0c6cdb359875a6d4ebae3c296f394030c2dd753d94a7ba.gz",
+      "sha256": "8433351b04aea5bf1ed75ce8fa1f15b63af291ddd247e6aac83dca3f9df53d08",
+      "bytes": 4646,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-318c13b1639bf4358c7a2bcbde059aaa5c373de178939e9ce761bedf8d2b0c9d.gz",
+      "sha256": "186631c085dd972e19c2125c42f5d250c672f6d0ffcad6475398a201c9efd9cc",
+      "bytes": 3003,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-4f43a7347677528925cf12645658e52e3acb1ffd75ffff5a094d7a9a566d18fc.gz",
+      "sha256": "ec4813102c964049d7d2587ea99fa70dc124a22bf758ab6ef0db68912e2d800d",
+      "bytes": 454,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-6a141903241d819337e0f728a013c43b2d03f3d341bcd7c68c1f2edcb724ac24.gz",
+      "sha256": "39d77ad3ae3e06966232a07d50d5e395695eccfbfb2850722e8af1a5b4798de1",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-7e28701f0a0016a9af4320d0b5f1c6264e589bc5f37d818b4a342f27eac1e29d.gz",
+      "sha256": "af37297a6a8677689a2454967d187d7fe721a49aecaf1bc8864a61c5f9aa2c0c",
+      "bytes": 4651,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-a0914c06409a466fa10dece7a29297cec0ee70ebb12199894ffba858ca292889.gz",
+      "sha256": "ad72da83fb055ca14f5df883180ba02cc65ae6a415beee5811c25b6ea2472c1f",
+      "bytes": 3006,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-19149699068889ab82a4e0de9a34c93b1f8d2d28a6a947477720c3008beabb13.gz",
+      "sha256": "5cc2c01984015324bfb9e9ab4182f1758c9b6b591d26d90e9dc08f99529c6a75",
+      "bytes": 454,
+      "createdAt": "2026-08-27T23:07:04Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "upstream/ledger-release-8b8a23259dc60cc8007336cfba47f867751396301c673acb8d44cdc8be355b42.gz",
+      "sha256": "8c6afdf81e21ba979046aed36e038e2efe1ab6a2efda2ace2c769b006fe7942a",
+      "bytes": 87,
+      "createdAt": "2026-08-27T23:07:04Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "429024e7bd56deec34e03f35ed74070b3d3ebd67c432fdd49e04b2b3ba1045b1"
+  }
+}

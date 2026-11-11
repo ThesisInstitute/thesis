@@ -1,5 +1,5 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import {
-  FORECAST_CELLS,
   getForecastRunEntries,
   type ForecastCell,
   type ForecastRunEntry,
@@ -402,7 +402,7 @@ const PACK_DETAILS: Record<string, Omit<PredictionPackDetail, "packId">> = {
 };
 
 export function buildPredictionPackCatalog(
-  forecasts: ForecastCell[] = FORECAST_CELLS,
+  forecasts: ForecastCell[] = getPublishedForecasts(),
 ): PredictionPackCatalogEntry[] {
   const entries = new Map<string, MutablePackCatalogEntry>();
 
@@ -445,7 +445,7 @@ export function buildPredictionPackCatalog(
 
 export function getPredictionPackCatalogEntry(
   packId: string,
-  forecasts: ForecastCell[] = FORECAST_CELLS,
+  forecasts: ForecastCell[] = getPublishedForecasts(),
 ) {
   return buildPredictionPackCatalog(forecasts).find(
     (entry) => entry.packId === packId,

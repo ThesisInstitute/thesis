@@ -1,0 +1,15 @@
+{
+  "summary": "The draft is publishable with one warning: it should make the model-prior choice more explicit.",
+  "requiredFixes": [
+    {
+      "rubricItem": "model_prior",
+      "severity": "warning",
+      "summary": "The draft uses a recent persistence mean, but does not explicitly say whether a broader time-series/model prior was considered and ruled out.",
+      "actionRequested": "Add one sentence stating that no separate statistical model prior was used beyond the Jan-Jul 2026 persistence prior, or name the model prior if one was used."
+    }
+  ],
+  "optionalSuggestions": [
+    "The resolution-date discrepancy is handled clearly; keep the explanation tied to the official BLS release calendar.",
+    "Consider noting that BLS will publish the resolving value to one decimal even though the point estimate is expressed as 0.25."
+  ]
+}

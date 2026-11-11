@@ -19,6 +19,20 @@ from canonical_json import canonical_bytes  # noqa: E402
 TODAY = dt.date(2030, 1, 10)
 
 
+@pytest.fixture
+def resolver_admits(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stub the resolver's verdict for tests that use a fictional series.
+
+    No resolver leg executes a fixture series, so the execution-plan gate
+    would refuse it before the mechanics under test run. The gate is tested
+    against the real resolver in tests/test_execution_plan_gate.py.
+    """
+
+    monkeypatch.setattr(
+        prospect_targets, "execution_plan_refusal", lambda registration: None
+    )
+
+
 def empty_state(**overrides) -> prospect_targets.ValidationState:
     values = {
         "registry_series": frozenset(),
@@ -97,6 +111,7 @@ def validate(payload: dict, tmp_path: pathlib.Path, **kwargs):
     )
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_valid_origins_replay_to_batch_targets(tmp_path: pathlib.Path) -> None:
     codex = codex_target()
     ledger = ledger_gap_target()
@@ -225,6 +240,7 @@ def test_codex_near_duplicate_is_rejected(tmp_path: pathlib.Path) -> None:
         validate(envelope(("codex", codex_target())), tmp_path, state=state)
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_duplicate_proposals_fail_strict_replay_and_filter_to_one(
     tmp_path: pathlib.Path,
 ) -> None:

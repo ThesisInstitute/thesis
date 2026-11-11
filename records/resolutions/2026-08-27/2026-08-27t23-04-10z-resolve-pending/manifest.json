@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-08-27T23:04:10Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "9526211a3970993269523e1e43f4b17ccad846de",
+  "facts": [
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-08-15.first_print",
+      "sourceVintage": "2026-08-27",
+      "retrievedAt": "2026-08-27T23:04:10Z",
+      "targetContentHash": "88d9a299ea398bb463f4263048ae7ca91aec787c14c3e41d2307180fda4ac9fb",
+      "responseArchive": {
+        "path": "records/resolutions/2026-08-27/2026-08-27t23-04-10z-resolve-pending/responses/ccsa-2026-08-27-72034ab691cea571.csv.gz",
+        "sha256": "72034ab691cea5710931e6cf059041e947453b18ce77361f78166bac8b5140e1",
+        "bytes": 59163,
+        "gzipSha256": "5809d791ce0cad2de647bb5f763d18b7005e2f3677ae5774c2f0099da9c64074",
+        "gzipBytes": 15656,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-08-27/2026-08-27t23-04-10z-resolve-pending/responses/ccsa-2026-08-27-72034ab691cea571.csv.gz",
+      "sha256": "5809d791ce0cad2de647bb5f763d18b7005e2f3677ae5774c2f0099da9c64074",
+      "bytes": 15656,
+      "createdAt": "2026-08-27T23:04:10Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-08-27/2026-08-27t23-04-10z-resolve-pending/manifest.json",
+      "sha256": "093812cb1f7e9f8a28df09ce269b64f65d8056d6e1cb1c15db99683703111718",
+      "bytes": 1301,
+      "createdAt": "2026-08-27T23:04:10Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "3c5514292f915ed4cfec4b151fe354ebcbae1a92794be099182f9162272f0d86"
+}

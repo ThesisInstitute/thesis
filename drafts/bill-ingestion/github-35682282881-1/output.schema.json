@@ -1,0 +1,92 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["slug", "bill", "provisions"],
+  "properties": {
+    "slug": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"},
+    "bill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slug", "name", "status", "pages", "analyzed", "analysisDate", "sourceUrl"],
+      "properties": {
+        "slug": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"},
+        "name": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "minLength": 1},
+        "pages": {"type": "integer", "minimum": 0},
+        "analyzed": {"type": "string", "minLength": 1},
+        "analysisDate": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "sourceUrl": {"type": "string", "minLength": 1}
+      }
+    },
+    "provisions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "heading", "quote", "goals", "effects", "barriers", "metrics", "conditionals", "context"],
+        "properties": {
+          "title": {"type": "string", "minLength": 1},
+          "heading": {"type": "string", "minLength": 1},
+          "quote": {"type": "string", "minLength": 1},
+          "goals": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["mechanism", "text"],
+              "properties": {
+                "mechanism": {"type": "string", "minLength": 1},
+                "text": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          "barriers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["actor", "text"],
+              "properties": {
+                "actor": {"type": "string", "minLength": 1},
+                "text": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "text", "series_hint", "rationale", "stances", "layer", "category"],
+              "properties": {
+                "kind": {"type": "string", "minLength": 1},
+                "text": {"type": "string", "minLength": 1},
+                "series_hint": {"type": "string", "pattern": "^[A-Za-z0-9_.-]*$"},
+                "rationale": {"type": "string", "minLength": 1},
+                "layer": {"type": "string", "enum": ["execution", "participation", "outcome"]},
+                "category": {"type": "string", "enum": ["intended", "unintended", "operational"]},
+                "stances": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["goal", "stance"],
+                    "properties": {
+                      "goal": {"type": "integer", "minimum": 0},
+                      "stance": {"type": "string", "enum": ["serves", "opposes", "orthogonal"]}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "conditionals": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "context": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,945 @@
+{
+ "comment": "The 44 docket-only rows of PolicyEngine/chronicle ledger/series_catalog.json at 8c4a0f86 (sha256 b055a7ae...), verbatim; every other row omitted.",
+ "series": [
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "abs.labour.unemployment_rate",
+   "entity": null,
+   "family_patterns": [
+    "abs.labour.unemployment_rate"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "443cb1bf-49d3-4e1e-9897-9556c8a8c768"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "bea.core_pce.mom",
+   "entity": null,
+   "family_patterns": [
+    "bea.core_pce.mom"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "efc3259b-eb44-49c3-9bc6-e92fd7cf6243"
+  },
+  {
+   "aliases": [],
+   "cadence": "quarter",
+   "concept": "bea.ita.personal_transfer_payments",
+   "entity": null,
+   "family_patterns": [
+    "bea.ita.personal_transfer_payments"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_millions",
+   "uuid": "47d53b27-f420-4fa2-9d29-3c8832474cb8"
+  },
+  {
+   "aliases": [],
+   "cadence": "quarter",
+   "concept": "bea.private_nonresidential_fixed_investment",
+   "entity": null,
+   "family_patterns": [
+    "bea.private_nonresidential_fixed_investment"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_billions",
+   "uuid": "2e36a67f-ae8d-4717-a70e-9de016e28d3f"
+  },
+  {
+   "aliases": [],
+   "cadence": "quarter",
+   "concept": "bea.research_and_development_fixed_investment",
+   "entity": null,
+   "family_patterns": [
+    "bea.research_and_development_fixed_investment"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_billions",
+   "uuid": "3efd33de-5be6-4150-bf62-6e4a1e9a1291"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "bls.ces.nonfarm_payrolls.change",
+   "entity": null,
+   "family_patterns": [
+    "bls.ces.nonfarm_payrolls.change"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "d8ab9f3a-aa0c-4b7f-89df-a0c9107cfdbb"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "bls.cps.telework_share",
+   "entity": null,
+   "family_patterns": [
+    "bls.cps.telework_share"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "94a5a046-ea77-449a-8ba9-95ffebc9039c"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "bls.jolts.quits_rate",
+   "entity": null,
+   "family_patterns": [
+    "bls.jolts.quits_rate"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "e6aed5ae-2f23-413b-a600-4c5b80edeb18"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "bls.lns11300000",
+   "entity": null,
+   "family_patterns": [
+    "bls.lns11300000"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "percent",
+   "uuid": "0006af01-72ba-4e63-8d88-54500588f215"
+  },
+  {
+   "aliases": [],
+   "cadence": "quarter",
+   "concept": "bls.productivity.nonfarm_qoq_prelim",
+   "entity": null,
+   "family_patterns": [
+    "bls.productivity.nonfarm_qoq_prelim"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "6e671a89-65f6-4da9-b092-4e6d74a36a08"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "bls.qcew.child_day_care_services.annual_avg_employment",
+   "entity": null,
+   "family_patterns": [
+    "bls.qcew.child_day_care_services.annual_avg_employment"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "count",
+   "uuid": "c6c98b8b-55f6-4543-b057-96726c38a2bf"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "bls.real_earnings.avg_hourly_mom",
+   "entity": null,
+   "family_patterns": [
+    "bls.real_earnings.avg_hourly_mom"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "2e3a7126-41fd-4d88-99b6-cf4f2057c277"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "census.spm.child_poverty_rate",
+   "entity": null,
+   "family_patterns": [
+    "census.spm.child_poverty_rate"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "percent",
+   "uuid": "37841d30-5bd6-42a0-aea7-fc7b6d32dbcc"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "eia.ng.vented_flared.us.annual",
+   "entity": null,
+   "family_patterns": [
+    "eia.ng.vented_flared.us.annual"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "million_cubic_feet",
+   "uuid": "52011655-2184-4c46-9f22-a97d5db88959"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "eurostat.hicp.flash.yoy",
+   "entity": null,
+   "family_patterns": [
+    "eurostat.hicp.flash.yoy"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "1e84eb13-9e80-4dda-9b82-71361b886c1e"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "eurostat.unemployment_rate",
+   "entity": null,
+   "family_patterns": [
+    "eurostat.unemployment_rate"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "2c59f506-873f-45df-b6c5-588c82dcd640"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "eurostat.unemployment_rate.belgium",
+   "entity": null,
+   "family_patterns": [
+    "eurostat.unemployment_rate.belgium"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "BE",
+    "level": "country",
+    "name": null
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "c7f994ce-3d0b-4a28-ba5b-e286237cd14d"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "fns.snap.total_persons",
+   "entity": null,
+   "family_patterns": [
+    "fns.snap.total_persons"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "millions",
+   "uuid": "748670af-cafa-416e-afcd-b2c303593782"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "fns.wic.total_participation",
+   "entity": null,
+   "family_patterns": [
+    "fns.wic.total_participation"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "millions",
+   "uuid": "5a76270d-3418-49c8-b510-a08c0df0fc8c"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "irs.actc.total_claims",
+   "entity": null,
+   "family_patterns": [
+    "irs.actc.total_claims"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "millions",
+   "uuid": "23396038-b31d-43cd-be08-4aa9fe916b56"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "irs.actc.total_credit_amount",
+   "entity": null,
+   "family_patterns": [
+    "irs.actc.total_credit_amount"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_millions",
+   "uuid": "05d4b329-d6c0-4050-ab25-f1a1deddf465"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "irs.soi.credit_30d.total_claims",
+   "entity": null,
+   "family_patterns": [
+    "irs.soi.credit_30d.total_claims"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "count",
+   "uuid": "f5eacf8a-ce09-4721-a92a-9b19766a0d3c"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "irs.soi.credit_30d.total_credit_amount",
+   "entity": null,
+   "family_patterns": [
+    "irs.soi.credit_30d.total_credit_amount"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_millions",
+   "uuid": "c70d0bc6-d299-4727-959a-3c7bdb324861"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "nbb.business_barometer.overall",
+   "entity": null,
+   "family_patterns": [
+    "nbb.business_barometer.overall"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "BE",
+    "level": "country",
+    "name": null
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "index_points",
+   "uuid": "a3e8d1fb-5f29-40a8-ab14-a06a53ecb6af"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "nbb.consumer_confidence.indicator",
+   "entity": null,
+   "family_patterns": [
+    "nbb.consumer_confidence.indicator"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "BE",
+    "level": "country",
+    "name": null
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "index_points",
+   "uuid": "64bd2834-d559-4bf2-abff-3eae6fcf6b4b"
+  },
+  {
+   "aliases": [],
+   "cadence": "quarter",
+   "concept": "nbb.gdp.flash_qoq",
+   "entity": null,
+   "family_patterns": [
+    "nbb.gdp.flash_qoq"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "BE",
+    "level": "country",
+    "name": null
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "03a9d380-e5cf-45d8-b4d8-b3da28aad043"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "sba.disaster.loan_program.charge_off_amount",
+   "entity": null,
+   "family_patterns": [
+    "sba.disaster.loan_program.charge_off_amount"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd",
+   "uuid": "c0b2e780-847d-4780-8671-c8b38f0ad3d6"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "sba.disaster.loan_program.charge_off_rate_upb",
+   "entity": null,
+   "family_patterns": [
+    "sba.disaster.loan_program.charge_off_rate_upb"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "percent",
+   "uuid": "0b925fe8-b841-4d0e-84f7-65bef6fc611c"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "sba.disaster.loan_program.post_charge_off_recovery",
+   "entity": null,
+   "family_patterns": [
+    "sba.disaster.loan_program.post_charge_off_recovery"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd",
+   "uuid": "282e0e7a-6290-4114-aaf8-caaf96b99418"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "statbel.cpi.headline_yoy",
+   "entity": null,
+   "family_patterns": [
+    "statbel.cpi.headline_yoy"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "BE",
+    "level": "country",
+    "name": null
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "99a7178c-5085-4ec2-9714-c4d03f10f184"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "statbel.health_index.yoy",
+   "entity": null,
+   "family_patterns": [
+    "statbel.health_index.yoy"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "BE",
+    "level": "country",
+    "name": null
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "8fc8eb86-6f04-4c6b-91ae-ca2a490a175f"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "statjp.cpi.tokyo_all_items_yoy",
+   "entity": null,
+   "family_patterns": [
+    "statjp.cpi.tokyo_all_items_yoy"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": null,
+   "uuid": "62e78be0-309e-49ba-8604-67abb80f1a03"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.cdfi.assistance_transaction_obligations",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.cdfi.assistance_transaction_obligations"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_millions",
+   "uuid": "69834e1f-1fbf-432c-9913-6b391321b3a8"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.dhs.title_vi.award_transaction_obligations",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.dhs.title_vi.award_transaction_obligations"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd",
+   "uuid": "e64ea5db-b72a-4a46-8948-6142dbc59d91"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.dod.new_prime_awards",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.dod.new_prime_awards"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "millions",
+   "uuid": "8146ecb0-3ef3-49eb-b8a0-e61d15aa276e"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.dod.prime_award_obligations",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.dod.prime_award_obligations"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "billions USD",
+   "uuid": "a2649fd9-f382-4003-ba70-01030bc93b5e"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.dod.prime_award_transactions",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.dod.prime_award_transactions"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "millions",
+   "uuid": "82ff2d7f-04ee-4366-8fe4-b8e919e6efa6"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.dod.prime_contract_obligations",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.dod.prime_contract_obligations"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "billions USD",
+   "uuid": "11ea0d3d-fab9-42bb-b679-3471d4b60323"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.dod.small_business_contract_obligation_share",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.dod.small_business_contract_obligation_share"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "percent",
+   "uuid": "91e3b668-cb4b-4682-94a5-7ae404a6565d"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.dod.unique_prime_contract_recipients",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.dod.unique_prime_contract_recipients"
+   ],
+   "first_observed_period": null,
+   "geography": null,
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "thousands",
+   "uuid": "96d17026-b54c-4409-98c9-339b6725fde7"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.ntia.broadband_al11038_obligations",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.ntia.broadband_al11038_obligations"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_millions",
+   "uuid": "f37307e0-91c6-49ee-afc7-2021e33ea863"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.ondcp.hidta_al95001_obligations",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.ondcp.hidta_al95001_obligations"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_millions",
+   "uuid": "02662bfc-b77d-48f3-938b-7a5b2f9e5c73"
+  },
+  {
+   "aliases": [],
+   "cadence": "year",
+   "concept": "usaspending.usfs.minnesota_place_of_performance_obligations",
+   "entity": null,
+   "family_patterns": [
+    "usaspending.usfs.minnesota_place_of_performance_obligations"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "usd_millions",
+   "uuid": "720be189-a4a5-4b0c-a25c-49233ff388a4"
+  },
+  {
+   "aliases": [],
+   "cadence": "month",
+   "concept": "usda.fsa.crp.enrolled_acres_total",
+   "entity": null,
+   "family_patterns": [
+    "usda.fsa.crp.enrolled_acres_total"
+   ],
+   "first_observed_period": null,
+   "geography": {
+    "id": "0100000US",
+    "level": "country",
+    "name": "United States"
+   },
+   "last_observed_period": null,
+   "observation_count": 0,
+   "rid_patterns": [],
+   "source_concepts": [],
+   "sources": [],
+   "status": "docket-only",
+   "unit": "count",
+   "uuid": "4266e63f-dbf3-4c86-be8d-44315dbe32e3"
+  }
+ ]
+}

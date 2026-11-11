@@ -1,0 +1,1306 @@
+[
+  {
+    "slug": "uk-production-output-index-july-2026",
+    "country": "UK",
+    "type": "data",
+    "title": "UK production output index, July 2026",
+    "question": "What will the Office for National Statistics first print for IOP: B-E: PRODUCTION: CVMSA, seasonally adjusted total production output index, July 2026, be?",
+    "unit": "index_points",
+    "pointEstimate": 98.1,
+    "ciLow": 97.0,
+    "ciHigh": 99.2,
+    "confidence": 0.8,
+    "resolutionDate": "2026-09-11",
+    "resolutionSource": "Office for National Statistics Index of Production dataset, Index of Production time series (DIOP), Total Production : Sections B, C, D and E (Index):CVM",
+    "resolutionSourceUrl": "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/indexofproduction",
+    "resolutionRule": "Resolve to the first official ONS print in the Index of Production dataset, Index of Production time series (DIOP), for Total Production : Sections B, C, D and E (Index):CVM for July 2026, rounded as first published in index points. Use the 11 September 2026 7:00am Index of Production, UK: July 2026 release and associated DIOP dataset first publication; ignore later revisions or corrections unless the first-published value is withdrawn before any value is published.",
+    "dataPointId": "ons.production.total_index.2026_07.first_print",
+    "historicalContext": [
+      {
+        "label": "July 2025",
+        "value": 97.9,
+        "period": {
+          "type": "month",
+          "value": "2025-07"
+        }
+      },
+      {
+        "label": "August 2025",
+        "value": 97.8,
+        "period": {
+          "type": "month",
+          "value": "2025-08"
+        }
+      },
+      {
+        "label": "September 2025",
+        "value": 96.1,
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        }
+      },
+      {
+        "label": "October 2025",
+        "value": 97.7,
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        }
+      },
+      {
+        "label": "November 2025",
+        "value": 99.1,
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        }
+      },
+      {
+        "label": "December 2025",
+        "value": 98.6,
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        }
+      },
+      {
+        "label": "January 2026",
+        "value": 98.4,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "February 2026",
+        "value": 98.8,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "March 2026",
+        "value": 98.7,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 99.1,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 98.5,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 98.3,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      }
+    ],
+    "drivers": [
+      "June level persistence near 98.3",
+      "recent monthly production softness",
+      "small mean-reversion offset",
+      "July seasonal-adjusted residual risk",
+      "manufacturing-heavy aggregate volatility"
+    ],
+    "sourceContext": [
+      "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/indexofproduction",
+      "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/timeseries/k222/diop",
+      "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/bulletins/indexofproduction/june2026",
+      "https://www.ons.gov.uk/releases/indexofproductionukjuly2026",
+      "https://www.ons.gov.uk/releasecalendar?page=2&release-type=type-upcoming"
+    ],
+    "runAt": "2026-09-02T18:38:12Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "UK production output index, July 2026"
+      },
+      {
+        "kind": "text",
+        "text": "Resolver framing: the registered target is ons.production.total_index.2026_07.first_print for the first official July 2026 ONS total production output index print in the Index of Production dataset, DIOP table field Total Production : Sections B, C, D and E (Index):CVM. The ledger sourceBinding names sourceSeriesId L2KQ, but the ONS DIOP monthly total production index page for IOP: B-E: PRODUCTION: CVMSA is series K222; L2KQ is a quarterly GDP production index series. I keep the registered slug, unit, dataPointId, resolutionSourceUrl, and date, and use the monthly K222 DIOP page as exact source-series evidence for the same target concept."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Opened ONS release calendar and July 2026 release placeholder for Index of Production, UK: July 2026.",
+        "result": "ONS release calendar item 8 and the release placeholder both show Index of Production, UK: July 2026 scheduled for 11 September 2026 at 7:00am, confirmed/not yet published as of this run."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Opened ONS DIOP K222 time-series page for IOP: B-E: PRODUCTION: CVMSA.",
+        "result": "Fetched latest monthly levels from K222: 2026 JAN 98.4, 2026 FEB 98.8, 2026 MAR 98.7, 2026 APR 99.1, 2026 MAY 98.5, 2026 JUN 98.3; annual 2025 value 98.2 and quarterly 2026 Q2 value 98.6 are also shown on the same page."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Opened ONS Index of Production, UK: June 2026 bulletin for first-release context and component momentum.",
+        "result": "Fetched June bulletin statistics: monthly production output decreased 0.2% in June 2026 after May 2026 fell 0.7% and April 2026 rose 0.4%; Q2 2026 production had 0.0% growth; manufacturing rose 1.0% in Q2 while electricity and gas fell 2.3% and water supply and sewerage fell 3.7%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read K222 recent history for a reference class and July behavior.",
+        "result": "Fetched K222 levels around recent Julys: 2023 JUN 101.3 to JUL 100.7, 2024 JUN 98.5 to JUL 97.9, and 2025 JUN 98.5 to JUL 97.9; the last three July-minus-June changes were each -0.6 index points in the current official table."
+      },
+      {
+        "kind": "text",
+        "text": "The base rate/reference class is a persistence model for a seasonally adjusted monthly level series: start from the latest official K222 level, 98.3 in June 2026, because production output levels move slowly around a mean but individual monthly changes are noisy."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior = 98.3 from K222 June 2026; historical sample = Jan 2024 through Jun 2026 K222 successive monthly changes with sample standard deviation sigma = 0.83 index points and mean change +0.01. Adjustments: recent momentum -0.15 because Apr-May-Jun moved 99.1 to 98.5 to 98.3 and the June bulletin reports -0.2% after -0.7%; July residual -0.10 because 2023-2025 July changes were all -0.6 but seasonal adjustment should already remove most calendar effects; mean reversion +0.05 because the latest level is slightly below the 2026 Q2 average 98.6. Point = 98.3 - 0.15 - 0.10 + 0.05 = 98.1. 80% half-width = 1.28*sigma = 1.28*0.83 = 1.06, rounded to 1.1, so interval = 98.1 +/- 1.1 = [97.0, 99.2]."
+      },
+      {
+        "kind": "text",
+        "text": "Variant consistency: all level anchors are the same ONS DIOP seasonally adjusted CVMSA total production index variant, K222, not the annual/monthly growth-rate series and not the quarterly GDP L2KQ page."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk is a rebound in manufacturing or petroleum-related output after the June weakness, which would land above the interval if July prints above 99.2. Downside risk is another broad fall across manufacturing plus energy and water output, which would land below the interval if July prints below 97.0. A source-series correction or an unresolved L2KQ-vs-K222 registration dispute is outside the interval logic rather than economic signal."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the blocking resolver fix by restoring resolutionSourceUrl to the registered ONS Index of Production dataset URL and making the resolver text explicitly name the DIOP table field; kept the K222/L2KQ discrepancy visible as source-grounding context without changing the registered target."
+      },
+      {
+        "kind": "forecast",
+        "point": 98.1,
+        "ciLow": 97.0,
+        "ciHigh": 99.2
+      }
+    ],
+    "agentReportedRunAt": "2026-09-02T18:36:09Z",
+    "runStartedAt": "2026-09-02T18:35:37Z",
+    "promptMode": "fast",
+    "registrationCommit": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+    "targetContentHash": "ac5b9a119c865fcf52c49a16a8e8598a8318cdd6bf67a9446158dbb5a666e37a",
+    "targetRegistrationPath": "records/targets/2026-09-02-ac5b9a119c865fcf52c49a16a8e8598a8318cdd6bf67a9446158dbb5a666e37a.json",
+    "registeredAtUtc": "2026-09-02T18:31:06Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 95.35,
+        "upper": 100.85
+      },
+      "points": [
+        {
+          "value": 95.35,
+          "probability": 0.0
+        },
+        {
+          "value": 95.3775,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 95.405,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 95.4325,
+          "probability": 0.005
+        },
+        {
+          "value": 95.46,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 95.4875,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 95.515,
+          "probability": 0.01
+        },
+        {
+          "value": 95.5425,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 95.57,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 95.5975,
+          "probability": 0.015
+        },
+        {
+          "value": 95.625,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 95.6525,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 95.68,
+          "probability": 0.02
+        },
+        {
+          "value": 95.7075,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 95.735,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 95.7625,
+          "probability": 0.025
+        },
+        {
+          "value": 95.79,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 95.8175,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 95.845,
+          "probability": 0.03
+        },
+        {
+          "value": 95.8725,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 95.9,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 95.9275,
+          "probability": 0.035
+        },
+        {
+          "value": 95.955,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 95.9825,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 96.01,
+          "probability": 0.04
+        },
+        {
+          "value": 96.0375,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 96.065,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 96.0925,
+          "probability": 0.045
+        },
+        {
+          "value": 96.12,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 96.1475,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 96.175,
+          "probability": 0.05
+        },
+        {
+          "value": 96.2025,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 96.23,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 96.2575,
+          "probability": 0.055
+        },
+        {
+          "value": 96.285,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 96.3125,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 96.34,
+          "probability": 0.06
+        },
+        {
+          "value": 96.3675,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 96.395,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 96.4225,
+          "probability": 0.065
+        },
+        {
+          "value": 96.45,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 96.4775,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 96.505,
+          "probability": 0.07
+        },
+        {
+          "value": 96.5325,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 96.56,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 96.5875,
+          "probability": 0.075
+        },
+        {
+          "value": 96.615,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 96.6425,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 96.67,
+          "probability": 0.08
+        },
+        {
+          "value": 96.6975,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 96.725,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 96.7525,
+          "probability": 0.085
+        },
+        {
+          "value": 96.78,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 96.8075,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 96.835,
+          "probability": 0.09
+        },
+        {
+          "value": 96.8625,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 96.89,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 96.9175,
+          "probability": 0.095
+        },
+        {
+          "value": 96.945,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 96.9725,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 97.0,
+          "probability": 0.1
+        },
+        {
+          "value": 97.0275,
+          "probability": 0.11
+        },
+        {
+          "value": 97.055,
+          "probability": 0.12
+        },
+        {
+          "value": 97.0825,
+          "probability": 0.13
+        },
+        {
+          "value": 97.11,
+          "probability": 0.14
+        },
+        {
+          "value": 97.1375,
+          "probability": 0.15
+        },
+        {
+          "value": 97.165,
+          "probability": 0.16
+        },
+        {
+          "value": 97.1925,
+          "probability": 0.17
+        },
+        {
+          "value": 97.22,
+          "probability": 0.18
+        },
+        {
+          "value": 97.2475,
+          "probability": 0.19
+        },
+        {
+          "value": 97.275,
+          "probability": 0.2
+        },
+        {
+          "value": 97.3025,
+          "probability": 0.21
+        },
+        {
+          "value": 97.33,
+          "probability": 0.22
+        },
+        {
+          "value": 97.3575,
+          "probability": 0.23
+        },
+        {
+          "value": 97.385,
+          "probability": 0.24
+        },
+        {
+          "value": 97.4125,
+          "probability": 0.25
+        },
+        {
+          "value": 97.44,
+          "probability": 0.26
+        },
+        {
+          "value": 97.4675,
+          "probability": 0.27
+        },
+        {
+          "value": 97.495,
+          "probability": 0.28
+        },
+        {
+          "value": 97.5225,
+          "probability": 0.29
+        },
+        {
+          "value": 97.55,
+          "probability": 0.3
+        },
+        {
+          "value": 97.5775,
+          "probability": 0.31
+        },
+        {
+          "value": 97.605,
+          "probability": 0.32
+        },
+        {
+          "value": 97.6325,
+          "probability": 0.33
+        },
+        {
+          "value": 97.66,
+          "probability": 0.34
+        },
+        {
+          "value": 97.6875,
+          "probability": 0.35
+        },
+        {
+          "value": 97.715,
+          "probability": 0.36
+        },
+        {
+          "value": 97.7425,
+          "probability": 0.37
+        },
+        {
+          "value": 97.77,
+          "probability": 0.38
+        },
+        {
+          "value": 97.7975,
+          "probability": 0.39
+        },
+        {
+          "value": 97.825,
+          "probability": 0.4
+        },
+        {
+          "value": 97.8525,
+          "probability": 0.41
+        },
+        {
+          "value": 97.88,
+          "probability": 0.42
+        },
+        {
+          "value": 97.9075,
+          "probability": 0.43
+        },
+        {
+          "value": 97.935,
+          "probability": 0.44
+        },
+        {
+          "value": 97.9625,
+          "probability": 0.45
+        },
+        {
+          "value": 97.99,
+          "probability": 0.46
+        },
+        {
+          "value": 98.0175,
+          "probability": 0.47
+        },
+        {
+          "value": 98.045,
+          "probability": 0.48
+        },
+        {
+          "value": 98.0725,
+          "probability": 0.49
+        },
+        {
+          "value": 98.1,
+          "probability": 0.5
+        },
+        {
+          "value": 98.1275,
+          "probability": 0.51
+        },
+        {
+          "value": 98.155,
+          "probability": 0.52
+        },
+        {
+          "value": 98.1825,
+          "probability": 0.53
+        },
+        {
+          "value": 98.21,
+          "probability": 0.54
+        },
+        {
+          "value": 98.2375,
+          "probability": 0.55
+        },
+        {
+          "value": 98.265,
+          "probability": 0.56
+        },
+        {
+          "value": 98.2925,
+          "probability": 0.57
+        },
+        {
+          "value": 98.32,
+          "probability": 0.58
+        },
+        {
+          "value": 98.3475,
+          "probability": 0.59
+        },
+        {
+          "value": 98.375,
+          "probability": 0.6
+        },
+        {
+          "value": 98.4025,
+          "probability": 0.61
+        },
+        {
+          "value": 98.43,
+          "probability": 0.62
+        },
+        {
+          "value": 98.4575,
+          "probability": 0.63
+        },
+        {
+          "value": 98.485,
+          "probability": 0.64
+        },
+        {
+          "value": 98.5125,
+          "probability": 0.65
+        },
+        {
+          "value": 98.54,
+          "probability": 0.66
+        },
+        {
+          "value": 98.5675,
+          "probability": 0.67
+        },
+        {
+          "value": 98.595,
+          "probability": 0.68
+        },
+        {
+          "value": 98.6225,
+          "probability": 0.69
+        },
+        {
+          "value": 98.65,
+          "probability": 0.7
+        },
+        {
+          "value": 98.6775,
+          "probability": 0.71
+        },
+        {
+          "value": 98.705,
+          "probability": 0.72
+        },
+        {
+          "value": 98.7325,
+          "probability": 0.73
+        },
+        {
+          "value": 98.76,
+          "probability": 0.74
+        },
+        {
+          "value": 98.7875,
+          "probability": 0.75
+        },
+        {
+          "value": 98.815,
+          "probability": 0.76
+        },
+        {
+          "value": 98.8425,
+          "probability": 0.77
+        },
+        {
+          "value": 98.87,
+          "probability": 0.78
+        },
+        {
+          "value": 98.8975,
+          "probability": 0.79
+        },
+        {
+          "value": 98.925,
+          "probability": 0.8
+        },
+        {
+          "value": 98.9525,
+          "probability": 0.81
+        },
+        {
+          "value": 98.98,
+          "probability": 0.82
+        },
+        {
+          "value": 99.0075,
+          "probability": 0.83
+        },
+        {
+          "value": 99.035,
+          "probability": 0.84
+        },
+        {
+          "value": 99.0625,
+          "probability": 0.85
+        },
+        {
+          "value": 99.09,
+          "probability": 0.86
+        },
+        {
+          "value": 99.1175,
+          "probability": 0.87
+        },
+        {
+          "value": 99.145,
+          "probability": 0.88
+        },
+        {
+          "value": 99.1725,
+          "probability": 0.89
+        },
+        {
+          "value": 99.2,
+          "probability": 0.9
+        },
+        {
+          "value": 99.2275,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 99.255,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 99.2825,
+          "probability": 0.905
+        },
+        {
+          "value": 99.31,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 99.3375,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 99.365,
+          "probability": 0.91
+        },
+        {
+          "value": 99.3925,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 99.42,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 99.4475,
+          "probability": 0.915
+        },
+        {
+          "value": 99.475,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 99.5025,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 99.53,
+          "probability": 0.92
+        },
+        {
+          "value": 99.5575,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 99.585,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 99.6125,
+          "probability": 0.925
+        },
+        {
+          "value": 99.64,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 99.6675,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 99.695,
+          "probability": 0.93
+        },
+        {
+          "value": 99.7225,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 99.75,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 99.7775,
+          "probability": 0.935
+        },
+        {
+          "value": 99.805,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 99.8325,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 99.86,
+          "probability": 0.94
+        },
+        {
+          "value": 99.8875,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 99.915,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 99.9425,
+          "probability": 0.945
+        },
+        {
+          "value": 99.97,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 99.9975,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 100.025,
+          "probability": 0.95
+        },
+        {
+          "value": 100.0525,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 100.08,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 100.1075,
+          "probability": 0.955
+        },
+        {
+          "value": 100.135,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 100.1625,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 100.19,
+          "probability": 0.96
+        },
+        {
+          "value": 100.2175,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 100.245,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 100.2725,
+          "probability": 0.965
+        },
+        {
+          "value": 100.3,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 100.3275,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 100.355,
+          "probability": 0.97
+        },
+        {
+          "value": 100.3825,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 100.41,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 100.4375,
+          "probability": 0.975
+        },
+        {
+          "value": 100.465,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 100.4925,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 100.52,
+          "probability": 0.98
+        },
+        {
+          "value": 100.5475,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 100.575,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 100.6025,
+          "probability": 0.985
+        },
+        {
+          "value": 100.63,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 100.6575,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 100.685,
+          "probability": 0.99
+        },
+        {
+          "value": 100.7125,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 100.74,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 100.7675,
+          "probability": 0.995
+        },
+        {
+          "value": 100.795,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 100.8225,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 100.85,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 98.1,
+        "median": 98.1,
+        "interval80": {
+          "lower": 97.0,
+          "upper": 99.2
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/prompt.md",
+        "sha256": "685c4d6f3e63de380936feb0d485972ee3834cab4e7acee0f60c4fefbb182f23",
+        "bytes": 10665,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_command.json",
+        "sha256": "f6e9677655bffd5e4076794a6b0bf7a02d0b958bba382070bf4cfba629036ec5",
+        "bytes": 756,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_stdout.jsonl",
+        "sha256": "ca2a8efc7acfec6d46de96c47bc262077d4a7e897917c7b02ec966b9a801f5d1",
+        "bytes": 26658,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_stderr.log",
+        "sha256": "0d7297e19fa6485c967f31ebd6e2af236e7de669bcf8ddcdb63c43efe5a106ed",
+        "bytes": 233,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_events.jsonl",
+        "sha256": "c495493c7eb8750030cf89c95ba050c7a1c4a56b8dda0053f63df85280cb45e2",
+        "bytes": 26736,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_last_message.txt",
+        "sha256": "ef08947c9c3d2baffb664bbd93c9ee7e9e04f5727152b41c15b70a505f638384",
+        "bytes": 6747,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_trace.json",
+        "sha256": "dde1a16836cb184dc17a08ad379aa78ea439bdea6c26984179acebac01d54c92",
+        "bytes": 560,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_stdout.txt",
+        "sha256": "ef08947c9c3d2baffb664bbd93c9ee7e9e04f5727152b41c15b70a505f638384",
+        "bytes": 6747,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_stderr.txt",
+        "sha256": "f3dbf0c90081face1cd346be8066e7c685855879601380f6ae06b68b50ff0787",
+        "bytes": 248,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_prompt.md",
+        "sha256": "85084feac60689884765d768df295e4d552c6f9f8b00a643f07568814385935e",
+        "bytes": 10148,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_command.json",
+        "sha256": "0543e29af12592b2229268be69ec7e772929fd2a6315e3b9b2908dd950a9bff3",
+        "bytes": 752,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "d6473a1d3adef127619a06f0466fc704429bd94990165b3f4c7450d8e612f6ff",
+        "bytes": 1209,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_stderr.log",
+        "sha256": "51e4a644ddcab2fc15ccd00a8ae50d415ab3dcd8d8734aa720c108c7ccd90885",
+        "bytes": 233,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_events.jsonl",
+        "sha256": "b8f6fc88664a33b28fb668c244dfc5b93d819539a11d8b53a165e019cd669739",
+        "bytes": 1231,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_last_message.txt",
+        "sha256": "c70494a71d91d4ae3e672d1ee60daffe92c4d7490419fce83915056ba42ad4c2",
+        "bytes": 867,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_trace.json",
+        "sha256": "f87c0fe841a582b5ca1149dc74b2f8c8b050932521f2b371e570e06a5051e8a3",
+        "bytes": 552,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_stdout.txt",
+        "sha256": "c70494a71d91d4ae3e672d1ee60daffe92c4d7490419fce83915056ba42ad4c2",
+        "bytes": 867,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_stderr.txt",
+        "sha256": "4e2674a07b81d4197fa479f1b2606f4dd9634d87aabe3e6b2617e284e1f54ee4",
+        "bytes": 248,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/revision_prompt.md",
+        "sha256": "f16021ab4ab5e3bceccb72b0a67b0c8295dbb7c28545ecf7c3713894332b0b78",
+        "bytes": 19215,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/command.json",
+        "sha256": "2c31ed03cea7d509bc3f5554c149ae4aeaac7772584e285b145cc7463a5ddc6d",
+        "bytes": 750,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_stdout.jsonl",
+        "sha256": "07fc9e1e1d5857834b042b3b5341adbae7f507d17e1dbb2390f233d31efbe1e7",
+        "bytes": 8075,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_stderr.log",
+        "sha256": "92d8f63a66b40e40761ee91bfb15ed5aad36b0f8f2817b092f0ec963cbdc5143",
+        "bytes": 233,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_events.jsonl",
+        "sha256": "990d3e41777e4fa76a52e0a3d9c9914f5191cf6946c954a938baae5719ca6f82",
+        "bytes": 8097,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_last_message.txt",
+        "sha256": "533b6acb49bfadfa24b5ab6c858a575a7fd7a7d66ca29f422195c9285564f684",
+        "bytes": 7355,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_trace.json",
+        "sha256": "ac15100986a368b6c61c3f0016181694ab08dc57a8c5c75f8f99e6dea7978493",
+        "bytes": 551,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/stdout.txt",
+        "sha256": "533b6acb49bfadfa24b5ab6c858a575a7fd7a7d66ca29f422195c9285564f684",
+        "bytes": 7355,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/stderr.txt",
+        "sha256": "0921f5d8e2d502ead3561f12436df6105207515c647e594b5a8cecb7cf72f188",
+        "bytes": 248,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/raw_response.txt",
+        "sha256": "533b6acb49bfadfa24b5ab6c858a575a7fd7a7d66ca29f422195c9285564f684",
+        "bytes": 7355,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/parsed_cells.json",
+        "sha256": "b1100ec6519ebc8b6fd7e8058921b648ad0e31e4278ab45ab6eb952794a4fb1b",
+        "bytes": 9006,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/normalized_cells.json",
+        "sha256": "193bae9aa999bf3a46c5180a4325bcd6fb08dd8621bdf56cfde3811338d07f93",
+        "bytes": 26525,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/distribution.json",
+        "sha256": "64afaf4b78f5ede47be4ce494d74ac29c4cdf79b80e698dea7d7a1b64cbf15d8",
+        "bytes": 13735,
+        "createdAt": "2026-09-02T18:35:37Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/validation.json",
+        "sha256": "0d11465a36dfcd1d885f7f431e19bb84568d55354a5f61b3198586bc3437d859",
+        "bytes": 137,
+        "createdAt": "2026-09-02T18:35:37Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-02T18:35:37Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "c3b41504a6bbe5f14d4934facb9ec6c67b43064989e6981b5a5c36d4cdc1c0d2"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.finding.1",
+          "severity": "blocking",
+          "rubricItem": "resolver",
+          "summary": "The draft sets resolutionSourceUrl to the K222 time-series page, while the ledger contract requires https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/indexofproduction.",
+          "actionRequested": "Set resolutionSourceUrl to the ledger resolutionSourceUrl exactly; keep the K222/L2KQ discrepancy explanation in reasoning or sourceContext rather than changing the target resolver field."
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Make the resolver text explicitly name the ledger dataset/table field alongside the K222 evidence page to reduce ambiguity."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Keep the L2KQ-vs-K222 discrepancy visible, but avoid implying the cell has changed the registered target."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.finding.1",
+          "decision": "accepted",
+          "rationale": "Review disposition: accepted the blocking resolver fix by restoring resolutionSourceUrl to the registered ONS Index of Production dataset URL and making the resolver text explicitly name the DIOP table field; kept the K222/L2KQ discrepancy visible as source-grounding context without changing the registered target.",
+          "forecastChanged": true
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver fix by restoring resolutionSourceUrl to the registered ONS Index of Production dataset URL and making the resolver text explicitly name the DIOP table field; kept the K222/L2KQ discrepancy visible as source-grounding context without changing the registered target.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the blocking resolver fix by restoring resolutionSourceUrl to the registered ONS Index of Production dataset URL and making the resolver text explicitly name the DIOP table field; kept the K222/L2KQ discrepancy visible as source-grounding context without changing the registered target.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "Draft is mostly publication-ready, but its JSON resolver URL conflicts with the canonical ledger target contract."
+    }
+  }
+]

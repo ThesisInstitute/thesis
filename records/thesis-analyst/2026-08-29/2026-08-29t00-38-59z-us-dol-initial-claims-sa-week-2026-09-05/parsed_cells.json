@@ -1,0 +1,164 @@
+[
+  {
+    "slug": "initial-claims-week-2026-09-05",
+    "country": "US",
+    "type": "data",
+    "title": "US initial claims, week ending Sep 5",
+    "question": "What will the U.S. Department of Labor report as the advance seasonally adjusted initial claims figure for the week ending September 5, 2026, in the first official print?",
+    "unit": "thousands",
+    "pointEstimate": 206,
+    "ciLow": 188,
+    "ciHigh": 224,
+    "confidence": 0.8,
+    "resolutionDate": "2026-09-20",
+    "resolutionSource": "ALFRED graph CSV, ICSA advance vintage",
+    "resolutionSourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA",
+    "resolutionRule": "Resolve using the registered ALFRED graph CSV source binding for sourceSeriesId ICSA, field ICSA, releasePolicy advance_vintage, table ALFRED graph CSV, transformed by multiplying the published ICSA value by 0.001 to express claims in thousands. Use the first advance vintage for the observation dated 2026-09-05 available by the registered resolve-by bound of 2026-09-20. Ignore later ALFRED/FRED vintage changes and subsequent DOL revisions.",
+    "dataPointId": "us.dol.initial_claims.sa.week_2026-09-05",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-06-27"
+        },
+        "label": "week ending 2026-06-27",
+        "value": 215
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-04"
+        },
+        "label": "week ending 2026-07-04",
+        "value": 215
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-11"
+        },
+        "label": "week ending 2026-07-11",
+        "value": 208
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-18"
+        },
+        "label": "week ending 2026-07-18",
+        "value": 187
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-25"
+        },
+        "label": "week ending 2026-07-25",
+        "value": 197
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-01"
+        },
+        "label": "week ending 2026-08-01",
+        "value": 199
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-08"
+        },
+        "label": "week ending 2026-08-08",
+        "value": 209
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-15"
+        },
+        "label": "week ending 2026-08-15",
+        "value": 206
+      },
+      {
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-22"
+        },
+        "label": "week ending 2026-08-22",
+        "value": 203
+      }
+    ],
+    "drivers": [
+      "Recent claims near 200 thousand",
+      "Four-week average around 205.5 thousand",
+      "Late-summer seasonal adjustment noise",
+      "No current layoff-break signal",
+      "Two-week forecast horizon from latest print"
+    ],
+    "sourceContext": [
+      "https://www.dol.gov/index.php/newsroom/releases/eta",
+      "https://oui.doleta.gov/unemploy/claims_arch.asp",
+      "https://fred.stlouisfed.org/releases/calendar?ob=rd&od=asc&rid=180&ve=2026-12-31&view=week&vs=2026-01-01",
+      "https://www.dol.gov/ui/data.pdf",
+      "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA"
+    ],
+    "runAt": "2026-08-29T00:39:16Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast for seasonally adjusted initial claims"
+      },
+      {
+        "kind": "text",
+        "text": "Resolver framing: the target is DOL seasonally adjusted initial claims, series ICSA-equivalent, for the week ending 2026-09-05, reported as the advance first print in thousands. The registered resolver is ALFRED graph CSV for ICSA with advance_vintage policy and factor 0.001, so the JSON resolver fields follow that contract. DOL's archive page says the UI Weekly Claims News Release is published each Thursday at 8:30 AM Eastern except listed federal-holiday exceptions; the FRED release calendar lists weekly claims releases on 2026-09-10 and 2026-09-17. I believe the registered expectedReleaseWindow ending 2026-09-20 may be one week late for this stated week-ending target, but I keep the catalog slug, dataPointId, resolver source, and resolutionDate tied to the registered target."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the DOL ETA newsroom listing and latest weekly-claims release text for the most recent print.",
+        "result": "Fetched DOL values: week ending 2026-08-22 seasonally adjusted initial claims = 203 thousand; prior week revised level = 207 thousand; 4-week moving average = 205.5 thousand; continuing claims for week ending 2026-08-15 = 1778 thousand."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the DOL ETA newsroom page for the three preceding weekly claims reports.",
+        "result": "Fetched DOL advance seasonally adjusted initial claims: week ending 2026-08-15 = 206 thousand; week ending 2026-08-08 = 209 thousand; week ending 2026-08-01 = 199 thousand; corresponding 4-week averages were 204.0, 199.0, and 198.75 thousand."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read older DOL ETA newsroom entries for the late-June and July reference class.",
+        "result": "Fetched DOL advance seasonally adjusted initial claims: week ending 2026-07-25 = 197 thousand; 2026-07-18 = 187 thousand; 2026-07-11 = 208 thousand; 2026-07-04 = 215 thousand; 2026-06-27 = 215 thousand."
+      },
+      {
+        "kind": "tool",
+        "tool": "calendar.lookup",
+        "call": "Checked public release-calendar context for the target's publication timing and registered resolve-by bound.",
+        "result": "Fetched calendar context: weekly claims releases listed on 2026-09-10 and 2026-09-17; registered sourceBinding expectedReleaseWindow start = 2026-09-16 and end = 2026-09-20; final JSON resolutionDate uses the registered bound 2026-09-20."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate / reference class: the recent official-source reference class has nine consecutive advance prints from 187 to 215 thousand, with the latest at 203 thousand and the latest four-week mean at 204.25 thousand from the fetched Aug 1-Aug 22 values. This argues for a low-200s persistence prior rather than a return to the 220s unless fresh layoff evidence appears."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior = latest four-week average 204.25 thousand, using the official DOL advance prints from week ending 2026-06-27 through 2026-08-22. Adjustment components: level +0.5 thousand because the latest print, 203, is slightly below the recent mean; momentum +0.5 thousand because the 4-week average rose from 198.75 to 205.5 over the latest three releases; one-off seasonal-noise adjustment +0.5 thousand for late-summer volatility; policy-mechanism adjustment 0 because the latest federal-worker and aggregate claims context does not show a discrete policy shock. Point = 204.25 + 0.5 + 0.5 + 0.5 + 0 = 205.75, rounded to 206 thousand. Successive changes in the fetched level series were 0, -7, -21, +10, +2, +10, -3, -3 thousand; sample one-week sigma = 9.96. For a two-week horizon from the latest released week to week ending 2026-09-05, horizon sigma = sqrt(2)*9.96 = 14.08, and 1.28*sigma = 18.0 thousand, giving an 80% interval of 206 +/- 18 = 188 to 224 thousand."
+      },
+      {
+        "kind": "text",
+        "text": "Level, momentum, one-off, and policy mechanisms: the level is historically low but stable, momentum is a mild drift up from the July trough, one-off risk is mostly seasonal-adjustment noise around late summer, and I do not see a policy mechanism large enough to shift claims materially before the target week. Upside risk would be a sudden layoff burst, a strike-related filing wave, or a seasonal factor miss that would land above the interval. Downside risk would be another July-like low claims print near 187 thousand or below. Outside the interval means below 188 thousand or above 224 thousand in the advance SA first print."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the blocking resolver critiques by changing resolutionDate to 2026-09-20 and the resolver fields to the registered ALFRED ICSA advance-vintage source binding; retained the analytical point estimate and interval because the critique did not identify an evidence or calibration error; retained the date discrepancy only as reasoning context."
+      },
+      {
+        "kind": "forecast",
+        "point": 206,
+        "ciLow": 188,
+        "ciHigh": 224
+      }
+    ]
+  }
+]

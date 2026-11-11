@@ -1,0 +1,1024 @@
+[
+  {
+    "slug": "initial-claims-week-2026-09-12",
+    "country": "US",
+    "type": "data",
+    "title": "Initial claims, week ending Sep. 12, 2026",
+    "question": "What will the U.S. Department of Labor first report as the advance seasonally adjusted initial unemployment insurance claims count, series ICSA, for the week ending 2026-09-12?",
+    "unit": "thousands",
+    "pointEstimate": 207,
+    "ciLow": 191,
+    "ciHigh": 223,
+    "confidence": 0.8,
+    "resolutionDate": "2026-09-29",
+    "resolutionSource": "U.S. Department of Labor ETA UI Weekly Claims News Release, preserved through ALFRED ICSA advance vintage",
+    "resolutionSourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA",
+    "resolutionRule": "Resolve through the registered ALFRED graph CSV source binding for sourceSeriesId ICSA, field ICSA, releasePolicy advance_vintage, selecting the first advance vintage corresponding to the first official U.S. Department of Labor ETA seasonally adjusted initial claims print for the week ending 2026-09-12. Multiply persons by 0.001 to express thousands and round to the nearest 1 thousand. Use the first print only; ignore later DOL revisions, FRED/ALFRED vintage changes after the first available advance vintage, and benchmark updates. The official DOL weekly release schedule points to Thursday 2026-09-17 for the agency first print, while the registered ledger target preserves resolutionDate 2026-09-29 and expected ALFRED window 2026-09-25 through 2026-09-29.",
+    "dataPointId": "us.dol.initial_claims.sa.week_2026-09-12",
+    "historicalContext": [
+      {
+        "label": "week ending 2026-06-13",
+        "value": 226,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-06-13"
+        }
+      },
+      {
+        "label": "week ending 2026-06-20",
+        "value": 215,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-06-20"
+        }
+      },
+      {
+        "label": "week ending 2026-06-27",
+        "value": 215,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-06-27"
+        }
+      },
+      {
+        "label": "week ending 2026-07-04",
+        "value": 215,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-04"
+        }
+      },
+      {
+        "label": "week ending 2026-07-11",
+        "value": 208,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-11"
+        }
+      },
+      {
+        "label": "week ending 2026-07-18",
+        "value": 187,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-18"
+        }
+      },
+      {
+        "label": "week ending 2026-07-25",
+        "value": 197,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-07-25"
+        }
+      },
+      {
+        "label": "week ending 2026-08-01",
+        "value": 199,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-01"
+        }
+      },
+      {
+        "label": "week ending 2026-08-08",
+        "value": 209,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-08"
+        }
+      },
+      {
+        "label": "week ending 2026-08-15",
+        "value": 206,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-15"
+        }
+      },
+      {
+        "label": "week ending 2026-08-22",
+        "value": 203,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-22"
+        }
+      },
+      {
+        "label": "week ending 2026-08-29",
+        "value": 206,
+        "period": {
+          "type": "week_ending",
+          "value": "2026-08-29"
+        }
+      }
+    ],
+    "drivers": [
+      "Latest DOL first print was 206 thousand for week ending 2026-08-29",
+      "Recent first-print four-week average is 206 thousand",
+      "August employment report was stronger than expected with unemployment unchanged at 4.1 percent",
+      "Claims remain in a low-layoff low-200-thousand regime",
+      "Two unreleased weeks create moderate horizon and Labor Day seasonal-adjustment risk"
+    ],
+    "sourceContext": [
+      "https://www.dol.gov/index.php/newsroom/releases?agency=39&page=0&state=All&topic=All&year=all",
+      "https://www.dol.gov/newsroom/releases/eta",
+      "https://oui.doleta.gov/unemploy/archive.asp",
+      "https://fred.stlouisfed.org/releases/calendar?m=&ob=n&od=asc&rid=180&ve=2026-12-31&vs=2026-01-01&y=",
+      "https://alfred.stlouisfed.org/series?seid=ICSA",
+      "https://www.bls.gov/news.release/archives/empsit_09042026.htm"
+    ],
+    "runAt": "2026-09-07T20:09:19Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "US initial claims first-print forecast for week ending 2026-09-12"
+      },
+      {
+        "kind": "text",
+        "text": "Framing and exact resolver: this forecasts the U.S. Department of Labor Employment and Training Administration advance seasonally adjusted initial claims series, ICSA, for week ending 2026-09-12. All anchors use the same seasonally adjusted initial-claims variant, not not-seasonally-adjusted claims, continued claims, or all-program weeks claimed. DOL is the substantive agency source; ALFRED is the registered mechanical advance-vintage mirror."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Inspected DOL ETA news release listings for recent Unemployment Insurance Weekly Claims Reports.",
+        "result": "Fetched DOL first-print seasonally adjusted initial claims in thousands: 2026-08-29 = 206, 2026-08-22 = 203, 2026-08-15 = 206, 2026-08-08 = 209, 2026-08-01 = 199, 2026-07-25 = 197, 2026-07-18 = 187, 2026-07-11 = 208, 2026-07-04 = 215, 2026-06-27 = 215, 2026-06-20 = 215, 2026-06-13 = 226."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked the DOL Office of Unemployment Insurance archive publication schedule and the FRED release calendar for the weekly claims release timing.",
+        "result": "Fetched schedule numbers: DOL says the UI Weekly Claims News Release is published Thursday at 8:30 AM EST and lists Wednesday 2026-11-25 as the only 2026 non-Thursday exception; FRED's release calendar lists Unemployment Insurance Weekly Claims Report on Thursday 2026-09-17 at 7:30 AM Central and Thursday 2026-09-24 at 7:30 AM Central."
+      },
+      {
+        "kind": "tool",
+        "tool": "alfred.lookup",
+        "call": "Checked the ALFRED/FRED ICSA series page for the registered mirror identity and latest revised observation context.",
+        "result": "Fetched ALFRED/FRED ICSA mirror values in persons: 2026-08-29 = 206,000, 2026-08-22 = 204,000, 2026-08-15 = 207,000, 2026-08-08 = 212,000, 2026-08-01 = 200,000; series updated 2026-09-03 at 7:34 AM CDT."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked BLS Employment Situation for August 2026 as contemporaneous labor-market context.",
+        "result": "Fetched BLS labor context: August 2026 nonfarm payroll employment increased by 162,000, unemployment rate was unchanged at 4.1 percent, unemployed persons were 7.0 million, and June plus July payroll revisions were +55,000."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate/reference class: the recent official-source reference class is twelve DOL first-print seasonally adjusted ICSA weekly values from 2026-06-13 through 2026-08-29: 226, 215, 215, 215, 208, 187, 197, 199, 209, 206, 203, and 206 thousand. The base rate is tightly centered near 207 thousand; the full-sample mean is 207.17, the median is 207, and the latest four first prints average 206."
+      },
+      {
+        "kind": "text",
+        "text": "Level, momentum, one-off, and policy-mechanism effects: the level starts from 206 thousand for week ending 2026-08-29. Momentum is flat after 209, 206, 203, and 206, while the July 18 trough at 187 looks like a one-off low rather than the new center. The August payroll gain of 162,000 and unchanged 4.1 percent unemployment argue against an imminent layoff breakout, but claims often stay low in a slow-hiring environment. I found no policy mechanism in the checked public releases that should mechanically shift regular initial claims for the Sep. 12 week."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: prior model is two-week persistence around the latest DOL first print and recent reference-class center; historical sample is the twelve fetched DOL first prints from 2026-06-13 through 2026-08-29. Adjustment components are +1 thousand toward the 207 thousand median, 0 thousand from flat recent momentum, 0 thousand from the strong August jobs report because it mainly confirms low layoffs rather than reducing claims below the current range, and 0 thousand for policy effects; point = 206 + 1 = 207. Interval method uses realized dispersion of successive weekly changes in the fetched first-print history: -11, 0, 0, -7, -21, +10, +2, +10, -3, -3, +3 thousand; sample sigma = 8.98 thousand. One-week 80% half-width = 1.28*sigma = 11.49 thousand; with two unreleased weeks from the latest 2026-08-29 print to the target 2026-09-12, scale by sqrt(2): 11.49*1.414 = 16.25 thousand. Final implied bounds = 207 +/- 16.25 = [190.75, 223.25], rounded to [191, 223]."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk is a real post-Labor-Day layoff pickup, a seasonal-adjustment miss, or a claims catch-up after the low July/August prints, which would land above the interval if the first print exceeds 223 thousand. Downside risk is another unusually quiet filing week like 2026-07-18, which would land below the interval if the first print is under 191 thousand. An outside the interval outcome would most likely require either a renewed sub-190 low or a return to the June high-220s."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the reviewer finding that no required fixes were needed. Kept the registered ALFRED advance-vintage resolver and ledger resolutionDate distinction, and retained the explicit 12-week first-print volatility basis because it satisfies the required source grounding and interval arithmetic."
+      },
+      {
+        "kind": "forecast",
+        "point": 207,
+        "ciLow": 191,
+        "ciHigh": 223
+      }
+    ],
+    "agentReportedRunAt": "2026-09-07T20:07:22Z",
+    "runStartedAt": "2026-09-07T20:07:16Z",
+    "promptMode": "fast",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "targetContentHash": "258f273174f320907d3b0c6615b97556066de9ef341f697df1840f5003c015dc",
+    "targetRegistrationPath": "records/targets/2026-09-07-258f273174f320907d3b0c6615b97556066de9ef341f697df1840f5003c015dc.json",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 167.0,
+        "upper": 247.0
+      },
+      "points": [
+        {
+          "value": 167.0,
+          "probability": 0.0
+        },
+        {
+          "value": 167.4,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 167.8,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 168.2,
+          "probability": 0.005
+        },
+        {
+          "value": 168.6,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 169.0,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 169.4,
+          "probability": 0.01
+        },
+        {
+          "value": 169.8,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 170.2,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 170.6,
+          "probability": 0.015
+        },
+        {
+          "value": 171.0,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 171.4,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 171.8,
+          "probability": 0.02
+        },
+        {
+          "value": 172.2,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 172.6,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 173.0,
+          "probability": 0.025
+        },
+        {
+          "value": 173.4,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 173.8,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 174.2,
+          "probability": 0.03
+        },
+        {
+          "value": 174.6,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 175.0,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 175.4,
+          "probability": 0.035
+        },
+        {
+          "value": 175.8,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 176.2,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 176.6,
+          "probability": 0.04
+        },
+        {
+          "value": 177.0,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 177.4,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 177.8,
+          "probability": 0.045
+        },
+        {
+          "value": 178.2,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 178.6,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 179.0,
+          "probability": 0.05
+        },
+        {
+          "value": 179.4,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 179.8,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 180.2,
+          "probability": 0.055
+        },
+        {
+          "value": 180.6,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 181.0,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 181.4,
+          "probability": 0.06
+        },
+        {
+          "value": 181.8,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 182.2,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 182.6,
+          "probability": 0.065
+        },
+        {
+          "value": 183.0,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 183.4,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 183.8,
+          "probability": 0.07
+        },
+        {
+          "value": 184.2,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 184.6,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 185.0,
+          "probability": 0.075
+        },
+        {
+          "value": 185.4,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 185.8,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 186.2,
+          "probability": 0.08
+        },
+        {
+          "value": 186.6,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 187.0,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 187.4,
+          "probability": 0.085
+        },
+        {
+          "value": 187.8,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 188.2,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 188.6,
+          "probability": 0.09
+        },
+        {
+          "value": 189.0,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 189.4,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 189.8,
+          "probability": 0.095
+        },
+        {
+          "value": 190.2,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 190.6,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 191.0,
+          "probability": 0.1
+        },
+        {
+          "value": 191.4,
+          "probability": 0.11
+        },
+        {
+          "value": 191.8,
+          "probability": 0.12
+        },
+        {
+          "value": 192.2,
+          "probability": 0.13
+        },
+        {
+          "value": 192.6,
+          "probability": 0.14
+        },
+        {
+          "value": 193.0,
+          "probability": 0.15
+        },
+        {
+          "value": 193.4,
+          "probability": 0.16
+        },
+        {
+          "value": 193.8,
+          "probability": 0.17
+        },
+        {
+          "value": 194.2,
+          "probability": 0.18
+        },
+        {
+          "value": 194.6,
+          "probability": 0.19
+        },
+        {
+          "value": 195.0,
+          "probability": 0.2
+        },
+        {
+          "value": 195.4,
+          "probability": 0.21
+        },
+        {
+          "value": 195.8,
+          "probability": 0.22
+        },
+        {
+          "value": 196.2,
+          "probability": 0.23
+        },
+        {
+          "value": 196.6,
+          "probability": 0.24
+        },
+        {
+          "value": 197.0,
+          "probability": 0.25
+        },
+        {
+          "value": 197.4,
+          "probability": 0.26
+        },
+        {
+          "value": 197.8,
+          "probability": 0.27
+        },
+        {
+          "value": 198.2,
+          "probability": 0.28
+        },
+        {
+          "value": 198.6,
+          "probability": 0.29
+        },
+        {
+          "value": 199.0,
+          "probability": 0.3
+        },
+        {
+          "value": 199.4,
+          "probability": 0.31
+        },
+        {
+          "value": 199.8,
+          "probability": 0.32
+        },
+        {
+          "value": 200.2,
+          "probability": 0.33
+        },
+        {
+          "value": 200.6,
+          "probability": 0.34
+        },
+        {
+          "value": 201.0,
+          "probability": 0.35
+        },
+        {
+          "value": 201.4,
+          "probability": 0.36
+        },
+        {
+          "value": 201.8,
+          "probability": 0.37
+        },
+        {
+          "value": 202.2,
+          "probability": 0.38
+        },
+        {
+          "value": 202.6,
+          "probability": 0.39
+        },
+        {
+          "value": 203.0,
+          "probability": 0.4
+        },
+        {
+          "value": 203.4,
+          "probability": 0.41
+        },
+        {
+          "value": 203.8,
+          "probability": 0.42
+        },
+        {
+          "value": 204.2,
+          "probability": 0.43
+        },
+        {
+          "value": 204.6,
+          "probability": 0.44
+        },
+        {
+          "value": 205.0,
+          "probability": 0.45
+        },
+        {
+          "value": 205.4,
+          "probability": 0.46
+        },
+        {
+          "value": 205.8,
+          "probability": 0.47
+        },
+        {
+          "value": 206.2,
+          "probability": 0.48
+        },
+        {
+          "value": 206.6,
+          "probability": 0.49
+        },
+        {
+          "value": 207.0,
+          "probability": 0.5
+        },
+        {
+          "value": 207.4,
+          "probability": 0.51
+        },
+        {
+          "value": 207.8,
+          "probability": 0.52
+        },
+        {
+          "value": 208.2,
+          "probability": 0.53
+        },
+        {
+          "value": 208.6,
+          "probability": 0.54
+        },
+        {
+          "value": 209.0,
+          "probability": 0.55
+        },
+        {
+          "value": 209.4,
+          "probability": 0.56
+        },
+        {
+          "value": 209.8,
+          "probability": 0.57
+        },
+        {
+          "value": 210.2,
+          "probability": 0.58
+        },
+        {
+          "value": 210.6,
+          "probability": 0.59
+        },
+        {
+          "value": 211.0,
+          "probability": 0.6
+        },
+        {
+          "value": 211.4,
+          "probability": 0.61
+        },
+        {
+          "value": 211.8,
+          "probability": 0.62
+        },
+        {
+          "value": 212.2,
+          "probability": 0.63
+        },
+        {
+          "value": 212.6,
+          "probability": 0.64
+        },
+        {
+          "value": 213.0,
+          "probability": 0.65
+        },
+        {
+          "value": 213.4,
+          "probability": 0.66
+        },
+        {
+          "value": 213.8,
+          "probability": 0.67
+        },
+        {
+          "value": 214.2,
+          "probability": 0.68
+        },
+        {
+          "value": 214.6,
+          "probability": 0.69
+        },
+        {
+          "value": 215.0,
+          "probability": 0.7
+        },
+        {
+          "value": 215.4,
+          "probability": 0.71
+        },
+        {
+          "value": 215.8,
+          "probability": 0.72
+        },
+        {
+          "value": 216.2,
+          "probability": 0.73
+        },
+        {
+          "value": 216.6,
+          "probability": 0.74
+        },
+        {
+          "value": 217.0,
+          "probability": 0.75
+        },
+        {
+          "value": 217.4,
+          "probability": 0.76
+        },
+        {
+          "value": 217.8,
+          "probability": 0.77
+        },
+        {
+          "value": 218.2,
+          "probability": 0.78
+        },
+        {
+          "value": 218.6,
+          "probability": 0.79
+        },
+        {
+          "value": 219.0,
+          "probability": 0.8
+        },
+        {
+          "value": 219.4,
+          "probability": 0.81
+        },
+        {
+          "value": 219.8,
+          "probability": 0.82
+        },
+        {
+          "value": 220.2,
+          "probability": 0.83
+        },
+        {
+          "value": 220.6,
+          "probability": 0.84
+        },
+        {
+          "value": 221.0,
+          "probability": 0.85
+        },
+        {
+          "value": 221.4,
+          "probability": 0.86
+        },
+        {
+          "value": 221.8,
+          "probability": 0.87
+        },
+        {
+          "value": 222.2,
+          "probability": 0.88
+        },
+        {
+          "value": 222.6,
+          "probability": 0.89
+        },
+        {
+          "value": 223.0,
+          "probability": 0.9
+        },
+        {
+          "value": 223.4,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 223.8,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 224.2,
+          "probability": 0.905
+        },
+        {
+          "value": 224.6,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 225.0,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 225.4,
+          "probability": 0.91
+        },
+        {
+          "value": 225.8,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 226.2,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 226.6,
+          "probability": 0.915
+        },
+        {
+          "value": 227.0,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 227.4,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 227.8,
+          "probability": 0.92
+        },
+        {
+          "value": 228.2,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 228.6,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 229.0,
+          "probability": 0.925
+        },
+        {
+          "value": 229.4,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 229.8,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 230.2,
+          "probability": 0.93
+        },
+        {
+          "value": 230.6,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 231.0,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 231.4,
+          "probability": 0.935
+        },
+        {
+          "value": 231.8,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 232.2,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 232.6,
+          "probability": 0.94
+        },
+        {
+          "value": 233.0,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 233.4,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 233.8,
+          "probability": 0.945
+        },
+        {
+          "value": 234.2,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 234.6,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 235.0,
+          "probability": 0.95
+        },
+        {
+          "value": 235.4,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 235.8,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 236.2,
+          "probability": 0.955
+        },
+        {
+          "value": 236.6,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 237.0,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 237.4,
+          "probability": 0.96
+        },
+        {
+          "value": 237.8,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 238.2,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 238.6,
+          "probability": 0.965
+        },
+        {
+          "value": 239.0,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 239.4,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 239.8,
+          "probability": 0.97
+        },
+        {
+          "value": 240.2,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 240.6,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 241.0,
+          "probability": 0.975
+        },
+        {
+          "value": 241.4,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 241.8,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 242.2,
+          "probability": 0.98
+        },
+        {
+          "value": 242.6,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 243.0,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 243.4,
+          "probability": 0.985
+        },
+        {
+          "value": 243.8,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 244.2,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 244.6,
+          "probability": 0.99
+        },
+        {
+          "value": 245.0,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 245.4,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 245.8,
+          "probability": 0.995
+        },
+        {
+          "value": 246.2,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 246.6,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 247.0,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 207,
+        "median": 207,
+        "interval80": {
+          "lower": 191,
+          "upper": 223
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    }
+  }
+]

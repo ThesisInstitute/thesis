@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/dgorder-2026-08-26-8ace97b42555d33c.csv.gz",
+      "sha256": "8be1b1ab1a05ee55883a55f555065d95eb8b79a1b974c83fea74f60ca421a1c1",
+      "bytes": 2367,
+      "createdAt": "2026-08-26T14:28:17Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/amdmvs-2026-08-26-c5e7320552016600.csv.gz",
+      "sha256": "11cc041089a562b65572aa05e7192b20bb90ee8099adc35cb89fcf8752a2c722",
+      "bytes": 2342,
+      "createdAt": "2026-08-26T14:28:17Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "c717961c6c067970c8de4272d4e3c785b40581f19fabccade099605f07524c0c"
+  }
+}

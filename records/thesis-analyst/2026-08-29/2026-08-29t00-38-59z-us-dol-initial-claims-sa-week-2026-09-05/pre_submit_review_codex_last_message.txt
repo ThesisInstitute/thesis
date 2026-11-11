@@ -1,0 +1,21 @@
+{
+  "summary": "Draft is analytically usable but not publication-ready because its resolver source and resolutionDate conflict with the canonical ledger target contract.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "blocking",
+      "summary": "The cell uses resolutionDate 2026-09-10 and a DOL data.pdf resolver, but the ledger contract requires resolutionDate 2026-09-20 and the ALFRED/FRED advance-vintage source binding at alfred.stlouisfed.org for ICSA.",
+      "actionRequested": "Change the JSON resolver fields to match the canonical ledger target exactly, including resolutionDate 2026-09-20 and the registered ALFRED graph CSV / advance_vintage resolver text; keep any concern about the date discrepancy only in reasoning."
+    },
+    {
+      "rubricItem": "coherence",
+      "severity": "blocking",
+      "summary": "The reasoning says it is keeping the registered target while the JSON fields override the registered resolutionDate and source.",
+      "actionRequested": "Make the final JSON fields byte-consistent with the ledger contract, then separately state that the forecaster believes the ledger release window may be one week late."
+    }
+  ],
+  "optionalSuggestions": [
+    "The prior, update, interval math, tails, point estimate, and unit are otherwise coherent.",
+    "Consider naming ALFRED advance vintage explicitly in the final forecast step so the first-print rule is unambiguous."
+  ]
+}

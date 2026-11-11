@@ -1,0 +1,15 @@
+{
+  "summary": "Draft is publication-ready on forecast substance, but the resolver date discrepancy needs a blocking fix because it conflicts with the canonical ledger contract.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "blocking",
+      "summary": "The resolutionRule says the official ABS page currently schedules the September 2026 first print for 15 October 2026 while the registered contract sets resolutionDate to 2026-10-28; this creates an unresolved contract discrepancy inside the cell.",
+      "actionRequested": "Either remove the asserted 15 October schedule claim unless it is formally accepted as a ledger discrepancy, or keep the registered resolutionDate 2026-10-28 and state more narrowly that the cell follows the ledger's resolve-by-bound contract despite observed schedule evidence."
+    }
+  ],
+  "optionalSuggestions": [
+    "The prior/update/interval step is strong; consider making the historical sample label explicitly say 14 monthly changes from 2025-06 through 2026-07.",
+    "The tail scenarios are adequate, but could name concrete labor-market mechanisms such as survey rotation, hiring slowdown, or rebound from prior-month volatility."
+  ]
+}

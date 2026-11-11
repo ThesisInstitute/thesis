@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MetricCard } from "@/components/MetricCard";
+import { MetricCard, type MetricRegistryView } from "@/components/MetricCard";
 import { renderInline } from "@/lib/render-inline";
 import {
   foldStances,
@@ -14,6 +14,7 @@ export interface ProvisionMetricView {
   text: string;
   badgeLabel: string;
   badgeClass: string;
+  registry?: MetricRegistryView;
   rationale?: string;
   stances?: MetricStance[];
   forecast?: {
@@ -204,6 +205,7 @@ export function ProvisionAnalysis({
                 text={metric.text}
                 badgeLabel={metric.badgeLabel}
                 badgeClass={metric.badgeClass}
+                registry={metric.registry}
                 rationale={metric.rationale}
                 stance={foldStances(metric.stances, goalStates)}
                 forecast={metric.forecast}

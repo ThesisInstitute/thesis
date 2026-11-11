@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-09-21T16:10:04Z",
+  "finishedAt": "2026-09-21T16:15:26Z",
+  "promptMode": "ladder",
+  "timeoutSeconds": 540,
+  "targets": 2,
+  "ok": 2,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "us-private-nonresidential-fixed-investment-q3-2026",
+        "comparisonTarget": true,
+        "country": "US",
+        "dataPointId": "bea.private_nonresidential_fixed_investment.2026_q3.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-29",
+          "start": "2026-10-29"
+        },
+        "period": "2026-Q3",
+        "publishedResolutionDate": "2026-10-29",
+        "registeredAtUtc": "2026-08-17T16:54:17Z",
+        "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolve to the first official BEA GDP advance-release print for 2026-Q3, NIPA Table 5.3.5, line 2 Nonresidential, nominal seasonally adjusted annual rate. Use the published table value transformed by multiplying the table's millions-of-dollars value by 0.001 to usd_billions. Do not use later second, third, annual-update, or comprehensive-revision values except insofar as BEA has already incorporated them into the first Q3 advance-release table on 2026-10-29.",
+        "resolutionSource": "U.S. Bureau of Economic Analysis GDP advance release, NIPA Table 5.3.5 line 2",
+        "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+        "series": "bea.private_nonresidential_fixed_investment",
+        "sourceBinding": {
+          "adapter": "bea-release",
+          "allowedHosts": [
+            "apps.bea.gov",
+            "www.bea.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-29",
+            "start": "2026-10-29"
+          },
+          "field": "Line 2: Nonresidential",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "T50305:L2",
+          "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+          "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 2 (Nonresidential)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "78ab7e77198fa656ee058e98fa6d3e8743b3f9f24714b851883bee7fff4d2114",
+        "targetRegistrationPath": "records/targets/2026-08-17-78ab7e77198fa656ee058e98fa6d3e8743b3f9f24714b851883bee7fff4d2114.json",
+        "targetUnit": "usd_billions",
+        "valueScale": 1
+      },
+      "startedAt": "2026-09-21T16:10:04Z",
+      "finishedAt": "2026-09-21T16:13:04Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-21/2026-09-21t16-10-04z-bea-private-nonresidential-fixed-investment-2026-q3/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-21/2026-09-21t16-10-04z-bea-private-nonresidential-fixed-investment-2026-q3/cells.with_activity.json",
+      "stdoutTail": "ifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t16-10-04z-bea-private-nonresidential-fixed-investment-2026-q3/distribution.json\",\n      \"sha256\": \"d91a19c882dfc96735e767286658895c3fee2a29ac4a5b1d2a5c074f7e4d047a\",\n      \"bytes\": 15294,\n      \"createdAt\": \"2026-09-21T16:10:04Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t16-10-04z-bea-private-nonresidential-fixed-investment-2026-q3/validation.json\",\n      \"sha256\": \"12cbbfb3610fa54a771864eace6f6b8ae1385f2d7800ccc0ff166d085c9eda92\",\n      \"bytes\": 151,\n      \"createdAt\": \"2026-09-21T16:10:04Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t16-10-04z-bea-private-nonresidential-fixed-investment-2026-q3/cells.with_activity.json\",\n      \"sha256\": \"2076aa7aad776b9fc12ec4b0e1704bca17a4c72dfca7c8ef7fbdcc38b43936ec\",\n      \"bytes\": 47456,\n      \"createdAt\": \"2026-09-21T16:10:04Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t16-10-04z-bea-private-nonresidential-fixed-investment-2026-q3/manifest.json\",\n      \"sha256\": \"0b6fda04faf08590870b2fbafa58404eafd04703cebf0f07c1e665cf08f8f26b\",\n      \"bytes\": 18745,\n      \"createdAt\": \"2026-09-21T16:10:04Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"us-private-nonresidential-fixed-investment-q3-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"72e7bd49fed8a8bbdf29e2a65e80611f3e291e4d\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"36ea6c9a7bfe6279ba5076988e4bda9b8b9e0bdb3da1ab43e83261eef6db75d0\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "us-private-research-development-fixed-investment-q3-2026",
+        "comparisonTarget": true,
+        "country": "US",
+        "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-10-29",
+          "start": "2026-10-29"
+        },
+        "period": "2026-Q3",
+        "publishedResolutionDate": "2026-10-29",
+        "registeredAtUtc": "2026-08-17T16:54:17Z",
+        "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+        "resolutionPolicy": "first_print",
+        "resolutionRule": "Resolve to the first official BEA GDP advance-release print for 2026-Q3, NIPA Table 5.3.5, line 18 Research and development, nominal seasonally adjusted annual rate. Use the published table value transformed by multiplying the table's millions-of-dollars value by 0.001 to usd_billions, retaining the precision implied by the official table; do not use later second, third, annual-update, or comprehensive-revision values except insofar as BEA has already incorporated them into the first Q3 advance-release table on 2026-10-29.",
+        "resolutionSource": "U.S. Bureau of Economic Analysis GDP advance release, NIPA Table 5.3.5 line 18",
+        "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+        "series": "bea.research_and_development_fixed_investment",
+        "sourceBinding": {
+          "adapter": "bea-release",
+          "allowedHosts": [
+            "apps.bea.gov",
+            "www.bea.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-10-29",
+            "start": "2026-10-29"
+          },
+          "field": "Line 18: Research and development",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "T50305:L18",
+          "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+          "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 18 (Research and development)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1",
+        "targetRegistrationPath": "records/targets/2026-08-17-a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1.json",
+        "targetUnit": "usd_billions",
+        "valueScale": 1
+      },
+      "startedAt": "2026-09-21T16:13:04Z",
+      "finishedAt": "2026-09-21T16:15:26Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/cells.with_activity.json",
+      "stdoutTail": "un_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/distribution.json\",\n      \"sha256\": \"8b175778b0171155fee6a1a20bfad25b199564e88e373c3df7bf3aace663c6f9\",\n      \"bytes\": 13683,\n      \"createdAt\": \"2026-09-21T16:13:04Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/validation.json\",\n      \"sha256\": \"0669206c51c471a7013757b6743d92a3b19d171740dcedcfa9385240e5caf466\",\n      \"bytes\": 157,\n      \"createdAt\": \"2026-09-21T16:13:04Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/cells.with_activity.json\",\n      \"sha256\": \"e7955ef3ce6b6fd41757db765cc895b5df5d94980e9477f91bb3cd27e72b653e\",\n      \"bytes\": 44640,\n      \"createdAt\": \"2026-09-21T16:13:04Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/manifest.json\",\n      \"sha256\": \"6dff0ab7f3577d38eeba75cf228e476b8b770091bc7d12226d1d3540524ffc10\",\n      \"bytes\": 17591,\n      \"createdAt\": \"2026-09-21T16:13:04Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"us-private-research-development-fixed-investment-q3-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"72e7bd49fed8a8bbdf29e2a65e80611f3e291e4d\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"f1eb382b02809ffb57780855a1d6209c6b838eca9667ee19f9474b099bad98d4\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

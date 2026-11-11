@@ -1,0 +1,24 @@
+{
+  "provider": "openai",
+  "backend": "codex-exec",
+  "auth": "codex-cli-subscription",
+  "model": "gpt-5.5",
+  "searchEnabled": true,
+  "sandbox": "read-only",
+  "networkAccess": false,
+  "reasoningEffort": "low",
+  "timeoutSeconds": 540,
+  "timedOut": false,
+  "timeoutReason": null,
+  "terminatedAfterOutput": false,
+  "processReturnCode": 0,
+  "effectiveReturnCode": 0,
+  "usage": {
+    "input_tokens": 119031,
+    "cached_input_tokens": 28416,
+    "output_tokens": 4772,
+    "reasoning_output_tokens": 2955
+  },
+  "eventCount": 27,
+  "lastError": null
+}

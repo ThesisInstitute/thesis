@@ -5,11 +5,11 @@ import {
   type ForecastComparisonRun,
 } from "./forecast-cells";
 
-// Registry of accepted open-challenge submissions (docs/open-challenge.md).
-// Hand-maintained alongside FORECAST_COMPARISON_RUN_AUGMENTS for now — the
-// consistency test in __tests__/challenge-lane.test.ts keeps the two in
-// lockstep. When scoring ingestion of records/challenge/ lands, this file
-// becomes generated output.
+// FROZEN registry of the two accepted challenge-lane v1 submissions
+// (docs/open-challenge.md — lane withdrawn 2026-08-23; v2 lives on branch
+// challenge-lane-v2). No new entries: intake is closed. The consistency
+// test in __tests__/challenge-lane.test.ts keeps this in lockstep with
+// the inbox artifacts and FORECAST_COMPARISON_RUN_AUGMENTS.
 export interface ChallengeSubmissionRecord {
   /** GitHub identity from the submission's `challenger` field. */
   challenger: string;

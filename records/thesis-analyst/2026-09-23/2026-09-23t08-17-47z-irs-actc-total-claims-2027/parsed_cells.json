@@ -1,0 +1,176 @@
+[
+  {
+    "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+    "country": "US",
+    "type": "conditional",
+    "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC \u00a724(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC \u00a724(h)(6), while \u00a724(d)(1)(B)(i) contains the underlying $3,000 amount.",
+    "title": "ACTC total claims, TY2027",
+    "question": "IRS SOI Publication 1304 Table 3.3, tax year 2027 first print, all returns total row, refundable child tax credit or additional child tax credit, number of returns, under the registered current-law condition",
+    "unit": "millions",
+    "pointEstimate": 15.523077,
+    "ciLow": 14.533333,
+    "ciHigh": 16.4,
+    "confidence": 0.8,
+    "resolutionDate": "2029-12-31",
+    "resolutionSource": "Internal Revenue Service, SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3",
+    "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "resolutionRule": "Resolve from the first IRS SOI Publication 1304 Table 3.3 print for tax year 2027: All returns, total row; Refundable child tax credit or additional child tax credit; Number of returns. Multiply the published whole-return count by 0.000001 and retain six decimal places in millions. Later revisions are irrelevant. The registered IRS release window is 2029-01-01 through 2029-12-31, with 2029-12-31 retained as the registered resolutionDate because no exact IRS publication-calendar day is registered. Evaluate the condition on 2027-12-31; if the condition fails, mark this conditional cell unresolved rather than resolving it from the tax-year print.",
+    "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "year",
+          "value": "2018"
+        },
+        "label": "2018",
+        "value": 20.450468
+      },
+      {
+        "period": {
+          "type": "year",
+          "value": "2019"
+        },
+        "label": "2019",
+        "value": 19.867646
+      },
+      {
+        "period": {
+          "type": "year",
+          "value": "2020"
+        },
+        "label": "2020",
+        "value": 19.119249
+      },
+      {
+        "period": {
+          "type": "year",
+          "value": "2021"
+        },
+        "label": "2021",
+        "value": 37.771612
+      },
+      {
+        "period": {
+          "type": "year",
+          "value": "2022"
+        },
+        "label": "2022",
+        "value": 18.076696
+      },
+      {
+        "period": {
+          "type": "year",
+          "value": "2023"
+        },
+        "label": "2023",
+        "value": 17.626084
+      }
+    ],
+    "drivers": [
+      "pre-2021 and post-2021 ACTC claimant decline",
+      "2021 expanded-credit outlier retained as an official print but excluded from central trend",
+      "four-year extrapolation from latest official print",
+      "current-law threshold condition preserved"
+    ],
+    "sourceContext": [
+      "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+      "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+      "https://www.irs.gov/pub/irs-soi/23in33ar.xls"
+    ],
+    "runAt": "2026-09-23T08:19:39Z",
+    "thresholdLadder": {
+      "thresholds": [
+        14,
+        14.4,
+        14.8,
+        15,
+        15.2,
+        15.4,
+        15.6,
+        15.8,
+        16,
+        16.2,
+        16.4,
+        16.7,
+        17
+      ],
+      "cumulativeProbabilities": [
+        0.04,
+        0.08,
+        0.14,
+        0.2,
+        0.3,
+        0.42,
+        0.55,
+        0.67,
+        0.77,
+        0.84,
+        0.9,
+        0.95,
+        0.98
+      ]
+    },
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "ACTC total claiming returns for tax year 2027"
+      },
+      {
+        "kind": "text",
+        "text": "The resolver is the first IRS SOI Publication 1304 Table 3.3 print for tax year 2027, all returns total row, refundable child tax credit or additional child tax credit, number of returns, converted to millions. The registered 2029-12-31 date is a Thesis resolve-by bound, not an IRS scheduled release day."
+      },
+      {
+        "kind": "text",
+        "text": "Structured announcement fetch: thesis_announcement_fetch.fetch_official_announcement was called on the exact registered URL, https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304, and returned HTTP 200 with 153837 response bytes. This authenticates the Publication 1304 methodology identity but does not establish the lab-committed release window or bound."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0006 and extract_irs_soi call-0012 for 2018; fetch_source call-0005 and extract_irs_soi call-0010 for 2019",
+        "result": "IRS workbooks returned 2018 rawValue 20450468, value 20.450468 million; 2019 rawValue 19867646, value 19.867646 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0004 and extract_irs_soi call-0011 for 2020; fetch_source call-0003 and extract_irs_soi call-0009 for 2021",
+        "result": "IRS workbooks returned 2020 rawValue 19119249, value 19.119249 million; 2021 rawValue 37771612, value 37.771612 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0002 and extract_irs_soi call-0008 for 2022; fetch_source call-0001 and extract_irs_soi call-0007 for 2023",
+        "result": "IRS workbooks returned 2022 rawValue 18076696, value 18.076696 million; 2023 rawValue 17626084, value 17.626084 million."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate/reference class: the six official prints are 20.450468, 19.867646, 19.119249, 37.771612, 18.076696, and 17.626084 million. The 2021 value reflects the temporary expanded child tax credit regime and is retained in historicalContext as an official print, but excluded from the central current-law trend and sigma calculation."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior is the latest official print, 2023 = 17.626084 million; the non-2021 reference class mean from call-0017 is 19.0280286 million; the 2018-to-2023 straight-line projection to 2027 from call-0016 is 15.3665768 million. I use a small upward adjustment to 15.523077 because the recent decline may flatten as the claimant population approaches a lower current-law plateau. For annual-noise sizing I exclude the 2021 policy outlier from the sigma calculation: call-0018 gives sigma = 0.2552523201213532 million from successive changes in 2018, 2019, 2020, 2022, and 2023; 1.28*sigma from call-0021 is 0.3267229697553321 million. The ladder-implied 80% interval width is 1.866667 million from call-0025, much wider than the 1.28*sigma one-year half-width because 2027 is four tax years beyond the latest official print and current-law participation, filing, and demographic uncertainty dominate one-year historical noise."
+      },
+      {
+        "kind": "math",
+        "text": "Ladder: P(X <= 14.0) = 0.04; P(X <= 14.4) = 0.08; P(X <= 14.8) = 0.14; P(X <= 15.0) = 0.20; P(X <= 15.2) = 0.30; P(X <= 15.4) = 0.42; P(X <= 15.6) = 0.55; P(X <= 15.8) = 0.67; P(X <= 16.0) = 0.77; P(X <= 16.2) = 0.84; P(X <= 16.4) = 0.90; P(X <= 16.7) = 0.95; P(X <= 17.0) = 0.98. Linear interpolation gives p10 = 14.533333 from call-0022, p50 = 15.523077 from call-0023, and p90 = 16.400000 from call-0024."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: downside risk would come from faster shrinkage in eligible low-income child returns, stronger take-up erosion, or administrative/reporting changes that lower ACTC claiming returns, which would land below the interval. Upside risk would come from larger eligible-family counts, higher refundable-credit claiming, or a reversal of the recent decline, which would land above the interval. A policy change violating the condition would make this conditional cell unresolved rather than an outside-the-interval resolution."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the resolver critique by preserving the structured announcement-fetch event for the exact registered URL and clarifying that 2029-12-31 is a resolve-by bound, not an IRS schedule date; accepted the tail critique by relabeling lower claims as downside risk and higher claims as upside risk. No forecast numbers changed."
+      },
+      {
+        "kind": "forecast",
+        "point": 15.523077,
+        "ciLow": 14.533333,
+        "ciHigh": 16.4
+      }
+    ]
+  }
+]

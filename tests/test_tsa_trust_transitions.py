@@ -1187,3 +1187,599 @@ def test_witness_writer_continues_after_one_read_error(
     assert [token.anchor_id for token in verification.witnesses[pending].tokens] == [
         beta.anchor_id
     ]
+
+
+# --- Signer rotation: same anchor, same root, new responder key --------------
+#
+# v1 -> v2 above adds an authority. The cases below replay the other kind of
+# transition, the one tsa-anchors-v3 makes: an authority already in the active
+# bundle replaces its responder certificate, and the next bundle re-pins that
+# anchor. Real-pin coverage of v3 itself lives in tests/test_tsa_anchors_v3.py.
+
+
+def _rotated_authority(
+    authority: SyntheticAuthority,
+    directory: pathlib.Path,
+    *,
+    certificate_serial: int,
+) -> SyntheticAuthority:
+    """The same root, endpoint and policy with a new responder certificate."""
+
+    directory.mkdir(parents=True, exist_ok=True)
+    root_key = authority.root_certificate.parent / "root.key"
+    signer_key = directory / "signer.key"
+    signer_request = directory / "signer.csr"
+    signer_certificate = directory / "signer.pem"
+    signer_extensions = directory / "signer-extensions.cnf"
+    serial = directory / "tsa-serial"
+    tsa_config = directory / "tsa.cnf"
+    _run_openssl(
+        "req",
+        "-new",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-sha256",
+        "-subj",
+        f"/CN={authority.anchor_id} Timestamp Signer {certificate_serial}",
+        "-keyout",
+        str(signer_key),
+        "-out",
+        str(signer_request),
+    )
+    signer_extensions.write_text(
+        "\n".join(
+            [
+                "[tsa_signer]",
+                "basicConstraints=critical,CA:FALSE",
+                "keyUsage=critical,digitalSignature,nonRepudiation",
+                "extendedKeyUsage=critical,timeStamping",
+                "subjectKeyIdentifier=hash",
+                "authorityKeyIdentifier=keyid,issuer",
+            ]
+        )
+        + "\n"
+    )
+    _run_openssl(
+        "x509",
+        "-req",
+        "-in",
+        str(signer_request),
+        "-CA",
+        str(authority.root_certificate),
+        "-CAkey",
+        str(root_key),
+        "-set_serial",
+        str(certificate_serial),
+        "-days",
+        "3650",
+        "-sha256",
+        "-extfile",
+        str(signer_extensions),
+        "-extensions",
+        "tsa_signer",
+        "-out",
+        str(signer_certificate),
+    )
+    serial.write_text("01\n")
+    tsa_config.write_text(
+        "\n".join(
+            [
+                "[tsa]",
+                "default_tsa=tsa_config",
+                "[tsa_config]",
+                f"serial={serial}",
+                f"signer_cert={signer_certificate}",
+                f"signer_key={signer_key}",
+                "signer_digest=sha256",
+                f"default_policy={authority.policy_oid}",
+                f"other_policies={authority.policy_oid}",
+                "digests=sha256",
+                "accuracy=secs:1",
+                "clock_precision_digits=0",
+                "ordering=yes",
+                "tsa_name=yes",
+                "ess_cert_id_chain=no",
+            ]
+        )
+        + "\n"
+    )
+    return SyntheticAuthority(
+        anchor_id=authority.anchor_id,
+        endpoint=authority.endpoint,
+        policy_oid=authority.policy_oid,
+        root_certificate=authority.root_certificate,
+        signer_certificate=signer_certificate,
+        signer_key=signer_key,
+        tsa_config=tsa_config,
+    )
+
+
+@pytest.fixture(scope="module")
+def rotated_beta(
+    tmp_path_factory: pytest.TempPathFactory,
+    authority_material: dict[str, SyntheticAuthority],
+) -> SyntheticAuthority:
+    return _rotated_authority(
+        authority_material["beta"],
+        tmp_path_factory.mktemp("synthetic-beta-rotated"),
+        certificate_serial=202,
+    )
+
+
+@pytest.fixture
+def rotation_environment(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    authority_material: dict[str, SyntheticAuthority],
+    rotated_beta: SyntheticAuthority,
+) -> TrustEnvironment:
+    """v1 = alpha; v2 = alpha + beta; v3 = alpha + beta's new responder only."""
+
+    records = tmp_path / "records"
+    (records / "trust").mkdir(parents=True)
+    alpha = _anchor_payload(records, authority_material["alpha"])
+    beta = _anchor_payload(records, authority_material["beta"])
+    beta_rotated = _anchor_payload(records, rotated_beta)
+    assert {key: value for key, value in beta.items() if key != "allowedSigners"} == {
+        key: value for key, value in beta_rotated.items() if key != "allowedSigners"
+    }
+    assert beta["allowedSigners"] != beta_rotated["allowedSigners"]
+    payloads = {
+        version: {
+            "anchors": anchors,
+            "bundleId": f"tsa-anchors-{version}",
+            "schemaVersion": "thesis_tsa_trust_bundle_v1",
+        }
+        for version, anchors in {
+            "v1": [alpha],
+            "v2": [alpha, beta],
+            "v3": [alpha, beta_rotated],
+        }.items()
+    }
+    references: dict[str, dict[str, Any]] = {}
+    for version, payload in payloads.items():
+        path = records / "trust" / f"tsa-anchors-{version}.json"
+        _write_canonical_json(path, payload)
+        references[version] = _bundle_reference(path, payload)
+    monkeypatch.setattr(
+        record_chain,
+        "CODE_PINNED_TRUST_BUNDLES",
+        {reference["path"]: reference for reference in references.values()},
+    )
+    monkeypatch.setattr(
+        record_chain,
+        "CODE_PINNED_TSA_IDENTITIES",
+        {
+            payload["bundleId"]: {
+                anchor["id"]: {
+                    "rootSpkiSha256": anchor["rootCertificate"]["spkiSha256"],
+                    "signerSpkiSha256": {
+                        signer["spkiSha256"] for signer in anchor["allowedSigners"]
+                    },
+                }
+                for anchor in payload["anchors"]
+            }
+            for payload in payloads.values()
+        },
+    )
+    return TrustEnvironment(
+        records=records,
+        authorities={**authority_material, "beta_rotated": rotated_beta},
+        bundle_payloads=payloads,
+        bundle_references=references,
+    )
+
+
+def _signer_spki(authority: SyntheticAuthority) -> str:
+    return record_chain._certificate_identity(authority.signer_certificate)[
+        "spkiSha256"
+    ]
+
+
+def _refused_outcome(authority: SyntheticAuthority) -> dict[str, Any]:
+    return {
+        **_unavailable_outcome(authority),
+        "reason": "pinned timestamp verification failed: RFC 3161 token signer "
+        "is not pinned for TSA anchor",
+    }
+
+
+def _chain_through_rotation(environment: TrustEnvironment) -> pathlib.Path:
+    """v2 active, one snapshot both responders witnessed, then the rotation.
+
+    Returns the head: a v2-era snapshot that only alpha witnessed, because
+    beta's endpoint now answers with a responder v2 does not pin.
+    """
+
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    v1 = environment.bundle_references["v1"]
+    v2 = environment.bundle_references["v2"]
+    introduce_v2 = _new_snapshot(environment, "introduce-v2", trust_updates=[v2])
+    _initialize_chain(environment, introduce_v2)
+    _write_v2_witness(
+        introduce_v2,
+        v1,
+        [_available_outcome(environment, introduce_v2, alpha)],
+        supplemental_outcomes=[
+            _available_outcome(environment, introduce_v2, beta, supplemental_bundle=v2)
+        ],
+    )
+    before = _new_snapshot(environment, "before-rotation", previous=introduce_v2)
+    _write_v2_witness(
+        before,
+        v2,
+        [
+            _available_outcome(environment, before, alpha),
+            _available_outcome(environment, before, beta),
+        ],
+    )
+    after = _new_snapshot(environment, "after-rotation", previous=before)
+    _write_v2_witness(
+        after,
+        v2,
+        [_available_outcome(environment, after, alpha), _refused_outcome(beta)],
+    )
+    _set_chain_head(environment, after)
+    return after
+
+
+def _introduce_v3(
+    environment: TrustEnvironment, previous: pathlib.Path
+) -> pathlib.Path:
+    return _new_snapshot(
+        environment,
+        "introduce-v3",
+        previous=previous,
+        trust_updates=[environment.bundle_references["v3"]],
+    )
+
+
+def _verify_synthetic(environment: TrustEnvironment) -> ChainVerification:
+    return verify_chain(environment.records, allow_pre_enumeration=True, now=FAR_FUTURE)
+
+
+def test_signer_rotation_replays_from_the_old_responder_to_the_new(
+    rotation_environment: TrustEnvironment,
+) -> None:
+    environment = rotation_environment
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    rotated = environment.authorities["beta_rotated"]
+    v2 = environment.bundle_references["v2"]
+    v3 = environment.bundle_references["v3"]
+
+    head = _chain_through_rotation(environment)
+    transition = _introduce_v3(environment, head)
+    _write_v2_witness(
+        transition,
+        v2,
+        [_available_outcome(environment, transition, alpha), _refused_outcome(beta)],
+    )
+    successor = _new_snapshot(environment, "v3-active", previous=transition)
+    _write_v2_witness(
+        successor,
+        v3,
+        [
+            _available_outcome(environment, successor, alpha),
+            _available_outcome(environment, successor, beta, signing_authority=rotated),
+        ],
+    )
+    _set_chain_head(environment, successor)
+
+    verification = _verify_synthetic(environment)
+
+    assert set(verification.active_trust_bundles) == {
+        reference["path"] for reference in environment.bundle_references.values()
+    }
+    assert verification.pending_trust_bundle_updates == ()
+    by_name = {path.name: evidence for path, evidence in verification.witnesses.items()}
+    # Tokens from the retired responder keep verifying under the bundle their
+    # marker names.
+    before = by_name["digest-before-rotation.json"]
+    assert {token.trust_bundle_id for token in before.tokens} == {"tsa-anchors-v2"}
+    assert _signer_spki(beta) in {token.tsa_spki_sha256 for token in before.tokens}
+    # One old-bundle token is what authorizes v3; a re-pinned anchor has no
+    # supplemental lane.
+    introduced = by_name["digest-introduce-v3.json"]
+    assert [token.anchor_id for token in introduced.tokens] == [alpha.anchor_id]
+    assert introduced.supplemental_tokens == ()
+    after = by_name["digest-v3-active.json"]
+    assert {token.trust_bundle_id for token in after.tokens} == {"tsa-anchors-v3"}
+    assert {token.tsa_spki_sha256 for token in after.tokens} == {
+        _signer_spki(alpha),
+        _signer_spki(rotated),
+    }
+
+
+def test_new_responder_token_is_refused_under_the_old_bundle(
+    rotation_environment: TrustEnvironment,
+) -> None:
+    environment = rotation_environment
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    rotated = environment.authorities["beta_rotated"]
+    head = _chain_through_rotation(environment)
+    claimed = _new_snapshot(environment, "claims-new-responder", previous=head)
+    _write_v2_witness(
+        claimed,
+        environment.bundle_references["v2"],
+        [
+            _available_outcome(environment, claimed, alpha),
+            _available_outcome(environment, claimed, beta, signing_authority=rotated),
+        ],
+    )
+    _set_chain_head(environment, claimed)
+
+    with pytest.raises(ChainError, match="token signer is not pinned"):
+        _verify_synthetic(environment)
+
+
+def _chain_with_v3_active(environment: TrustEnvironment) -> pathlib.Path:
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    head = _chain_through_rotation(environment)
+    transition = _introduce_v3(environment, head)
+    _write_v2_witness(
+        transition,
+        environment.bundle_references["v2"],
+        [_available_outcome(environment, transition, alpha), _refused_outcome(beta)],
+    )
+    _set_chain_head(environment, transition)
+    assert environment.bundle_references["v3"]["path"] in (
+        _verify_synthetic(environment).active_trust_bundles
+    )
+    return transition
+
+
+def test_retired_responder_token_is_refused_once_v3_is_active(
+    rotation_environment: TrustEnvironment,
+) -> None:
+    environment = rotation_environment
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    transition = _chain_with_v3_active(environment)
+    successor = _new_snapshot(environment, "retired-key", previous=transition)
+    _write_v2_witness(
+        successor,
+        environment.bundle_references["v3"],
+        [
+            _available_outcome(environment, successor, alpha),
+            _available_outcome(environment, successor, beta),
+        ],
+    )
+    _set_chain_head(environment, successor)
+
+    with pytest.raises(ChainError, match="token signer is not pinned"):
+        _verify_synthetic(environment)
+
+
+def test_witness_cannot_fall_back_to_v2_once_v3_is_active(
+    rotation_environment: TrustEnvironment,
+) -> None:
+    environment = rotation_environment
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    transition = _chain_with_v3_active(environment)
+    successor = _new_snapshot(environment, "downgrade", previous=transition)
+    _write_v2_witness(
+        successor,
+        environment.bundle_references["v2"],
+        [
+            _available_outcome(environment, successor, alpha),
+            _available_outcome(environment, successor, beta),
+        ],
+    )
+    _set_chain_head(environment, successor)
+
+    with pytest.raises(ChainError, match="newest active TSA trust bundle"):
+        _verify_synthetic(environment)
+
+
+def test_rotation_transition_cannot_be_witnessed_under_its_own_bundle(
+    rotation_environment: TrustEnvironment,
+) -> None:
+    environment = rotation_environment
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    rotated = environment.authorities["beta_rotated"]
+    head = _chain_through_rotation(environment)
+    transition = _introduce_v3(environment, head)
+    _write_v2_witness(
+        transition,
+        environment.bundle_references["v3"],
+        [
+            _available_outcome(environment, transition, alpha),
+            _available_outcome(
+                environment, transition, beta, signing_authority=rotated
+            ),
+        ],
+    )
+    _set_chain_head(environment, transition)
+
+    with pytest.raises(ChainError, match="newest active TSA trust bundle"):
+        _verify_synthetic(environment)
+
+
+def test_rotation_transition_has_no_supplemental_lane(
+    rotation_environment: TrustEnvironment,
+) -> None:
+    environment = rotation_environment
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    rotated = environment.authorities["beta_rotated"]
+    v1 = environment.bundle_references["v1"]
+    v2 = environment.bundle_references["v2"]
+    v3 = environment.bundle_references["v3"]
+
+    # The writer asks only the active bundle's anchors: both v3 anchor IDs are
+    # already active, so nothing is requested on the pending bundle's behalf.
+    evidence_bundle, targets, updates = witness_targets(
+        environment.records,
+        ChainVerification(
+            ordered=(),
+            witnesses={},
+            enumeration_cutover=None,
+            active_trust_bundles={v1["path"]: v1, v2["path"]: v2},
+            pending_trust_bundle_updates=(),
+        ),
+        {"trustBundleUpdates": [v3]},
+    )
+    assert evidence_bundle == v2
+    assert updates == [v3]
+    assert [
+        (target.anchor["id"], target.bundle_reference["bundleId"], target.supplemental)
+        for target in targets
+    ] == [
+        (alpha.anchor_id, "tsa-anchors-v2", False),
+        (beta.anchor_id, "tsa-anchors-v2", False),
+    ]
+
+    # And the verifier refuses a marker that claims one anyway.
+    head = _chain_through_rotation(environment)
+    transition = _introduce_v3(environment, head)
+    _write_v2_witness(
+        transition,
+        v2,
+        [_available_outcome(environment, transition, alpha), _refused_outcome(beta)],
+        supplemental_outcomes=[
+            _available_outcome(
+                environment,
+                transition,
+                beta,
+                signing_authority=rotated,
+                supplemental_bundle=v3,
+            )
+        ],
+    )
+    _set_chain_head(environment, transition)
+    with pytest.raises(ChainError, match="not introduced by a pending"):
+        _verify_synthetic(environment)
+
+
+def test_unwitnessed_rotation_transition_keeps_v3_pending(
+    rotation_environment: TrustEnvironment,
+) -> None:
+    environment = rotation_environment
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    rotated = environment.authorities["beta_rotated"]
+    v2 = environment.bundle_references["v2"]
+    v3 = environment.bundle_references["v3"]
+    head = _chain_through_rotation(environment)
+    transition = _introduce_v3(environment, head)
+    _write_v2_witness(
+        transition, v2, [_unavailable_outcome(alpha), _refused_outcome(beta)]
+    )
+    _set_chain_head(environment, transition)
+
+    pending = _verify_synthetic(environment)
+    assert v3["path"] not in pending.active_trust_bundles
+    assert pending.pending_trust_bundle_updates == (v3,)
+    # The recorder does not name the bundle a second time.
+    payload: dict[str, Any] = {}
+    add_trust_bundle_updates(payload, pending)
+    assert payload == {}
+
+    # A snapshot cannot use v3 while it is pending...
+    premature = _new_snapshot(environment, "premature-v3", previous=transition)
+    _write_v2_witness(
+        premature,
+        v3,
+        [
+            _available_outcome(environment, premature, alpha),
+            _available_outcome(environment, premature, beta, signing_authority=rotated),
+        ],
+    )
+    _set_chain_head(environment, premature)
+    with pytest.raises(ChainError, match="newest active TSA trust bundle"):
+        _verify_synthetic(environment)
+
+    # ...and the next old-bundle witness is what activates it.
+    premature.with_suffix(".witness.json").unlink()
+    _write_v2_witness(
+        premature,
+        v2,
+        [_available_outcome(environment, premature, alpha), _refused_outcome(beta)],
+    )
+    activated = _verify_synthetic(environment)
+    assert v3["path"] in activated.active_trust_bundles
+    assert activated.pending_trust_bundle_updates == ()
+
+
+def test_witness_writer_carries_a_signer_rotation_through_v3(
+    rotation_environment: TrustEnvironment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    environment = rotation_environment
+    alpha = environment.authorities["alpha"]
+    beta = environment.authorities["beta"]
+    rotated = environment.authorities["beta_rotated"]
+    v2 = environment.bundle_references["v2"]
+    v3 = environment.bundle_references["v3"]
+    head = _chain_through_rotation(environment)
+    transition = _introduce_v3(environment, head)
+    _patch_writer_verification(monkeypatch)
+    response_dir = environment.records.parent / "writer-responses"
+    response_dir.mkdir()
+    # beta's endpoint now answers with the new responder, as DigiCert's does.
+    by_endpoint = {alpha.endpoint: alpha, beta.endpoint: rotated}
+    calls: list[str] = []
+
+    def requester(endpoint: str, query: bytes, _timeout: float) -> bytes:
+        authority = by_endpoint[endpoint]
+        calls.append(endpoint)
+        query_path = response_dir / f"{len(calls)}.tsq"
+        response_path = response_dir / f"{len(calls)}.tsr"
+        query_path.write_bytes(query)
+        _run_openssl(
+            "ts",
+            "-reply",
+            "-config",
+            str(authority.tsa_config),
+            "-section",
+            "tsa_config",
+            "-queryfile",
+            str(query_path),
+            "-out",
+            str(response_path),
+        )
+        return response_path.read_bytes()
+
+    marker = json.loads(
+        witness_module.witness_snapshot(
+            environment.records, transition, requester=requester, timeout_seconds=1
+        ).read_text()
+    )
+    assert marker["status"] == "available"
+    assert marker["trustBundlePath"] == v2["path"]
+    assert [outcome["status"] for outcome in marker["anchorOutcomes"]] == [
+        "available",
+        "unavailable",
+    ]
+    assert "token signer is not pinned" in marker["anchorOutcomes"][1]["reason"]
+    assert marker["supplementalOutcomes"] == []
+    assert calls == [alpha.endpoint, beta.endpoint]
+    # The refused token is not left beside the snapshot.
+    assert sorted(path.name for path in transition.parent.glob("*.tsr")) == [
+        f"{transition.stem}.{alpha.anchor_id}.tsr"
+    ]
+    assert v3["path"] in _verify_synthetic(environment).active_trust_bundles
+
+    successor = _new_snapshot(environment, "v3-active", previous=transition)
+    marker = json.loads(
+        witness_module.witness_snapshot(
+            environment.records, successor, requester=requester, timeout_seconds=1
+        ).read_text()
+    )
+    assert marker["status"] == "available"
+    assert marker["trustBundlePath"] == v3["path"]
+    assert [outcome["status"] for outcome in marker["anchorOutcomes"]] == [
+        "available",
+        "available",
+    ]
+    assert marker["anchorOutcomes"][1]["tsaSignerSpkiSha256"] == _signer_spki(rotated)
+    assert marker["supplementalOutcomes"] == []
+    verification = _verify_synthetic(environment)
+    assert len(verification.witnesses[successor].tokens) == 2

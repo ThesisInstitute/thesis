@@ -4,6 +4,7 @@ import base64
 import datetime as dt
 import gzip
 import hashlib
+import itertools
 import json
 import os
 import pathlib
@@ -14,6 +15,8 @@ import sys
 from types import SimpleNamespace
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -244,8 +247,12 @@ def test_archives_raw_response_and_attaches_append_provenance(
 
     archive = enriched["responseArchive"]
     assert enriched["targetContentHash"] == content_hash
+    assert enriched["value"] == 245000
+    assert enriched["measure"]["unit"] == "count"
+    assert enriched["source"]["recorded_value"] == 245.0
+    assert enriched["source"]["recorded_unit"] == "thousands"
     projection = enriched["sourceBindingProjection"]
-    assert projection["unit"] == "thousands"
+    assert projection["unit"] == "count"
     assert projection["field"] == "ICSA"
     assert projection["responseSha256"] == archive["sha256"]
     assert enriched["assertionVersion"]["id"].startswith("av2:")
@@ -354,7 +361,11 @@ def test_main_removes_signing_secret_before_any_resolver_work(
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
 
     assert resolve_pending.main() == 0
-    assert capsys.readouterr().out == "no pending adapter-covered cells\n"
+    assert capsys.readouterr().out == (
+        "no pending adapter-covered cells\n"
+        f"{resolve_pending.RESOLUTION_LOOP_COMPLETE} 0 reference(s) examined\n"
+        f"{resolve_pending.RESOLVER_FINISHED} 0\n"
+    )
     assert resolve_pending.PRODUCER_SIGNING_KEY_ENV not in os.environ
 
 
@@ -568,15 +579,23 @@ def test_value_plausibility_gate_blocks_scale_blunders() -> None:
 
 
 def test_a19_parse_reads_current_month_column() -> None:
+    # The real June 2026 table: each value is found by its headers (row,
+    # "Total", "16 years and over", the later of two June headings), not by
+    # its position. tests/test_a19_adapter.py covers the parser in depth.
     html = (
-        "<table><tr><td>Healthcare support occupations</td>"
-        "<td>5,950</td><td>5,691</td></tr>"
-        "<tr><td>Production occupations</td><td>7,938</td><td>7,759</td></tr>"
-        "</table>"
-    )
+        ROOT / "tests/fixtures/a19/cpseea19-2026-06-wayback-20260710110509.table.html"
+    ).read_text()
     values = resolve_pending.a19_values_from_html(html)
     assert values["healthcare_support"] == 5691.0
     assert values["production"] == 7759.0
+    # A bare row of numbers names no month and no column: nothing is read.
+    assert (
+        resolve_pending.a19_values_from_html(
+            "<table><tr><td>Production occupations</td><td>7,938</td>"
+            "<td>7,759</td></tr></table>"
+        )
+        == {}
+    )
 
 
 def test_pending_adapter_refs_maps_and_gates_units() -> None:
@@ -1423,9 +1442,11 @@ def test_qcew_legacy_aircraft_registration_remains_exactly_supported() -> None:
     )
 
 
+@pytest.mark.parametrize("catalog_refuses", [False, True])
 @pytest.mark.parametrize("variant", ["aircraft", "annual"])
 def test_main_qcew_branch_builds_and_projects_the_registered_fact(
     variant: str,
+    catalog_refuses: bool,
     tmp_path: pathlib.Path,
     monkeypatch,
 ) -> None:
@@ -1516,6 +1537,7 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         )
 
     appended: dict[str, str] = {}
+    propose_kwargs: dict[str, object] = {}
 
     def fake_propose(
         _repo,
@@ -1528,6 +1550,7 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         **_kwargs,
     ):
         appended["content"] = content
+        propose_kwargs.update(_kwargs)
         return "d" * 40
 
     monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
@@ -1567,10 +1590,40 @@ def test_main_qcew_branch_builds_and_projects_the_registered_fact(
         "utc_now",
         lambda: f"{release_date}T12:00:00Z",
     )
+
+    def fake_catalog_refusals(repo, sha, path, content, rows):
+        # The preflight sees the base the append is built on.
+        assert (repo, sha, path, content) == (
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            "ledger/official_observations.jsonl",
+            "",
+        )
+        if not catalog_refuses:
+            return {}
+        return {str(row["source_record_id"]): "unit conflict (fixture)" for row in rows}
+
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", fake_catalog_refusals
+    )
     monkeypatch.setattr(resolve_pending, "propose_ledger_append", fake_propose)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py"])
+    monkeypatch.delenv(resolve_pending.APPEND_GATE_TIMEOUT_ENV, raising=False)
 
+    if catalog_refuses:
+        # A row the ledger's catalog refuses is excluded, its archive with it,
+        # and the run reports refused rows instead of aborting in the append.
+        assert resolve_pending.main() == resolve_pending.EXIT_REFUSED_ROWS
+        assert appended == {}
+        assert not [
+            path for path in tmp_path.rglob("*.gz") if "responses" in path.parts
+        ]
+        return
     assert resolve_pending.main() == 0
+    # main forwards the wall-clock gate budget, not an attempt count.
+    assert propose_kwargs["gate_timeout_seconds"] == (
+        resolve_pending.DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60
+    )
     rows = [
         json.loads(line) for line in appended["content"].splitlines() if line.strip()
     ]
@@ -2279,21 +2332,95 @@ def _pre_genesis_tree() -> resolve_pending.RepositoryTree:
     )
 
 
+def _gate_check_runs(
+    append_conclusion: str | None,
+    trusted_conclusion: str | None,
+    arch_conclusion: str | None = "failure",
+) -> list[dict]:
+    """Check runs as chronicle's gate workflow leaves them on a proposal head.
+
+    Each required gate has one real run (the delivering event) and one
+    skipped twin (the other event's job-level condition). None models a real
+    run still queued for a runner. Arch checks defaults to the failure every
+    proposal before 2026-10-19 that needed catalog curation carried.
+    """
+
+    def real(name: str, conclusion: str | None, run_id: int) -> dict:
+        return {
+            "id": run_id,
+            "name": name,
+            "status": "queued" if conclusion is None else "completed",
+            "conclusion": conclusion,
+            "html_url": f"https://github.com/PolicyEngine/chronicle/actions/runs/{run_id}",
+        }
+
+    def twin(name: str, run_id: int) -> dict:
+        return {
+            "id": run_id,
+            "name": name,
+            "status": "completed",
+            "conclusion": "skipped",
+        }
+
+    return [
+        twin("Append gate", 11),
+        real("Append gate", append_conclusion, 1),
+        twin("Trusted base append gate", 12),
+        real("Trusted base append gate", trusted_conclusion, 2),
+        # Arch checks runs for the proposal branch's push and for its pull
+        # request.
+        *(
+            {
+                "id": run_id,
+                "name": "Arch checks",
+                "status": "queued" if arch_conclusion is None else "completed",
+                "conclusion": arch_conclusion,
+                "html_url": (
+                    f"https://github.com/PolicyEngine/chronicle/actions/runs/{run_id}"
+                ),
+            }
+            for run_id in (13, 14)
+        ),
+    ]
+
+
+def _check_runs_page(runs: list[dict]) -> dict:
+    """One complete check-runs page, as GitHub returns it."""
+
+    return {"total_count": len(runs), "check_runs": runs}
+
+
 def _proposal_api_stub(
-    gate_conclusion: str,
+    gate_conclusion: str | None,
     calls: list[tuple[tuple[str, ...], dict | None]],
     *,
+    trusted_conclusion: str | None = "success",
     fail_ref_creation: bool = False,
     fail_pr_creation: bool = False,
     recover_pr_number: int | None = None,
     merge_payload: dict | None = None,
+    arch_conclusion: str | None = "failure",
+    open_issues: list[dict] | None = None,
+    fail_issue_calls: bool = False,
+    base_arch_conclusion: str | None = "success",
 ):
     merged = False
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         nonlocal merged
         calls.append((args, input_body))
         joined = " ".join(args)
+        if "/issues" in joined:
+            if fail_issue_calls:
+                raise RuntimeError("simulated issue API failure")
+            if "/issues?state=open" in joined:
+                return json.dumps(open_issues or [])
+            if joined.endswith("/comments") and "POST" in args:
+                return json.dumps({"id": 1})
+            if joined.endswith("/issues") and "POST" in args:
+                return json.dumps(
+                    {"number": 99, "html_url": "https://github.com/x/y/issues/99"}
+                )
         if "/git/refs" in joined and "POST" in args:
             if fail_ref_creation:
                 raise RuntimeError("simulated ref creation failure")
@@ -2308,17 +2435,25 @@ def _proposal_api_stub(
             if fail_pr_creation:
                 raise RuntimeError("simulated PR creation failure")
             return json.dumps({"number": 7})
+        if "/check-runs" in joined and f"commits/{'b' * 40}/" in joined:
+            # The ledger branch head the proposal builds on: its push run.
+            runs = [
+                {
+                    "id": 21,
+                    "name": "Arch checks",
+                    "status": "completed",
+                    "conclusion": base_arch_conclusion,
+                    "html_url": "https://github.com/PolicyEngine/chronicle/actions/runs/21",
+                }
+            ]
+            return json.dumps(_check_runs_page(runs))
         if "/check-runs" in joined:
             return json.dumps(
-                {
-                    "check_runs": [
-                        {
-                            "name": "Append gate",
-                            "status": "completed",
-                            "conclusion": gate_conclusion,
-                        }
-                    ]
-                }
+                _check_runs_page(
+                    _gate_check_runs(
+                        gate_conclusion, trusted_conclusion, arch_conclusion
+                    )
+                )
             )
         if "/merge" in joined:
             result = (
@@ -2353,12 +2488,17 @@ def _install_proposal_transport(
     tree: resolve_pending.RepositoryTree,
     calls: list[tuple[tuple[str, ...], dict | None]],
     *,
-    gate_conclusion: str = "success",
+    gate_conclusion: str | None = "success",
+    trusted_conclusion: str | None = "success",
     fail_ref_creation: bool = False,
     fail_pr_creation: bool = False,
     recover_pr_number: int | None = None,
     merge_payload: dict | None = None,
     published: list[dict[str, bytes]] | None = None,
+    arch_conclusion: str | None = "failure",
+    open_issues: list[dict] | None = None,
+    fail_issue_calls: bool = False,
+    base_arch_conclusion: str | None = "success",
 ) -> None:
     monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
 
@@ -2380,10 +2520,15 @@ def _install_proposal_transport(
         _proposal_api_stub(
             gate_conclusion,
             calls,
+            trusted_conclusion=trusted_conclusion,
             fail_ref_creation=fail_ref_creation,
             fail_pr_creation=fail_pr_creation,
             recover_pr_number=recover_pr_number,
             merge_payload=merge_payload,
+            arch_conclusion=arch_conclusion,
+            open_issues=open_issues,
+            fail_issue_calls=fail_issue_calls,
+            base_arch_conclusion=base_arch_conclusion,
         ),
     )
 
@@ -2446,13 +2591,15 @@ def test_append_proposal_builds_byte_correct_verified_release(
     assert changes["ledger/official_observations.jsonl"] == candidate
     assert "ledger/series_uuid_registry.jsonl" not in changes
     regenerated_catalog = json.loads(changes["ledger/series_catalog.json"])
-    assert regenerated_catalog["observations_sha256"] == hashlib.sha256(
-        candidate
-    ).hexdigest()
+    assert (
+        regenerated_catalog["observations_sha256"]
+        == hashlib.sha256(candidate).hexdigest()
+    )
     assert regenerated_catalog["observation_rows"] == 2
-    assert regenerated_catalog["uuid_registry_sha256"] == hashlib.sha256(
-        tree.files["ledger/series_uuid_registry.jsonl"]
-    ).hexdigest()
+    assert (
+        regenerated_catalog["uuid_registry_sha256"]
+        == hashlib.sha256(tree.files["ledger/series_uuid_registry.jsonl"]).hexdigest()
+    )
     release_paths = [path for path in changes if path.startswith("releases/")]
     assert len(release_paths) == 4
     manifest_path = next(path for path in release_paths if path.endswith(".json"))
@@ -2511,6 +2658,60 @@ def test_append_proposal_builds_byte_correct_verified_release(
         (args, body) for args, body in calls if "/merge" in " ".join(args)
     )
     assert merge_call[1] == {"merge_method": "rebase", "sha": "c" * 40}
+    pull = next(body for args, body in calls if " ".join(args).endswith("/pulls"))
+    assert pull["title"] == "Record 1 first-print observation(s) via resolve_pending.py"
+
+
+def test_append_proposal_names_what_it_appends(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    # A restatement run's proposal says it restates rather than records prints.
+    tree, _anchor_dir, requester, signing_key_pem = _release_fixture_tree(tmp_path)
+    monkeypatch.setenv(resolve_pending.PRODUCER_SIGNING_KEY_ENV, signing_key_pem)
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    published: list[dict[str, bytes]] = []
+    _install_proposal_transport(monkeypatch, tree, calls, published=published)
+    real_verify = resolve_pending.verify_release_chain
+    real_verify_signature = resolve_pending.verify_producer_signature_bytes
+
+    def test_pins_verify(*args, **kwargs):
+        kwargs["enforce_production_pins"] = False
+        return real_verify(*args, **kwargs)
+
+    def test_pin_signature_verify(*args, **kwargs):
+        kwargs["enforce_production_pin"] = False
+        return real_verify_signature(*args, **kwargs)
+
+    monkeypatch.setattr(resolve_pending, "verify_release_chain", test_pins_verify)
+    monkeypatch.setattr(
+        resolve_pending, "verify_producer_signature_bytes", test_pin_signature_verify
+    )
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.2030","value":1}\n'
+    )
+
+    resolve_pending.propose_ledger_append(
+        "PolicyEngine/chronicle",
+        "codex/thesis-ledger-facts",
+        "ledger/official_observations.jsonl",
+        candidate.decode(),
+        "a" * 40,
+        "b" * 40,
+        1,
+        poll_seconds=0,
+        poll_attempts=1,
+        timestamp_requester=requester,
+        release_now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
+        what="base-unit restatement(s)",
+    )
+
+    pull = next(body for args, body in calls if " ".join(args).endswith("/pulls"))
+    assert pull["title"] == "Record 1 base-unit restatement(s) via resolve_pending.py"
+    assert "resolve_pending.py: 1 base-unit restatement(s) built against" in (
+        pull["body"]
+    )
+    assert "first-print" not in pull["title"] + pull["body"]
 
 
 def test_append_proposal_catalog_generator_failure_is_closed(
@@ -2556,6 +2757,7 @@ def test_catalog_regeneration_inputs_cover_the_fixture_stage(
         "ledger/series_catalog.json",
         "ledger/series_uuid_registry.jsonl",
         "ledger/seeds/thesis_docket_series.json",
+        "ledger/seeds/entity_folds.json",
     )
     tree, _anchor_dir, _requester, _signing_key = _release_fixture_tree(tmp_path)
     allowed = {
@@ -2992,6 +3194,765 @@ def test_append_proposal_refuses_to_merge_and_cleans_gate_failure(
     assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
 
 
+class _FakeClock:
+    """Monotonic clock and sleep that advance together, without waiting."""
+
+    def __init__(self) -> None:
+        self.now = 0.0
+        self.sleeps: list[float] = []
+
+    def __call__(self) -> float:
+        return self.now
+
+    def sleep(self, seconds: float) -> None:
+        self.sleeps.append(seconds)
+        self.now += seconds
+
+
+def test_append_gate_state_separates_queued_failed_and_passed() -> None:
+    state = resolve_pending.append_gate_state
+    twin = {"status": "completed", "conclusion": "skipped"}
+    queued = {"status": "queued", "conclusion": None}
+    # The 2026-09-22/23 shape: a skipped twin beside a real run still queued
+    # for a runner. Not a verdict either way, so keep waiting.
+    assert state([twin, queued]) == "pending"
+    assert state([twin, {"status": "in_progress", "conclusion": None}]) == "pending"
+    assert state([twin, {"status": "completed", "conclusion": "success"}]) == "passed"
+    assert state([twin, {"status": "completed", "conclusion": "failure"}]) == "failed"
+    # An adverse conclusion fails at once, whatever is still queued.
+    assert state([queued, {"status": "completed", "conclusion": "cancelled"}]) == (
+        "failed"
+    )
+    # A lone twin is not a verdict and not yet a failure: the delivering
+    # event's real run lives in a separate workflow run and may not exist yet.
+    assert state([twin]) == "pending"
+    assert state([]) == "pending"
+
+
+# Every check-run shape GitHub reports, as (status, conclusion).
+_RUN_SHAPES = [
+    ("queued", None),
+    ("in_progress", None),
+    *(
+        ("completed", conclusion)
+        for conclusion in (
+            "success",
+            "skipped",
+            "neutral",
+            "failure",
+            "cancelled",
+            "timed_out",
+            "action_required",
+            "stale",
+        )
+    ),
+]
+
+
+def test_append_gate_state_invariants_hold_for_every_run_set() -> None:
+    """Exhaustive over every multiset of up to three runs of one gate.
+
+    I1 "passed" only when every run completed, at least one succeeded and
+       none concluded against the proposal: exactly what append_gate_verdict
+       accepted before, so no run set the old poll refused can pass now.
+    I2 "failed" exactly when some run completed with a conclusion other than
+       success, skipped or neutral, whatever else is still queued.
+    I3 otherwise "pending": waiting, never a verdict.
+    I4 order never matters.
+    """
+
+    adverse = {"failure", "cancelled", "timed_out", "action_required", "stale"}
+    checked = 0
+    for size in range(0, 4):
+        for shapes in itertools.combinations_with_replacement(_RUN_SHAPES, size):
+            runs = [{"status": s, "conclusion": c} for s, c in shapes]
+            state = resolve_pending.append_gate_state(runs)
+            completed = all(s == "completed" for s, _ in shapes)
+            any_adverse = any(s == "completed" and c in adverse for s, c in shapes)
+            if any_adverse:
+                assert state == "failed", shapes
+            elif runs and completed and resolve_pending.append_gate_verdict(runs):
+                assert state == "passed", shapes
+                assert any(c == "success" for _, c in shapes), shapes
+            else:
+                assert state == "pending", shapes
+            for order in itertools.permutations(runs):
+                assert resolve_pending.append_gate_state(list(order)) == state
+            checked += 1
+    assert checked == 1 + 10 + 55 + 220
+
+
+def test_await_append_gates_outlasts_a_long_runner_queue(monkeypatch) -> None:
+    clock = _FakeClock()
+    reads: list[str] = []
+
+    def api(*args: str, input_body=None, **_kwargs) -> str:
+        reads.append(" ".join(args))
+        # Chronicle #286's real queue times: trusted base started after 47
+        # minutes, the pull_request Append gate after 68.
+        return json.dumps(
+            _check_runs_page(
+                _gate_check_runs(
+                    "success" if clock.now >= 68 * 60 else None,
+                    "success" if clock.now >= 47 * 60 else None,
+                )
+            )
+        )
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        286,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+
+    # The old loop (30 reads x 20 s) gave up after ten minutes.
+    assert clock.now >= 68 * 60 > 30 * 20
+    # Backoff doubles from 20 s and is capped, so the pass is noticed within
+    # one capped interval of the gate finishing.
+    assert clock.sleeps[:3] == [20, 40, 80]
+    assert max(clock.sleeps) == resolve_pending.APPEND_GATE_MAX_POLL_SECONDS
+    assert clock.now < 68 * 60 + resolve_pending.APPEND_GATE_MAX_POLL_SECONDS
+    expected_read = f"repos/PolicyEngine/chronicle/commits/{'c' * 40}/check-runs"
+    assert reads and all(
+        read == expected_read + "?per_page=100&page=1" for read in reads
+    )
+
+
+def test_await_append_gates_timeout_names_queued_jobs_not_a_failure(
+    monkeypatch,
+) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            _check_runs_page(_gate_check_runs(None, "success"))
+        ),
+    )
+
+    with pytest.raises(resolve_pending.LedgerProposalError) as info:
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            286,
+            timeout_seconds=150 * 60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    message = str(info.value)
+    assert "append gate did not complete for PolicyEngine/chronicle#286" in message
+    assert "after 150.0 of 150 allowed minutes; no verdict yet" in message
+    assert (
+        "Append gate: queued "
+        "(https://github.com/PolicyEngine/chronicle/actions/runs/1)" in message
+    )
+    # The gate that passed is not listed, and nothing reads as a rejection.
+    assert "Trusted base" not in message
+    assert "failed" not in message and "did not pass" not in message
+    # The last read lands exactly on the deadline, never past it.
+    assert clock.now == 150 * 60
+
+
+def test_await_append_gates_fails_fast_while_twin_is_queued(monkeypatch) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            _check_runs_page(_gate_check_runs("failure", None))
+        ),
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=re.escape(
+            "append gate failed for PolicyEngine/chronicle#283: Append gate: "
+            "failure (https://github.com/PolicyEngine/chronicle/actions/runs/1); "
+            "refusing to merge"
+        ),
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            283,
+            timeout_seconds=150 * 60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    assert clock.sleeps == []
+
+
+def test_await_append_gates_requires_the_trusted_base_gate(monkeypatch) -> None:
+    clock = _FakeClock()
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(
+            _check_runs_page(_gate_check_runs("success", "failure"))
+        ),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"append gate failed .*Trusted base append gate: failure",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+
+    # A passing Append gate alone never merges: with no trusted-base run at
+    # all the wait runs out instead.
+    only_append = [
+        run
+        for run in _gate_check_runs("success", "success")
+        if run["name"] != "Trusted base append gate"
+    ]
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        lambda *_args, **_kwargs: json.dumps(_check_runs_page(only_append)),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"did not complete .*Trusted base append gate: no check run yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=3,
+        )
+
+
+def _paged_check_runs_api(pages: list[list[dict]], *, totals=None, calls=None):
+    """A fake ``gh api`` serving ``pages`` by ``&page=N``, 1-based.
+
+    ``totals`` overrides each page's total_count (default: all runs).
+    """
+
+    total = sum(len(page) for page in pages)
+
+    def api(*args: str, input_body=None, **kwargs) -> str:
+        endpoint = args[-1]
+        if calls is not None:
+            calls.append((endpoint, kwargs))
+        number = int(re.search(r"[?&]page=(\d+)", endpoint).group(1))
+        runs = pages[number - 1] if number <= len(pages) else []
+        page_total = totals[number - 1] if totals is not None else total
+        return json.dumps({"total_count": page_total, "check_runs": runs})
+
+    return api
+
+
+def _filler_runs(count: int, *, first_id: int = 1000) -> list[dict]:
+    return [
+        {
+            "id": first_id + index,
+            "name": f"Arch checks {index}",
+            "status": "completed",
+            "conclusion": "success",
+        }
+        for index in range(count)
+    ]
+
+
+def test_read_check_runs_returns_every_run_across_pages(monkeypatch) -> None:
+    for total in (0, 1, 99, 100, 101, 250, 1000):
+        runs = _filler_runs(total)
+        pages = [runs[start : start + 100] for start in range(0, total, 100)] or [[]]
+        calls: list = []
+        monkeypatch.setattr(
+            resolve_pending, "_gh_api", _paged_check_runs_api(pages, calls=calls)
+        )
+        assert resolve_pending.read_check_runs("o/r", "c" * 40) == runs, total
+        assert len(calls) == max(1, -(-total // 100)), total
+
+
+def test_a_rejecting_run_on_page_two_fails_the_gate(monkeypatch) -> None:
+    """The review's reproduction: both successes on page one, a failed
+    trusted-gate duplicate on page two, total_count 101."""
+
+    first = _gate_check_runs("success", "success")
+    first += _filler_runs(100 - len(first))
+    second = [
+        {
+            "id": 3,
+            "name": "Trusted base append gate",
+            "status": "completed",
+            "conclusion": "failure",
+            "html_url": "https://github.com/PolicyEngine/chronicle/actions/runs/3",
+        }
+    ]
+    calls: list = []
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api([first, second], calls=calls),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"append gate failed .*Trusted base append gate: failure",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=150 * 60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+        )
+    assert [endpoint.rsplit("&", 1)[1] for endpoint, _ in calls] == ["page=1", "page=2"]
+
+
+def test_a_queued_run_on_page_two_keeps_the_gate_pending(monkeypatch) -> None:
+    first = _gate_check_runs("success", "success")
+    first += _filler_runs(100 - len(first))
+    second = [{"id": 4, "name": "Append gate", "status": "queued", "conclusion": None}]
+    monkeypatch.setattr(
+        resolve_pending, "_gh_api", _paged_check_runs_api([first, second])
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"did not complete .*Append gate: queued",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=2,
+        )
+
+
+def test_an_incomplete_listing_is_a_failed_read_never_a_verdict(monkeypatch) -> None:
+    """Both gates pass on the pages served, but the listing does not add up;
+    the waiter must refuse to merge on it."""
+
+    passing = _gate_check_runs("success", "success")
+    shapes = {
+        # total_count promises a run that no page returns.
+        "short": ([passing], [len(passing) + 1]),
+        # Runs were added between pages: total_count moved from 101 to 102,
+        # so positions shifted and a run can have been skipped.
+        "moved": (
+            [
+                passing + _filler_runs(100 - len(passing)),
+                _filler_runs(1, first_id=5000),
+            ],
+            [101, 102],
+        ),
+        # total_count lower than the runs returned.
+        "overfull": ([passing], [len(passing) - 1]),
+        # A boolean is not a count.
+        "boolean": ([passing], [True]),
+        # An empty page in the middle: the listing stops short of its count.
+        "gap": (
+            [
+                passing + _filler_runs(100 - len(passing)),
+                [],
+                _filler_runs(1, first_id=6000),
+            ],
+            [101, 101, 101],
+        ),
+        # total_count missing or not an integer.
+        "untyped": ([passing], ["5"]),
+    }
+    for label, (pages, totals) in shapes.items():
+        monkeypatch.setattr(
+            resolve_pending,
+            "_gh_api",
+            _paged_check_runs_api(pages, totals=totals),
+        )
+        with pytest.raises(
+            resolve_pending.CheckRunsIncompleteError,
+        ):
+            resolve_pending.read_check_runs("o/r", "c" * 40)
+        with pytest.raises(
+            resolve_pending.LedgerProposalError,
+            match="could not read append gate status .*5 consecutive failures",
+        ):
+            resolve_pending.await_append_gates(
+                "PolicyEngine/chronicle",
+                "c" * 40,
+                7,
+                timeout_seconds=150 * 60,
+                clock=_FakeClock(),
+                sleep=lambda _seconds: None,
+            )
+        assert label
+
+
+def test_a_listing_that_adds_up_by_repeating_a_run_is_refused(monkeypatch) -> None:
+    """Review of 80041473: runs reorder between page reads, so page two
+    repeats a run from page one and the failing run F is never served,
+    yet the listing's length still equals total_count."""
+
+    first = _gate_check_runs("success", "success")
+    first += _filler_runs(100 - len(first))
+    repeated = dict(first[-1])
+    monkeypatch.setattr(
+        resolve_pending, "_gh_api", _paged_check_runs_api([first, [repeated]])
+    )
+    with pytest.raises(resolve_pending.CheckRunsIncompleteError, match="appears twice"):
+        resolve_pending.read_check_runs("o/r", "c" * 40)
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="could not read append gate status",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=150 * 60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+        )
+
+
+def test_a_page_larger_than_requested_is_refused(monkeypatch) -> None:
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api([_filler_runs(150)]),
+    )
+    with pytest.raises(
+        resolve_pending.CheckRunsIncompleteError, match="holds 150 runs"
+    ):
+        resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
+def test_a_run_without_an_integer_id_is_refused(monkeypatch) -> None:
+    good = {"name": "Append gate", "status": "completed", "conclusion": "success"}
+    bad_runs = [
+        good,
+        *({**good, "id": bad_id} for bad_id in ("7", True, 7.0)),
+        # A run that is not an object at all.
+        "x",
+        ["x"],
+    ]
+    for run in bad_runs:
+        monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api([[run]]))
+        with pytest.raises(
+            resolve_pending.CheckRunsIncompleteError, match="without an integer id"
+        ):
+            resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
+def test_an_empty_listing_keeps_both_gates_pending(monkeypatch) -> None:
+    monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api([[]]))
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"did not complete .*Append gate: no check run yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=1,
+        )
+
+
+def _multi_page_passing_listing(first_filler_id: int = 1000) -> list[list[dict]]:
+    runs = _gate_check_runs("success", "success")
+    runs += _filler_runs(150 - len(runs), first_id=first_filler_id)
+    return [runs[:100], runs[100:]]
+
+
+def test_a_multi_page_pass_stands_only_once_a_second_read_agrees(
+    monkeypatch,
+) -> None:
+    calls: list = []
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api(_multi_page_passing_listing(), calls=calls),
+    )
+    clock = _FakeClock()
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    # Two full listings of two pages each, one poll interval apart.
+    assert len(calls) == 4
+    assert clock.sleeps == [20]
+
+
+def test_a_multi_page_pass_whose_runs_changed_is_read_again(monkeypatch) -> None:
+    """Review of ebdee131 (P4): a run re-run between page reads can swap a
+    new attempt onto a page already read while the total holds. A pass is
+    confirmed only by two consecutive reads with the same run ids."""
+
+    listings = iter(
+        [
+            _multi_page_passing_listing(1000),
+            _multi_page_passing_listing(2000),
+            _multi_page_passing_listing(2000),
+        ]
+    )
+    pages: list[list[dict]] = []
+
+    def api(*args: str, input_body=None, **kwargs) -> str:
+        if args[-1].endswith("&page=1"):
+            pages[:] = next(listings)
+        return _paged_check_runs_api(pages)(*args, input_body=input_body, **kwargs)
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+    clock = _FakeClock()
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    # Read 1 (ids A) and read 2 (ids B) disagree; read 3 (ids B) confirms.
+    assert clock.sleeps == [20, 40]
+
+
+def test_an_unconfirmed_multi_page_pass_at_the_deadline_says_so(monkeypatch) -> None:
+    monkeypatch.setattr(
+        resolve_pending,
+        "_gh_api",
+        _paged_check_runs_api(_multi_page_passing_listing()),
+    )
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="no second read has confirmed yet",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+            poll_attempts=1,
+        )
+
+
+def test_a_listing_longer_than_the_page_cap_is_refused(monkeypatch) -> None:
+    cap = resolve_pending.APPEND_GATE_MAX_CHECK_RUN_PAGES
+    runs = _filler_runs(100 * cap + 1)
+    pages = [runs[start : start + 100] for start in range(0, len(runs), 100)]
+    monkeypatch.setattr(resolve_pending, "_gh_api", _paged_check_runs_api(pages))
+    with pytest.raises(
+        resolve_pending.CheckRunsIncompleteError, match=f"returned {100 * cap} of"
+    ):
+        resolve_pending.read_check_runs("o/r", "c" * 40)
+
+
+def test_each_gate_read_is_bounded_by_the_remaining_budget(monkeypatch) -> None:
+    clock = _FakeClock()
+    calls: list = []
+    api = _paged_check_runs_api([_gate_check_runs(None, None)], calls=calls)
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+    with pytest.raises(resolve_pending.LedgerProposalError, match="did not complete"):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=5 * 60,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+    timeouts = [kwargs["timeout"] for _endpoint, kwargs in calls]
+    floor = resolve_pending.APPEND_GATE_MIN_READ_SECONDS
+    cap = resolve_pending.APPEND_GATE_MAX_READ_SECONDS
+    assert timeouts[0] == cap
+    assert all(floor <= value <= cap for value in timeouts)
+    # The last read happens at the deadline; it still gets the floor, so a
+    # gate that passes in the final interval is not lost to a 1-second read.
+    assert timeouts[-1] == floor
+
+
+def test_each_page_read_gets_its_own_share_of_the_budget(monkeypatch) -> None:
+    """The bound is recomputed per page, not once per poll."""
+
+    clock = _FakeClock()
+    runs = _filler_runs(250)
+    pages = [runs[start : start + 100] for start in range(0, 250, 100)]
+    served = _paged_check_runs_api(pages)
+    timeouts: list[float] = []
+
+    def slow(*args: str, input_body=None, **kwargs) -> str:
+        timeouts.append(kwargs["timeout"])
+        clock.now += 50  # each page read takes 50 s
+        return served(*args, input_body=input_body, **kwargs)
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", slow)
+    assert (
+        len(
+            resolve_pending.read_check_runs(
+                "o/r", "c" * 40, deadline=clock.now + 130, clock=clock
+            )
+        )
+        == 250
+    )
+    # 130 s left, then 80, then 30: each page sees what the budget has left.
+    assert timeouts == [120.0, 80.0, 30.0]
+
+
+def test_gh_api_timeout_becomes_a_runtime_error(monkeypatch) -> None:
+    def hung(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr(resolve_pending.subprocess, "run", hung)
+    with pytest.raises(RuntimeError, match=r"gh api repos/o/r timed out after 7 s"):
+        resolve_pending._gh_api("repos/o/r", timeout=7)
+
+
+def test_await_append_gates_retries_transient_read_failures(monkeypatch) -> None:
+    clock = _FakeClock()
+    outcomes = iter(
+        [
+            RuntimeError("gh api check-runs failed: HTTP 502"),
+            RuntimeError("gh api check-runs failed: HTTP 502"),
+            None,
+        ]
+    )
+
+    def flaky(*_args, **_kwargs) -> str:
+        outcome = next(outcomes)
+        if outcome is not None:
+            raise outcome
+        return json.dumps(_check_runs_page(_gate_check_runs("success", "success")))
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", flaky)
+    resolve_pending.await_append_gates(
+        "PolicyEngine/chronicle",
+        "c" * 40,
+        7,
+        timeout_seconds=150 * 60,
+        clock=clock,
+        sleep=clock.sleep,
+    )
+    assert clock.sleeps == [20, 40]
+
+    reads: list[int] = []
+
+    def down(*_args, **_kwargs) -> str:
+        reads.append(1)
+        raise RuntimeError("gh api check-runs failed: HTTP 503")
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", down)
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match="could not read append gate status .*5 consecutive failures",
+    ):
+        resolve_pending.await_append_gates(
+            "PolicyEngine/chronicle",
+            "c" * 40,
+            7,
+            timeout_seconds=150 * 60,
+            clock=_FakeClock(),
+            sleep=lambda _seconds: None,
+        )
+    assert len(reads) == resolve_pending.APPEND_GATE_MAX_READ_FAILURES
+
+
+def test_append_proposal_gate_timeout_closes_pr_without_a_rejection_message(
+    monkeypatch,
+) -> None:
+    tree = _pre_genesis_tree()
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, tree, calls, gate_conclusion=None)
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.queue","value":1}\n'
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError, match="did not complete"
+    ) as info:
+        resolve_pending.propose_ledger_append(
+            "PolicyEngine/chronicle",
+            "codex/thesis-ledger-facts",
+            "ledger/official_observations.jsonl",
+            candidate.decode(),
+            "a" * 40,
+            "b" * 40,
+            1,
+            poll_seconds=0,
+            poll_attempts=3,
+        )
+
+    assert "Append gate: queued" in str(info.value)
+    joined = [" ".join(args) for args, _ in calls]
+    # Three reads of the proposal head (the ledger branch head is read once,
+    # before the proposal, by report_red_ledger_base).
+    assert sum(f"commits/{'c' * 40}/check-runs" in call for call in joined) == 3
+    assert not any("/merge" in call for call in joined)
+    assert any("PATCH" in call and "/pulls/7" in call for call in joined)
+    assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
+
+
+@pytest.mark.parametrize("budget", [0, -1, float("inf"), float("nan"), True, "90"])
+def test_append_proposal_bad_gate_budget_has_no_remote_mutation(
+    monkeypatch, budget
+) -> None:
+    tree = _pre_genesis_tree()
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, tree, calls)
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.budget","value":1}\n'
+    )
+
+    with pytest.raises(
+        resolve_pending.LedgerProposalError, match="gate_timeout_seconds"
+    ):
+        resolve_pending.propose_ledger_append(
+            "PolicyEngine/chronicle",
+            "codex/thesis-ledger-facts",
+            "ledger/official_observations.jsonl",
+            candidate.decode(),
+            "a" * 40,
+            "b" * 40,
+            1,
+            gate_timeout_seconds=budget,
+        )
+
+    assert calls == []
+
+
+def test_append_gate_timeout_prefers_flag_then_environment_then_default() -> None:
+    budget = resolve_pending.append_gate_timeout_seconds
+    env = resolve_pending.APPEND_GATE_TIMEOUT_ENV
+    assert budget(None, {}) == resolve_pending.DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60
+    assert budget(None, {env: " "}) == 150 * 60
+    assert budget(None, {env: "90"}) == 90 * 60
+    assert budget(45.0, {env: "90"}) == 45 * 60
+    for bad in ("soon", "0", "-5", "inf", "nan"):
+        with pytest.raises(resolve_pending.LedgerProposalError):
+            budget(None, {env: bad})
+    with pytest.raises(resolve_pending.LedgerProposalError):
+        budget(0.0, {})
+
+
 def test_append_proposal_cleans_pr_and_branch_when_merge_is_refused(
     monkeypatch,
 ) -> None:
@@ -3025,6 +3986,204 @@ def test_append_proposal_cleans_pr_and_branch_when_merge_is_refused(
     assert any("/merge" in call for call in joined)
     assert any("PATCH" in call and "/pulls/7" in call for call in joined)
     assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
+
+
+def _propose_one_row(**kwargs) -> str:
+    tree_ledger = b'{"source_record_id":"fixture.base","value":0}\n'
+    candidate = tree_ledger + b'{"source_record_id":"test.series.arch","value":1}\n'
+    return resolve_pending.propose_ledger_append(
+        "PolicyEngine/chronicle",
+        "codex/thesis-ledger-facts",
+        "ledger/official_observations.jsonl",
+        candidate.decode(),
+        "a" * 40,
+        "b" * 40,
+        1,
+        poll_seconds=0,
+        poll_attempts=1,
+        **kwargs,
+    )
+
+
+def test_land_policy_merges_past_red_arch_checks_and_files_the_curation(
+    monkeypatch, capsys
+) -> None:
+    """The behaviour before Arch checks was awaited, now said out loud: the
+    append merges, and the red verdict becomes a Chronicle issue."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, _pre_genesis_tree(), calls)
+
+    assert _propose_one_row(run_url="https://github.com/o/r/actions/runs/5") == (
+        "d" * 40
+    )
+
+    joined = [" ".join(args) for args, _ in calls]
+    assert any("/merge" in call for call in joined)
+    created = [
+        body
+        for args, body in calls
+        if args[-1] == "repos/PolicyEngine/chronicle/issues" and "POST" in args
+    ]
+    assert len(created) == 1
+    assert created[0]["title"] == resolve_pending.LEDGER_CURATION_ISSUE_TITLE
+    assert "PolicyEngine/chronicle#7 merged at " + "d" * 40 in created[0]["body"]
+    assert "actions/runs/13" in created[0]["body"]
+    assert "https://github.com/o/r/actions/runs/5" in created[0]["body"]
+    out = capsys.readouterr().out
+    assert "ARCH CHECKS FAILED AT MERGE" in out
+    assert "ledger curation filed: https://github.com/x/y/issues/99" in out
+    pr_body = next(
+        body["body"]
+        for args, body in calls
+        if args[-1] == "repos/PolicyEngine/chronicle/pulls" and "POST" in args
+    )
+    assert "Arch checks is awaited" in pr_body
+
+
+def test_land_policy_comments_on_the_open_curation_issue(monkeypatch) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch,
+        _pre_genesis_tree(),
+        calls,
+        open_issues=[
+            {
+                "number": 5,
+                "title": resolve_pending.LEDGER_CURATION_ISSUE_TITLE,
+                "pull_request": {},
+            },
+            {"number": 6, "title": "unrelated"},
+            {"number": 8, "title": resolve_pending.LEDGER_CURATION_ISSUE_TITLE},
+        ],
+    )
+    _propose_one_row()
+    posts = [
+        args[-1] for args, _ in calls if "POST" in args and "/issues" in args[-1]
+    ]
+    # A pull request that shares the title is not the issue.
+    assert posts == ["repos/PolicyEngine/chronicle/issues/8/comments"]
+
+
+def test_a_failing_issue_api_never_undoes_a_merged_append(
+    monkeypatch, capsys
+) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, fail_issue_calls=True
+    )
+    assert _propose_one_row() == "d" * 40
+    assert "could not file the ledger curation issue" in capsys.readouterr().out
+    joined = [" ".join(args) for args, _ in calls]
+    # Merged, then the proposal branch deleted; nothing was closed.
+    assert any("DELETE" in call and "/git/refs/heads/" in call for call in joined)
+    assert not any("PATCH" in call for call in joined)
+
+
+def test_green_arch_checks_files_nothing(monkeypatch, capsys) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, arch_conclusion="success"
+    )
+    assert _propose_one_row() == "d" * 40
+    assert not any("/issues" in " ".join(args) for args, _ in calls)
+    assert "ARCH CHECKS" not in capsys.readouterr().out
+
+
+def test_a_red_ledger_branch_head_is_filed_before_the_append(
+    monkeypatch, capsys
+) -> None:
+    """A red head (an earlier append merged before Arch checks reported, a
+    hand merge) is filed when the next append builds on it; it never holds
+    the append."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch,
+        _pre_genesis_tree(),
+        calls,
+        arch_conclusion="success",
+        base_arch_conclusion="failure",
+    )
+    assert _propose_one_row() == "d" * 40
+    created = [
+        body
+        for args, body in calls
+        if args[-1] == "repos/PolicyEngine/chronicle/issues" and "POST" in args
+    ]
+    assert len(created) == 1 and "b" * 40 in created[0]["body"]
+    assert "LEDGER BRANCH RED BEFORE THIS APPEND" in capsys.readouterr().out
+    joined = [" ".join(args) for args, _ in calls]
+    issue_at = next(i for i, call in enumerate(joined) if "/issues" in call)
+    pr_at = next(i for i, call in enumerate(joined) if call.endswith("/pulls"))
+    assert issue_at < pr_at
+
+
+def test_refuse_policy_holds_the_append_on_red_arch_checks(monkeypatch) -> None:
+    """Option (a): Arch checks becomes a required gate. A red verdict closes
+    the proposal like a failed append gate, and nothing merges."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, _pre_genesis_tree(), calls)
+    with pytest.raises(
+        resolve_pending.LedgerProposalError,
+        match=r"append gate failed .*Arch checks: failure",
+    ):
+        _propose_one_row(arch_checks_policy=resolve_pending.ARCH_CHECKS_POLICY_REFUSE)
+    joined = [" ".join(args) for args, _ in calls]
+    assert not any("/merge" in call for call in joined)
+    assert any("PATCH" in call and "/pulls/7" in call for call in joined)
+    assert not any("/issues" in call for call in joined)
+
+
+def test_refuse_policy_merges_on_green_arch_checks(monkeypatch) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, arch_conclusion="success"
+    )
+    refuse = resolve_pending.ARCH_CHECKS_POLICY_REFUSE
+    assert _propose_one_row(arch_checks_policy=refuse) == "d" * 40
+
+
+def test_refuse_policy_waits_for_both_arch_checks_runs(monkeypatch) -> None:
+    """Arch checks runs for the proposal's push and its pull request; under
+    "refuse" a green push run alone never merges (the pull request run,
+    which also checks the anchor move against the base, may not be listed
+    yet)."""
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(
+        monkeypatch, _pre_genesis_tree(), calls, arch_conclusion="success"
+    )
+    base_api = resolve_pending._gh_api
+
+    def push_run_only(*args: str, **kwargs) -> str:
+        raw = base_api(*args, **kwargs)
+        if f"commits/{'c' * 40}/check-runs" in " ".join(args):
+            page = json.loads(raw)
+            runs = [r for r in page["check_runs"] if r.get("id") != 14]
+            return json.dumps(_check_runs_page(runs))
+        return raw
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", push_run_only)
+    refuse = resolve_pending.ARCH_CHECKS_POLICY_REFUSE
+    with pytest.raises(resolve_pending.LedgerProposalError, match="did not complete"):
+        _propose_one_row(arch_checks_policy=refuse)
+    assert not any("/merge" in " ".join(args) for args, _ in calls)
+
+
+def test_unknown_arch_checks_policy_refuses_before_any_remote_call(
+    monkeypatch,
+) -> None:
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    _install_proposal_transport(monkeypatch, _pre_genesis_tree(), calls)
+    with pytest.raises(resolve_pending.LedgerProposalError, match="policy"):
+        _propose_one_row(arch_checks_policy="merge-anyway")
+    assert calls == []
+
+
+def test_the_default_arch_checks_policy_awaits_max_s_ruling() -> None:
+    # Flipping this to "refuse" is the whole of option (a); it changes when
+    # rows needing uncurated catalog work land, so it is Max's call.
+    land = resolve_pending.ARCH_CHECKS_POLICY_LAND
+    assert resolve_pending.ARCH_CHECKS_POLICY == land
+    assert resolve_pending.ARCH_CHECKS_GATE not in resolve_pending.REQUIRED_APPEND_GATES
 
 
 def test_append_proposal_refuses_if_base_moves_during_gate_poll(
@@ -3069,7 +4228,7 @@ def test_append_proposal_recovers_ambiguous_successful_merge(monkeypatch) -> Non
     base_api = resolve_pending._gh_api
     merge_attempted = False
 
-    def ambiguous_api(*args: str, input_body=None) -> str:
+    def ambiguous_api(*args: str, input_body=None, **_kwargs) -> str:
         nonlocal merge_attempted
         joined = " ".join(args)
         if "/merge" in joined:
@@ -3123,7 +4282,7 @@ def test_append_proposal_rejects_retarget_after_normal_merge_response(
     base_api = resolve_pending._gh_api
     pr_reads = 0
 
-    def retargeting_api(*args: str, input_body=None) -> str:
+    def retargeting_api(*args: str, input_body=None, **_kwargs) -> str:
         nonlocal pr_reads
         joined = " ".join(args)
         if joined.endswith("/pulls/7") and "PATCH" not in args:
@@ -3306,7 +4465,7 @@ def test_publish_proposal_uses_one_tree_and_one_commit(monkeypatch) -> None:
     calls: list[tuple[tuple[str, ...], dict | None]] = []
     blob_number = 0
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         nonlocal blob_number
         calls.append((args, input_body))
         endpoint = args[-1]
@@ -3407,7 +4566,7 @@ def test_fetch_repository_tree_binds_commit_trees_and_blobs(monkeypatch) -> None
     ]
     root_tree_sha = resolve_pending._git_tree_object_sha(root_entries)
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         del input_body
         endpoint = args[-1]
         if endpoint.endswith(f"/git/commits/{commit_sha}"):
@@ -3448,6 +4607,115 @@ def test_fetch_repository_tree_binds_commit_trees_and_blobs(monkeypatch) -> None
     }
 
 
+def _git_blob_sha(raw: bytes) -> str:
+    return hashlib.sha1(
+        f"blob {len(raw)}\0".encode("ascii") + raw,
+        usedforsecurity=False,
+    ).hexdigest()
+
+
+def _fake_tree_api(
+    monkeypatch: pytest.MonkeyPatch,
+    commit_sha: str,
+    layout: dict[str, dict[str, bytes]],
+) -> None:
+    """Serve a two-level tree (root dirs -> files, plus ledger/seeds) over _gh_api."""
+    blobs: dict[str, bytes] = {}
+    trees: dict[str, list[dict[str, str]]] = {}
+
+    def tree_sha_for(files: dict[str, bytes], subtrees: dict[str, str]) -> str:
+        entries = []
+        for name, raw in files.items():
+            sha = _git_blob_sha(raw)
+            blobs[sha] = raw
+            entries.append({"path": name, "mode": "100644", "type": "blob", "sha": sha})
+        for name, sha in subtrees.items():
+            entries.append({"path": name, "mode": "040000", "type": "tree", "sha": sha})
+        entries.sort(key=lambda entry: entry["path"])
+        sha = resolve_pending._git_tree_object_sha(entries)
+        trees[sha] = entries
+        return sha
+
+    seeds = layout.get("ledger/seeds", {})
+    seeds_sha = tree_sha_for(seeds, {}) if seeds else None
+    ledger_sha = tree_sha_for(
+        layout["ledger"], {"seeds": seeds_sha} if seeds_sha else {}
+    )
+    root_sha = tree_sha_for({}, {"ledger": ledger_sha})
+
+    def api(*args: str, input_body=None, **_kwargs) -> str:
+        del input_body
+        endpoint = args[-1]
+        if endpoint.endswith(f"/git/commits/{commit_sha}"):
+            return json.dumps({"sha": commit_sha, "tree": {"sha": root_sha}})
+        for sha, entries in trees.items():
+            if endpoint.endswith(f"/git/trees/{sha}"):
+                return json.dumps({"sha": sha, "tree": entries, "truncated": False})
+        for sha, raw in blobs.items():
+            if endpoint.endswith(f"/git/blobs/{sha}"):
+                return json.dumps(
+                    {
+                        "sha": sha,
+                        "encoding": "base64",
+                        "content": base64.b64encode(raw).decode(),
+                        "size": len(raw),
+                    }
+                )
+        raise AssertionError(endpoint)
+
+    monkeypatch.setattr(resolve_pending, "_gh_api", api)
+
+
+def test_fetch_repository_tree_stages_the_entity_fold_seed_when_present(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Once Chronicle commits curated entity folds, the staged regeneration
+    # must see them; otherwise it re-splits the folded lineages and every
+    # append proposes revive events that _registry_growth_refusal refuses.
+    commit_sha = "b" * 40
+    ledger_path = "ledger/official_observations.jsonl"
+    folds = b'{"schemaVersion": "chronicle_entity_folds_v1", "folds": []}\n'
+    docket_seed = b"[]\n"
+    _fake_tree_api(
+        monkeypatch,
+        commit_sha,
+        {
+            "ledger": {"official_observations.jsonl": b'{"source_record_id":"x"}\n'},
+            "ledger/seeds": {
+                "entity_folds.json": folds,
+                "thesis_docket_series.json": docket_seed,
+            },
+        },
+    )
+    tree = resolve_pending._fetch_repository_tree(
+        "PolicyEngine/chronicle", commit_sha, ledger_path
+    )
+    assert tree.files["ledger/seeds/entity_folds.json"] == folds
+    assert tree.files["ledger/seeds/thesis_docket_series.json"] == docket_seed
+
+
+def test_fetch_repository_tree_tolerates_a_base_without_entity_folds(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Before Chronicle adds the seed, the base simply has no folds; listing
+    # the path first must not break any proposal.
+    commit_sha = "c" * 40
+    ledger_path = "ledger/official_observations.jsonl"
+    _fake_tree_api(
+        monkeypatch,
+        commit_sha,
+        {
+            "ledger": {"official_observations.jsonl": b'{"source_record_id":"x"}\n'},
+            "ledger/seeds": {"thesis_docket_series.json": b"[]\n"},
+        },
+    )
+    tree = resolve_pending._fetch_repository_tree(
+        "PolicyEngine/chronicle", commit_sha, ledger_path
+    )
+    assert "ledger/seeds/entity_folds.json" not in tree.files
+    assert "ledger/seeds/thesis_docket_series.json" in tree.files
+
+
 def test_fetch_repository_tree_rejects_swapped_commit_response(monkeypatch) -> None:
     monkeypatch.setattr(
         resolve_pending,
@@ -3469,7 +4737,7 @@ def test_fetch_repository_tree_rejects_partial_tree_with_claimed_sha(
     commit_sha = "a" * 40
     claimed_tree_sha = "c" * 40
 
-    def api(*args: str, input_body=None) -> str:
+    def api(*args: str, input_body=None, **_kwargs) -> str:
         del input_body
         if "/git/commits/" in args[-1]:
             return json.dumps({"sha": commit_sha, "tree": {"sha": claimed_tree_sha}})
@@ -3847,6 +5115,89 @@ def test_current_native_executor_requires_exact_registry_series_spec_pair() -> N
     borrowed = json.loads(json.dumps(registration))
     borrowed["contract"]["series"] = "unrelated.other.series"
     assert resolve_pending.intl_execution_spec(borrowed, spec) is None
+
+
+def _routed_intl_spec(ref: str) -> dict:
+    """The spec exactly as the resolver's router hands it to the main loop."""
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": "routed-target",
+                "resolutionDate": "2026-09-14",
+            }
+        ],
+        "resolutionLinks": [
+            {
+                "status": "pending",
+                "targetFactRef": ref,
+                "forecastSlug": "routed-target",
+            }
+        ],
+    }
+    ((got_ref, kind, spec, *_rest),) = resolve_pending.pending_adapter_refs(log)
+    assert (got_ref, kind) == (ref, "intl")
+    return spec
+
+
+def _current_intl_registration(series: str) -> dict:
+    spec = resolve_pending.INTL_REGISTRY_ADAPTERS[series]
+    binding = {
+        **json.loads(json.dumps(resolve_pending.intl_binding_template(spec))),
+        "allowedHosts": list(spec["allowed_hosts"]),
+        "expectedReleaseWindow": {"start": "2026-09-14", "end": "2026-09-14"},
+    }
+    return {
+        "targetContentHash": "0" * 64,
+        "contract": {"series": series, "sourceBinding": binding},
+    }
+
+
+def test_routed_international_spec_reaches_its_native_executor() -> None:
+    """The router copies the adapter (`{**spec, "period_type": ...,
+    "target_series": stem}`), so an identity test against the registry
+    refused every registered international target: both StatCan CPI cells
+    of summer 2026 printed "BINDING/ADAPTER MISMATCH (refusing, registry
+    drift?): ... — " with no mismatch named, and their first-print windows
+    closed unresolved. The direct-spec tests above could not see it."""
+    ref = "statcan.cpi.allitems.yoy.2026_08.first_print"
+    routed = _routed_intl_spec(ref)
+    canonical = resolve_pending.INTL_REGISTRY_ADAPTERS["statcan.cpi.allitems.yoy"]
+    assert routed is not canonical  # the router hands over a copy
+    assert resolve_pending.intl_registry_origin(routed) is canonical
+
+    registration = _current_intl_registration("statcan.cpi.allitems.yoy")
+    binding = registration["contract"]["sourceBinding"]
+    assert resolve_pending.intl_binding_mismatches(routed, binding) == []
+    execution = resolve_pending.intl_execution_spec(registration, routed)
+    assert execution is not None
+    assert execution["target_series"] == "statcan.cpi.allitems.yoy"
+
+
+def test_routed_spec_still_cannot_borrow_another_series_contract() -> None:
+    """What the identity test was for: the parser that runs must be the
+    canonical one for the series the immutable contract names."""
+    routed = _routed_intl_spec("statcan.cpi.allitems.yoy.2026_08.first_print")
+    borrowed = _current_intl_registration("statcan.cpi.allitems.yoy")
+    borrowed["contract"]["series"] = "statcan.gdp_by_industry.monthly_growth"
+    assert resolve_pending.intl_execution_spec(borrowed, routed) is None
+    unknown = _current_intl_registration("statcan.cpi.allitems.yoy")
+    unknown["contract"]["series"] = "unrelated.other.series"
+    assert resolve_pending.intl_execution_spec(unknown, routed) is None
+
+
+def test_altered_routed_spec_has_no_origin() -> None:
+    routed = _routed_intl_spec("statcan.cpi.allitems.yoy.2026_08.first_print")
+    registration = _current_intl_registration("statcan.cpi.allitems.yoy")
+    for tampered in (
+        {**routed, "series_id": "v00000000"},  # a different vector
+        {**routed, "extra_transform": "anything"},  # an added key
+        {k: v for k, v in routed.items() if k != "allowed_hosts"},  # a dropped key
+        {**routed, "target_series": "abs.cpi.all_groups.yoy"},  # another stem
+        {**routed, "target_series": "not.an.adapter"},
+    ):
+        assert resolve_pending.intl_registry_origin(tampered) is None
+        assert resolve_pending.intl_execution_spec(registration, tampered) is None
 
 
 def test_existing_legacy_international_targets_fail_closed_except_reviewed_one() -> (
@@ -4438,3 +5789,1281 @@ def test_binding_adapter_mismatch_guards_family_routing() -> None:
     assert mismatch("alfred", {"contract": {}}) is None
     # Families without a declared adapter set are not constrained here.
     assert mismatch("intl", reg("generic-url")) is None
+
+
+# ---------------------------------------------------------------------------
+# Aging/disability batch (2026-08-23): BLS CPS/CES/LAUS, SSA official pages,
+# VA MMWR, SSA hearings.
+
+AGING_FIXTURES = ROOT / "tests" / "fixtures" / "ssa_official"
+
+
+def _aging_log() -> dict:
+    cells = [
+        (
+            "va-pending",
+            "va.vba.mmwr.claims_inventory.week_2026-07-13.first_print",
+            "2026-07-13",
+            "thousands",
+            597.8,
+            609.6,
+        ),
+        (
+            "ssi-65",
+            "ssa.ssi.recipients_aged_65_plus.2026_06.first_print",
+            "2026-07-31",
+            "thousands",
+            2496.2,
+            2510.0,
+        ),
+        (
+            "ssdi",
+            "ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print",
+            "2026-07-31",
+            "thousands",
+            7002.0,
+            7017.0,
+        ),
+        (
+            "hearings",
+            "ssa.hearings.average_processing_time_days.2026-06.first_print",
+            "2026-07-31",
+            "count",
+            322.0,
+            330.0,
+        ),
+        (
+            "lfpr",
+            "bls.cps.lfpr_55_plus.2026-07.first_print",
+            "2026-08-07",
+            "percent",
+            37.0,
+            37.2,
+        ),
+        (
+            "epop",
+            "bls.cps.LNU02374597.2026-07.first_print",
+            "2026-08-07",
+            "percent",
+            20.9,
+            22.3,
+        ),
+        (
+            "hhc",
+            "bls.ces.home_health_care_services.employment.2026-07.first_print",
+            "2026-08-07",
+            "thousands",
+            1881.5,
+            1896.1,
+        ),
+        (
+            "co-ssi",
+            "ssa.ssi.recipients.colorado.2026-07.first_print",
+            "2026-08-31",
+            "thousands",
+            66.181,
+            66.581,
+        ),
+        (
+            "co-ssi-65",
+            "ssa.ssi.recipients.colorado.aged_65_plus.2026-07.first_print",
+            "2026-08-31",
+            "count",
+            23024.0,
+            23096.0,
+        ),
+        (
+            "ssi-total",
+            "ssa.ssi.total_recipients.2026-07.first_print",
+            "2026-08-31",
+            "millions",
+            7.28,
+            7.338,
+        ),
+        (
+            "co-lf",
+            "bls.laus.colorado.labor_force.2026-07.first_print",
+            "2026-08-21",
+            "thousands",
+            3179.0,
+            3185.4,
+        ),
+    ]
+    return {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": slug,
+                "resolutionDate": release,
+                "unit": unit,
+                "interval80": {"lower": lower, "upper": upper},
+            }
+            for slug, _ref, release, unit, lower, upper in cells
+        ],
+        "resolutionLinks": [
+            {"status": "pending", "forecastSlug": slug, "targetFactRef": ref}
+            for slug, ref, *_ in cells
+        ],
+    }
+
+
+def test_pending_adapter_refs_maps_the_aging_disability_batch() -> None:
+    todo = {
+        ref: item
+        for item in resolve_pending.pending_adapter_refs(_aging_log())
+        for ref in [item[0]]
+    }
+    assert len(todo) == 11
+
+    def claim(ref):
+        _ref, kind, spec, period_type, period, release, forecast = todo[ref]
+        assert resolve_pending.adapter_unit_matches(spec, forecast), ref
+        return kind, spec, period_type, period
+
+    kind, spec, period_type, period = claim(
+        "va.vba.mmwr.claims_inventory.week_2026-07-13.first_print"
+    )
+    assert (kind, period_type, period) == ("va_mmwr", "week", "2026-07-13")
+    assert spec["anchors"] == {
+        "2026-06-22": 593770,
+        "2026-06-29": 589026,
+        "2026-07-06": 601630,
+    }
+    kind, spec, period_type, period = claim(
+        "ssa.ssi.recipients_aged_65_plus.2026_06.first_print"
+    )
+    assert (kind, spec["reader"], period) == ("ssa_official", "ssi_table1", "2026-06")
+    # Longest stem wins: the 65+ Colorado cell is not the Colorado total.
+    kind, spec, _, _ = claim(
+        "ssa.ssi.recipients.colorado.aged_65_plus.2026-07.first_print"
+    )
+    assert (spec["reader"], spec["column"], spec["unit"]) == (
+        "ssi_table4",
+        "65 or older",
+        "count",
+    )
+    kind, spec, _, _ = claim("ssa.ssi.recipients.colorado.2026-07.first_print")
+    assert (spec["column"], spec["unit"], spec["scale"]) == (
+        "Total",
+        "thousands",
+        0.001,
+    )
+    kind, spec, _, _ = claim("ssa.ssi.total_recipients.2026-07.first_print")
+    assert (spec["reader"], spec["unit"]) == ("ssi_table2", "millions")
+    kind, spec, _, _ = claim(
+        "ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print"
+    )
+    assert (spec["reader"], spec["row"]) == ("snapshot_table2", "Disabled workers")
+    kind, spec, _, _ = claim(
+        "ssa.hearings.average_processing_time_days.2026-06.first_print"
+    )
+    assert (kind, spec["reader"]) == ("ssa_official", "oho_workload_xml")
+    for ref, series_id, gate in [
+        ("bls.cps.lfpr_55_plus.2026-07.first_print", "LNS11324230", "latest_month"),
+        ("bls.cps.LNU02374597.2026-07.first_print", "LNU02374597", "latest_month"),
+        (
+            "bls.ces.home_health_care_services.employment.2026-07.first_print",
+            "CES6562160001",
+            "latest_preliminary",
+        ),
+        (
+            "bls.laus.colorado.labor_force.2026-07.first_print",
+            "LASST080000000000006",
+            "latest_preliminary",
+        ),
+    ]:
+        kind, spec, period_type, period = claim(ref)
+        assert (kind, spec["series_id"], period) == ("bls_api", series_id, "2026-07")
+        assert spec.get("first_print_gate", "latest_preliminary") == gate
+        assert len(spec["anchors"]) >= 3
+    laus = resolve_pending.BLS_API_ADAPTERS["bls.laus.colorado.labor_force"]
+    assert (laus["scale"], laus["round"]) == (0.001, 1)
+    # Every aging family is bound to a named binding adapter, and a
+    # generic-url registration stays out of it.
+    mismatch = resolve_pending.binding_adapter_mismatch
+    generic = {"contract": {"sourceBinding": {"adapter": "generic-url"}}}
+    assert mismatch("ssa_official", generic) == "generic-url"
+    assert mismatch("va_mmwr", generic) == "generic-url"
+    assert (
+        mismatch(
+            "ssa_official",
+            {"contract": {"sourceBinding": {"adapter": "ssa-official-page"}}},
+        )
+        is None
+    )
+
+
+def test_bls_cps_latest_month_gate_and_preliminary_gate_disagree_on_cps_rows() -> None:
+    # CPS rows never carry the preliminary footnote (live API, 2026-08-23).
+    rows = {
+        "2026-07": {"value": 36.9, "latest": True, "preliminary": False},
+        "2026-06": {"value": 37.1, "latest": False, "preliminary": False},
+    }
+    assert resolve_pending.bls_first_print(rows, "2026-07", "latest_month") == (
+        36.9,
+        None,
+    )
+    value, refusal = resolve_pending.bls_first_print(rows, "2026-06", "latest_month")
+    assert value is None and "no longer the latest month" in refusal
+    assert resolve_pending.bls_first_print(rows, "2026-08", "latest_month") == (
+        None,
+        None,
+    )
+    # The default gate would refuse CPS forever; the specs opt out explicitly.
+    value, refusal = resolve_pending.bls_first_print(rows, "2026-07")
+    assert value is None and "latest preliminary" in refusal
+    with pytest.raises(ValueError, match="unknown BLS first-print gate"):
+        resolve_pending.bls_first_print(rows, "2026-07", "whenever")
+    notes = resolve_pending.BLS_API_ADAPTERS["bls.cps.lfpr_55_plus"]["evidence_notes"]
+    assert "not to revise previous months" in notes
+
+
+class _FakeCapture:
+    """Stand-in for official_browser_fetch.BrowserCapture."""
+
+    def __init__(
+        self, url: str, body: bytes, retrieved_at: str = "2026-08-23T14:00:00Z"
+    ):
+        self.url = url
+        self.final_url = url
+        self.status = 200
+        self.headers = {"content-type": "text/html; charset=UTF-8"}
+        self.body = body
+        self.retrieved_at = retrieved_at
+        self.user_agent = (
+            "HeadlessChrome/151 thesis-resolver/1.0 (+https://app.thesisinstitute.org)"
+        )
+        self.engine = "chromium 151 (playwright 1.62.0)"
+
+    @property
+    def sha256(self) -> str:
+        return hashlib.sha256(self.body).hexdigest()
+
+    def transport_record(self):
+        return {
+            "kind": "headless-browser",
+            "engine": self.engine,
+            "userAgent": self.user_agent,
+            "redirectsAccepted": False,
+        }
+
+    def response_record(self):
+        return {
+            "url": self.url,
+            "finalUrl": self.final_url,
+            "status": self.status,
+            "headers": dict(self.headers),
+            "retrievedAt": self.retrieved_at,
+            "bytes": len(self.body),
+            "sha256": self.sha256,
+        }
+
+
+def _ssa_fixture_pages() -> dict[str, bytes]:
+    base = "https://www.ssa.gov/policy/docs"
+    return {
+        f"{base}/statcomps/ssi_monthly/2026-06/table01.html": (
+            AGING_FIXTURES / "ssi_2026-06_table01.html"
+        ).read_bytes(),
+        f"{base}/statcomps/ssi_monthly/2026-05/table01.html": (
+            AGING_FIXTURES / "ssi_2026-05_table01.html"
+        ).read_bytes(),
+        f"{base}/quickfacts/stat_snapshot/2026-06.html": (
+            AGING_FIXTURES / "stat_snapshot_2026-06.html"
+        ).read_bytes(),
+        f"{base}/quickfacts/stat_snapshot/2026-05.html": (
+            AGING_FIXTURES / "stat_snapshot_2026-05.html"
+        ).read_bytes(),
+        "https://www.ssa.gov/appeals/DataSets/02_HO_Workload_Data.xml": (
+            AGING_FIXTURES / "ho_workload_2026-06-26.xml"
+        ).read_bytes(),
+    }
+
+
+def _install_aging_main(
+    monkeypatch, refs: list[str], *, utc_now="2026-08-23T14:05:00Z"
+):
+    import official_browser_fetch
+
+    log = _aging_log()
+    monkeypatch.setattr(resolve_pending, "load_thesis_log", lambda _url: log)
+    monkeypatch.setattr(resolve_pending, "pending_claims_refs", lambda _log: [])
+    full = resolve_pending.pending_adapter_refs
+    monkeypatch.setattr(
+        resolve_pending,
+        "pending_adapter_refs",
+        lambda log_: [item for item in full(log_) if item[0] in refs],
+    )
+    monkeypatch.setattr(
+        resolve_pending, "ledger_state", lambda *_a: ("", "blob", "a" * 40)
+    )
+    monkeypatch.setattr(resolve_pending, "registration_contracts", lambda: {})
+    monkeypatch.setattr(resolve_pending, "utc_now", lambda: utc_now)
+    pages = _ssa_fixture_pages()
+    fetched: list[str] = []
+    pages_box = {"pages": pages}
+
+    def fake_browser_fetch(url, *, allowed_hosts=None, timeout_seconds=90.0):
+        pages = pages_box["pages"]
+        fetched.append(url)
+        if url not in pages:
+            raise official_browser_fetch.BrowserFetchError(f"HTTP 404 for {url}")
+        return _FakeCapture(url, pages[url])
+
+    monkeypatch.setattr(official_browser_fetch, "browser_fetch", fake_browser_fetch)
+    envelopes: dict[str, bytes] = {}
+    real_envelope = resolve_pending.ssa_capture_envelope
+
+    def record_envelope(**kwargs):
+        raw = real_envelope(**kwargs)
+        envelopes[kwargs["period"] + ":" + kwargs["spec"]["reader"]] = raw
+        return raw
+
+    monkeypatch.setattr(resolve_pending, "ssa_capture_envelope", record_envelope)
+    monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+    return fetched, envelopes, pages
+
+
+def test_main_ssa_official_leg_resolves_editions_through_the_browser_transport(
+    monkeypatch, capsys
+) -> None:
+    refs = [
+        "ssa.ssi.recipients_aged_65_plus.2026_06.first_print",
+        "ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print",
+    ]
+    fetched, envelopes, _pages = _install_aging_main(monkeypatch, refs)
+    snapshot_url = (
+        "https://www.ssa.gov/policy/docs/quickfacts/stat_snapshot/2026-06.html"
+    )
+
+    def fake_wayback(url: str) -> bytes:
+        if "cdx/search" in url:
+            if "stat_snapshot/2026-06.html" in url:
+                return (AGING_FIXTURES / "cdx_stat_snapshot_2026-06.json").read_bytes()
+            return b"[]"
+        assert url.endswith(snapshot_url)
+        return (
+            AGING_FIXTURES / "stat_snapshot_2026-06.wayback-20260711204033.html"
+        ).read_bytes()
+
+    monkeypatch.setattr(resolve_pending, "ssa_wayback_fetch", fake_wayback)
+
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert (
+        "  resolve ssa.ssi.recipients_aged_65_plus.2026_06.first_print"
+        " -> 2505.847 thousands" in out
+    )
+    assert (
+        "  resolve ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print"
+        " -> 7006.0 thousands" in out
+    )
+    assert "dry-run: would append 2 row(s)" in out
+    # Anchors (prior editions) were re-read before the target pages.
+    assert fetched.index(
+        "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-05/table01.html"
+    ) < fetched.index(
+        "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-06/table01.html"
+    )
+    envelope = json.loads(envelopes["2026-06:snapshot_table2"])
+    assert envelope["schemaVersion"] == "ssa_official_page_capture_v1"
+    assert envelope["transport"]["kind"] == "headless-browser"
+    assert envelope["wayback"]["status"] == "parsed"
+    assert envelope["wayback"]["corroboratingCapture"]["timestamp"] == "20260711204033"
+    assert envelope["wayback"]["corroboratingCapture"]["value"] == 7006
+    assert envelope["anchors"][0]["period"] == "2026-05"
+    assert envelope["anchors"][0]["observed"] == 7029
+    assert (
+        envelope["derived"]["rawValue"] == 7006
+        and envelope["derived"]["value"] == 7006.0
+    )
+    table1 = json.loads(envelopes["2026-06:ssi_table1"])
+    assert table1["wayback"]["status"] == "none"
+    assert table1["derived"]["identities"][0].startswith("Total: Under 18 + 18-64")
+
+
+def test_main_ssa_official_leg_refuses_a_disagreeing_wayback_capture(
+    monkeypatch, capsys
+) -> None:
+    refs = ["ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print"]
+    _install_aging_main(monkeypatch, refs)
+    archived = (
+        AGING_FIXTURES / "stat_snapshot_2026-06.wayback-20260711204033.html"
+    ).read_bytes()
+    # Same page, different first print: a 1-unit change in every DI cell
+    # keeps the identities valid but moves the target.
+    tampered = (
+        archived.replace(b">7,006<", b">7,007<")
+        .replace(b">8,008<", b">8,009<")
+        .replace(b">71,255<", b">71,256<")
+    )
+
+    def fake_wayback(url: str) -> bytes:
+        if "cdx/search" in url:
+            return (AGING_FIXTURES / "cdx_stat_snapshot_2026-06.json").read_bytes()
+        return tampered
+
+    monkeypatch.setattr(resolve_pending, "ssa_wayback_fetch", fake_wayback)
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert "WAYBACK CAPTURE DISAGREES (refusing, page revised in place?)" in out
+    assert "live 7006 vs capture 20260711204033 7007" in out
+    assert "nothing new to record" in out
+
+
+def test_main_ssa_official_leg_refuses_anchor_drift_before_the_target(
+    monkeypatch, capsys
+) -> None:
+    refs = ["ssa.ssi.recipients_aged_65_plus.2026_06.first_print"]
+    fetched, _envelopes, _pages = _install_aging_main(monkeypatch, refs)
+    monkeypatch.setitem(
+        resolve_pending.SSA_OFFICIAL_ADAPTERS["ssa.ssi.recipients_aged_65_plus"],
+        "anchors",
+        {"2026-05": 2501548},
+    )
+    monkeypatch.setattr(resolve_pending, "ssa_wayback_fetch", lambda _u: b"[]")
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert "ANCHOR MISMATCH (refusing, wrong SSA table cell?)" in out
+    assert "anchor 2026-05=2501549 (recorded 2501548)" in out
+    assert not any(url.endswith("2026-06/table01.html") for url in fetched)
+
+
+def test_main_ssa_hearings_leg_refuses_because_the_source_has_no_national_row(
+    monkeypatch, capsys
+) -> None:
+    refs = ["ssa.hearings.average_processing_time_days.2026-06.first_print"]
+    _install_aging_main(monkeypatch, refs)
+    monkeypatch.setattr(resolve_pending, "ssa_wayback_fetch", lambda _u: b"[]")
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert "SOURCE PUBLISHES NO NATIONAL AGGREGATE (refusing)" in out
+    assert "RPTG_PRD_ENDT 06/26/2026, 165 hearing-office rows" in out
+    assert "nothing new to record" in out
+
+
+def test_main_survives_a_refused_wayback_refetch_and_resolves_the_rest(
+    monkeypatch, capsys
+) -> None:
+    """2026-09-01, 09-02 and 09-06: web.archive.org refused one connection
+    and the uncaught URLError ended the run, so nothing resolved that day
+    was appended. The hearings target must defer and the run must go on."""
+    import urllib.error
+
+    hearings = "ssa.hearings.average_processing_time_days.2026-06.first_print"
+    other = "ssa.oasdi.disabled_worker_beneficiaries.2026-06.first_print"
+    _fetched, _envelopes, pages = _install_aging_main(monkeypatch, [hearings, other])
+    archived = (AGING_FIXTURES / "ho_workload_2026-06-26.xml").read_bytes()
+    (workload_url,) = [url for url, body in pages.items() if body == archived]
+    # The live file has rolled on to July, so June survives only in Wayback.
+    pages[workload_url] = archived.replace(b"06/26/2026", b"07/31/2026")
+    snapshot_capture = (
+        AGING_FIXTURES / "stat_snapshot_2026-06.wayback-20260711204033.html"
+    ).read_bytes()
+    capture_reads = {"workload": 0}
+
+    def fake_wayback(url: str) -> bytes:
+        if "cdx/search" in url:
+            if "stat_snapshot/2026-06.html" in url:
+                return (AGING_FIXTURES / "cdx_stat_snapshot_2026-06.json").read_bytes()
+            if workload_url.split("://", 1)[1] in url:
+                return (
+                    b'[["timestamp","statuscode","digest","length"],'
+                    b'["20260701120000","200","AAAA","1000"]]'
+                )
+            return b"[]"
+        if url.endswith(workload_url):
+            capture_reads["workload"] += 1
+            if capture_reads["workload"] == 1:
+                return archived  # the corroboration's own guarded read
+            raise urllib.error.URLError(ConnectionRefusedError(111, "refused"))
+        return snapshot_capture
+
+    monkeypatch.setattr(resolve_pending, "ssa_wayback_fetch", fake_wayback)
+
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert capture_reads["workload"] == 2
+    assert f"  WAYBACK FETCH FAILED (deferring): {hearings}" in out
+    assert "::warning title=Resolver source unreachable::" in out
+    assert f"  resolve {other} -> 7006.0 thousands" in out
+    assert "dry-run: would append 1 row(s)" in out
+
+
+def test_main_ssa_official_leg_treats_a_missing_engine_as_fatal(
+    monkeypatch, capsys
+) -> None:
+    import official_browser_fetch
+
+    refs = ["ssa.ssi.recipients_aged_65_plus.2026_06.first_print"]
+    _install_aging_main(monkeypatch, refs)
+
+    def no_engine(url, **_kwargs):
+        raise official_browser_fetch.BrowserFetchUnavailableError("playwright missing")
+
+    monkeypatch.setattr(official_browser_fetch, "browser_fetch", no_engine)
+    assert resolve_pending.main() == 1
+    out = capsys.readouterr().out
+    assert "SSA BROWSER ENVIRONMENT FAILURE (fatal)" in out
+    assert "environment failures left admitted references unresolvable" in out
+
+
+def _va_workbook_server(
+    monkeypatch, *, target_modified="Mon, 13 Jul 2026 17:30:32 GMT"
+):
+    sys.path.insert(0, str(ROOT / "tests"))
+    from va_mmwr_fixtures import build_workbook
+
+    landing = (
+        ROOT / "tests" / "fixtures" / "va_mmwr" / "detailed_claims_data_excerpt.html"
+    ).read_bytes()
+    books = {
+        "MMWR-06-20-2026.xlsx": (
+            593770,
+            70879,
+            "Reporting through June 20, 2026",
+            "Mon, 22 Jun 2026 15:42:38 GMT",
+        ),
+        "MMWR-06-27-2026.xlsx": (
+            589026,
+            68207,
+            "Reporting through June 27, 2026",
+            "Mon, 29 Jun 2026 14:06:57 GMT",
+        ),
+        "MMWR-07-04-2026.xlsx": (
+            601630,
+            69193,
+            "Reporting through July 04, 2026",
+            "Tue, 07 Jul 2026 19:33:23 GMT",
+        ),
+        "MMWR-07-11-2026.xlsx": (
+            600878,
+            69481,
+            "Reporting through July 11, 2026",
+            target_modified,
+        ),
+    }
+    served: list[str] = []
+
+    def fake_get(url: str):
+        served.append(url)
+        if url == resolve_pending.va_mmwr.LANDING_URL:
+            return landing, {"content-type": "text/html"}, "2026-08-23T14:00:00Z", url
+        name = url.rsplit("/", 1)[-1]
+        pending, over, through, modified = books[name]
+        raw = build_workbook(pending=pending, over_125=over, through=through)
+        headers = {
+            "content-type": (
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ),
+            "last-modified": modified,
+            "etag": f'"{name}"',
+        }
+        return raw, headers, "2026-08-23T14:00:01Z", url
+
+    monkeypatch.setattr(resolve_pending, "va_mmwr_http_get", fake_get)
+    return served
+
+
+def test_main_va_mmwr_leg_resolves_the_report_week_with_anchors(
+    monkeypatch, capsys
+) -> None:
+    ref = "va.vba.mmwr.claims_inventory.week_2026-07-13.first_print"
+    _install_aging_main(monkeypatch, [ref])
+    served = _va_workbook_server(monkeypatch)
+    rows: list[dict] = []
+    real_fact = resolve_pending.generic_fact
+
+    def record(*args, **kwargs):
+        row = real_fact(*args, **kwargs)
+        rows.append(row)
+        return row
+
+    monkeypatch.setattr(resolve_pending, "generic_fact", record)
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert f"  resolve {ref} -> 600.878 thousands" in out
+    # One landing read, four workbooks (three anchors + target), each once.
+    assert served.count(resolve_pending.va_mmwr.LANDING_URL) == 1
+    assert sorted(u.rsplit("/", 1)[-1] for u in served[1:]) == [
+        "MMWR-06-20-2026.xlsx",
+        "MMWR-06-27-2026.xlsx",
+        "MMWR-07-04-2026.xlsx",
+        "MMWR-07-11-2026.xlsx",
+    ]
+    row = rows[0]
+    assert row["period"] == {"type": "week_ending", "value": "2026-07-11"}
+    assert row["observed_at"] == "2026-07-13"
+    assert row["source"]["url"].endswith("/REPORTS/mmwr/2026/MMWR-07-11-2026.xlsx")
+    assert (
+        "Last-Modified header placed its posting"
+        in row["measure"]["concept_evidence_notes"]
+    )
+
+
+def test_main_va_mmwr_leg_refuses_a_reposted_workbook_and_anchor_drift(
+    monkeypatch, capsys
+) -> None:
+    ref = "va.vba.mmwr.claims_inventory.week_2026-07-13.first_print"
+    _install_aging_main(monkeypatch, [ref])
+    _va_workbook_server(monkeypatch, target_modified="Tue, 01 Sep 2026 09:00:00 GMT")
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert "FIRST-PRINT WINDOW MISSED (refusing)" in out and "re-post" in out
+    # Anchor drift refuses before the target is even read.
+    monkeypatch.setitem(
+        resolve_pending.VA_MMWR_ADAPTERS["va.vba.mmwr.claims_inventory"],
+        "anchors",
+        {"2026-06-22": 593771},
+    )
+    _va_workbook_server(monkeypatch)
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert "ANCHOR MISMATCH (refusing, wrong VA workbook cell?)" in out
+    assert "anchor 2026-06-22=593770 (recorded 593771)" in out
+
+
+def test_main_defers_ssa_edition_pages_on_404_but_not_on_the_by_date(
+    monkeypatch, capsys
+) -> None:
+    # The Colorado cells' resolutionDate (2026-08-31) is a by-date; the
+    # edition page is the release evidence, so a 404 defers and a present
+    # page resolves even before that date.
+    ref = "ssa.ssi.recipients.colorado.2026-07.first_print"
+    _fetched, _envelopes, pages = _install_aging_main(
+        monkeypatch, [ref], utc_now="2026-08-23T14:05:00Z"
+    )
+    base = "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly"
+    # The prior edition (anchor) is posted; the target edition is not yet.
+    pages[f"{base}/2026-06/table04.html"] = (
+        AGING_FIXTURES / "ssi_2026-06_table04.html"
+    ).read_bytes()
+    monkeypatch.setattr(resolve_pending, "ssa_wayback_fetch", lambda _u: b"[]")
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert "release 2026-08-31 not reached" not in out
+    assert "not yet published (deferring)" in out and "HTTP 404" in out
+    # Once the edition is posted, the same run resolves before the by-date.
+    pages[f"{base}/2026-07/table04.html"] = (
+        AGING_FIXTURES / "ssi_2026-07_table04.html"
+    ).read_bytes()
+    assert resolve_pending.main() == 0
+    out = capsys.readouterr().out
+    assert f"  resolve {ref} -> 66.284 thousands" in out
+
+
+# ---------------------------------------------------------------------------
+# Registry growth: appends may mint their own first observations, nothing else
+# (the 2026-08-17 byte-compare guard overshot — no series could ever take its
+# first observation; resolve-loop failures 2026-08-18..22, issues #202-#206).
+
+
+def _registry_line(**fields) -> bytes:
+    return json.dumps(fields).encode() + b"\n"
+
+
+BASE_REGISTRY = _registry_line(
+    concept="dol.eta.continued_claims.sa",
+    geography={"level": "country", "id": "0100000US", "vintage": "current"},
+    entity={"name": "person", "role": "ui_claimant"},
+    uuid="00000000-0000-4000-8000-000000000001",
+) + _registry_line(
+    concept="census.housing.completions_saar",
+    geography=None,
+    entity=None,
+    uuid="00000000-0000-4000-8000-000000000002",
+)
+FULL_IDENTITY = {
+    "geography": {"level": "country", "id": "0100000US", "vintage": "current"},
+    "entity": {"name": "economy", "role": "aggregate"},
+}
+
+
+def test_registry_growth_allows_own_mints_and_placeholder_enrichment() -> None:
+    refusal = resolve_pending._registry_growth_refusal
+    rows = [
+        "va.vba.mmwr.claims_inventory.week_2026-07-13.first_print",
+        "census.housing.completions_saar.2026_07.first_print",
+    ]
+    grown = (
+        BASE_REGISTRY
+        + _registry_line(
+            concept="census.housing.completions_saar",
+            geography=None,
+            entity=None,
+            uuid="00000000-0000-4000-8000-000000000002",
+            retired=True,
+            note="docket placeholder enriched by first observed identity",
+        )
+        + _registry_line(
+            concept="census.housing.completions_saar",
+            **FULL_IDENTITY,
+            uuid="00000000-0000-4000-8000-000000000002",
+            succeeds={
+                "concept": "census.housing.completions_saar",
+                "geography": None,
+                "entity": None,
+            },
+        )
+        + _registry_line(
+            concept="va.vba.mmwr.claims_inventory",
+            **FULL_IDENTITY,
+            uuid="00000000-0000-4000-8000-000000000003",
+        )
+    )
+    assert refusal(BASE_REGISTRY, grown, rows) is None
+    assert refusal(BASE_REGISTRY, BASE_REGISTRY, rows) is None
+
+
+def test_registry_growth_refuses_everything_beyond_the_appended_rows() -> None:
+    refusal = resolve_pending._registry_growth_refusal
+    rows = ["va.vba.mmwr.claims_inventory.week_2026-07-13.first_print"]
+    mint = dict(concept="va.vba.mmwr.claims_inventory", **FULL_IDENTITY)
+    # Rewriting committed lines is never an append.
+    assert "rewrites committed lines" in refusal(
+        BASE_REGISTRY, BASE_REGISTRY[:-2] + b"x\n", rows
+    )
+    # An identity that belongs to no appended observation.
+    assert "belongs to no observation" in refusal(
+        BASE_REGISTRY,
+        BASE_REGISTRY
+        + _registry_line(
+            concept="bea.gdp.advance",
+            **FULL_IDENTITY,
+            uuid="00000000-0000-4000-8000-000000000009",
+        ),
+        rows,
+    )
+    # Single-segment concepts never qualify.
+    assert "belongs to no observation" in refusal(
+        BASE_REGISTRY,
+        BASE_REGISTRY
+        + _registry_line(
+            concept="va", **FULL_IDENTITY, uuid="00000000-0000-4000-8000-000000000009"
+        ),
+        rows,
+    )
+    # Supersede/revive/reclaim events stay chronicle-side.
+    assert "['supersedes']" in refusal(
+        BASE_REGISTRY,
+        BASE_REGISTRY
+        + _registry_line(
+            **mint,
+            uuid="00000000-0000-4000-8000-000000000009",
+            supersedes="00000000-0000-4000-8000-000000000001",
+            note="x",
+        ),
+        rows,
+    )
+    # UUID reuse outside the sanctioned enrichment.
+    assert "reuses UUID" in refusal(
+        BASE_REGISTRY,
+        BASE_REGISTRY
+        + _registry_line(**mint, uuid="00000000-0000-4000-8000-000000000001"),
+        rows,
+    )
+    # Appends may not mint placeholders.
+    assert "placeholder identity" in refusal(
+        BASE_REGISTRY,
+        BASE_REGISTRY
+        + _registry_line(
+            concept="va.vba.mmwr.claims_inventory",
+            geography=None,
+            entity=None,
+            uuid="00000000-0000-4000-8000-000000000009",
+        ),
+        rows,
+    )
+    # Retiring anything but a committed placeholder is refused.
+    assert "non-placeholder" in refusal(
+        BASE_REGISTRY,
+        BASE_REGISTRY
+        + _registry_line(
+            **mint,
+            uuid="00000000-0000-4000-8000-000000000009",
+            retired=True,
+            note="x",
+        ),
+        rows,
+    )
+    assert "matches no committed docket placeholder" in refusal(
+        BASE_REGISTRY,
+        BASE_REGISTRY
+        + _registry_line(
+            concept="va.vba.mmwr.claims_inventory",
+            geography=None,
+            entity=None,
+            uuid="00000000-0000-4000-8000-000000000009",
+            retired=True,
+            note="x",
+        ),
+        ["va.vba.mmwr.claims_inventory.week_2026-07-13.first_print"],
+    )
+    # A succeeds-mint needs its placeholder retire in the same append.
+    assert "without its placeholder retire" in refusal(
+        BASE_REGISTRY,
+        BASE_REGISTRY
+        + _registry_line(
+            concept="census.housing.completions_saar",
+            **FULL_IDENTITY,
+            uuid="00000000-0000-4000-8000-000000000002",
+            succeeds={
+                "concept": "census.housing.completions_saar",
+                "geography": None,
+                "entity": None,
+            },
+        ),
+        ["census.housing.completions_saar.2026_07.first_print"],
+    )
+    # Junk lines fail closed.
+    assert "not JSON" in refusal(BASE_REGISTRY, BASE_REGISTRY + b"not json\n", rows)
+    assert "lacks concept/uuid" in refusal(
+        BASE_REGISTRY, BASE_REGISTRY + b'{"uuid":"new"}\n', rows
+    )
+
+
+def test_append_proposal_accepts_the_generators_own_first_observation_mint(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A staged generator minting exactly the appended row's identity passes."""
+    tree, anchor_dir, requester, signing_key_pem = _release_fixture_tree(tmp_path)
+    minted_line = json.dumps(
+        {
+            "concept": "test.series.minted",
+            "geography": {"level": "country", "id": "0100000US", "vintage": "current"},
+            "entity": {"name": "economy", "role": "aggregate"},
+            "uuid": "00000000-0000-4000-8000-00000000aaaa",
+        }
+    )
+    tree.files["scripts/build_series_catalog.py"] = tree.files[
+        "scripts/build_series_catalog.py"
+    ].replace(
+        b"import check_thesis_facts_append  # noqa: F401",
+        b"import check_thesis_facts_append  # noqa: F401\n"
+        b"import json as json_module\n"
+        b"registry_path = pathlib.Path('ledger/series_uuid_registry.jsonl')\n"
+        b"registry_path.write_bytes(registry_path.read_bytes() + "
+        + repr(minted_line + "\n").encode()
+        + b".encode())",
+    )
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.minted.2026-07.first_print","value":1}\n'
+    )
+    changes = resolve_pending._prepare_release_files(
+        tree,
+        path="ledger/official_observations.jsonl",
+        candidate_ledger=candidate,
+        added=1,
+        requester=requester,
+        timeout_seconds=10,
+        clock_skew_seconds=resolve_pending.DEFAULT_CLOCK_SKEW_SECONDS,
+        anchor_dir=anchor_dir,
+        now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
+        producer_signing_key=signing_key_pem,
+    )
+    regenerated = changes["ledger/series_uuid_registry.jsonl"]
+    assert regenerated.endswith(minted_line.encode() + b"\n")
+    assert regenerated.startswith(tree.files["ledger/series_uuid_registry.jsonl"])
+
+
+def _catalog_tree(generator: bytes) -> resolve_pending.RepositoryTree:
+    files = {
+        "ledger/official_observations.jsonl": (
+            b'{"source_record_id":"base","unit":"thousands"}\n'
+        ),
+        "scripts/build_series_catalog.py": generator,
+    }
+    return resolve_pending.RepositoryTree(
+        tree_sha="1" * 40,
+        files=files,
+        modes={relative: "100644" for relative in files},
+        blob_shas={relative: "a" * 40 for relative in files},
+    )
+
+
+_UNIT_CONFLICT_GENERATOR = b"""import json, pathlib, sys
+text = pathlib.Path("ledger/official_observations.jsonl").read_text()
+rows = [json.loads(line) for line in text.splitlines() if line.strip()]
+units = {row.get("unit") for row in rows if row.get("unit")}
+if len(units) > 1:
+    sys.exit(f"unit conflict within identity: {sorted(units)}")
+"""
+
+
+def test_ledger_catalog_refusals_names_only_rows_that_fail_alone(monkeypatch) -> None:
+    tree = _catalog_tree(_UNIT_CONFLICT_GENERATOR)
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    good = {"source_record_id": "good", "unit": "thousands"}
+    bad = {"source_record_id": "bad", "unit": "millions"}
+    path = "ledger/official_observations.jsonl"
+    assert (
+        resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, [good]) == {}
+    )
+    refusals = resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, path, base, [good, bad]
+    )
+    assert list(refusals) == ["bad"]
+    assert (
+        "exit 1" in refusals["bad"] and "['millions', 'thousands']" in refusals["bad"]
+    )
+    # A base the generator already refuses is not blamed on the new rows: the
+    # append then fails as it did before.
+    broken = _catalog_tree(b"raise SystemExit(3)\n")
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: broken)
+    assert (
+        resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, [bad]) == {}
+    )
+
+
+def test_excluded_catalog_rows_leave_no_orphan_archive(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    responses = tmp_path / "records" / "resolutions" / "run" / "responses"
+    responses.mkdir(parents=True)
+    for name in ("own.gz", "shared.gz"):
+        (responses / name).write_bytes(b"x")
+    relative = "records/resolutions/run/responses/"
+    rows = [
+        {
+            "source_record_id": "refused",
+            "responseArchive": {"path": relative + "own.gz"},
+        },
+        {
+            "source_record_id": "refused.shared",
+            "responseArchive": {"path": relative + "shared.gz"},
+        },
+        {
+            "source_record_id": "kept",
+            "responseArchive": {"path": relative + "shared.gz"},
+        },
+    ]
+    kept = resolve_pending.exclude_catalog_refusals(
+        rows, {"refused": "conflict", "refused.shared": "conflict"}
+    )
+    assert [row["source_record_id"] for row in kept] == ["kept"]
+    assert not (responses / "own.gz").exists()
+    assert (responses / "shared.gz").exists()
+
+
+def test_catalog_refusals_are_reported_counted_and_excluded(
+    tmp_path: pathlib.Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    responses = tmp_path / "run" / "responses"
+    responses.mkdir(parents=True)
+    for name in ("a.gz", "b.gz"):
+        (responses / name).write_bytes(b"x")
+    rows = [
+        {"source_record_id": "kept", "responseArchive": {"path": "run/responses/a.gz"}},
+        {"source_record_id": "gone", "responseArchive": {"path": "run/responses/b.gz"}},
+    ]
+    refused = ["earlier: contract"]
+    kept = resolve_pending.apply_catalog_refusals(
+        rows, {"gone": "unit conflict"}, refused
+    )
+    assert [row["source_record_id"] for row in kept] == ["kept"]
+    assert refused == ["earlier: contract", "gone: unit conflict"]
+    assert "CATALOG REFUSED (excluded from append): gone — unit conflict" in (
+        capsys.readouterr().out
+    )
+    assert (responses / "a.gz").exists() and not (responses / "b.gz").exists()
+
+
+def test_rows_that_fail_the_catalog_only_together_stop_before_any_write(
+    monkeypatch,
+) -> None:
+    generator = b"""import json, pathlib, sys
+text = pathlib.Path("ledger/official_observations.jsonl").read_text()
+ids = {json.loads(line)["source_record_id"] for line in text.splitlines() if line}
+if {"x", "y"} <= ids or "z" in ids:
+    sys.exit("note: registry\\nconflict")
+"""
+    tree = _catalog_tree(generator)
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    path = "ledger/official_observations.jsonl"
+    rows = [{"source_record_id": ref} for ref in ("x", "y")]
+    with pytest.raises(resolve_pending.LedgerProposalError, match="together"):
+        resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, rows)
+    # A lone refusal's reason drops the generator's notes.
+    refusals = resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, path, base, [{"source_record_id": "z"}]
+    )
+    assert refusals == {"z": "series-catalog generator exit 1: conflict"}
+    # No rows: nothing is fetched.
+    monkeypatch.setattr(
+        resolve_pending, "_fetch_repository_tree", lambda *_: pytest.fail("fetched")
+    )
+    assert resolve_pending.ledger_catalog_refusals("r", "b" * 40, path, base, []) == {}
+
+
+def test_the_workflow_publishes_before_failing_on_refused_rows() -> None:
+    workflow = (ROOT / ".github/workflows/resolve-and-rebuild.yml").read_text()
+    resolve_step = workflow.split(
+        "      - name: Resolve pending cells against official prints\n", 1
+    )[1].split("\n      - name:", 1)[0]
+    assert 'statuses=("${PIPESTATUS[@]}")' in resolve_step
+    assert '[ "$resolver_rc" -ne 3 ]' in resolve_step
+    assert 'echo "resolver_rc=$resolver_rc" >> "$GITHUB_OUTPUT"' in resolve_step
+    assert resolve_pending.EXIT_REFUSED_ROWS == 3
+    names = [
+        line.strip()[len("- name: ") :]
+        for line in workflow.splitlines()
+        if line.strip().startswith("- name: ")
+    ]
+    fail_step = names.index("Fail the run on refused rows")
+    assert fail_step == names.index("Alert on failure") - 1
+    assert fail_step > names.index("Record the successfully deployed ledger SHA")
+    assert "if: steps.resolve.outputs.resolver_rc == '3'" in workflow
+
+
+# --- Registry growth is a per-row catalog refusal (2026-10-16) ---
+#
+# Run 38962977031 reached the append for the first time in two weeks and
+# raised there: the FY2026 USAspending CDFI snapshot's row made the staged
+# generator retire a non-placeholder identity, which _regenerate_series_catalog
+# refuses for the whole append. The per-row preflight only looked at the
+# generator's exit code, so it could not exclude that one row.
+
+_REGISTRY_GENERATOR = b"""import json, pathlib, sys
+text = pathlib.Path("ledger/official_observations.jsonl").read_text()
+rows = [json.loads(line) for line in text.splitlines() if line.strip()]
+registry = pathlib.Path("ledger/series_uuid_registry.jsonl")
+ids = [row["source_record_id"] for row in rows]
+if any(ref.startswith("conflict.") for ref in ids):
+    sys.exit("unit conflict within identity")
+if any(ref.startswith("unlink.") for ref in ids):
+    registry.unlink()
+    sys.exit(0)
+added = []
+for ref in ids:
+    concept = ".".join(ref.split(".")[:3])
+    full = {"geography": ["country", "0100000US", "current"],
+            "entity": ["economy", "aggregate"]}
+    if ref.startswith("retire."):
+        added.append({"concept": concept, "uuid": "old-" + concept, **full,
+                      "retired": True})
+    elif ref.startswith("mint."):
+        added.append({"concept": concept, "uuid": "fresh-" + ref, **full})
+if added:
+    with registry.open("a") as handle:
+        for entry in added:
+            handle.write(json.dumps(entry) + "\\n")
+"""
+_BASE_REGISTRY = (
+    b'{"concept":"base.series.level","uuid":"base-1",'
+    b'"geography":["country","0100000US","current"],'
+    b'"entity":["economy","aggregate"]}\n'
+)
+
+
+def _registry_tree() -> resolve_pending.RepositoryTree:
+    tree = _catalog_tree(_REGISTRY_GENERATOR)
+    tree.files["ledger/series_uuid_registry.jsonl"] = _BASE_REGISTRY
+    tree.modes["ledger/series_uuid_registry.jsonl"] = "100644"
+    tree.blob_shas["ledger/series_uuid_registry.jsonl"] = "b" * 40
+    return tree
+
+
+def _refuse(monkeypatch, rows: list[dict[str, str]]) -> dict[str, str]:
+    tree = _registry_tree()
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    base = tree.files["ledger/official_observations.jsonl"].decode()
+    return resolve_pending.ledger_catalog_refusals(
+        "r", "b" * 40, "ledger/official_observations.jsonl", base, rows
+    )
+
+
+def test_a_row_that_retires_an_identity_is_refused_alone(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "mint.series.a.fy2026.snapshot"},
+        {"source_record_id": "retire.cdfi.obligations.fy2026.snapshot"},
+        {"source_record_id": "plain.series.b.2026_09.first_print"},
+    ]
+    refusals = _refuse(monkeypatch, rows)
+    assert list(refusals) == ["retire.cdfi.obligations.fy2026.snapshot"]
+    reason = refusals["retire.cdfi.obligations.fy2026.snapshot"]
+    assert reason.startswith("series-catalog registry growth refused: ")
+    assert "retires a non-placeholder identity 'retire.cdfi.obligations'" in reason
+
+
+def test_a_first_observations_own_fresh_identity_is_not_refused(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "mint.series.a.fy2026.snapshot"},
+        {"source_record_id": "mint.series.b.fy2026.snapshot"},
+    ]
+    assert _refuse(monkeypatch, rows) == {}
+
+
+def test_a_generator_that_removes_the_registry_is_a_refusal(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "plain.series.b.2026_09.first_print"},
+        {"source_record_id": "unlink.series.c.2026_09.first_print"},
+    ]
+    refusals = _refuse(monkeypatch, rows)
+    assert refusals == {
+        "unlink.series.c.2026_09.first_print": (
+            "series-catalog registry growth refused: the generator removed the "
+            "UUID registry"
+        )
+    }
+
+
+@settings(max_examples=15, deadline=None)
+@given(
+    kinds=st.lists(
+        st.sampled_from(["plain", "mint", "retire", "conflict"]), min_size=1, max_size=4
+    )
+)
+def test_exactly_the_rows_that_fail_alone_are_refused(kinds: list[str]) -> None:
+    """Every row whose own append the generator refuses, by exit code or by
+    registry growth, is refused with that reason; every other row is kept,
+    and the kept rows pass together (no rows fail only together here)."""
+    rows = [
+        {"source_record_id": f"{kind}.series.s{index}.2026_09.first_print"}
+        for index, kind in enumerate(kinds)
+    ]
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        refusals = _refuse(monkeypatch, rows)
+    expected = {
+        row["source_record_id"]
+        for row, kind in zip(rows, kinds)
+        if kind in {"retire", "conflict"}
+    }
+    assert set(refusals) == expected
+    for ref, reason in refusals.items():
+        if ref.startswith("retire."):
+            assert reason.startswith("series-catalog registry growth refused: ")
+        else:
+            assert reason.startswith("series-catalog generator exit 1: ")
+
+
+def _registry_program_refusals(
+    monkeypatch,
+    rows: list[dict[str, str]],
+    program: str,
+    *,
+    base_registry: bytes | None = _BASE_REGISTRY,
+) -> dict[str, str]:
+    generator = (
+        """import json, pathlib
+ledger = pathlib.Path("ledger/official_observations.jsonl")
+ids = {json.loads(line)["source_record_id"] for line in ledger.read_text().splitlines()}
+registry = pathlib.Path("ledger/series_uuid_registry.jsonl")
+def emit(concept, uuid, **fields):
+    entry = {"concept": concept, "uuid": uuid,
+             "geography": ["country", "0100000US", "current"],
+             "entity": ["economy", "aggregate"]}
+    entry.update(fields)
+    with registry.open("a") as handle:
+        handle.write(json.dumps(entry) + "\\n")
+"""
+        + program
+    )
+    tree = _catalog_tree(generator.encode())
+    if base_registry is not None:
+        relative = "ledger/series_uuid_registry.jsonl"
+        tree.files[relative] = base_registry
+        tree.modes[relative] = "100644"
+        tree.blob_shas[relative] = "b" * 40
+    monkeypatch.setattr(resolve_pending, "_fetch_repository_tree", lambda *_: tree)
+    return resolve_pending.ledger_catalog_refusals(
+        "r",
+        "b" * 40,
+        "ledger/official_observations.jsonl",
+        tree.files["ledger/official_observations.jsonl"].decode(),
+        rows,
+    )
+
+
+def test_catalog_trial_cannot_borrow_a_refused_peers_identity(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "cross.series.a.2026_09.first_print"},
+        {"source_record_id": "foreign.series.b.2026_09.first_print"},
+        {"source_record_id": "plain.series.c.2026_09.first_print"},
+    ]
+    program = """if "cross.series.a.2026_09.first_print" in ids:
+    emit("foreign.series.b", "foreign-fresh")
+if "foreign.series.b.2026_09.first_print" in ids:
+    emit("foreign.series.b", "foreign-existing", retired=True)
+"""
+    refusals = _registry_program_refusals(monkeypatch, rows, program)
+    assert set(refusals) == {row["source_record_id"] for row in rows[:2]}
+    assert "belongs to no observation" in refusals[rows[0]["source_record_id"]]
+    assert "retires a non-placeholder" in refusals[rows[1]["source_record_id"]]
+
+
+def test_placeholder_enrichment_survives_a_refused_peer(monkeypatch) -> None:
+    rows = [
+        {"source_record_id": "census.housing.completions_saar.2026_09.first_print"},
+        {"source_record_id": "retire.series.bad.2026_09.first_print"},
+    ]
+    registry = _BASE_REGISTRY + _registry_line(
+        concept="census.housing.completions_saar",
+        uuid="placeholder-1",
+        geography=None,
+        entity=None,
+    )
+    program = """if "census.housing.completions_saar.2026_09.first_print" in ids:
+    emit("census.housing.completions_saar", "placeholder-1",
+         geography=None, entity=None, retired=True)
+    emit("census.housing.completions_saar", "placeholder-1",
+         succeeds={"concept": "census.housing.completions_saar",
+                   "geography": None, "entity": None})
+if "retire.series.bad.2026_09.first_print" in ids:
+    emit("retire.series.bad", "old-bad", retired=True)
+"""
+    refusals = _registry_program_refusals(
+        monkeypatch, rows, program, base_registry=registry
+    )
+    assert list(refusals) == [rows[1]["source_record_id"]]
+    assert "retires a non-placeholder" in refusals[rows[1]["source_record_id"]]
+
+
+def test_base_only_registry_drift_is_not_attributed_to_new_rows(monkeypatch) -> None:
+    rows = [{"source_record_id": "plain.series.a.2026_09.first_print"}]
+    # The generator also emits this unrelated identity for the base alone.
+    assert (
+        _registry_program_refusals(
+            monkeypatch, rows, 'emit("base.series.level", "base-drift")\n'
+        )
+        == {}
+    )
+
+
+@pytest.mark.parametrize("retired", [False, True])
+def test_joint_only_registry_growth_obeys_the_final_growth_policy(
+    monkeypatch, retired: bool
+) -> None:
+    rows = [
+        {"source_record_id": "joint.series.a.2026_09.first_print"},
+        {"source_record_id": "joint.series.b.2026_09.first_print"},
+    ]
+    program = f"""if {{"joint.series.a.2026_09.first_print",
+     "joint.series.b.2026_09.first_print"}} <= ids:
+    emit("joint.series.a", "joint-1", retired={retired!r})
+"""
+    if retired:
+        with pytest.raises(
+            resolve_pending.LedgerProposalError,
+            match="one by one fail it together: .*retires a non-placeholder",
+        ):
+            _registry_program_refusals(monkeypatch, rows, program)
+    else:
+        assert _registry_program_refusals(monkeypatch, rows, program) == {}
+
+
+def test_absent_base_registry_preserves_exit_code_only_preflight(monkeypatch) -> None:
+    rows = [{"source_record_id": "retire.series.bad.2026_09.first_print"}]
+    assert (
+        _registry_program_refusals(
+            monkeypatch,
+            rows,
+            'emit("retire.series.bad", "old-bad", retired=True)\n',
+            base_registry=None,
+        )
+        == {}
+    )

@@ -1,0 +1,19 @@
+{
+  "provider": "openai",
+  "backend": "codex-exec",
+  "auth": "codex-cli-subscription",
+  "model": "gpt-5.5",
+  "searchEnabled": true,
+  "sandbox": "read-only",
+  "networkAccess": false,
+  "reasoningEffort": "low",
+  "timeoutSeconds": 540,
+  "timedOut": true,
+  "timeoutReason": "idle",
+  "terminatedAfterOutput": false,
+  "processReturnCode": 0,
+  "effectiveReturnCode": 0,
+  "usage": null,
+  "eventCount": 38,
+  "lastError": null
+}

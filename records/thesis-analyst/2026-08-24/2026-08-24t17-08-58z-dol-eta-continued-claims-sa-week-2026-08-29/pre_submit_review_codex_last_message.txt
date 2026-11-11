@@ -1,0 +1,15 @@
+{
+  "summary": "The draft is mostly coherent and well supported, but it likely violates the ledger target contract by setting a specific September 10 resolution date instead of the registered bound/window date.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "blocking",
+      "summary": "The draft sets resolutionDate to 2026-09-10, while the provided canonical ledger context gives an expectedReleaseWindow ending 2026-09-12 and instructs the cell to follow ledger fields for resolutionDate.",
+      "actionRequested": "Set resolutionDate to the ledger-contracted date if that is 2026-09-12, or explicitly align with the registered target record rather than the inferred DOL release day."
+    }
+  ],
+  "optionalSuggestions": [
+    "Keep the September 10 DOL release discussion in reasoning as evidence for first-print timing, but separate it from the ledger resolutionDate field.",
+    "The prior/update/interval step is strong; no replacement forecast is needed."
+  ]
+}

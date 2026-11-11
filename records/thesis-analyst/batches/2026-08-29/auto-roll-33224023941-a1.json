@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-08-29T00:38:59Z",
+  "finishedAt": "2026-08-29T00:43:57Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 2,
+  "ok": 2,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "initial-claims-week-2026-09-05",
+        "country": "US",
+        "dataPointId": "us.dol.initial_claims.sa.week_2026-09-05",
+        "expectedReleaseWindow": {
+          "end": "2026-09-20",
+          "start": "2026-09-16"
+        },
+        "period": "week_2026-09-05",
+        "registeredAt": "2026-08-29T00:37:16Z",
+        "registeredAtUtc": "2026-08-29T00:37:16Z",
+        "registrationCommit": "e2c9aba4f01f9ab15053ecba7a01caec216cc444",
+        "registrationState": "preregistered",
+        "series": "us.dol.initial_claims.sa",
+        "sourceBinding": {
+          "adapter": "alfred-fred",
+          "allowedHosts": [
+            "alfred.stlouisfed.org"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-09-20",
+            "start": "2026-09-16"
+          },
+          "field": "ICSA",
+          "releasePolicy": "advance_vintage",
+          "sourceSeriesId": "ICSA",
+          "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA",
+          "table": "ALFRED graph CSV",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "309a1b08a210a0e9ba97c3f79d88a28d7e7e84448b1413d351bbbbd5ffab1271",
+        "targetRegistrationPath": "records/targets/2026-08-29-309a1b08a210a0e9ba97c3f79d88a28d7e7e84448b1413d351bbbbd5ffab1271.json",
+        "targetUnit": "thousands",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-08-29T00:38:59Z",
+      "finishedAt": "2026-08-29T00:41:11Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-08-29/2026-08-29t00-38-59z-us-dol-initial-claims-sa-week-2026-09-05/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-08-29/2026-08-29t00-38-59z-us-dol-initial-claims-sa-week-2026-09-05/cells.with_activity.json",
+      "stdoutTail": "     \"createdAt\": \"2026-08-29T00:38:59Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-08-29/2026-08-29t00-38-59z-us-dol-initial-claims-sa-week-2026-09-05/distribution.json\",\n      \"sha256\": \"c01160d706d90057792faf26fb9ffd91a3a7ddc3964e510a05186daf602bac22\",\n      \"bytes\": 13554,\n      \"createdAt\": \"2026-08-29T00:38:59Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-08-29/2026-08-29t00-38-59z-us-dol-initial-claims-sa-week-2026-09-05/validation.json\",\n      \"sha256\": \"2f907aa5135417563a770481cb13ce82f7784b334b697335bc7febd3cb0c0759\",\n      \"bytes\": 131,\n      \"createdAt\": \"2026-08-29T00:38:59Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-08-29/2026-08-29t00-38-59z-us-dol-initial-claims-sa-week-2026-09-05/cells.with_activity.json\",\n      \"sha256\": \"794b9c1f480334d755944c8c3654eecb2f40df0943424921dbe1775ef400408e\",\n      \"bytes\": 42350,\n      \"createdAt\": \"2026-08-29T00:38:59Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-08-29/2026-08-29t00-38-59z-us-dol-initial-claims-sa-week-2026-09-05/manifest.json\",\n      \"sha256\": \"adabf20ac456be25a4eae832c3ab116426fddc4afd98e4662a29e2d6caa491ce\",\n      \"bytes\": 16148,\n      \"createdAt\": \"2026-08-29T00:38:59Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"initial-claims-week-2026-09-05\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"e2c9aba4f01f9ab15053ecba7a01caec216cc444\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"f077368f86df19714ff5c03cc3403dc2cac7855faf9e12821e55c7ae1fe9f805\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "continued-claims-week-2026-09-05",
+        "country": "US",
+        "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-05.first_print",
+        "expectedReleaseWindow": {
+          "end": "2026-09-21",
+          "start": "2026-09-17"
+        },
+        "period": "week_2026-09-05",
+        "registeredAt": "2026-08-29T00:37:16Z",
+        "registeredAtUtc": "2026-08-29T00:37:16Z",
+        "registrationCommit": "e2c9aba4f01f9ab15053ecba7a01caec216cc444",
+        "registrationState": "preregistered",
+        "series": "dol.eta.continued_claims.sa",
+        "sourceBinding": {
+          "adapter": "alfred-fred",
+          "allowedHosts": [
+            "alfred.stlouisfed.org"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-09-21",
+            "start": "2026-09-17"
+          },
+          "field": "CCSA",
+          "releasePolicy": "advance_vintage",
+          "sourceSeriesId": "CCSA",
+          "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA",
+          "table": "ALFRED graph CSV",
+          "transform": {
+            "factor": 1e-06,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "b665b98ad6cd565d23ce2c9701de4b4fbd8fea1034a3ee54ddc96d1c0c16df2d",
+        "targetRegistrationPath": "records/targets/2026-08-29-b665b98ad6cd565d23ce2c9701de4b4fbd8fea1034a3ee54ddc96d1c0c16df2d.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-08-29T00:41:11Z",
+      "finishedAt": "2026-08-29T00:43:57Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-08-29/2026-08-29t00-41-11z-dol-eta-continued-claims-sa-week-2026-09-05/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-08-29/2026-08-29t00-41-11z-dol-eta-continued-claims-sa-week-2026-09-05/cells.with_activity.json",
+      "stdoutTail": "t\": \"2026-08-29T00:41:11Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-08-29/2026-08-29t00-41-11z-dol-eta-continued-claims-sa-week-2026-09-05/distribution.json\",\n      \"sha256\": \"08649040cd5f0394fcb79220700dc136222cfb2ace6ab95b185e527563ec7d6e\",\n      \"bytes\": 13907,\n      \"createdAt\": \"2026-08-29T00:41:11Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-08-29/2026-08-29t00-41-11z-dol-eta-continued-claims-sa-week-2026-09-05/validation.json\",\n      \"sha256\": \"52785306b908c90151c40ffe8582d85ce50751a55cee59c9ccabd0a0e96d0da5\",\n      \"bytes\": 133,\n      \"createdAt\": \"2026-08-29T00:41:11Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-08-29/2026-08-29t00-41-11z-dol-eta-continued-claims-sa-week-2026-09-05/cells.with_activity.json\",\n      \"sha256\": \"cdc903801b9b14eb9e117f1a12104ee3814b56265eabe228f3e351c43c8e0b11\",\n      \"bytes\": 45633,\n      \"createdAt\": \"2026-08-29T00:41:11Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-08-29/2026-08-29t00-41-11z-dol-eta-continued-claims-sa-week-2026-09-05/manifest.json\",\n      \"sha256\": \"b817981a53b82265d508e0f99a606bba18c7b478d57d24ac31a873a325bfbf39\",\n      \"bytes\": 16437,\n      \"createdAt\": \"2026-08-29T00:41:11Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"continued-claims-week-2026-09-05\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"e2c9aba4f01f9ab15053ecba7a01caec216cc444\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"a6604b5d477c2ff194cc4085249d47baeb37fcd288429af6736f3adadbf9d9c2\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

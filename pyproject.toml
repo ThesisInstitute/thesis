@@ -35,7 +35,9 @@ Issues = "https://github.com/ThesisInstitute/thesis/issues"
 
 [project.optional-dependencies]
 custody = [
-    "receipt==0.5.1; python_version >= '3.11'",
+    # Native captured IRS workbook extractions replay offline during custody.
+    "xlrd==2.0.1",
+    "receipt==0.6.2; python_version >= '3.11'",
     # SBA custody replays geometry through pypdf layout internals; any version
     # bump must pass the official-layout and adversarial-fixture suite first.
     "pypdf==6.14.2",
@@ -54,6 +56,12 @@ resolver = [
     # SBA loan-performance resolution replays the hash-pinned PDF member from
     # witnessed custody and therefore needs the same strict parser as capture.
     "pypdf==6.14.2",
+    # SSA official pages (SSI Monthly Statistics, Monthly Statistical
+    # Snapshot, OHO workload XML) resolve through headless Chromium via
+    # scripts/official_browser_fetch.py; ssa.gov's bot manager refuses every
+    # non-browser client. Install the engine with
+    # `python -m playwright install --with-deps chromium`.
+    "playwright==1.62.0",
 ]
 experiments = [
     "numpy>=2.2.6",
@@ -80,6 +88,8 @@ dev = [
     "pyyaml>=6.0.2",
     # The IRS SOI and EIA DNav adapter fixtures parse real .xls workbooks.
     "xlrd==2.0.1",
+    # Property tests (tests/test_resolution_status.py).
+    "hypothesis>=6.140",
 ]
 
 [tool.setuptools.packages.find]

@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-08-26T16:25:30Z",
+  "finishedAt": "2026-08-26T16:29:10Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 2,
+  "ok": 2,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "uk-ppi-input-prices-annual-rate-august-2026",
+        "country": "UK",
+        "dataPointId": "ons.ppi.input_prices_yoy.2026_08.first_print",
+        "expectedReleaseDate": "2026-09-16",
+        "expectedReleaseWindow": {
+          "end": "2026-09-16",
+          "start": "2026-09-16"
+        },
+        "period": "2026-08",
+        "registeredAt": "2026-08-26T16:23:02Z",
+        "registeredAtUtc": "2026-08-26T16:23:02Z",
+        "registrationCommit": "b4f1d890f91c9ece5fc1e068a92fbe28ea25be43",
+        "registrationState": "preregistered",
+        "resolutionSourceUrl": "https://www.ons.gov.uk/releases/producerpriceinflationukaugust2026timeseries",
+        "series": "ons.ppi.input_prices_yoy",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.ons.gov.uk"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-09-16",
+            "start": "2026-09-16"
+          },
+          "field": "Total input producer prices, 12-month percentage change",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "PPI:GHIP",
+          "sourceUrl": "https://www.ons.gov.uk/releases/producerpriceinflationukaugust2026timeseries",
+          "table": "Producer price inflation time series",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "sourceField": "Total input producer prices, 12-month percentage change",
+        "sourceSeriesId": "PPI:GHIP",
+        "sourceTable": "Producer price inflation time series",
+        "targetContentHash": "2c4797e85af3bb173fcc595dd241efba3eea6d9f2c854085b8195f60588ba1b6",
+        "targetRegistrationPath": "records/targets/2026-08-26-2c4797e85af3bb173fcc595dd241efba3eea6d9f2c854085b8195f60588ba1b6.json",
+        "targetUnit": "percent_growth",
+        "transform": {
+          "factor": 1,
+          "operation": "identity"
+        },
+        "valueScale": 1
+      },
+      "startedAt": "2026-08-26T16:25:30Z",
+      "finishedAt": "2026-08-26T16:27:31Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/cells.with_activity.json",
+      "stdoutTail": "  \"bytes\": 26085,\n      \"createdAt\": \"2026-08-26T16:25:30Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/distribution.json\",\n      \"sha256\": \"bb8ebec0edb253da8632ed371a855c1364c7adad3f1a0a6e2955d214314413f9\",\n      \"bytes\": 13590,\n      \"createdAt\": \"2026-08-26T16:25:30Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/validation.json\",\n      \"sha256\": \"6e96c5a4f4a430ecc72b4369485fee62d4d20de22efe2e3a6a6c40234a90486d\",\n      \"bytes\": 144,\n      \"createdAt\": \"2026-08-26T16:25:30Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/cells.with_activity.json\",\n      \"sha256\": \"a46f37905f405a118acbd9621797091114a7c394ee108cd1484b8ab8cc7b7b42\",\n      \"bytes\": 38891,\n      \"createdAt\": \"2026-08-26T16:25:30Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/manifest.json\",\n      \"sha256\": \"bb4594ab92873949cad18864ae028f9c1bb4dda2019368b2421237f81a477f40\",\n      \"bytes\": 13686,\n      \"createdAt\": \"2026-08-26T16:25:30Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"uk-ppi-input-prices-annual-rate-august-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"b4f1d890f91c9ece5fc1e068a92fbe28ea25be43\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"1a1cd27998ad87e9c80dfb09604c76b80df1b83d79b4338438f7bfa26d0f3807\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "uk-private-rent-annual-rate-august-2026",
+        "country": "UK",
+        "dataPointId": "ons.pipr.uk_private_rent_yoy.2026_08.first_print",
+        "expectedReleaseDate": "2026-09-16",
+        "expectedReleaseWindow": {
+          "end": "2026-09-16",
+          "start": "2026-09-16"
+        },
+        "period": "2026-08",
+        "registeredAt": "2026-08-26T16:23:02Z",
+        "registeredAtUtc": "2026-08-26T16:23:02Z",
+        "registrationCommit": "b4f1d890f91c9ece5fc1e068a92fbe28ea25be43",
+        "registrationState": "preregistered",
+        "resolutionSourceUrl": "https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/priceindexofprivaterentsukmonthlypricestatistics",
+        "series": "ons.pipr.uk_private_rent_yoy",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.ons.gov.uk"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-09-16",
+            "start": "2026-09-16"
+          },
+          "field": "UK, all property types, annual percentage change",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "priceindexofprivaterentsukmonthlypricestatistics",
+          "sourceUrl": "https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/priceindexofprivaterentsukmonthlypricestatistics",
+          "table": "Price Index of Private Rents, UK: monthly price statistics",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "sourceField": "UK, all property types, annual percentage change",
+        "sourceSeriesId": "priceindexofprivaterentsukmonthlypricestatistics",
+        "sourceTable": "Price Index of Private Rents, UK: monthly price statistics",
+        "targetContentHash": "ea72854092e5b7d2ffc1e87736b878925ecad998c58768551ae364ef2ffc5452",
+        "targetRegistrationPath": "records/targets/2026-08-26-ea72854092e5b7d2ffc1e87736b878925ecad998c58768551ae364ef2ffc5452.json",
+        "targetUnit": "percent_growth",
+        "transform": {
+          "factor": 1,
+          "operation": "identity"
+        },
+        "valueScale": 1
+      },
+      "startedAt": "2026-08-26T16:27:31Z",
+      "finishedAt": "2026-08-26T16:29:10Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/cells.with_activity.json",
+      "stdoutTail": "5499,\n      \"createdAt\": \"2026-08-26T16:27:31Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/distribution.json\",\n      \"sha256\": \"d8e74c99f7a8897c786a14e7795c837c89e5c465ac0d80fc06095774e16360f0\",\n      \"bytes\": 13228,\n      \"createdAt\": \"2026-08-26T16:27:31Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/validation.json\",\n      \"sha256\": \"011e8acf1abe05ed7f07955a31bde9dacf34f146ab9cfbf1ab287baed999a7c8\",\n      \"bytes\": 140,\n      \"createdAt\": \"2026-08-26T16:27:31Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/cells.with_activity.json\",\n      \"sha256\": \"fc01932b5b7ca42d4a309f1d30a4a0e235c92a56ab67445ac61b0c5ca5790761\",\n      \"bytes\": 39293,\n      \"createdAt\": \"2026-08-26T16:27:31Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/manifest.json\",\n      \"sha256\": \"6756d01b041a502726ef01f4b238c89726a20c103f0b9ba227a2888086aae80d\",\n      \"bytes\": 14738,\n      \"createdAt\": \"2026-08-26T16:27:31Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"uk-private-rent-annual-rate-august-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"b4f1d890f91c9ece5fc1e068a92fbe28ea25be43\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"fb94fbdcf2ce70e801c78d08ed23418fd5d5217da2907e56c1cf86b09fec6660\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

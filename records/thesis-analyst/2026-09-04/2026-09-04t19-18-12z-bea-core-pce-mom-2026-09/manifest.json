@@ -1,0 +1,397 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-04T19:18:12Z",
+  "runStartedAt": "2026-09-04T19:18:12Z",
+  "sealedAt": "2026-09-04T19:20:07Z",
+  "series": "bea.core_pce.mom",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-core-pce-mom-september-2026",
+    "country": "US",
+    "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+    "expectedReleaseWindow": {
+      "end": "2026-11-03",
+      "start": "2026-10-26"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-04T19:02:52Z",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "registrationState": "preregistered",
+    "series": "bea.core_pce.mom",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.bea.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-03",
+        "start": "2026-10-26"
+      },
+      "field": "bea.core_pce.mom",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "bea.core_pce.mom",
+      "sourceUrl": "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+      "table": "U.S. Bureau of Economic Analysis, Personal Income and Outlays, August 2026",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558",
+    "targetRegistrationPath": "records/targets/2026-09-04-3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "targetContentHash": "3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558",
+  "targetRegistrationPath": "records/targets/2026-09-04-3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558.json",
+  "registeredAtUtc": "2026-09-04T19:02:52Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-04T19:18:12Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "8d56dbbfea17b44115a38222cebbd7713543c061453c7002d73692e0ee5291f0"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "warning",
+        "rubricItem": "resolver",
+        "summary": "The draft correctly identifies the BEA first-print September 2026 Personal Income and Outlays release date as 2026-10-29, but its `resolutionSourceUrl` is a future news-release URL while the ledger binding currently names the BEA core PCE series page and has an August table-label discrepancy.",
+        "actionRequested": "Align the resolver fields with the registered source binding where possible, and keep the explicit reasoning note that the ledger table label says August 2026 while the target period, slug, and dataPointId are September 2026."
+      },
+      {
+        "findingId": "review.finding.2",
+        "severity": "warning",
+        "rubricItem": "update",
+        "summary": "The +0.01 sticky-services adjustment is directionally plausible but not tied to a concrete cited component value or named BEA table observation.",
+        "actionRequested": "Either cite the specific BEA component evidence supporting sticky services/core persistence or describe the +0.01 as a judgmental residual rather than evidence-driven movement."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "State that the seven-month volatility sample is intentionally short because it uses same-year first prints, or add a longer historical volatility cross-check if available."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Make the final forecast step repeat the rounded implied bounds 0.10 to 0.38 so the JSON interval and reasoning are visibly identical."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the resolver cleanup by using the registered BEA core PCE series page as the stable resolutionSourceUrl while retaining the verified 2026-10-29 BEA schedule date and the ledger August-label discrepancy note; accepted the update critique by describing the +0.01 persistence term as a judgmental residual, and accepted the optional clarity point by repeating the rounded 0.10 to 0.38 interval in the calculation.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.finding.2",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the resolver cleanup by using the registered BEA core PCE series page as the stable resolutionSourceUrl while retaining the verified 2026-10-29 BEA schedule date and the ledger August-label discrepancy note; accepted the update critique by describing the +0.01 persistence term as a judgmental residual, and accepted the optional clarity point by repeating the rounded 0.10 to 0.38 interval in the calculation.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the resolver cleanup by using the registered BEA core PCE series page as the stable resolutionSourceUrl while retaining the verified 2026-10-29 BEA schedule date and the ledger August-label discrepancy note; accepted the update critique by describing the +0.01 persistence term as a judgmental residual, and accepted the optional clarity point by repeating the rounded 0.10 to 0.38 interval in the calculation.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the resolver cleanup by using the registered BEA core PCE series page as the stable resolutionSourceUrl while retaining the verified 2026-10-29 BEA schedule date and the ledger August-label discrepancy note; accepted the update critique by describing the +0.01 persistence term as a judgmental residual, and accepted the optional clarity point by repeating the rounded 0.10 to 0.38 interval in the calculation.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is publishable after a small resolver/source cleanup; the forecast logic is otherwise coherent and traceable."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/prompt.md",
+      "sha256": "5654a55b251f2fd6565c1c87bd85beed10823d6914ebc0e6206282de6658c3b3",
+      "bytes": 10600,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_command.json",
+      "sha256": "a77aedc7830fc85d1c48ce277870f4e0f83cd04076e0e95a42a25e8b273d3e0c",
+      "bytes": 746,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "c8c6058d5006bce7084629224c788897f049cc4d000dbaa2c6d4fa5624f1bc88",
+      "bytes": 38416,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_codex_stderr.log",
+      "sha256": "960d1aa6f422e8a596876aa5d2d6977fc64daf3744fa323bbd159c59931eed65",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_codex_events.jsonl",
+      "sha256": "41931e770c19577799508ad45ed746dd8994089bba9ce2fe24f45c01416f1b8c",
+      "bytes": 38590,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_codex_last_message.txt",
+      "sha256": "677a69592b4f988f76ddd6d0d1cd0f36c8499e44fd52a264f017363abab25f8e",
+      "bytes": 6597,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_codex_trace.json",
+      "sha256": "ae6239f47b1906bd62df3ce58c5bafbc71de687a434fd8a81e4a99ce48c3a9f5",
+      "bytes": 559,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_stdout.txt",
+      "sha256": "677a69592b4f988f76ddd6d0d1cd0f36c8499e44fd52a264f017363abab25f8e",
+      "bytes": 6597,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/draft_stderr.txt",
+      "sha256": "815634a688898c1abe20fb486af0aee91c06eb4132e69f302c7b414b6593bc27",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_prompt.md",
+      "sha256": "4e8ab2845859b9c699364b2e837a68046e76b23246422555373ae56572fe4623",
+      "bytes": 9858,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_command.json",
+      "sha256": "a465674df9e7b0784f731d5085a6c2bdec29524c54087408fb65c492d95885f3",
+      "bytes": 742,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "6d90660b0a12037c07cfb5aa81f048b9d32e75121a0415c8f6dbe63233ed7e78",
+      "bytes": 2600,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "fd46b3112f3a18cc622d2d72b4fe49ea0b203169e080fa7ee5467f6126dfafce",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "68eef57e8e08a8995450ec21c576be5a94684b962c5b44c32ebb30e9bc737f88",
+      "bytes": 2620,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "14f87c47b911c037719200f88844a71b4aa919805b671c547724034b2acd1f16",
+      "bytes": 1592,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "d84d7476c67b15344a5f938eceebaad20793aef5708abe586b157f0db29bad03",
+      "bytes": 556,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "14f87c47b911c037719200f88844a71b4aa919805b671c547724034b2acd1f16",
+      "bytes": 1592,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "e31880c9d82293f93245bbcc620223a9a1a04bea1917374220197f6dd6490c85",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/revision_prompt.md",
+      "sha256": "4eb72f565397f96673421e2e99facb4f09d58e1819d8a6ffb740ba6a0f260f2c",
+      "bytes": 19725,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/command.json",
+      "sha256": "5cc27ccc25c319eba44adb1b10b07caedff226502a03c1782fa9b7df9f3ce459",
+      "bytes": 740,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/codex_stdout.jsonl",
+      "sha256": "e309a29295a42c542258f427e19f8e2e15de4b7fd5080b1ccdfb223f3394b1f7",
+      "bytes": 8323,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/codex_stderr.log",
+      "sha256": "6a27b5d481a4f882f2760945f88f1c0d8a577c7dd9a6340c472e500d4cd8d4b5",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/codex_events.jsonl",
+      "sha256": "37538422c8535fe5331c19ed637ccee3825643a2fd209432514a9c60f1c1f799",
+      "bytes": 8373,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/codex_last_message.txt",
+      "sha256": "4142293865e4634f97868a30d312dca4262d5bea5920cbdbca0a79f9f4fad409",
+      "bytes": 7283,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/codex_trace.json",
+      "sha256": "ca3e754804518321246faba00168f620b5afe62b86bb6bdb8c43d27ae9adb41a",
+      "bytes": 556,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/stdout.txt",
+      "sha256": "4142293865e4634f97868a30d312dca4262d5bea5920cbdbca0a79f9f4fad409",
+      "bytes": 7283,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/stderr.txt",
+      "sha256": "99a872bf9a412ed6938895151a6a0b76f5c0d27b5972d10486e113b77ab7607b",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/raw_response.txt",
+      "sha256": "4142293865e4634f97868a30d312dca4262d5bea5920cbdbca0a79f9f4fad409",
+      "bytes": 7283,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/parsed_cells.json",
+      "sha256": "8dbfbddb170b399e5e467843252b3f22628a16df9fd1bd979d99d64cd1a2d115",
+      "bytes": 8516,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/normalized_cells.json",
+      "sha256": "ae3285493e80bdca7c66bee075b90362978ca6396a4bd4dad26c126d96090a24",
+      "bytes": 25876,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/distribution.json",
+      "sha256": "0bd0da07c9ae919d274216368caf91810e8c4fa708bd57d538e06ee7a79c5437",
+      "bytes": 13576,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/validation.json",
+      "sha256": "9d5cad01c9a5a0abc18120278cbd11b5b823488ed43eab9ef8d504ec2cb19c52",
+      "bytes": 131,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/cells.with_activity.json",
+      "sha256": "e06dda19f3ffcc6031728217738a47d828fc76e9627f1c523e9916f25a26bbdf",
+      "bytes": 41843,
+      "createdAt": "2026-09-04T19:18:12Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-18-12z-bea-core-pce-mom-2026-09/manifest.json",
+      "sha256": "de6595d3a9f9ba2473a250ba1d5649815f767133faf6b203508eb4e4cef72fc4",
+      "bytes": 16042,
+      "createdAt": "2026-09-04T19:18:12Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "us-core-pce-mom-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "bcfc4980e1f6faf18b13f65d326f2e778683666911f538a6c7f21c69be53a6aa"
+}

@@ -1,0 +1,393 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-02T18:33:36Z",
+  "runStartedAt": "2026-09-02T18:33:36Z",
+  "sealedAt": "2026-09-02T18:35:36Z",
+  "series": "ons.uk_hpi.annual_change",
+  "period": "2026-07",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "uk-house-price-index-annual-rate-july-2026",
+    "country": "UK",
+    "dataPointId": "ons.uk_hpi.annual_change.2026_07.first_print",
+    "expectedReleaseDate": "2026-09-16",
+    "expectedReleaseWindow": {
+      "end": "2026-09-16",
+      "start": "2026-09-16"
+    },
+    "period": "2026-07",
+    "registeredAt": "2026-09-02T18:31:06Z",
+    "registeredAtUtc": "2026-09-02T18:31:06Z",
+    "registrationCommit": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+    "registrationState": "preregistered",
+    "resolutionSourceUrl": "https://www.gov.uk/government/collections/uk-house-price-index-reports",
+    "series": "ons.uk_hpi.annual_change",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.gov.uk"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-09-16",
+        "start": "2026-09-16"
+      },
+      "field": "Annual Change",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "UKHPI:K02000001:all-property-types:annual-change",
+      "sourceUrl": "https://www.gov.uk/government/collections/uk-house-price-index-reports",
+      "table": "UK House Price Index full file, United Kingdom row",
+      "transform": {
+        "factor": 1,
+        "operation": "identity"
+      }
+    },
+    "sourceField": "Annual Change",
+    "sourceSeriesId": "UKHPI:K02000001:all-property-types:annual-change",
+    "sourceTable": "UK House Price Index full file, United Kingdom row",
+    "targetContentHash": "07be653389c2ef5984ed0ae11abda329a931f1585747e491ec5bbe0cc22d6670",
+    "targetRegistrationPath": "records/targets/2026-09-02-07be653389c2ef5984ed0ae11abda329a931f1585747e491ec5bbe0cc22d6670.json",
+    "targetUnit": "percent",
+    "transform": {
+      "factor": 1,
+      "operation": "identity"
+    },
+    "valueScale": 1
+  },
+  "registrationCommit": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+  "targetContentHash": "07be653389c2ef5984ed0ae11abda329a931f1585747e491ec5bbe0cc22d6670",
+  "targetRegistrationPath": "records/targets/2026-09-02-07be653389c2ef5984ed0ae11abda329a931f1585747e491ec5bbe0cc22d6670.json",
+  "registeredAtUtc": "2026-09-02T18:31:06Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-02T18:33:36Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "4535b59ede3bcd0dc67bc446a9f8431fe888a3b6ea8ab32b51184009c8b0f51c"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "warning",
+        "rubricItem": "interval",
+        "summary": "The interval uses dispersion of recent annual-change levels, not realized forecast error or month-to-month annual-rate volatility.",
+        "actionRequested": "Either relabel this as an explicit uncertainty choice or briefly justify why recent level dispersion is the intended proxy for 80% forecast uncertainty."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Clarify that the 0.4% July 2026 monthly assumption is a forecast assumption, not an observed value."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Keep the first-print wording tightly aligned to the ledger rule if same-day corrections have a defined treatment elsewhere."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the interval critique by explicitly labeling recent annual-rate dispersion as the uncertainty proxy rather than realized forecast-error dispersion, clarified that the 0.4% July 2026 monthly input is a forecast assumption, and tightened the first-print rule to match the ledger without adding same-day correction exceptions.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the interval critique by explicitly labeling recent annual-rate dispersion as the uncertainty proxy rather than realized forecast-error dispersion, clarified that the 0.4% July 2026 monthly input is a forecast assumption, and tightened the first-print rule to match the ledger without adding same-day correction exceptions.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the interval critique by explicitly labeling recent annual-rate dispersion as the uncertainty proxy rather than realized forecast-error dispersion, clarified that the 0.4% July 2026 monthly input is a forecast assumption, and tightened the first-print rule to match the ledger without adding same-day correction exceptions.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is publishable with no blocking issues; it states the resolver, prior, update, interval math, and JSON fields coherently."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/prompt.md",
+      "sha256": "8b70ca65863f813000b9637878918bc4659a7ca9d7f5a92be79d1a1236f3b222",
+      "bytes": 10626,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_command.json",
+      "sha256": "5ef9c7fec851e854bc6e0a53377689a0dc388af9851e6ee696fca1f438c263b3",
+      "bytes": 754,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_codex_stdout.jsonl",
+      "sha256": "291b1efb0ddc230f263c09a39b690737ab72bed95c99aaf032ef06b4034c9e9d",
+      "bytes": 14915,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_codex_stderr.log",
+      "sha256": "171daef4761982125574ce8bfb4dc45d2c8492c705068cd5630bf7fc7c572e94",
+      "bytes": 233,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_codex_events.jsonl",
+      "sha256": "09ae91a053432d1cd8fdbbc382156ba4f9c9564b5747465ba970e83b3d16ee26",
+      "bytes": 14966,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_codex_last_message.txt",
+      "sha256": "ac1fec2dc7b66b2ca44bf5a4d955d35e09b21d5c60fa43bd7bdcf344cc3a2622",
+      "bytes": 7035,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_codex_trace.json",
+      "sha256": "500574570a12d5373cfd329af4ba126ea41941d6792f55ab01067cc415bc8e36",
+      "bytes": 559,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_stdout.txt",
+      "sha256": "ac1fec2dc7b66b2ca44bf5a4d955d35e09b21d5c60fa43bd7bdcf344cc3a2622",
+      "bytes": 7035,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/draft_stderr.txt",
+      "sha256": "7c8f5b0859889648c1e86de457fc7137124f13934a894785f0d684c30e5ec40d",
+      "bytes": 248,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_prompt.md",
+      "sha256": "8c6c46608e95e64f07e78152c685252f2883d57e5c6afb83839940defbad83d8",
+      "bytes": 10397,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_command.json",
+      "sha256": "5711d051546038c5777e819957181f28123ed7229ad789305d182083ccd5fe6e",
+      "bytes": 750,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "2102bf23509655ad800b6a88dc4d95051cc1c387c30e52490d218b370dd54dca",
+      "bytes": 1201,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_codex_stderr.log",
+      "sha256": "ce3699ee6729fbcfa5a243c563c7cca8310a9189fab2f44c2c47f5585eb4973e",
+      "bytes": 233,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_codex_events.jsonl",
+      "sha256": "b36a87f7487444d8e3253ee535cbf37407c5dca124a6051f944c6a49bf26afb3",
+      "bytes": 1223,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_codex_last_message.txt",
+      "sha256": "129f9aaca440d858c0013bd71c65f9ae61aa991334ab69ba4b9a372b276818c6",
+      "bytes": 845,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_codex_trace.json",
+      "sha256": "ab550a9befd912d373a487b4a7f9ff7b31741009281bbffe2a1342a5d6c7e3a2",
+      "bytes": 552,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_stdout.txt",
+      "sha256": "129f9aaca440d858c0013bd71c65f9ae61aa991334ab69ba4b9a372b276818c6",
+      "bytes": 845,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/pre_submit_review_stderr.txt",
+      "sha256": "921b8575c05b7954df73b2735ad239e35289bce4d39ec6019e50c36c8f7474c5",
+      "bytes": 248,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/revision_prompt.md",
+      "sha256": "aa8c9306ec663dce14b78998aa154a08eb6ded777fb1c355db33149902d74234",
+      "bytes": 19442,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/command.json",
+      "sha256": "eb0f7364103aae06837428ee070c30aa22710c50fc6a16301d657993f8178068",
+      "bytes": 748,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/codex_stdout.jsonl",
+      "sha256": "26f920c2489fa5021ddfbcafc26d13c5df172c57aec01ea39dcacb29b9ebc090",
+      "bytes": 8069,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/codex_stderr.log",
+      "sha256": "1974f1a7a0be402f4dd71dd53abcfa9877a4e1626a5235203a2335703413f19b",
+      "bytes": 233,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/codex_events.jsonl",
+      "sha256": "1ac7e5268066ff944b72158bf1b8e718edf7b59383830749ce81b78e29905069",
+      "bytes": 8091,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/codex_last_message.txt",
+      "sha256": "9bc403471f7ccdbf4b78cc77dd00838b41b13226d5c503f567e35b019ce893e5",
+      "bytes": 7447,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/codex_trace.json",
+      "sha256": "b021a5fe647895a9d4eda95df3850b2c0d1396908300487ec394b8322c09ac2f",
+      "bytes": 551,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/stdout.txt",
+      "sha256": "9bc403471f7ccdbf4b78cc77dd00838b41b13226d5c503f567e35b019ce893e5",
+      "bytes": 7447,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/stderr.txt",
+      "sha256": "f0fc8890f1c655088fadd10fff38cf5823d2871aed3a4094106aecf2c63e76ee",
+      "bytes": 248,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/raw_response.txt",
+      "sha256": "9bc403471f7ccdbf4b78cc77dd00838b41b13226d5c503f567e35b019ce893e5",
+      "bytes": 7447,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/parsed_cells.json",
+      "sha256": "afe6a47eaa7bf04995a9a6804898b4498149780d525b5510efb451b56dc65f7b",
+      "bytes": 8617,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/normalized_cells.json",
+      "sha256": "6c695c0e952e6d56b35bee6f25bc62e9b2700622f5fa8c69129f58c492915c8f",
+      "bytes": 25949,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/distribution.json",
+      "sha256": "1b1e47ca10164601c03cf88fcf2a91cd2e4481a868d8aaa856a5b3940edfe9db",
+      "bytes": 13548,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/validation.json",
+      "sha256": "d787614ad8bea39601cacf120c495788c043d041e9b8b73c9409e2411eec7976",
+      "bytes": 143,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/cells.with_activity.json",
+      "sha256": "83cb6f3a713511f9fb09e09fc26e615fb5be47b6f31b78e71ff50b2bf34ce16d",
+      "bytes": 40518,
+      "createdAt": "2026-09-02T18:33:36Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/manifest.json",
+      "sha256": "d3cb5985a31c47f45c6e9cabfa19afd0cf568aa1edb28124533c455e8f65d08a",
+      "bytes": 15176,
+      "createdAt": "2026-09-02T18:33:36Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "uk-house-price-index-annual-rate-july-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "14aa15210a3803be2ac6fea2ab51ffa41a34e4efa22450c85f59726e68b1968d"
+}

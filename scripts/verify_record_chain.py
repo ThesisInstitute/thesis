@@ -43,6 +43,20 @@ CODE_PINNED_TRUST_BUNDLES: dict[str, dict[str, Any]] = {
             "036737fdd779f5add77b79262d9967e4bac450ff3ab7132eb929dbf893a4c396"
         ),
     },
+    # v3 is v2 with one change: the DigiCert anchor admits the responder that
+    # timestamp.digicert.com has used since 2026-09-04 instead of the one it
+    # retired. Until the recorder workflow publishes the file, its exact bytes
+    # live in scripts/staged_trust_bundles/ (see scripts/publish_trust_bundles.py
+    # and docs/tsa-trust-bundle-rotation.md).
+    "records/trust/tsa-anchors-v3.json": {
+        "bundleId": "tsa-anchors-v3",
+        "path": "records/trust/tsa-anchors-v3.json",
+        "sha256": "a7a8043930e43de4a993df43c8afdbd19bbd85be2f6a5ae6c9a6636c42d22b7e",
+        "size": 1916,
+        "canonicalJsonSha256": (
+            "7082056523d6a96ad83e749499c28497366f2ef7412a4d3f3590b2902976e9e6"
+        ),
+    },
 }
 CODE_PINNED_TSA_IDENTITIES = {
     "tsa-anchors-v1": {
@@ -70,6 +84,33 @@ CODE_PINNED_TSA_IDENTITIES = {
             ),
             "signerSpkiSha256": {
                 "7abda95ed7301ac94bded350babc319903d0b4f16c4e7e39346dba5f9e992b72"
+            },
+        },
+    },
+    "tsa-anchors-v3": {
+        "freetsa-root-2016": {
+            "rootSpkiSha256": (
+                "52c54ba340885605314daa1857c8763b94087d05c636092938d4e2d1818e99b5"
+            ),
+            "signerSpkiSha256": {
+                "fa02bd555e3e483d62b4e70be6218692068d2b0b0a7525db58dcbf2901cdb072"
+            },
+        },
+        # CN=DigiCert SHA256 RSA4096 Timestamp Responder 2026 1, serial
+        # 084FDC334F7E454EDBC30F8FF9921835, certificate SHA-256 2da09da7...,
+        # valid 2026-08-05 to 2037-11-04, issued by DigiCert Trusted G4
+        # TimeStamping RSA4096 SHA256 2025 CA1 under the same pinned root.
+        # Derived on 2026-09-19 from a fresh receipt whose CMS signature
+        # verified against records/trust/digicert-trusted-root-g4.pem. The
+        # 2025 responder (7abda95e...) is deliberately absent: tokens it
+        # signed keep verifying under v2, the bundle their markers name, and
+        # no witness made after v3 activates may be signed by a retired key.
+        "digicert-trusted-root-g4": {
+            "rootSpkiSha256": (
+                "59df317bfa9f4f0ab7ca514d7772296aa2c765b87664d08b96e57399e364729c"
+            ),
+            "signerSpkiSha256": {
+                "753596b60a629061144cbd312017bbfb77510eac20b7eadc5fafb7cabe142fd5"
             },
         },
     },

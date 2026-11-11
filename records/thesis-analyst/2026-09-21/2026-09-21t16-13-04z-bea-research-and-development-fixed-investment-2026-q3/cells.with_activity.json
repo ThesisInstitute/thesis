@@ -1,0 +1,1381 @@
+[
+  {
+    "slug": "us-private-research-development-fixed-investment-q3-2026",
+    "country": "US",
+    "type": "data",
+    "title": "US R&D Fixed Investment 2026-Q3",
+    "question": "What will BEA first report for 2026-Q3 private research and development fixed investment, NIPA Table 5.3.5 line 18, nominal seasonally adjusted annual rate?",
+    "unit": "usd_billions",
+    "pointEstimate": 962.0,
+    "ciLow": 934.0,
+    "ciHigh": 988.4,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-29",
+    "resolutionSource": "U.S. Bureau of Economic Analysis GDP advance release, NIPA Table 5.3.5 line 18",
+    "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+    "resolutionRule": "Resolve to the first official BEA GDP advance-release print for 2026-Q3, NIPA Table 5.3.5, line 18 Research and development, nominal seasonally adjusted annual rate. Use the published table value transformed by multiplying the table's millions-of-dollars value by 0.001 to usd_billions, retaining the precision implied by the official table; do not use later second, third, annual-update, or comprehensive-revision values except insofar as BEA has already incorporated them into the first Q3 advance-release table on 2026-10-29.",
+    "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+    "historicalContext": [
+      {
+        "label": "2023-Q1",
+        "value": 757.014,
+        "period": {
+          "type": "quarter",
+          "value": "2023-Q1"
+        }
+      },
+      {
+        "label": "2023-Q2",
+        "value": 768.124,
+        "period": {
+          "type": "quarter",
+          "value": "2023-Q2"
+        }
+      },
+      {
+        "label": "2023-Q3",
+        "value": 772.65,
+        "period": {
+          "type": "quarter",
+          "value": "2023-Q3"
+        }
+      },
+      {
+        "label": "2023-Q4",
+        "value": 779.924,
+        "period": {
+          "type": "quarter",
+          "value": "2023-Q4"
+        }
+      },
+      {
+        "label": "2024-Q1",
+        "value": 790.638,
+        "period": {
+          "type": "quarter",
+          "value": "2024-Q1"
+        }
+      },
+      {
+        "label": "2024-Q2",
+        "value": 790.755,
+        "period": {
+          "type": "quarter",
+          "value": "2024-Q2"
+        }
+      },
+      {
+        "label": "2024-Q3",
+        "value": 801.362,
+        "period": {
+          "type": "quarter",
+          "value": "2024-Q3"
+        }
+      },
+      {
+        "label": "2024-Q4",
+        "value": 803.046,
+        "period": {
+          "type": "quarter",
+          "value": "2024-Q4"
+        }
+      },
+      {
+        "label": "2025-Q1",
+        "value": 806.273,
+        "period": {
+          "type": "quarter",
+          "value": "2025-Q1"
+        }
+      },
+      {
+        "label": "2025-Q2",
+        "value": 829.769,
+        "period": {
+          "type": "quarter",
+          "value": "2025-Q2"
+        }
+      },
+      {
+        "label": "2025-Q3",
+        "value": 855.584,
+        "period": {
+          "type": "quarter",
+          "value": "2025-Q3"
+        }
+      },
+      {
+        "label": "2025-Q4",
+        "value": 881.507,
+        "period": {
+          "type": "quarter",
+          "value": "2025-Q4"
+        }
+      },
+      {
+        "label": "2026-Q1",
+        "value": 909.507,
+        "period": {
+          "type": "quarter",
+          "value": "2026-Q1"
+        }
+      },
+      {
+        "label": "2026-Q2",
+        "value": 936,
+        "period": {
+          "type": "quarter",
+          "value": "2026-Q2"
+        }
+      }
+    ],
+    "drivers": [
+      "recent nominal R&D investment momentum accelerated through 2026-Q2",
+      "pure recent-change persistence is above the longer 2023-Q1 to 2026-Q2 base rate",
+      "BEA Q2 advance GDP release reported real GDP growth of 1.5 percent SAAR after 2.1 percent in Q1",
+      "intellectual-property investment tends to be smoother than structures but current-dollar levels can shift at annual update",
+      "first-print source data and BEA projections add uncertainty around the latest quarter"
+    ],
+    "sourceContext": [
+      "https://www.bea.gov/news/schedule/full",
+      "https://api.db.nomics.world/v22/series/BEA/NIPA-T50305/Y006RC-Q?observations=1",
+      "https://www.bea.gov/news/2026/gdp-advance-estimate-2nd-quarter-2026"
+    ],
+    "runAt": "2026-09-21T16:15:26Z",
+    "thresholdLadder": {
+      "thresholds": [
+        920,
+        930,
+        940,
+        950,
+        956,
+        962,
+        968,
+        974,
+        980,
+        986,
+        992,
+        1000,
+        1010
+      ],
+      "cumulativeProbabilities": [
+        0.04,
+        0.08,
+        0.13,
+        0.25,
+        0.38,
+        0.5,
+        0.62,
+        0.73,
+        0.82,
+        0.88,
+        0.93,
+        0.97,
+        0.99
+      ]
+    },
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "US private research and development fixed investment, 2026-Q3 first print"
+      },
+      {
+        "kind": "text",
+        "text": "Resolver framing: this is BEA NIPA Table 5.3.5 line 18, Research and development, nominal seasonally adjusted annual rate, source concept T50305:L18. The official table is in millions of dollars; the registered target unit is usd_billions, so resolution multiplies the first-print table value by 0.001. No discrepancy was found in the ledger date, unit, source, or rule."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0005 captured the BEA official full release schedule and I checked the GDP advance-estimate row for 2026-Q3.",
+        "result": "call-0005 fetched 124266 bytes from BEA's official schedule; the schedule lists GDP (Advance Estimate), 3rd Quarter 2026 on 2026-10-29 at 8:30 AM, matching the registered resolutionDate 2026-10-29."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0003 and extract_json calls call-0004, call-0007, and call-0008 captured the public BEA/DBnomics NIPA Table 5.3.5 Y006RC-Q series used as a BEA-source history mirror for line 18.",
+        "result": "call-0003 identifies provider BEA, dataset NIPA-T50305, Table 5.3.5 LastRevised August 26, 2026, and Research and development line 18 in millions of current dollars; fetched recent values were 2023-Q1 757014, 2023-Q2 768124, 2023-Q3 772650, 2023-Q4 779924, 2024-Q1 790638, 2024-Q2 790755, 2024-Q3 801362, 2024-Q4 803046, 2025-Q1 806273, 2025-Q2 829769, 2025-Q3 855584, 2025-Q4 881507, 2026-Q1 909507, and 2026-Q2 936000, transformed to 757.014 through 936.000 usd_billions."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0006 captured BEA's Q2 2026 GDP advance-estimate release for current macro context.",
+        "result": "call-0006 fetched 53098 bytes; BEA reported real GDP +1.5 percent SAAR in 2026-Q2 after +2.1 percent in 2026-Q1, and the release metadata states this was the 2nd Quarter 2026 advance estimate."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.calculate",
+        "call": "calculate calls call-0009 through call-0017 used the fetched 2023-Q1 through 2026-Q2 history to compute the reference-class mean change, dispersion, and ladder interpolations.",
+        "result": "call-0009 computed mean(diff(history)) = 13.768153846153846 usd_billions; call-0010 computed sigma = 10.60440005254229 usd_billions from successive changes; call-0011 computed 1.28*sigma = 13.573632067254133 usd_billions; call-0012 computed p10 = 934.0; call-0013 computed p90 = 988.4; call-0017 computed the latest five changes as 23.496, 25.815, 25.923, 28.000, and 26.493 usd_billions."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate/reference class: the 2023-Q1 through 2026-Q2 level history gives an outside-view quarterly increase of about +13.768 usd_billions, while the latest five changes are all much stronger at about +23.496 to +28.000 usd_billions. A simple base-rate persistence prior from 2026-Q2 is 949.768, but recent momentum points higher."
+      },
+      {
+        "kind": "math",
+        "text": "Ladder: P(X <= 920) = 0.04; P(X <= 930) = 0.08; P(X <= 940) = 0.13; P(X <= 950) = 0.25; P(X <= 956) = 0.38; P(X <= 962) = 0.50; P(X <= 968) = 0.62; P(X <= 974) = 0.73; P(X <= 980) = 0.82; P(X <= 986) = 0.88; P(X <= 992) = 0.93; P(X <= 1000) = 0.97; P(X <= 1010) = 0.99. Linear interpolation gives p10 = 934.0 from call-0012, p50 = 962.0 because the 0.50 rung is exact, and p90 = 988.4 from call-0013."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior is the 2026-Q2 fetched level 936.000 plus the 2023-Q1 to 2026-Q2 mean quarterly change of 13.768, giving 949.768 in call-0014. Adjustment components are +12.232 for pure recent-change persistence from the stronger run of +23.496 to +28.000 quarterly changes, modest support from broader nominal intellectual-property investment context, and a tempering allowance for first-print source-data risk and possible annual-update rebasing before the Q3 advance release. Interval method is threshold-ladder interpolation, checked against realized dispersion: sigma = 10.604 usd_billions from call-0010, so 1.28*sigma = 13.574 from call-0011; the ladder-implied 80% width is 54.400 from call-0015, or half-width 27.200, about 2.00 times 1.28*sigma from call-0016, widened because the target is a first print that may incorporate annual-update level shifts as well as Q3 source-data surprises."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk: continued software, data-center, and R&D investment strength or an upward annual-update level shift would land above the interval. Downside risk: slower nominal IPP spending, weaker corporate investment budgets, or downward rebasing would land below the interval. An outside the interval outcome would most likely require both a large annual-update level shift and an unusually large Q3 source-data surprise."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the optional suggestions by making the BEA schedule check the explicit official confirmation for the 2026-10-29 8:30 AM GDP advance release and by separating pure recent-change persistence from broader IPP and macro context in the update rationale; no required fixes were identified."
+      },
+      {
+        "kind": "forecast",
+        "point": 962.0,
+        "ciLow": 934.0,
+        "ciHigh": 988.4
+      }
+    ],
+    "agentReportedRunAt": "2026-09-21T16:15:09Z",
+    "runStartedAt": "2026-09-21T16:13:04Z",
+    "promptMode": "ladder",
+    "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+    "targetContentHash": "a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1",
+    "targetRegistrationPath": "records/targets/2026-08-17-a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1.json",
+    "registeredAtUtc": "2026-08-17T16:54:17Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 892.0,
+        "upper": 1028.0
+      },
+      "points": [
+        {
+          "value": 892.0,
+          "probability": 0.0
+        },
+        {
+          "value": 892.68,
+          "probability": 0.0009714286
+        },
+        {
+          "value": 893.36,
+          "probability": 0.0019428571
+        },
+        {
+          "value": 894.04,
+          "probability": 0.0029142857
+        },
+        {
+          "value": 894.72,
+          "probability": 0.0038857143
+        },
+        {
+          "value": 895.4,
+          "probability": 0.0048571429
+        },
+        {
+          "value": 896.08,
+          "probability": 0.0058285714
+        },
+        {
+          "value": 896.76,
+          "probability": 0.0068
+        },
+        {
+          "value": 897.44,
+          "probability": 0.0077714286
+        },
+        {
+          "value": 898.12,
+          "probability": 0.0087428571
+        },
+        {
+          "value": 898.8,
+          "probability": 0.0097142857
+        },
+        {
+          "value": 899.48,
+          "probability": 0.0106857143
+        },
+        {
+          "value": 900.16,
+          "probability": 0.0116571429
+        },
+        {
+          "value": 900.84,
+          "probability": 0.0126285714
+        },
+        {
+          "value": 901.52,
+          "probability": 0.0136
+        },
+        {
+          "value": 902.2,
+          "probability": 0.0145714286
+        },
+        {
+          "value": 902.88,
+          "probability": 0.0155428571
+        },
+        {
+          "value": 903.56,
+          "probability": 0.0165142857
+        },
+        {
+          "value": 904.24,
+          "probability": 0.0174857143
+        },
+        {
+          "value": 904.92,
+          "probability": 0.0184571429
+        },
+        {
+          "value": 905.6,
+          "probability": 0.0194285714
+        },
+        {
+          "value": 906.28,
+          "probability": 0.0204
+        },
+        {
+          "value": 906.96,
+          "probability": 0.0213714286
+        },
+        {
+          "value": 907.64,
+          "probability": 0.0223428571
+        },
+        {
+          "value": 908.32,
+          "probability": 0.0233142857
+        },
+        {
+          "value": 909.0,
+          "probability": 0.0242857143
+        },
+        {
+          "value": 909.68,
+          "probability": 0.0252571429
+        },
+        {
+          "value": 910.36,
+          "probability": 0.0262285714
+        },
+        {
+          "value": 911.04,
+          "probability": 0.0272
+        },
+        {
+          "value": 911.72,
+          "probability": 0.0281714286
+        },
+        {
+          "value": 912.4,
+          "probability": 0.0291428571
+        },
+        {
+          "value": 913.08,
+          "probability": 0.0301142857
+        },
+        {
+          "value": 913.76,
+          "probability": 0.0310857143
+        },
+        {
+          "value": 914.44,
+          "probability": 0.0320571429
+        },
+        {
+          "value": 915.12,
+          "probability": 0.0330285714
+        },
+        {
+          "value": 915.8,
+          "probability": 0.034
+        },
+        {
+          "value": 916.48,
+          "probability": 0.0349714286
+        },
+        {
+          "value": 917.16,
+          "probability": 0.0359428571
+        },
+        {
+          "value": 917.84,
+          "probability": 0.0369142857
+        },
+        {
+          "value": 918.52,
+          "probability": 0.0378857143
+        },
+        {
+          "value": 919.2,
+          "probability": 0.0388571429
+        },
+        {
+          "value": 919.88,
+          "probability": 0.0398285714
+        },
+        {
+          "value": 920.56,
+          "probability": 0.04224
+        },
+        {
+          "value": 921.24,
+          "probability": 0.04496
+        },
+        {
+          "value": 921.92,
+          "probability": 0.04768
+        },
+        {
+          "value": 922.6,
+          "probability": 0.0504
+        },
+        {
+          "value": 923.28,
+          "probability": 0.05312
+        },
+        {
+          "value": 923.96,
+          "probability": 0.05584
+        },
+        {
+          "value": 924.64,
+          "probability": 0.05856
+        },
+        {
+          "value": 925.32,
+          "probability": 0.06128
+        },
+        {
+          "value": 926.0,
+          "probability": 0.064
+        },
+        {
+          "value": 926.68,
+          "probability": 0.06672
+        },
+        {
+          "value": 927.36,
+          "probability": 0.06944
+        },
+        {
+          "value": 928.04,
+          "probability": 0.07216
+        },
+        {
+          "value": 928.72,
+          "probability": 0.07488
+        },
+        {
+          "value": 929.4,
+          "probability": 0.0776
+        },
+        {
+          "value": 930.08,
+          "probability": 0.0804
+        },
+        {
+          "value": 930.76,
+          "probability": 0.0838
+        },
+        {
+          "value": 931.44,
+          "probability": 0.0872
+        },
+        {
+          "value": 932.12,
+          "probability": 0.0906
+        },
+        {
+          "value": 932.8,
+          "probability": 0.094
+        },
+        {
+          "value": 933.48,
+          "probability": 0.0974
+        },
+        {
+          "value": 934.16,
+          "probability": 0.1008
+        },
+        {
+          "value": 934.84,
+          "probability": 0.1042
+        },
+        {
+          "value": 935.52,
+          "probability": 0.1076
+        },
+        {
+          "value": 936.2,
+          "probability": 0.111
+        },
+        {
+          "value": 936.88,
+          "probability": 0.1144
+        },
+        {
+          "value": 937.56,
+          "probability": 0.1178
+        },
+        {
+          "value": 938.24,
+          "probability": 0.1212
+        },
+        {
+          "value": 938.92,
+          "probability": 0.1246
+        },
+        {
+          "value": 939.6,
+          "probability": 0.128
+        },
+        {
+          "value": 940.28,
+          "probability": 0.13336
+        },
+        {
+          "value": 940.96,
+          "probability": 0.14152
+        },
+        {
+          "value": 941.64,
+          "probability": 0.14968
+        },
+        {
+          "value": 942.32,
+          "probability": 0.15784
+        },
+        {
+          "value": 943.0,
+          "probability": 0.166
+        },
+        {
+          "value": 943.68,
+          "probability": 0.17416
+        },
+        {
+          "value": 944.36,
+          "probability": 0.18232
+        },
+        {
+          "value": 945.04,
+          "probability": 0.19048
+        },
+        {
+          "value": 945.72,
+          "probability": 0.19864
+        },
+        {
+          "value": 946.4,
+          "probability": 0.2068
+        },
+        {
+          "value": 947.08,
+          "probability": 0.21496
+        },
+        {
+          "value": 947.76,
+          "probability": 0.22312
+        },
+        {
+          "value": 948.44,
+          "probability": 0.23128
+        },
+        {
+          "value": 949.12,
+          "probability": 0.23944
+        },
+        {
+          "value": 949.8,
+          "probability": 0.2476
+        },
+        {
+          "value": 950.48,
+          "probability": 0.2604
+        },
+        {
+          "value": 951.16,
+          "probability": 0.2751333333
+        },
+        {
+          "value": 951.84,
+          "probability": 0.2898666667
+        },
+        {
+          "value": 952.52,
+          "probability": 0.3046
+        },
+        {
+          "value": 953.2,
+          "probability": 0.3193333333
+        },
+        {
+          "value": 953.88,
+          "probability": 0.3340666667
+        },
+        {
+          "value": 954.56,
+          "probability": 0.3488
+        },
+        {
+          "value": 955.24,
+          "probability": 0.3635333333
+        },
+        {
+          "value": 955.92,
+          "probability": 0.3782666667
+        },
+        {
+          "value": 956.6,
+          "probability": 0.392
+        },
+        {
+          "value": 957.28,
+          "probability": 0.4056
+        },
+        {
+          "value": 957.96,
+          "probability": 0.4192
+        },
+        {
+          "value": 958.64,
+          "probability": 0.4328
+        },
+        {
+          "value": 959.32,
+          "probability": 0.4464
+        },
+        {
+          "value": 960.0,
+          "probability": 0.46
+        },
+        {
+          "value": 960.68,
+          "probability": 0.4736
+        },
+        {
+          "value": 961.36,
+          "probability": 0.4872
+        },
+        {
+          "value": 962.04,
+          "probability": 0.5008
+        },
+        {
+          "value": 962.72,
+          "probability": 0.5144
+        },
+        {
+          "value": 963.4,
+          "probability": 0.528
+        },
+        {
+          "value": 964.08,
+          "probability": 0.5416
+        },
+        {
+          "value": 964.76,
+          "probability": 0.5552
+        },
+        {
+          "value": 965.44,
+          "probability": 0.5688
+        },
+        {
+          "value": 966.12,
+          "probability": 0.5824
+        },
+        {
+          "value": 966.8,
+          "probability": 0.596
+        },
+        {
+          "value": 967.48,
+          "probability": 0.6096
+        },
+        {
+          "value": 968.16,
+          "probability": 0.6229333333
+        },
+        {
+          "value": 968.84,
+          "probability": 0.6354
+        },
+        {
+          "value": 969.52,
+          "probability": 0.6478666667
+        },
+        {
+          "value": 970.2,
+          "probability": 0.6603333333
+        },
+        {
+          "value": 970.88,
+          "probability": 0.6728
+        },
+        {
+          "value": 971.56,
+          "probability": 0.6852666667
+        },
+        {
+          "value": 972.24,
+          "probability": 0.6977333333
+        },
+        {
+          "value": 972.92,
+          "probability": 0.7102
+        },
+        {
+          "value": 973.6,
+          "probability": 0.7226666667
+        },
+        {
+          "value": 974.28,
+          "probability": 0.7342
+        },
+        {
+          "value": 974.96,
+          "probability": 0.7444
+        },
+        {
+          "value": 975.64,
+          "probability": 0.7546
+        },
+        {
+          "value": 976.32,
+          "probability": 0.7648
+        },
+        {
+          "value": 977.0,
+          "probability": 0.775
+        },
+        {
+          "value": 977.68,
+          "probability": 0.7852
+        },
+        {
+          "value": 978.36,
+          "probability": 0.7954
+        },
+        {
+          "value": 979.04,
+          "probability": 0.8056
+        },
+        {
+          "value": 979.72,
+          "probability": 0.8158
+        },
+        {
+          "value": 980.4,
+          "probability": 0.824
+        },
+        {
+          "value": 981.08,
+          "probability": 0.8308
+        },
+        {
+          "value": 981.76,
+          "probability": 0.8376
+        },
+        {
+          "value": 982.44,
+          "probability": 0.8444
+        },
+        {
+          "value": 983.12,
+          "probability": 0.8512
+        },
+        {
+          "value": 983.8,
+          "probability": 0.858
+        },
+        {
+          "value": 984.48,
+          "probability": 0.8648
+        },
+        {
+          "value": 985.16,
+          "probability": 0.8716
+        },
+        {
+          "value": 985.84,
+          "probability": 0.8784
+        },
+        {
+          "value": 986.52,
+          "probability": 0.8843333333
+        },
+        {
+          "value": 987.2,
+          "probability": 0.89
+        },
+        {
+          "value": 987.88,
+          "probability": 0.8956666667
+        },
+        {
+          "value": 988.56,
+          "probability": 0.9013333333
+        },
+        {
+          "value": 989.24,
+          "probability": 0.907
+        },
+        {
+          "value": 989.92,
+          "probability": 0.9126666667
+        },
+        {
+          "value": 990.6,
+          "probability": 0.9183333333
+        },
+        {
+          "value": 991.28,
+          "probability": 0.924
+        },
+        {
+          "value": 991.96,
+          "probability": 0.9296666667
+        },
+        {
+          "value": 992.64,
+          "probability": 0.9332
+        },
+        {
+          "value": 993.32,
+          "probability": 0.9366
+        },
+        {
+          "value": 994.0,
+          "probability": 0.94
+        },
+        {
+          "value": 994.68,
+          "probability": 0.9434
+        },
+        {
+          "value": 995.36,
+          "probability": 0.9468
+        },
+        {
+          "value": 996.04,
+          "probability": 0.9502
+        },
+        {
+          "value": 996.72,
+          "probability": 0.9536
+        },
+        {
+          "value": 997.4,
+          "probability": 0.957
+        },
+        {
+          "value": 998.08,
+          "probability": 0.9604
+        },
+        {
+          "value": 998.76,
+          "probability": 0.9638
+        },
+        {
+          "value": 999.44,
+          "probability": 0.9672
+        },
+        {
+          "value": 1000.12,
+          "probability": 0.97024
+        },
+        {
+          "value": 1000.8,
+          "probability": 0.9716
+        },
+        {
+          "value": 1001.48,
+          "probability": 0.97296
+        },
+        {
+          "value": 1002.16,
+          "probability": 0.97432
+        },
+        {
+          "value": 1002.84,
+          "probability": 0.97568
+        },
+        {
+          "value": 1003.52,
+          "probability": 0.97704
+        },
+        {
+          "value": 1004.2,
+          "probability": 0.9784
+        },
+        {
+          "value": 1004.88,
+          "probability": 0.97976
+        },
+        {
+          "value": 1005.56,
+          "probability": 0.98112
+        },
+        {
+          "value": 1006.24,
+          "probability": 0.98248
+        },
+        {
+          "value": 1006.92,
+          "probability": 0.98384
+        },
+        {
+          "value": 1007.6,
+          "probability": 0.9852
+        },
+        {
+          "value": 1008.28,
+          "probability": 0.98656
+        },
+        {
+          "value": 1008.96,
+          "probability": 0.98792
+        },
+        {
+          "value": 1009.64,
+          "probability": 0.98928
+        },
+        {
+          "value": 1010.32,
+          "probability": 0.9901777778
+        },
+        {
+          "value": 1011.0,
+          "probability": 0.9905555556
+        },
+        {
+          "value": 1011.68,
+          "probability": 0.9909333333
+        },
+        {
+          "value": 1012.36,
+          "probability": 0.9913111111
+        },
+        {
+          "value": 1013.04,
+          "probability": 0.9916888889
+        },
+        {
+          "value": 1013.72,
+          "probability": 0.9920666667
+        },
+        {
+          "value": 1014.4,
+          "probability": 0.9924444444
+        },
+        {
+          "value": 1015.08,
+          "probability": 0.9928222222
+        },
+        {
+          "value": 1015.76,
+          "probability": 0.9932
+        },
+        {
+          "value": 1016.44,
+          "probability": 0.9935777778
+        },
+        {
+          "value": 1017.12,
+          "probability": 0.9939555556
+        },
+        {
+          "value": 1017.8,
+          "probability": 0.9943333333
+        },
+        {
+          "value": 1018.48,
+          "probability": 0.9947111111
+        },
+        {
+          "value": 1019.16,
+          "probability": 0.9950888889
+        },
+        {
+          "value": 1019.84,
+          "probability": 0.9954666667
+        },
+        {
+          "value": 1020.52,
+          "probability": 0.9958444444
+        },
+        {
+          "value": 1021.2,
+          "probability": 0.9962222222
+        },
+        {
+          "value": 1021.88,
+          "probability": 0.9966
+        },
+        {
+          "value": 1022.56,
+          "probability": 0.9969777778
+        },
+        {
+          "value": 1023.24,
+          "probability": 0.9973555556
+        },
+        {
+          "value": 1023.92,
+          "probability": 0.9977333333
+        },
+        {
+          "value": 1024.6,
+          "probability": 0.9981111111
+        },
+        {
+          "value": 1025.28,
+          "probability": 0.9984888889
+        },
+        {
+          "value": 1025.96,
+          "probability": 0.9988666667
+        },
+        {
+          "value": 1026.64,
+          "probability": 0.9992444444
+        },
+        {
+          "value": 1027.32,
+          "probability": 0.9996222222
+        },
+        {
+          "value": 1028.0,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 962.0,
+        "median": 962.0,
+        "interval80": {
+          "lower": 934.0,
+          "upper": 988.4
+        }
+      },
+      "provenance": "agent_reported",
+      "transformVersion": "agent_cdf_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/prompt.md",
+        "sha256": "e9531aeed1f05958316b616ff4d9c0ca5876b70ea048c14d06e12305e6adda32",
+        "bytes": 14671,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_command.json",
+        "sha256": "529ada2191aa4f573d98537936d0a1cde7949f5e22f7335ea694c868d9846e69",
+        "bytes": 1925,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_tool_evidence.json",
+        "sha256": "aa4610d35417521894baf65f18aca3f82fcebb9be1587fb1f2200a33982e8304",
+        "bytes": 304629,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_tool_evidence_verification.json",
+        "sha256": "e85e02d5f4e37f521dd2fd6a2dfd3501fceefa77b87c58b424ff9ce871ccef75",
+        "bytes": 2764,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_codex_stdout.jsonl",
+        "sha256": "3c7090fcf05215865e363d0bad31e4f2ab36eec08db10b01fe23fbfdc291e103",
+        "bytes": 1520088,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_codex_stderr.log",
+        "sha256": "c0e3622eeb58f1c8a888c3f274aa6be1abd3d73a153eeb58114887a6eb23c2aa",
+        "bytes": 233,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_codex_events.jsonl",
+        "sha256": "377594772d481114831888457e7276ffdc2dbb742a407be4a93213fa35d3e5b5",
+        "bytes": 1522605,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_codex_last_message.txt",
+        "sha256": "4fbeb1e55cc8637331c08eecdc7e529b6bbbdc342ef85d1a35c80c90d63b39b6",
+        "bytes": 8049,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_codex_trace.json",
+        "sha256": "0a0d5d44683a05a52a63258a3371be38c4a12f982f118c147a9011ed80497bb8",
+        "bytes": 560,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_stdout.txt",
+        "sha256": "4fbeb1e55cc8637331c08eecdc7e529b6bbbdc342ef85d1a35c80c90d63b39b6",
+        "bytes": 8049,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_stderr.txt",
+        "sha256": "c39b267ddff0205095ba3ae299dd7c31447e1ce4444b134a3a3c9894ac671c2b",
+        "bytes": 248,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_prompt.md",
+        "sha256": "e06e08bcf83a23724a34f4bee75190ab9d6a66dec137e72a21dec4991f8c2e6e",
+        "bytes": 12726,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_command.json",
+        "sha256": "f243f284dc305d2e965d8bf65c240f1c2d692083821e43611ef1e8b9faac9d64",
+        "bytes": 1848,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "d7e588f2f01cb88debb34d05a24c008810f20199e699316c3d9e32e266e5948f",
+        "bytes": 1417,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_codex_stderr.log",
+        "sha256": "ba050606f2ba084f7750570475e10bca1a35108b99f081758c8046cd9a073fd7",
+        "bytes": 233,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_codex_events.jsonl",
+        "sha256": "c0289802e0d5b1f87a2d583bff1a76a1b29a31489e320a3933025d89b70899f1",
+        "bytes": 1437,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_codex_last_message.txt",
+        "sha256": "59591a285f927c654f22b13ddab63879f16837b40d60c5cd13647b366d6145ef",
+        "bytes": 462,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_codex_trace.json",
+        "sha256": "9018b0cbfdbc54413d9a4f295643a2df37f28e9a4c3bb9cd72fdae28b8dd04e3",
+        "bytes": 555,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_stdout.txt",
+        "sha256": "59591a285f927c654f22b13ddab63879f16837b40d60c5cd13647b366d6145ef",
+        "bytes": 462,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_stderr.txt",
+        "sha256": "dc80f3574ad8a1850dfdd15d2278e038450cf19d69e46c889892489106fa385a",
+        "bytes": 248,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/revision_prompt.md",
+        "sha256": "14f060c1c8584c775ec83340d726522774b4c2e5f1494e996ba288c627a3d373",
+        "bytes": 24118,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/command.json",
+        "sha256": "80293092766ee8823715e21c9603cef234ed94ee6d04d5dd382eca255f260459",
+        "bytes": 1907,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/codex_stdout.jsonl",
+        "sha256": "3776286df3523d524d1f7f9a91143d439fe3167ac35f6ad304d687fd6df78fa9",
+        "bytes": 9696,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/codex_stderr.log",
+        "sha256": "6ceb76b3ab351740d4377c70f98c9234fe5806362bc95d0758e02202f19f4281",
+        "bytes": 233,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/codex_events.jsonl",
+        "sha256": "d1492e7e7e0ff9f5c19d35800bcccfeb47e3720a40e4c6b6ab0a0a23dd29c97e",
+        "bytes": 9746,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/codex_last_message.txt",
+        "sha256": "b1f9cccef970f4afda523d5356e04aab9635d69a41e7a357b3f5c171044fd5d9",
+        "bytes": 8532,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/codex_trace.json",
+        "sha256": "2c74c58c4820caecf76176344f18901fd20ae2cca27a415ecaa103d77623fef7",
+        "bytes": 556,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/stdout.txt",
+        "sha256": "b1f9cccef970f4afda523d5356e04aab9635d69a41e7a357b3f5c171044fd5d9",
+        "bytes": 8532,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/stderr.txt",
+        "sha256": "cffc39cec7e9b2f7e5690990b9100cca398f10fbfb7d53073635a80a7ad43c70",
+        "bytes": 248,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/raw_response.txt",
+        "sha256": "b1f9cccef970f4afda523d5356e04aab9635d69a41e7a357b3f5c171044fd5d9",
+        "bytes": 8532,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/parsed_cells.json",
+        "sha256": "45dea4337159ff698130bcd6e8a918d050afbae5d08f1896cef406ebc9efac5c",
+        "bytes": 10598,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/normalized_cells.json",
+        "sha256": "6a708ec4939e32406940ef6114ef298a92d3d3f0af8303cf368d83d545e2e7f5",
+        "bytes": 28067,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/distribution.json",
+        "sha256": "8b175778b0171155fee6a1a20bfad25b199564e88e373c3df7bf3aace663c6f9",
+        "bytes": 13683,
+        "createdAt": "2026-09-21T16:13:04Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/validation.json",
+        "sha256": "0669206c51c471a7013757b6743d92a3b19d171740dcedcfa9385240e5caf466",
+        "bytes": 157,
+        "createdAt": "2026-09-21T16:13:04Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-21T16:13:04Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "d02ad7b6720f757d85ed90fed145b0028691bc5261ab6efd9835c611e298473d"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-21/2026-09-21t16-13-04z-bea-research-and-development-fixed-investment-2026-q3/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Consider stating the BEA schedule check in sourceContext as the official confirmation for the 2026-10-29 8:30 AM GDP advance release."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "The update rationale would be slightly stronger if it separated pure recent-change persistence from broader IPP/macroeconomic context."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the optional suggestions by making the BEA schedule check the explicit official confirmation for the 2026-10-29 8:30 AM GDP advance release and by separating pure recent-change persistence from broader IPP and macro context in the update rationale; no required fixes were identified.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the optional suggestions by making the BEA schedule check the explicit official confirmation for the 2026-10-29 8:30 AM GDP advance release and by separating pure recent-change persistence from broader IPP and macro context in the update rationale; no required fixes were identified.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "The draft satisfies the resolver contract and gives a coherent prior, update, interval, tails, and final JSON for the sealed target."
+    }
+  }
+]

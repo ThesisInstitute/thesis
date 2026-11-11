@@ -1,0 +1,15 @@
+{
+  "summary": "Draft is mostly publication-ready, but its resolutionDate conflicts with the canonical ledger target contract.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "blocking",
+      "summary": "The draft sets resolutionDate to 2026-10-02, while the canonical target context binds the target to the ledger registration and expectedReleaseWindow ending 2026-10-08.",
+      "actionRequested": "Set the cell resolutionDate to the ledger-bound date 2026-10-08, while keeping the reasoning explicit that the BLS scheduled first-print release is expected on 2026-10-02 if that remains the cited public schedule."
+    }
+  ],
+  "optionalSuggestions": [
+    "In the interval sentence, note that sigma is estimated from only eight 2026 first prints, so the 80% interval reflects high sampling uncertainty.",
+    "Clarify that June and July revisions are current evidence available before the September target resolves, not target outcomes."
+  ]
+}

@@ -21,6 +21,21 @@ import run_thesis_analyst as analyst_runner  # noqa: E402
 from canonical_json import canonical_bytes, canonical_sha256  # noqa: E402
 
 
+@pytest.fixture
+def resolver_admits(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stub the resolver's verdict for tests about snapshot mechanics.
+
+    These tests drive retry, bind, supersede and pair atomicity with a
+    fictional series (or the deliberately unarmed Census SPM pair), which no
+    resolver leg executes. The execution-plan gate has its own tests against
+    the real resolver in tests/test_execution_plan_gate.py.
+    """
+
+    monkeypatch.setattr(
+        register_targets, "execution_plan_refusal", lambda registration: None
+    )
+
+
 def _alfred_docket_entries() -> list[dict]:
     docket = json.loads((ROOT / "scripts" / "docket_series.json").read_text())
     return [
@@ -76,6 +91,7 @@ def configure_generator_root(
     monkeypatch.setattr(generate_ledger_targets, "HAND_AUTHORED", hand_authored)
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_registration_snapshot_round_trip_and_hash_stability(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
@@ -453,6 +469,7 @@ def test_bounded_resolution_projection_refusals_are_presence_sensitive_and_liter
     )
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_registration_retry_reuses_immutable_snapshot_and_generated_target(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
@@ -492,6 +509,7 @@ def test_registration_retry_reuses_immutable_snapshot_and_generated_target(
     )
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_reuse_existing_only_hydrates_without_rewriting_registration(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
@@ -529,6 +547,7 @@ def test_reuse_existing_only_hydrates_without_rewriting_registration(
     )
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_reuse_existing_only_refuses_generated_rewrite_before_any_write(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
@@ -570,6 +589,7 @@ def test_reuse_existing_only_refuses_generated_rewrite_before_any_write(
     assert targets_path.read_text() == raw_targets
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_reuse_existing_only_refuses_whole_set_before_any_write(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
@@ -672,6 +692,7 @@ def test_reuse_existing_only_cli_combinations_refuse_before_writing(
     assert not (tmp_path / "records").exists()
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_registration_retry_fails_closed_on_generated_target_mismatch(
     tmp_path: pathlib.Path, monkeypatch
 ) -> None:
@@ -734,6 +755,7 @@ def test_empty_registration_is_a_byte_identical_no_op(
     assert not (tmp_path / "records" / "targets").exists()
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_reuse_existing_only_then_bind_uses_snapshot_introducing_commit(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -797,6 +819,7 @@ def test_reuse_existing_only_then_bind_uses_snapshot_introducing_commit(
     assert metadata["registrationCommits"] == [head]
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_publisher_regenerates_typescript_from_canonical_snapshot(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -1116,6 +1139,7 @@ def test_register_wave_refuses_existing_provenance_mismatch(
         register_wave.replay_provenance_for_module(module, "local_operator_attested")
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_published_target_is_exactly_regenerated_and_retry_safe(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -2644,6 +2668,7 @@ def test_binding_upgrade_of_published_head_target_is_refused(
         )
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_adoption_writes_an_authorizing_template_and_bind_accepts_it(
     tmp_path, monkeypatch
 ) -> None:
@@ -2737,6 +2762,7 @@ def test_adoption_writes_an_authorizing_template_and_bind_accepts_it(
     assert metadata["registrationCommits"] == [head]
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_bind_rejects_first_registration_after_head_template_changes(
     tmp_path, monkeypatch
 ) -> None:
@@ -2768,6 +2794,7 @@ def test_bind_rejects_first_registration_after_head_template_changes(
     assert targets_path.read_bytes() == targets_before
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_bind_rejects_ambiguous_head_template(tmp_path, monkeypatch) -> None:
     contract = _supersede_contract()
     _, docket, targets_path, _ = _commit_first_registration(
@@ -2999,6 +3026,7 @@ def test_bind_accepts_docket_series_without_source_binding_template(
     assert metadata["registrationCommits"] == [head]
 
 
+@pytest.mark.usefixtures("resolver_admits")
 @pytest.mark.parametrize(
     ("malformation", "message"),
     [
@@ -3674,6 +3702,7 @@ def test_attack_publisher_materialization_cannot_supersede(
         register_targets.materialize_registration_snapshots([path])
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_attack_register_supersede_retains_old_snapshot_and_one_block(
     tmp_path, monkeypatch
 ) -> None:
@@ -3900,6 +3929,7 @@ def test_mint_registration_never_registers_calendar_targets(
     assert not (tmp_path / "records" / "targets").exists()
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_bounded_pair_can_register_bind_and_mint(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -3988,6 +4018,7 @@ def test_condition_deadline_must_precede_bounded_window_literally() -> None:
     )
 
 
+@pytest.mark.usefixtures("resolver_admits")
 def test_skip_unbindable_never_registers_a_lone_conditional_arm(
     tmp_path: pathlib.Path, monkeypatch, capsys
 ) -> None:

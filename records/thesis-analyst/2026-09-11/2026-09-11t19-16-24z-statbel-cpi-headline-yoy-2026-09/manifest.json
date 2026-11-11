@@ -1,0 +1,397 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-11T19:16:24Z",
+  "runStartedAt": "2026-09-11T19:16:24Z",
+  "sealedAt": "2026-09-11T19:18:22Z",
+  "series": "statbel.cpi.headline_yoy",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "belgium-cpi-annual-rate-september-2026",
+    "country": "BE",
+    "dataPointId": "statbel.cpi.headline_yoy.2026-09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-07",
+      "start": "2026-09-29"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-11T19:13:41Z",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "registrationState": "preregistered",
+    "series": "statbel.cpi.headline_yoy",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "statbel.fgov.be"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-07",
+        "start": "2026-09-29"
+      },
+      "field": "statbel.cpi.headline_yoy",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "statbel.cpi.headline_yoy",
+      "sourceUrl": "https://statbel.fgov.be/en/themes/consumer-prices/consumer-price-index",
+      "table": "Statbel Consumer Price Index - Health Index release",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "f8846f2d36a637da92d8f74483a96279b757ff255008a02e7ae348f5f4bed77d",
+    "targetRegistrationPath": "records/targets/2026-09-11-f8846f2d36a637da92d8f74483a96279b757ff255008a02e7ae348f5f4bed77d.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "targetContentHash": "f8846f2d36a637da92d8f74483a96279b757ff255008a02e7ae348f5f4bed77d",
+  "targetRegistrationPath": "records/targets/2026-09-11-f8846f2d36a637da92d8f74483a96279b757ff255008a02e7ae348f5f4bed77d.json",
+  "registeredAtUtc": "2026-09-11T19:13:41Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-11T19:16:24Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "aefe835f80f885d193495e9a8625adb4585f94772d525cd47f5190c9859d74de"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "Resolution source URL and resolver text do not match the canonical ledger sourceBinding, which names the Statbel consumer-price-index page as sourceUrl and the Statbel Consumer Price Index - Health Index release as the table.",
+        "actionRequested": "Change resolutionSourceUrl to the ledger sourceUrl and align resolutionSource/resolutionRule with the registered resolver text while keeping the target as headline national CPI annual inflation, not HICP or health index."
+      },
+      {
+        "findingId": "review.finding.2",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "resolutionDate is 2026-09-29, but the provided canonical target context says to use the ledger fields as the resolutionDate contract and only provides the registered expectedReleaseWindow ending 2026-10-07.",
+        "actionRequested": "Set resolutionDate to the registered ledger resolution date if present in the target file; if the ledger truly uses the window end as the bound, use 2026-10-07 and mention the Statbel calendar's 2026-09-29 planned release as evidence rather than silently changing the contract."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The prior/update/interval step is strong; keep the stated persistence prior, 13-month sample, adjustment components, sigma method, and implied bounds."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Consider noting that be.STAT is supporting cross-check evidence, not the registered resolver URL, if it remains in sourceContext."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the resolver-source fix by using the registered Statbel CPI page as resolutionSourceUrl and clarifying be.STAT as supporting evidence; accepted the date-contract fix by using the registered window end 2026-10-07 while retaining the official 2026-09-29 planned release as calendar evidence; kept the prior/update/interval calibration unchanged.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.finding.2",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the resolver-source fix by using the registered Statbel CPI page as resolutionSourceUrl and clarifying be.STAT as supporting evidence; accepted the date-contract fix by using the registered window end 2026-10-07 while retaining the official 2026-09-29 planned release as calendar evidence; kept the prior/update/interval calibration unchanged.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the resolver-source fix by using the registered Statbel CPI page as resolutionSourceUrl and clarifying be.STAT as supporting evidence; accepted the date-contract fix by using the registered window end 2026-10-07 while retaining the official 2026-09-29 planned release as calendar evidence; kept the prior/update/interval calibration unchanged.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the resolver-source fix by using the registered Statbel CPI page as resolutionSourceUrl and clarifying be.STAT as supporting evidence; accepted the date-contract fix by using the registered window end 2026-10-07 while retaining the official 2026-09-29 planned release as calendar evidence; kept the prior/update/interval calibration unchanged.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is methodologically coherent, but it does not exactly match the ledger resolver/source and likely resolution-date contract."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/prompt.md",
+      "sha256": "2a469ae79168da783208ce656e4a523218c3559d40f676851e2464f728f0ae95",
+      "bytes": 10490,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_command.json",
+      "sha256": "64dcfa4e8f0e7540c1d96d5af1f9826e91c4c5a8023de54bc5a955ddf85bd24a",
+      "bytes": 754,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "27ae76f81e2278b8004fc2ce86a2f36ff287259eaf7975901db8e8db049c0621",
+      "bytes": 15112,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_codex_stderr.log",
+      "sha256": "1e4696344188a9d7e3f3d09774c8993ab581e5e8bba799ab1e354177551bc35f",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_codex_events.jsonl",
+      "sha256": "30ac517d7d12bdd3177e4206d5c00913b4ca633cb48950da9f6d97662cd2e0ff",
+      "bytes": 15208,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_codex_last_message.txt",
+      "sha256": "3d7193cdebb4e032f04e65a132e1381565c30a963b495d21111ba6b62f7c26ad",
+      "bytes": 6455,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_codex_trace.json",
+      "sha256": "ed7adea94e3557d7b617353c26d8c498a0b58f1157f810d0ffccb0675364891a",
+      "bytes": 560,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_stdout.txt",
+      "sha256": "3d7193cdebb4e032f04e65a132e1381565c30a963b495d21111ba6b62f7c26ad",
+      "bytes": 6455,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/draft_stderr.txt",
+      "sha256": "160d19b56189e8e3b948c10445cf3ff4c5eddcd312cfa1ff935db52b53b3f416",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_prompt.md",
+      "sha256": "70a431cef082e44aaf5f260557e38638a29278b5fe41d4fe97170f0173bfbc25",
+      "bytes": 9710,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_command.json",
+      "sha256": "43e4547384dacf6f5f44d93278a99630852aa475e863c9a237cf29ce56ff9763",
+      "bytes": 750,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "4d89fb3b0821caa782af2aa1351df4ee9b19c10ae0485d0c4d8b9405a69a4447",
+      "bytes": 2053,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "7cdb5af88207805410661fbb5820f0ed313692f70c52e4374bcc29948fc0e977",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "e0c168890840dbbb9d142294c5b4bf64a9b613986d7b8f574b01ba73d251f69d",
+      "bytes": 2075,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "e3724131e819e46370f4a1f6cd8692b559adbaffa39a8c5423d4f1d964bfc7f9",
+      "bytes": 1675,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "dfcd7fd4328813c448648ee7b7fc2e4008b7a2048c4d68aab6cdffbb833165b3",
+      "bytes": 552,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "e3724131e819e46370f4a1f6cd8692b559adbaffa39a8c5423d4f1d964bfc7f9",
+      "bytes": 1675,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "6cd7d01ab7e91d536f8177d721d5923e13696266a576b06c7d467f3dd2f154a7",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/revision_prompt.md",
+      "sha256": "d8d6ff9b0def46ec91f3e2b602096a08536a9b91471f687fbe59d3733f31cd31",
+      "bytes": 19556,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/command.json",
+      "sha256": "086e14eb7c5163dea914d68485c5994f1f31b863b5a7bc2c6ef76b8a47d015cd",
+      "bytes": 748,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/codex_stdout.jsonl",
+      "sha256": "b1c82540899b8d257ab53394d28de618110f59c8a7160b8b0e0ea32c177c3339",
+      "bytes": 7623,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/codex_stderr.log",
+      "sha256": "f72521cde5bbc9f28b68abda0905b099750ae29b90f34575088cd9a5d8ca985e",
+      "bytes": 233,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/codex_events.jsonl",
+      "sha256": "d50b2e8d556da5ffec43c76b72152e6fa33c9340254e9ee187b4ac596a81e070",
+      "bytes": 7645,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/codex_last_message.txt",
+      "sha256": "3476cbdee70608c5e884bb955bc61092d93e57c8ad42f39fe3ab2487ac0885b9",
+      "bytes": 6896,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/codex_trace.json",
+      "sha256": "f22c4b994b6129bf1e53abcda72ed01822bc1d409f41609faf4ddbf7aa7c2dfb",
+      "bytes": 552,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/stdout.txt",
+      "sha256": "3476cbdee70608c5e884bb955bc61092d93e57c8ad42f39fe3ab2487ac0885b9",
+      "bytes": 6896,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/stderr.txt",
+      "sha256": "e529a2cb481b76f8366fd52984cd0766a6f3fd509b89342f7b969b7691f45606",
+      "bytes": 248,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/raw_response.txt",
+      "sha256": "3476cbdee70608c5e884bb955bc61092d93e57c8ad42f39fe3ab2487ac0885b9",
+      "bytes": 6896,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/parsed_cells.json",
+      "sha256": "6d2685f807c58ffe59710e53505bd221bb3865a698ce17cbc1b2d3b2285f8afb",
+      "bytes": 8583,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/normalized_cells.json",
+      "sha256": "6e8149937fd543edb8d503277df9b3fcd0f29348ac0ea6be0ae878abebae4532",
+      "bytes": 25778,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/distribution.json",
+      "sha256": "38352bcd35d9adbd764a99af711ab3f98ffd70f1c0a94634a2c4107bc0659904",
+      "bytes": 13411,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/validation.json",
+      "sha256": "97482730ccd34c29243761e9b4a495727293cdbef6c77e0c0f25178b500d51d4",
+      "bytes": 139,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/cells.with_activity.json",
+      "sha256": "20a1bb2eb5cc7c90d78a4bb4ec1816642a1640dd90722cb132a76815db4adc67",
+      "bytes": 41840,
+      "createdAt": "2026-09-11T19:16:24Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-11/2026-09-11t19-16-24z-statbel-cpi-headline-yoy-2026-09/manifest.json",
+      "sha256": "c780b209538dd67c48812dbc93851abc48bc217a1a06c6d4d36571aefa345d79",
+      "bytes": 16163,
+      "createdAt": "2026-09-11T19:16:24Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "belgium-cpi-annual-rate-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "d26cef89bf9da6b17ce4495b4db5745f1e32f4bd98fd626c81d3586a0a7b8564"
+}

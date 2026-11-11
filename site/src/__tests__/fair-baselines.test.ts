@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { BrierRewardRow } from "@/data/brier-lab";
 import { summarizePairedComparison } from "@/data/brier-lab";
 import { canonicalStringify, sha256Hex } from "@/data/canonical-json";
@@ -17,6 +17,24 @@ import {
   type ObservationRecordedLedgerEntry,
   type PolicyEngineLedgerEntry,
 } from "@/data/thesis-log";
+
+// These fixtures test deterministic ledger reconstruction and paired scoring after execution verification.
+// The production verification boundary is exercised without mocks in
+// published-scoring-gate.test.ts and forecast-publication.test.ts.
+vi.mock("@/lib/forecast-publication", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/forecast-publication")>();
+  return {
+    ...actual,
+    verifyForecastRun: () => ({
+      eligible: true,
+      reason: "Downstream scoring fixture",
+    }),
+    filterPublishedForecasts: (
+      forecasts: import("@/data/forecast-cells").ForecastCell[],
+    ) => forecasts,
+  };
+});
 
 const RUN_AT = "2026-04-10T12:00:00Z";
 const SERIES = "test.series";

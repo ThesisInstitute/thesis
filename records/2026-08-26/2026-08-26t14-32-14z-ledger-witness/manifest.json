@@ -1,0 +1,2397 @@
+{
+  "schemaVersion": "thesis_ledger_witness_run_v2",
+  "retrievedAt": "2026-08-26T14:32:14Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerBranchSha": "9526211a3970993269523e1e43f4b17ccad846de",
+  "ledgerMainSha": "33ca98a7727b6935c2393254f09dcb34ad97710f",
+  "jsonl": {
+    "sha256": "f30824fd17f604b5f010fe0055b183fe01be8aca8783d6744c3d981f215e884c",
+    "bytes": 411864,
+    "lineCount": 215,
+    "sourceRecordIdCount": 215
+  },
+  "catalog": {
+    "sha256": "53be4c1c32794055eb3eef5f8dddf81a4f1ced4ac9a443d4ccc7a736dd6083ed",
+    "bytes": 203505
+  },
+  "releaseArchive": {
+    "schemaVersion": "thesis_ledger_release_archive_v1",
+    "directory": "releases/manifests",
+    "commitTreeSha": "f68f76b990073fe2cb76080efa689002f56ea5d5",
+    "releasesTreeSha": "4743c2a49e39b1bd8f1bdef4ce550ae5813b2711",
+    "manifestsTreeSha": "ab8e6840b7a9757acbaee26fb7ffceda7b660685",
+    "treeArchiveNames": {
+      "commit": "ledger-commit-tree.json",
+      "releases": "ledger-releases-tree.json",
+      "manifests": "ledger-release-manifests-tree.json"
+    },
+    "fileCount": 76,
+    "files": [
+      {
+        "path": "releases/manifests/0000-307cedbc91de43be.digicert.tsr",
+        "gitBlobSha": "c12d825dc3b08bcbb07dfdaac12647c7385f0894",
+        "sha256": "1114874211b2b7e8d63360d93cf97894779536e7efdb7b840355e7c538b5f3d0",
+        "bytes": 6007,
+        "archiveName": "ledger-release-0a39e7f5fa773e21024e78513c5a47b25f096f635dd247a57af4ce6cef8be32e"
+      },
+      {
+        "path": "releases/manifests/0000-307cedbc91de43be.freetsa.tsr",
+        "gitBlobSha": "acf389232ad4de43607345d65dfa1167c4c7963b",
+        "sha256": "3842ba6a38e32f2151981fb7e20abf4d68b1e77df5d56fa3df6abbca68b1d422",
+        "bytes": 4643,
+        "archiveName": "ledger-release-066f5369e3b7c9c0fbd80f648dde7b4637938a354f5ccefd753fcb4b83a867de"
+      },
+      {
+        "path": "releases/manifests/0000-307cedbc91de43be.json",
+        "gitBlobSha": "2362599ae51acb0f5ed5061929b015381d66d8ea",
+        "sha256": "307cedbc91de43be17123cc07e12633bfe0a77da4ec99666d9c78d53b980f65f",
+        "bytes": 457,
+        "archiveName": "ledger-release-33205bea3cf55cc47b60421befad39472123d9e348da1594236a50ee7964e4a9"
+      },
+      {
+        "path": "releases/manifests/0000-307cedbc91de43be.producer.sig",
+        "gitBlobSha": "ae0c1c07c2ef9a024577afee03a1e428ca2b5773",
+        "sha256": "1522cd67b2772e5dc5c679f20f99bcd53e8ecb9b3fa02fe0a1553bf10218764b",
+        "bytes": 64,
+        "archiveName": "ledger-release-0e3fc72c63dcbf133452a5da16ba1023e05a672773affa03ab9febc605ec9cb2"
+      },
+      {
+        "path": "releases/manifests/0001-916626696d034b80.digicert.tsr",
+        "gitBlobSha": "a06d2fe8a7fb24ae2f9e71c785a11040b6c75c3a",
+        "sha256": "01c8d45cf34115068ec48751be5e869d58168920dd525ffcb3f105dbb6cb472d",
+        "bytes": 6008,
+        "archiveName": "ledger-release-89628dad4bc59859cc402a362fb1ecf8cc633ccd4f721eca0c9e62d389b92909"
+      },
+      {
+        "path": "releases/manifests/0001-916626696d034b80.freetsa.tsr",
+        "gitBlobSha": "2ba5b60df1c55436a11b6e6762c65db61791d2f0",
+        "sha256": "358c9bd66108e54ae3fea5eda565b2ecd78f15b2c1ea54362ab903795247d7a4",
+        "bytes": 4643,
+        "archiveName": "ledger-release-5c6b8060b222aeaa726972f848ba3b7e98ef800d18da78f7715d8344d897662c"
+      },
+      {
+        "path": "releases/manifests/0001-916626696d034b80.json",
+        "gitBlobSha": "a3d4ae9570c9173de4877216d5ff2489b8ca448a",
+        "sha256": "916626696d034b804c505f590cc7b47881de7642676b0820721c20bc4ea97d90",
+        "bytes": 658,
+        "archiveName": "ledger-release-34a6415c6aebd34039c1f8f343248a2eb78549df7691c9e6d20b53544a7d0a8d"
+      },
+      {
+        "path": "releases/manifests/0001-916626696d034b80.producer.sig",
+        "gitBlobSha": "0605e6f4169fe1a7ddd783af21f2139847718f45",
+        "sha256": "55cbb9a0ca0fb9bd05d91fe8d15e610f506fe31e42c9eeeeff52d680b3d28e9c",
+        "bytes": 64,
+        "archiveName": "ledger-release-6ffe957e60c93145bfd9ab840352c2a14ecba64682888ca0fe9ea67968537d5e"
+      },
+      {
+        "path": "releases/manifests/0002-a69272175b73c83b.digicert.tsr",
+        "gitBlobSha": "8089caa7151950f38fbc6519dafc6e875e903202",
+        "sha256": "120d2ef49f1ff36c14365d96e349c41e8da69902c304bb65f396be021e5cec2f",
+        "bytes": 6007,
+        "archiveName": "ledger-release-a188274f65022d808e7788b68db97a9b915ec769d2950bdd55059aa2f286398a"
+      },
+      {
+        "path": "releases/manifests/0002-a69272175b73c83b.freetsa.tsr",
+        "gitBlobSha": "a4232af8bf90a24cb243b1970f051662992b204e",
+        "sha256": "793c9f26eb8eece09abf8b7d80eb59424d9c754de6f5674326f42ba5a7d85c95",
+        "bytes": 4644,
+        "archiveName": "ledger-release-9bc2505aff8aa875aea277ab50d1ed410f42e101aeae79912e3102982415cd13"
+      },
+      {
+        "path": "releases/manifests/0002-a69272175b73c83b.json",
+        "gitBlobSha": "f8e841fec529cb27a473146256ac0cdcd0e2b1c7",
+        "sha256": "a69272175b73c83b1255e19ad5f55e391a65f9b341c96c24e219b6efb78b755d",
+        "bytes": 658,
+        "archiveName": "ledger-release-5309744ee8ca047ea38826d95ab570d375b95f50c983cf4d3facade46e7e79b6"
+      },
+      {
+        "path": "releases/manifests/0002-a69272175b73c83b.producer.sig",
+        "gitBlobSha": "0c5015fa7ef5b71610a65609637b5d14584f628e",
+        "sha256": "91ba51a51cf7d5393de5d9fbafcc5a3619a479da129d6dcb952e3a1252789dd2",
+        "bytes": 64,
+        "archiveName": "ledger-release-208f84fdb610dd6934a30b15940e5bb5fb90ebb1d99896a985b36b9adea57c34"
+      },
+      {
+        "path": "releases/manifests/0003-cfae6e9b4524db6d.digicert.tsr",
+        "gitBlobSha": "c36e11bfbcd3a194632b562518f493d5c524d819",
+        "sha256": "0fd88ee299b5499d603528c1c9ef9f1511780a9351c6fdfa347b39554cf1a30a",
+        "bytes": 6007,
+        "archiveName": "ledger-release-7e474bbe8be34680b61a6f33cae376925017340e215ccd5278feeeba6d157e4a"
+      },
+      {
+        "path": "releases/manifests/0003-cfae6e9b4524db6d.freetsa.tsr",
+        "gitBlobSha": "00fc0e150a86716f4a4b0ce44d0a1fcaf54ae9a6",
+        "sha256": "644db1caa81d193945f925db1342e402dbe0546aef360f2e796f5f468a118654",
+        "bytes": 4645,
+        "archiveName": "ledger-release-ecbe3e1e22127342ead67c89622d8bb41b2f117a2ce35174badc31dc2176c104"
+      },
+      {
+        "path": "releases/manifests/0003-cfae6e9b4524db6d.json",
+        "gitBlobSha": "8b9363dda53472689cc500d00702b238cd1d3b61",
+        "sha256": "cfae6e9b4524db6d0772ddac0c289ea73f43502856f39c2ee4203fe18378a926",
+        "bytes": 658,
+        "archiveName": "ledger-release-54002731f4d2cd6f38b6a11c5939e461ae0df920281daa4030cc8c41c16d378a"
+      },
+      {
+        "path": "releases/manifests/0003-cfae6e9b4524db6d.producer.sig",
+        "gitBlobSha": "2d9ab2b38b695f07a4068a5771973c21eccadb89",
+        "sha256": "1ccbcb2d9323ed678610e2f415cf47cefee83c5a1a5a7d96eae8b645df775054",
+        "bytes": 64,
+        "archiveName": "ledger-release-ea532ec6c141ded985c013758b38d9847e4961ce9b8701a76f8aa99794943811"
+      },
+      {
+        "path": "releases/manifests/0004-36322993cf45b6d1.digicert.tsr",
+        "gitBlobSha": "01698bea74f7ae2faede29fe8c8fae966d9bb069",
+        "sha256": "bffc6aa7928dc02b23b1446253c78508123513afad0005ea4f62b893c8f4dc5d",
+        "bytes": 6006,
+        "archiveName": "ledger-release-13b9872e95029b112d4afd6ba82337176f647afd1e7ea9b6c35b6765148d6849"
+      },
+      {
+        "path": "releases/manifests/0004-36322993cf45b6d1.freetsa.tsr",
+        "gitBlobSha": "4ac2e31d85d9d608f8b778b19060b1ed3e167442",
+        "sha256": "f698f30e40da9f4f77f8c1e629807e0b6c6b2e3de54a3c51f6723c4eaa02af33",
+        "bytes": 4643,
+        "archiveName": "ledger-release-30d18289d52db32208550a59762d932a1aa01de1661bfb4a7a4cfb5a333a11c5"
+      },
+      {
+        "path": "releases/manifests/0004-36322993cf45b6d1.json",
+        "gitBlobSha": "59079a96006d8df8aef5a7433b880820543397c6",
+        "sha256": "36322993cf45b6d154f022054bdd0471ad1382e018a446414431c401e1f0d3a6",
+        "bytes": 658,
+        "archiveName": "ledger-release-8c3a7b7b4bd3f91aabf315bd93a399d90091fdf070a0ecddfbd808f0c380daa1"
+      },
+      {
+        "path": "releases/manifests/0004-36322993cf45b6d1.producer.sig",
+        "gitBlobSha": "ce319a15f7245567527e9eb987ca403db4b2d9c3",
+        "sha256": "da2a24cc5b84103e71ad001fe33e52e1f32969ff9e7efeb5a6671764fae7f26f",
+        "bytes": 64,
+        "archiveName": "ledger-release-d92f47c5a878dfe4bc7a794f147719b8036d2f415de8433129ae95a70675828b"
+      },
+      {
+        "path": "releases/manifests/0005-9bcc4ff6b3fad5d2.digicert.tsr",
+        "gitBlobSha": "e778a333ad7ca23aff5aebb30de829b82dbd75a5",
+        "sha256": "d4e318bb22ac6ee0af59d9bbe7a08314b2f80211574bde1e288553db3bc07386",
+        "bytes": 6007,
+        "archiveName": "ledger-release-a8dd54b3bd18a4a8a6725940bd50f2e68a7499f9a04cc86f4a438435881894bf"
+      },
+      {
+        "path": "releases/manifests/0005-9bcc4ff6b3fad5d2.freetsa.tsr",
+        "gitBlobSha": "6f5bd9c354603e9f81cbada36b8067386b4a990e",
+        "sha256": "5cff84b29a73dd1b683448bbd0d5e93fe5f85d84bf99dd997396170a9d931b37",
+        "bytes": 4643,
+        "archiveName": "ledger-release-0fd45156459217d1d6fbb96a69c61a898775b41ec2db8cbbb0dffca8257926c3"
+      },
+      {
+        "path": "releases/manifests/0005-9bcc4ff6b3fad5d2.json",
+        "gitBlobSha": "b3a81deb3b457b54912f6402a376b7f975ffa84b",
+        "sha256": "9bcc4ff6b3fad5d2c4d1d29431d8784e3aea3cbe410a5815e4b8652e1fff5db7",
+        "bytes": 658,
+        "archiveName": "ledger-release-8b170803d3a8a496e3f98e88c560c2bc9cc22262acafd7d52770f1d2df4938a5"
+      },
+      {
+        "path": "releases/manifests/0005-9bcc4ff6b3fad5d2.producer.sig",
+        "gitBlobSha": "d3a74558d05bc8e865f1d230bf2610ca89f5b6a8",
+        "sha256": "cab86ac8da1f86b7d0d8d36d33bd0d5f7ab4ab3584f6f412fc54fa08e7bec653",
+        "bytes": 64,
+        "archiveName": "ledger-release-7e4826135969eb267547b576c7f9a6ef5f42f8e419b5e8c797d907b63ca9da73"
+      },
+      {
+        "path": "releases/manifests/0006-770683e59da14f45.digicert.tsr",
+        "gitBlobSha": "3724fafa29630216fd31b60ce6dc668cff6f5fdc",
+        "sha256": "82638c5d69c6b5bc6083302101f867e1bb96870908307a276967212685a0e884",
+        "bytes": 6008,
+        "archiveName": "ledger-release-6acbca65894cd2cafbf8b6523b888ab6a569399006615e4918d441385475c980"
+      },
+      {
+        "path": "releases/manifests/0006-770683e59da14f45.freetsa.tsr",
+        "gitBlobSha": "f2f1929b7039c1398fb8b67ac9478d36da88e452",
+        "sha256": "719a233dbc6d8c80ee9ebd55373218bd4a4fe3a0d55d820411fbd95d641cfffb",
+        "bytes": 4643,
+        "archiveName": "ledger-release-dbefa80a04110d8da0cb941c581aea89367f67f019aedfc3b1556d4d8f09856c"
+      },
+      {
+        "path": "releases/manifests/0006-770683e59da14f45.json",
+        "gitBlobSha": "2dbec43c8cb3c882f33092efdaca459041fee08c",
+        "sha256": "770683e59da14f45716ee3de2d7344a2558622c6ec3c63c24087e05295562282",
+        "bytes": 658,
+        "archiveName": "ledger-release-402a05f9e9215821ad872d2ba1c1a56bc915265ba15d4768970ebff0bbabf665"
+      },
+      {
+        "path": "releases/manifests/0006-770683e59da14f45.producer.sig",
+        "gitBlobSha": "daf5fafbc208084cdf3320c283d3c71b698c1709",
+        "sha256": "cf590583e5b23f8cf25f8d69eb182453bac13112178e7b6f5098dbc0df948cae",
+        "bytes": 64,
+        "archiveName": "ledger-release-4a0bb578e0b4f7fba1ec5e9dd349a8970f9aa12bc088ee3ce57b6e71774d18ee"
+      },
+      {
+        "path": "releases/manifests/0007-2b5ed02908832f0c.digicert.tsr",
+        "gitBlobSha": "4291568e1e472e90420d1fc475ba0f5e7d4f4e49",
+        "sha256": "5694def5cc7251921b78e8776250518c61dc14f889e16e3e7c4c9a5d2ddf012f",
+        "bytes": 6008,
+        "archiveName": "ledger-release-765f6eccef3c17461ba728b053cd472756c2d5ee50559bc5b74eb1ae57c41593"
+      },
+      {
+        "path": "releases/manifests/0007-2b5ed02908832f0c.freetsa.tsr",
+        "gitBlobSha": "5d6acd69b0c0d46ef99dbf7b7a6befea4be197d1",
+        "sha256": "18c1319060101ca4fbc898401e33110b427ac030f98e7be728f1dbdcbf933386",
+        "bytes": 4644,
+        "archiveName": "ledger-release-9ccabd76becddc4061ee374f9fcbb1f6bd225eba630ee92c5cd845903b18c835"
+      },
+      {
+        "path": "releases/manifests/0007-2b5ed02908832f0c.json",
+        "gitBlobSha": "a4b362a745db71531ef07f2cc13b530668b2cd3b",
+        "sha256": "2b5ed02908832f0c35dbbcae902813f0ac43750195d03657e4c1db869d553b91",
+        "bytes": 658,
+        "archiveName": "ledger-release-f77d5a0cf79bd79a5aaef218e70969eb32b01676a9669409b098f939efb96ec3"
+      },
+      {
+        "path": "releases/manifests/0007-2b5ed02908832f0c.producer.sig",
+        "gitBlobSha": "8cc9d2344ec35899aae3d22b7fc9783192a8bf76",
+        "sha256": "8be30134d033538e3b2f843a5a5c3ed15a5dc86239dd8b2d698e0f7566fea36b",
+        "bytes": 64,
+        "archiveName": "ledger-release-959e1b442020e2bbf59c56819fbb391af14911fe697e405c7527f95d1413ea73"
+      },
+      {
+        "path": "releases/manifests/0008-070e797b855dce92.digicert.tsr",
+        "gitBlobSha": "811a320d85384de98ee35e5222301153e70f3c86",
+        "sha256": "98fd0c266c746842050082bab55c3fe0f10daf5d60e52260d4c905ad840c13b9",
+        "bytes": 6008,
+        "archiveName": "ledger-release-bd31b0676fdbb74d8369c367f8c5a4b7dffd0915dc65a24d0788d6634e5feed1"
+      },
+      {
+        "path": "releases/manifests/0008-070e797b855dce92.freetsa.tsr",
+        "gitBlobSha": "fd2a6931b91abe616f167935d44b90851186c885",
+        "sha256": "3217c4f0b23544b1dadd2b69d8f33e95833da554bfd0392cfe1f79ea8230348c",
+        "bytes": 4643,
+        "archiveName": "ledger-release-b5e8c35bd03a7fb65a013a68813e7bc8baba31e3f0abd3cc97602b810f03e23e"
+      },
+      {
+        "path": "releases/manifests/0008-070e797b855dce92.json",
+        "gitBlobSha": "fd25d4dc0c1d8e4ba65554d192ab06f5ee80af89",
+        "sha256": "070e797b855dce9206994ed8a2699662998a0cbd05d08b7c09da82fb7b9a9879",
+        "bytes": 658,
+        "archiveName": "ledger-release-c43bb109f6d2a87bb7e90d9429e730a543c0624997a71660cc6f08fdaf997786"
+      },
+      {
+        "path": "releases/manifests/0008-070e797b855dce92.producer.sig",
+        "gitBlobSha": "e2f99bef75e3dce5db8788c9f40bcca861bdae9a",
+        "sha256": "ab75e0f50602302ce1dd79109c75dba23cfc62c63e076038f08b04901e5bfad4",
+        "bytes": 64,
+        "archiveName": "ledger-release-acde675779452bff5182b3eb81070c9c45ed87666b285fc342fbb35c6d6a058c"
+      },
+      {
+        "path": "releases/manifests/0009-995768a31dd8fa6d.digicert.tsr",
+        "gitBlobSha": "c11ecd0ce6cec4b3fea1afd6c948a5f7e59fb360",
+        "sha256": "9bae2e6137eca4c872d1a4fb2ac66511f102fadaba14835b0f63d178656c2c20",
+        "bytes": 6007,
+        "archiveName": "ledger-release-d5e5dcf6c731697edeba1a1eb61999c8e1555649c366605c69f23fe0204582b8"
+      },
+      {
+        "path": "releases/manifests/0009-995768a31dd8fa6d.freetsa.tsr",
+        "gitBlobSha": "f84d54ff3d67d2e31134a3caf23d85e629aa2fc8",
+        "sha256": "939b2845e11f70ca691a2894a3d867d94903509300ad782951ea6197eb5650b9",
+        "bytes": 4644,
+        "archiveName": "ledger-release-18491ae3c18d376efd0ae3723b0a387032b459dfdb3bf5ad41bdb03b6a3ccb7a"
+      },
+      {
+        "path": "releases/manifests/0009-995768a31dd8fa6d.json",
+        "gitBlobSha": "f8065eb200080a8c7ce737c41ecaa9dc9eb5753a",
+        "sha256": "995768a31dd8fa6d31f693a9846f45066388140b670055baeb2b7bf282131808",
+        "bytes": 658,
+        "archiveName": "ledger-release-25c034992cbcd06bc715704d3437b31193c43d806cc02070afbb32543dc4913a"
+      },
+      {
+        "path": "releases/manifests/0009-995768a31dd8fa6d.producer.sig",
+        "gitBlobSha": "b17ae22df9d375fcedd100d4ed525eb34db01faa",
+        "sha256": "05a06cd5372efe82eb72f288624347c78366768081dd780fcb9408ca18d7b037",
+        "bytes": 64,
+        "archiveName": "ledger-release-c6bce35e23f6cf8097baab3383d339623a01e45bbcf1edc13b4871f5a9ff1be8"
+      },
+      {
+        "path": "releases/manifests/0010-6ba8c08f34189164.digicert.tsr",
+        "gitBlobSha": "cb6fcd36d786d96c738b5f76e07aee3e54225e02",
+        "sha256": "8a24a60cdeeb067e9523a02209e0f798029ef7ebe9bd34b5f1b1960c53f26f40",
+        "bytes": 6007,
+        "archiveName": "ledger-release-93364c38e1a38447d7058eb9931ef254abd2659103c7449d11383eea56aedc19"
+      },
+      {
+        "path": "releases/manifests/0010-6ba8c08f34189164.freetsa.tsr",
+        "gitBlobSha": "ead2eb8bb71bbebdb8b818931831117bc5fb2475",
+        "sha256": "b6fb96d424088f7d79e2cb0831439faec20f5a7f6bd16d8f7bc0c7f87b31b45e",
+        "bytes": 4645,
+        "archiveName": "ledger-release-b33d95496d3e5827791cd9d4532cf7370d1d0ef64808af64ba2c9935d1fa097c"
+      },
+      {
+        "path": "releases/manifests/0010-6ba8c08f34189164.json",
+        "gitBlobSha": "2135105fb9f82b9d288b2e0cd2ab3f9ae653b546",
+        "sha256": "6ba8c08f34189164679c857ee3755cbeb420c11a4125a0708b66a8c75c4f8972",
+        "bytes": 662,
+        "archiveName": "ledger-release-bdfd6429c0ee26e07bbd47442b1a7913a13d775ee09703e9700c1cc14c75e7b3"
+      },
+      {
+        "path": "releases/manifests/0010-6ba8c08f34189164.producer.sig",
+        "gitBlobSha": "ac4a30114bd071d055d32a9b18dcb428e3074ac0",
+        "sha256": "e5696cc6a677aa3859bc9861be5577a146f4dd9db73af1261a83cf4112a4167a",
+        "bytes": 64,
+        "archiveName": "ledger-release-3a60f395dbe193969c10acdf85c904709b1f5318b87809c99ea6fcc1ffac73eb"
+      },
+      {
+        "path": "releases/manifests/0011-34319583df55ce83.digicert.tsr",
+        "gitBlobSha": "f4ea768706f53f71c5bb5178a221c96760f8e35d",
+        "sha256": "91d01320cabc0847879c05f1de2aac4b5dc19e434eef4c28f82f82549268a7b4",
+        "bytes": 6007,
+        "archiveName": "ledger-release-aafbdec9f1acd6e8a5e8a0f8dbc856c53234cd0c57bff69c2b12200582dac248"
+      },
+      {
+        "path": "releases/manifests/0011-34319583df55ce83.freetsa.tsr",
+        "gitBlobSha": "914ade11e0ebbd3b3d49e29026ec291f02e04961",
+        "sha256": "c266c810f6dd2ae9c08b4a03656f4d3fd41c24acafdec51ed667e6dd146af151",
+        "bytes": 4644,
+        "archiveName": "ledger-release-818a110d3dcbb8cd65c2417616b2c2d5acb3053b0b9882dfd200686940913de0"
+      },
+      {
+        "path": "releases/manifests/0011-34319583df55ce83.json",
+        "gitBlobSha": "9cf447042f3beb37d616ae4da6ab9afcc0493378",
+        "sha256": "34319583df55ce8372c9aa167bfdca6fb2df4a48350069c4da6efc065ba94492",
+        "bytes": 662,
+        "archiveName": "ledger-release-535776ff1c9b634c8ef7ab8fb8ee0d37d82744e6c4e370b7d6b92f1d2e91d11d"
+      },
+      {
+        "path": "releases/manifests/0011-34319583df55ce83.producer.sig",
+        "gitBlobSha": "076b448af628dc9eebf9ebba02bc68a7ce087d5c",
+        "sha256": "9c4296fb2edaea6f9d34ae5e45df3e60a6cd664c7f14ce95d87e8844bf4ed5c6",
+        "bytes": 64,
+        "archiveName": "ledger-release-f05a2da62af4c41b1684580915bfd12093268954ee5ff07eb783503270b9a1ee"
+      },
+      {
+        "path": "releases/manifests/0012-3a5ef7eeee484370.digicert.tsr",
+        "gitBlobSha": "d018edbf8a078c56bdab8021771dda2a7661a7f9",
+        "sha256": "f4483450646be77ad22332066c9213e19a2c333a4eba0bf39d4714e136397321",
+        "bytes": 6007,
+        "archiveName": "ledger-release-cd77dae03598380bcddf4b605fa66f05326defbf850493a07ad889ebe7b7266b"
+      },
+      {
+        "path": "releases/manifests/0012-3a5ef7eeee484370.freetsa.tsr",
+        "gitBlobSha": "b380facaa0cc4290a4a4a79d9fd9976a60ea1b18",
+        "sha256": "9469790394cc1a56002f35c456420d8b2997029307b2dac7ada0834c3176ff13",
+        "bytes": 4643,
+        "archiveName": "ledger-release-13c5119c059b9db7fe64a61d5f3548c4faa2e21b550c6cb49917a5969a5c4551"
+      },
+      {
+        "path": "releases/manifests/0012-3a5ef7eeee484370.json",
+        "gitBlobSha": "9a60f33091188b11504fd15dfc983c3d4c392d1d",
+        "sha256": "3a5ef7eeee48437079edddbc0dc8b5edbff7f24b266c685f5791f64d36a674b9",
+        "bytes": 662,
+        "archiveName": "ledger-release-13d5861bd0d5f4ba53542a20790b3d8622cd3f61e7acfd6108ce264cabb9e60c"
+      },
+      {
+        "path": "releases/manifests/0012-3a5ef7eeee484370.producer.sig",
+        "gitBlobSha": "bf856ac5703e5bf0e9f690dd9e8ca866a67115cc",
+        "sha256": "268900dce7d51323f6a4eaad81df955b950b2d2f523c4adadae9b8ebe3ff6cd9",
+        "bytes": 64,
+        "archiveName": "ledger-release-9ff60a015bd514c7a36d12e7c7f11a8f00b8cac1276553e7b737dca300adf461"
+      },
+      {
+        "path": "releases/manifests/0013-d47323bbaacda2d1.digicert.tsr",
+        "gitBlobSha": "3eb9b2e3d2e990276a568c362d9011e6c943135e",
+        "sha256": "93566d4aaec9b18f237c23655fc1012641cd7175a8b3b066e51f2d35fc577d75",
+        "bytes": 6006,
+        "archiveName": "ledger-release-ffa56f8cccd0bdd12c900773158fcc256885646298a803738b0ae22abe5355af"
+      },
+      {
+        "path": "releases/manifests/0013-d47323bbaacda2d1.freetsa.tsr",
+        "gitBlobSha": "43fb3447d96c54a3eaef33deb47e2acfd832205f",
+        "sha256": "94a2bc956e1ab2944974dd7af78019d68a1d9eacec767b93d9cbf86b94ba3c71",
+        "bytes": 4644,
+        "archiveName": "ledger-release-e9e31d8fb033bb84ae3d2f768fe41c78719113cff3029846db9f685ccd1eb5f7"
+      },
+      {
+        "path": "releases/manifests/0013-d47323bbaacda2d1.json",
+        "gitBlobSha": "05be80643451f230c79d2b081df85e6b66cd5529",
+        "sha256": "d47323bbaacda2d1938adec43c47abad6f718634d47ec614eec1b905499f13e9",
+        "bytes": 662,
+        "archiveName": "ledger-release-e8d7b6bf9b689366b968bd6e48b043ba0afbfe9aceac81ea510d32334affd52b"
+      },
+      {
+        "path": "releases/manifests/0013-d47323bbaacda2d1.producer.sig",
+        "gitBlobSha": "be5b29776f855b32464eab609ef16f7d701df784",
+        "sha256": "886a269e679bf9ee89a6e38df8cfe688e9dd88f2c110516c368b2513ef2a6e83",
+        "bytes": 64,
+        "archiveName": "ledger-release-8e2724c201c004ba6df02a1c2aba751604001973ecee95caedc551b948bcc01c"
+      },
+      {
+        "path": "releases/manifests/0014-bd12e9e3e79a5529.digicert.tsr",
+        "gitBlobSha": "3da44bb9e31e5bcf64802a748970fbd7477be0b8",
+        "sha256": "33be31c87816ed007699affc8ded75fcf04a04b61b848a3d8c115c5f5f640a0f",
+        "bytes": 6007,
+        "archiveName": "ledger-release-4bb02f971d2e85afa22ff1941e0f928d5c3ba903fc0543ad9024f49cffd0a1e2"
+      },
+      {
+        "path": "releases/manifests/0014-bd12e9e3e79a5529.freetsa.tsr",
+        "gitBlobSha": "a5f2497929561272f61a5de4d0c2045fddab9e5f",
+        "sha256": "b41885b6d51fa48a561a2c11ae1bf36ef2ae4c43654ca600964e7a512e9a0500",
+        "bytes": 4644,
+        "archiveName": "ledger-release-5d2e59a5aea7cc32b3fe8c51b9a58b2d53727e2d526d65c45fa9ea598347834e"
+      },
+      {
+        "path": "releases/manifests/0014-bd12e9e3e79a5529.json",
+        "gitBlobSha": "8452b49266bbf6e36aa323cda934f0ac8c189c0d",
+        "sha256": "bd12e9e3e79a5529680644310735d16141b1e1b516e9c86c5a1483eba25f4e17",
+        "bytes": 662,
+        "archiveName": "ledger-release-57ba9f87ecf4a5e49547e4ddd0df2012930761802520651ba3f733f24368573b"
+      },
+      {
+        "path": "releases/manifests/0014-bd12e9e3e79a5529.producer.sig",
+        "gitBlobSha": "e18bd2dddf1056ed888910db58c3dc29ed58c990",
+        "sha256": "9f1b0de528cf85135c1b099a34d54af8bf28acd28fe479250bb5dadcd6f5b16d",
+        "bytes": 64,
+        "archiveName": "ledger-release-843d80fbe7ad5b353d2a564493e0f7f5040e182813653c756525914799ba48a1"
+      },
+      {
+        "path": "releases/manifests/0015-fdcfd0e570214f6b.digicert.tsr",
+        "gitBlobSha": "27b1fea29535e396a487f1ce77c4e15503b285f1",
+        "sha256": "fa56d44819e3173355d8b90b5f1a86fe650973442b55dcd5bedce88affc65f99",
+        "bytes": 6008,
+        "archiveName": "ledger-release-09759d3d07c765272bf8ba68058987d7da7968cdde0ef6832efc3bb47f681118"
+      },
+      {
+        "path": "releases/manifests/0015-fdcfd0e570214f6b.freetsa.tsr",
+        "gitBlobSha": "e9decb517af3061e07da4f306de76664629e1aea",
+        "sha256": "f413216d56e37dcc6ff4060c9c77dd4532fad6c348990a721262013983148975",
+        "bytes": 4643,
+        "archiveName": "ledger-release-00f1994e0705aaebf1d76637fff59266e0a1102c2bbbbf07d06a67211ca8966f"
+      },
+      {
+        "path": "releases/manifests/0015-fdcfd0e570214f6b.json",
+        "gitBlobSha": "12adc18b6d97b2ef97c15d1718c941a86f062a28",
+        "sha256": "fdcfd0e570214f6b9befa48c4fe15583b79bec60d091290e666eb8650a0bfe0f",
+        "bytes": 663,
+        "archiveName": "ledger-release-e7c55bddb03b3acad61012476832c6ab78be975f23f5ef50ac7cb004fa3282f5"
+      },
+      {
+        "path": "releases/manifests/0015-fdcfd0e570214f6b.producer.sig",
+        "gitBlobSha": "ed1c9dc7ae77969703a8e285512d95f9ab5cc057",
+        "sha256": "4a780e2b29768771ff642b5f7b253dee07dec77f5469d0ace16aa9db74cf4c35",
+        "bytes": 64,
+        "archiveName": "ledger-release-9390e5605178706a1a9d757b11a79611fafbf5f0b0d347149c3d0b5c540560a5"
+      },
+      {
+        "path": "releases/manifests/0016-5226191699ae168d.digicert.tsr",
+        "gitBlobSha": "cc3609cc1d65509295bd710c833a4344eb68b516",
+        "sha256": "78c9300e0df9e4dcb989be66602b8127a8a5803c396984cb871e80b90b7f6c1e",
+        "bytes": 6007,
+        "archiveName": "ledger-release-605c4855bff954d6fbf495e05b22f5295926e8ad3f1cefc398d0e1db8e2d3068"
+      },
+      {
+        "path": "releases/manifests/0016-5226191699ae168d.freetsa.tsr",
+        "gitBlobSha": "e66fcd9898f166c11e47a3119012a8b174f7d798",
+        "sha256": "79882497af4b7125c0d89010fc5f8dae53cf03f6d562ef53dfb4b34760a47e09",
+        "bytes": 4644,
+        "archiveName": "ledger-release-9c250d884236db0240f3353ddb8f71b0d1672247b2452cf7649c582d27b3d5d1"
+      },
+      {
+        "path": "releases/manifests/0016-5226191699ae168d.json",
+        "gitBlobSha": "c95a516106c6c941f86cbcedd584dc8e9911e754",
+        "sha256": "5226191699ae168d1da6573d9d7e295f8228609b92b7e0b26c9e6ee6c1bcf50d",
+        "bytes": 662,
+        "archiveName": "ledger-release-8ce5a604e36ee5500d49728d0096a519e411b91a39c2740757f0af56044a5fb5"
+      },
+      {
+        "path": "releases/manifests/0016-5226191699ae168d.producer.sig",
+        "gitBlobSha": "beb5607daa97e169ec72f2d2d9ca2bcb95067b5b",
+        "sha256": "175d5dc7d056325d1942f60b41d6a7dbbdc941632de54cda61a9abf4e72a0c0b",
+        "bytes": 64,
+        "archiveName": "ledger-release-4450a1775a899eb2ad7ca27678de7435bf5e3fea95ac76b545d035b6b87313ec"
+      },
+      {
+        "path": "releases/manifests/0017-efa7d60fece304f7.digicert.tsr",
+        "gitBlobSha": "625e02e3c59423a799224b7727e3a89f217c682e",
+        "sha256": "106ee4c5f9e33f2f0be74e80b8ae7c853bd2ca1ff196b14c308ce72ebb2564b0",
+        "bytes": 6007,
+        "archiveName": "ledger-release-a16077f24f2b8a08c9228c981072fe2b8722dd189de55800f794b8ddc830a937"
+      },
+      {
+        "path": "releases/manifests/0017-efa7d60fece304f7.freetsa.tsr",
+        "gitBlobSha": "98792e06a17a83d3196cf1caf2d187759dfc94dd",
+        "sha256": "01b08811dbac1d74b19bfa1b3e689a93b771f5feb8ae3db9ef3cb9115bd8da9a",
+        "bytes": 4643,
+        "archiveName": "ledger-release-749e50359c7097d6db9699cde15f009690efacd0ab37f8a31b933a8f41f25cf0"
+      },
+      {
+        "path": "releases/manifests/0017-efa7d60fece304f7.json",
+        "gitBlobSha": "dd9e28bc8e426de4b670da3c9aeec8707e9d1c26",
+        "sha256": "efa7d60fece304f77a403a1d8d4aa3789f87cfb174fe75e8705cf00339d45656",
+        "bytes": 662,
+        "archiveName": "ledger-release-8f141e4eae6fb232c93bfad9aece6dffe9195a6efaa20dc1cca73c62344667d1"
+      },
+      {
+        "path": "releases/manifests/0017-efa7d60fece304f7.producer.sig",
+        "gitBlobSha": "4913e6baad0cc5e70d5e62cc834abea5c2fc5095",
+        "sha256": "004881256a131934a1a859bca009945ba796cb6d48444324241d43f60df6a3f0",
+        "bytes": 64,
+        "archiveName": "ledger-release-c41431caca4bfbd2cfd1b7b446ad31d5a54ad3c5cb5dd571ba23983be3150e5d"
+      },
+      {
+        "path": "releases/manifests/0018-20974a5bdeeace01.digicert.tsr",
+        "gitBlobSha": "39d849670b9562c45287ccbed7e069735c69ed7b",
+        "sha256": "49c1fd0738ba0e4f05e233ec3974bc44924e3988a9f7270a8ecf2bbe8c96cdb5",
+        "bytes": 6007,
+        "archiveName": "ledger-release-25b670db641d94843f0c6cdb359875a6d4ebae3c296f394030c2dd753d94a7ba"
+      },
+      {
+        "path": "releases/manifests/0018-20974a5bdeeace01.freetsa.tsr",
+        "gitBlobSha": "67c62df2cb858c3145d4bf5133f922f674e8ae6e",
+        "sha256": "77c99a640e30b1b1704c5640c8c8a2c4e61977e459170ddd6a5219dea1acf101",
+        "bytes": 4642,
+        "archiveName": "ledger-release-318c13b1639bf4358c7a2bcbde059aaa5c373de178939e9ce761bedf8d2b0c9d"
+      },
+      {
+        "path": "releases/manifests/0018-20974a5bdeeace01.json",
+        "gitBlobSha": "60fd07468e1263c689ad9401c505e13127306f3d",
+        "sha256": "20974a5bdeeace01e2f5d34abc3b385beb249971e2d737ca56133656787ed56d",
+        "bytes": 662,
+        "archiveName": "ledger-release-4f43a7347677528925cf12645658e52e3acb1ffd75ffff5a094d7a9a566d18fc"
+      },
+      {
+        "path": "releases/manifests/0018-20974a5bdeeace01.producer.sig",
+        "gitBlobSha": "be59019fae6af54edc78794cca76c677f9702ebc",
+        "sha256": "d28650eff5c25fd7ddeeb3d3e1c36efdc69934ca39e4ef949ce8afa8ffdc0d95",
+        "bytes": 64,
+        "archiveName": "ledger-release-6a141903241d819337e0f728a013c43b2d03f3d341bcd7c68c1f2edcb724ac24"
+      }
+    ]
+  },
+  "upstream": [
+    {
+      "name": "official-observations.jsonl",
+      "role": "official_observations_jsonl",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/official-observations.jsonl.gz",
+        "sha256": "f30824fd17f604b5f010fe0055b183fe01be8aca8783d6744c3d981f215e884c",
+        "bytes": 411864,
+        "gzipSha256": "f5a0c2dfb9be58d10902e6cba61e5498aba15820fedf1efa7eaebd6ea740fde9",
+        "gzipBytes": 46310,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/ledger/official_observations.jsonl"
+    },
+    {
+      "name": "series-catalog.json",
+      "role": "series_catalog_json",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/series-catalog.json.gz",
+        "sha256": "53be4c1c32794055eb3eef5f8dddf81a4f1ced4ac9a443d4ccc7a736dd6083ed",
+        "bytes": 203505,
+        "gzipSha256": "20bb3bb76c217a49a7021e8a57dbcf39c6d2ad36deabaa5efca44e5c9a48863b",
+        "gzipBytes": 18181,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/ledger/series_catalog.json"
+    },
+    {
+      "name": "ledger-branch-commit.json",
+      "role": "ledger_branch_commit_api",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-branch-commit.json.gz",
+        "sha256": "f9b66c28d6e85ad36a48a03f033afba1ba5e30141b8fe887f4dc29a97a301bde",
+        "bytes": 25661,
+        "gzipSha256": "9d896452c79964db1fd105b1e70f158e78733d54ba798163395e637d7635471a",
+        "gzipBytes": 6016,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://api.github.com/repos/PolicyEngine/chronicle/commits/9526211a3970993269523e1e43f4b17ccad846de"
+    },
+    {
+      "name": "ledger-main-commit.json",
+      "role": "ledger_main_commit_api",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-main-commit.json.gz",
+        "sha256": "6c1e64858b6a4fd6a43ed41c546c430a876a3face5f5e0468d5a6b22d2cb01de",
+        "bytes": 90373,
+        "gzipSha256": "a46fa736a7eb9e60ff22271c9d09f5e9ad75c03cfa3f32a26271041a72cf6f15",
+        "gzipBytes": 19612,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://api.github.com/repos/PolicyEngine/chronicle/commits/33ca98a7727b6935c2393254f09dcb34ad97710f"
+    },
+    {
+      "name": "ledger-commit-tree.json",
+      "role": "ledger_commit_tree_api",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-commit-tree.json.gz",
+        "sha256": "028f3bc8ef8a2d5719467fd23ce1ac61c6e92c485a0618b7a515537e50118c78",
+        "bytes": 4016,
+        "gzipSha256": "f43b447fd983380f75d31306190a51f78571da068104e005666d66d5fda4b475",
+        "gzipBytes": 919,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://api.github.com/repos/PolicyEngine/chronicle/git/trees/f68f76b990073fe2cb76080efa689002f56ea5d5",
+      "gitTreeSha": "f68f76b990073fe2cb76080efa689002f56ea5d5"
+    },
+    {
+      "name": "ledger-releases-tree.json",
+      "role": "ledger_releases_tree_api",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-releases-tree.json.gz",
+        "sha256": "f1e7ad6b7c673f62d8bfb885029ad592a76bbac1c0144267021accefa8fab0b9",
+        "bytes": 831,
+        "gzipSha256": "9a7d4bb5587627a69cb2da27e4da5d0c29cb4aa5311bdf20b5a3c037d94fd27d",
+        "gzipBytes": 327,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://api.github.com/repos/PolicyEngine/chronicle/git/trees/4743c2a49e39b1bd8f1bdef4ce550ae5813b2711",
+      "gitTreeSha": "4743c2a49e39b1bd8f1bdef4ce550ae5813b2711"
+    },
+    {
+      "name": "ledger-release-manifests-tree.json",
+      "role": "ledger_release_manifests_tree_api",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-manifests-tree.json.gz",
+        "sha256": "90fd377e4ba35845c22f256116591444a3045c5bf8573e9369897ded56282097",
+        "bytes": 18808,
+        "gzipSha256": "a6b31d066a4654b5f4435a173827e28abae4a679ecb0e21490490f208e29598d",
+        "gzipBytes": 3053,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://api.github.com/repos/PolicyEngine/chronicle/git/trees/ab8e6840b7a9757acbaee26fb7ffceda7b660685",
+      "gitTreeSha": "ab8e6840b7a9757acbaee26fb7ffceda7b660685"
+    },
+    {
+      "name": "ledger-release-0a39e7f5fa773e21024e78513c5a47b25f096f635dd247a57af4ce6cef8be32e",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-0a39e7f5fa773e21024e78513c5a47b25f096f635dd247a57af4ce6cef8be32e.gz",
+        "sha256": "1114874211b2b7e8d63360d93cf97894779536e7efdb7b840355e7c538b5f3d0",
+        "bytes": 6007,
+        "gzipSha256": "8f0c397f1871a5d3fc16499426423f5164339aca9ae143f3ce076b59a2ca14d1",
+        "gzipBytes": 4646,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0000-307cedbc91de43be.digicert.tsr",
+      "sourcePath": "releases/manifests/0000-307cedbc91de43be.digicert.tsr",
+      "gitBlobSha": "c12d825dc3b08bcbb07dfdaac12647c7385f0894"
+    },
+    {
+      "name": "ledger-release-066f5369e3b7c9c0fbd80f648dde7b4637938a354f5ccefd753fcb4b83a867de",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-066f5369e3b7c9c0fbd80f648dde7b4637938a354f5ccefd753fcb4b83a867de.gz",
+        "sha256": "3842ba6a38e32f2151981fb7e20abf4d68b1e77df5d56fa3df6abbca68b1d422",
+        "bytes": 4643,
+        "gzipSha256": "4240e10e4a6e2b2eeba9a13866359e9e8ea3e921ef3f3bfac7b42512dfa7cf15",
+        "gzipBytes": 3003,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0000-307cedbc91de43be.freetsa.tsr",
+      "sourcePath": "releases/manifests/0000-307cedbc91de43be.freetsa.tsr",
+      "gitBlobSha": "acf389232ad4de43607345d65dfa1167c4c7963b"
+    },
+    {
+      "name": "ledger-release-33205bea3cf55cc47b60421befad39472123d9e348da1594236a50ee7964e4a9",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-33205bea3cf55cc47b60421befad39472123d9e348da1594236a50ee7964e4a9.gz",
+        "sha256": "307cedbc91de43be17123cc07e12633bfe0a77da4ec99666d9c78d53b980f65f",
+        "bytes": 457,
+        "gzipSha256": "f8b1f6f3500a479499b74d4d2fb7fce12349ca4ca8aa577540a4cee214c7f4ad",
+        "gzipBytes": 345,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0000-307cedbc91de43be.json",
+      "sourcePath": "releases/manifests/0000-307cedbc91de43be.json",
+      "gitBlobSha": "2362599ae51acb0f5ed5061929b015381d66d8ea"
+    },
+    {
+      "name": "ledger-release-0e3fc72c63dcbf133452a5da16ba1023e05a672773affa03ab9febc605ec9cb2",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-0e3fc72c63dcbf133452a5da16ba1023e05a672773affa03ab9febc605ec9cb2.gz",
+        "sha256": "1522cd67b2772e5dc5c679f20f99bcd53e8ecb9b3fa02fe0a1553bf10218764b",
+        "bytes": 64,
+        "gzipSha256": "e362e9fa572e38d724f1990faaf7aacee0a408a68a338163550f942bf0499f2e",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0000-307cedbc91de43be.producer.sig",
+      "sourcePath": "releases/manifests/0000-307cedbc91de43be.producer.sig",
+      "gitBlobSha": "ae0c1c07c2ef9a024577afee03a1e428ca2b5773"
+    },
+    {
+      "name": "ledger-release-89628dad4bc59859cc402a362fb1ecf8cc633ccd4f721eca0c9e62d389b92909",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-89628dad4bc59859cc402a362fb1ecf8cc633ccd4f721eca0c9e62d389b92909.gz",
+        "sha256": "01c8d45cf34115068ec48751be5e869d58168920dd525ffcb3f105dbb6cb472d",
+        "bytes": 6008,
+        "gzipSha256": "67210525e18b84130c08566f082dd8b1525e63a763c7f123be29ac3b8ae6de21",
+        "gzipBytes": 4652,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0001-916626696d034b80.digicert.tsr",
+      "sourcePath": "releases/manifests/0001-916626696d034b80.digicert.tsr",
+      "gitBlobSha": "a06d2fe8a7fb24ae2f9e71c785a11040b6c75c3a"
+    },
+    {
+      "name": "ledger-release-5c6b8060b222aeaa726972f848ba3b7e98ef800d18da78f7715d8344d897662c",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-5c6b8060b222aeaa726972f848ba3b7e98ef800d18da78f7715d8344d897662c.gz",
+        "sha256": "358c9bd66108e54ae3fea5eda565b2ecd78f15b2c1ea54362ab903795247d7a4",
+        "bytes": 4643,
+        "gzipSha256": "8113d3148b9a751d58d4456052463a8a41dcb53e3d52e05511bd96f4379dd3cd",
+        "gzipBytes": 3001,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0001-916626696d034b80.freetsa.tsr",
+      "sourcePath": "releases/manifests/0001-916626696d034b80.freetsa.tsr",
+      "gitBlobSha": "2ba5b60df1c55436a11b6e6762c65db61791d2f0"
+    },
+    {
+      "name": "ledger-release-34a6415c6aebd34039c1f8f343248a2eb78549df7691c9e6d20b53544a7d0a8d",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-34a6415c6aebd34039c1f8f343248a2eb78549df7691c9e6d20b53544a7d0a8d.gz",
+        "sha256": "916626696d034b804c505f590cc7b47881de7642676b0820721c20bc4ea97d90",
+        "bytes": 658,
+        "gzipSha256": "962a7d3ace708cdd06f9bbffb0db57de7936eecf9848900b1cf70039361a800c",
+        "gzipBytes": 450,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0001-916626696d034b80.json",
+      "sourcePath": "releases/manifests/0001-916626696d034b80.json",
+      "gitBlobSha": "a3d4ae9570c9173de4877216d5ff2489b8ca448a"
+    },
+    {
+      "name": "ledger-release-6ffe957e60c93145bfd9ab840352c2a14ecba64682888ca0fe9ea67968537d5e",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-6ffe957e60c93145bfd9ab840352c2a14ecba64682888ca0fe9ea67968537d5e.gz",
+        "sha256": "55cbb9a0ca0fb9bd05d91fe8d15e610f506fe31e42c9eeeeff52d680b3d28e9c",
+        "bytes": 64,
+        "gzipSha256": "00ba8004a4b98e033e5d09580fd327e4ea8959ce6bba3a33f6a08020f9936bb0",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0001-916626696d034b80.producer.sig",
+      "sourcePath": "releases/manifests/0001-916626696d034b80.producer.sig",
+      "gitBlobSha": "0605e6f4169fe1a7ddd783af21f2139847718f45"
+    },
+    {
+      "name": "ledger-release-a188274f65022d808e7788b68db97a9b915ec769d2950bdd55059aa2f286398a",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-a188274f65022d808e7788b68db97a9b915ec769d2950bdd55059aa2f286398a.gz",
+        "sha256": "120d2ef49f1ff36c14365d96e349c41e8da69902c304bb65f396be021e5cec2f",
+        "bytes": 6007,
+        "gzipSha256": "423b100d89bb8f45068dbf36d62b69fb8e36b49766fe55ab2d436ca45ecfaaa3",
+        "gzipBytes": 4646,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0002-a69272175b73c83b.digicert.tsr",
+      "sourcePath": "releases/manifests/0002-a69272175b73c83b.digicert.tsr",
+      "gitBlobSha": "8089caa7151950f38fbc6519dafc6e875e903202"
+    },
+    {
+      "name": "ledger-release-9bc2505aff8aa875aea277ab50d1ed410f42e101aeae79912e3102982415cd13",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9bc2505aff8aa875aea277ab50d1ed410f42e101aeae79912e3102982415cd13.gz",
+        "sha256": "793c9f26eb8eece09abf8b7d80eb59424d9c754de6f5674326f42ba5a7d85c95",
+        "bytes": 4644,
+        "gzipSha256": "0ac4418846bb308c0e80557b866aa98e1a93cd75f6141cf16aed8c902d21a1d7",
+        "gzipBytes": 3004,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0002-a69272175b73c83b.freetsa.tsr",
+      "sourcePath": "releases/manifests/0002-a69272175b73c83b.freetsa.tsr",
+      "gitBlobSha": "a4232af8bf90a24cb243b1970f051662992b204e"
+    },
+    {
+      "name": "ledger-release-5309744ee8ca047ea38826d95ab570d375b95f50c983cf4d3facade46e7e79b6",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-5309744ee8ca047ea38826d95ab570d375b95f50c983cf4d3facade46e7e79b6.gz",
+        "sha256": "a69272175b73c83b1255e19ad5f55e391a65f9b341c96c24e219b6efb78b755d",
+        "bytes": 658,
+        "gzipSha256": "ca843d034a64e2f54c592ba698b6db61a675993742def1ff45cf698cf6d6b1da",
+        "gzipBytes": 449,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0002-a69272175b73c83b.json",
+      "sourcePath": "releases/manifests/0002-a69272175b73c83b.json",
+      "gitBlobSha": "f8e841fec529cb27a473146256ac0cdcd0e2b1c7"
+    },
+    {
+      "name": "ledger-release-208f84fdb610dd6934a30b15940e5bb5fb90ebb1d99896a985b36b9adea57c34",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-208f84fdb610dd6934a30b15940e5bb5fb90ebb1d99896a985b36b9adea57c34.gz",
+        "sha256": "91ba51a51cf7d5393de5d9fbafcc5a3619a479da129d6dcb952e3a1252789dd2",
+        "bytes": 64,
+        "gzipSha256": "9e1ab94fc8ba4b2557f17617f930973366d5269cb3f4ce5eca9d6d7e87cf278e",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0002-a69272175b73c83b.producer.sig",
+      "sourcePath": "releases/manifests/0002-a69272175b73c83b.producer.sig",
+      "gitBlobSha": "0c5015fa7ef5b71610a65609637b5d14584f628e"
+    },
+    {
+      "name": "ledger-release-7e474bbe8be34680b61a6f33cae376925017340e215ccd5278feeeba6d157e4a",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-7e474bbe8be34680b61a6f33cae376925017340e215ccd5278feeeba6d157e4a.gz",
+        "sha256": "0fd88ee299b5499d603528c1c9ef9f1511780a9351c6fdfa347b39554cf1a30a",
+        "bytes": 6007,
+        "gzipSha256": "f2b25ecff59101a5f3126d7a0c7aee6c735a0c46ae89e81e16e2338326ef4e5f",
+        "gzipBytes": 4648,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0003-cfae6e9b4524db6d.digicert.tsr",
+      "sourcePath": "releases/manifests/0003-cfae6e9b4524db6d.digicert.tsr",
+      "gitBlobSha": "c36e11bfbcd3a194632b562518f493d5c524d819"
+    },
+    {
+      "name": "ledger-release-ecbe3e1e22127342ead67c89622d8bb41b2f117a2ce35174badc31dc2176c104",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-ecbe3e1e22127342ead67c89622d8bb41b2f117a2ce35174badc31dc2176c104.gz",
+        "sha256": "644db1caa81d193945f925db1342e402dbe0546aef360f2e796f5f468a118654",
+        "bytes": 4645,
+        "gzipSha256": "134913ffac8498d00da7bb73737e0362fc901deb522509184a3724bb8103b8a0",
+        "gzipBytes": 3006,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0003-cfae6e9b4524db6d.freetsa.tsr",
+      "sourcePath": "releases/manifests/0003-cfae6e9b4524db6d.freetsa.tsr",
+      "gitBlobSha": "00fc0e150a86716f4a4b0ce44d0a1fcaf54ae9a6"
+    },
+    {
+      "name": "ledger-release-54002731f4d2cd6f38b6a11c5939e461ae0df920281daa4030cc8c41c16d378a",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-54002731f4d2cd6f38b6a11c5939e461ae0df920281daa4030cc8c41c16d378a.gz",
+        "sha256": "cfae6e9b4524db6d0772ddac0c289ea73f43502856f39c2ee4203fe18378a926",
+        "bytes": 658,
+        "gzipSha256": "5d6855b2c2b6f12e96c147346480fefd76c32b0d949cd4d3a76939122a5d6637",
+        "gzipBytes": 450,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0003-cfae6e9b4524db6d.json",
+      "sourcePath": "releases/manifests/0003-cfae6e9b4524db6d.json",
+      "gitBlobSha": "8b9363dda53472689cc500d00702b238cd1d3b61"
+    },
+    {
+      "name": "ledger-release-ea532ec6c141ded985c013758b38d9847e4961ce9b8701a76f8aa99794943811",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-ea532ec6c141ded985c013758b38d9847e4961ce9b8701a76f8aa99794943811.gz",
+        "sha256": "1ccbcb2d9323ed678610e2f415cf47cefee83c5a1a5a7d96eae8b645df775054",
+        "bytes": 64,
+        "gzipSha256": "bdca0242a3382489b546229e394c12316af0093bf0913f63642f265c7faaf32e",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0003-cfae6e9b4524db6d.producer.sig",
+      "sourcePath": "releases/manifests/0003-cfae6e9b4524db6d.producer.sig",
+      "gitBlobSha": "2d9ab2b38b695f07a4068a5771973c21eccadb89"
+    },
+    {
+      "name": "ledger-release-13b9872e95029b112d4afd6ba82337176f647afd1e7ea9b6c35b6765148d6849",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-13b9872e95029b112d4afd6ba82337176f647afd1e7ea9b6c35b6765148d6849.gz",
+        "sha256": "bffc6aa7928dc02b23b1446253c78508123513afad0005ea4f62b893c8f4dc5d",
+        "bytes": 6006,
+        "gzipSha256": "1275800ae3e91bc97016362c051ccf87ac6689a3d3fa30618b10d0da972fc653",
+        "gzipBytes": 4647,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0004-36322993cf45b6d1.digicert.tsr",
+      "sourcePath": "releases/manifests/0004-36322993cf45b6d1.digicert.tsr",
+      "gitBlobSha": "01698bea74f7ae2faede29fe8c8fae966d9bb069"
+    },
+    {
+      "name": "ledger-release-30d18289d52db32208550a59762d932a1aa01de1661bfb4a7a4cfb5a333a11c5",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-30d18289d52db32208550a59762d932a1aa01de1661bfb4a7a4cfb5a333a11c5.gz",
+        "sha256": "f698f30e40da9f4f77f8c1e629807e0b6c6b2e3de54a3c51f6723c4eaa02af33",
+        "bytes": 4643,
+        "gzipSha256": "3af9c4386e38e6c48de6a972f4e28f618281e14ea190de6cea7342a8d4a469a5",
+        "gzipBytes": 3004,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0004-36322993cf45b6d1.freetsa.tsr",
+      "sourcePath": "releases/manifests/0004-36322993cf45b6d1.freetsa.tsr",
+      "gitBlobSha": "4ac2e31d85d9d608f8b778b19060b1ed3e167442"
+    },
+    {
+      "name": "ledger-release-8c3a7b7b4bd3f91aabf315bd93a399d90091fdf070a0ecddfbd808f0c380daa1",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8c3a7b7b4bd3f91aabf315bd93a399d90091fdf070a0ecddfbd808f0c380daa1.gz",
+        "sha256": "36322993cf45b6d154f022054bdd0471ad1382e018a446414431c401e1f0d3a6",
+        "bytes": 658,
+        "gzipSha256": "77d2da9e625279c4564a097ec0150c2065c2662dea1770b11f9896892b2f0188",
+        "gzipBytes": 448,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0004-36322993cf45b6d1.json",
+      "sourcePath": "releases/manifests/0004-36322993cf45b6d1.json",
+      "gitBlobSha": "59079a96006d8df8aef5a7433b880820543397c6"
+    },
+    {
+      "name": "ledger-release-d92f47c5a878dfe4bc7a794f147719b8036d2f415de8433129ae95a70675828b",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-d92f47c5a878dfe4bc7a794f147719b8036d2f415de8433129ae95a70675828b.gz",
+        "sha256": "da2a24cc5b84103e71ad001fe33e52e1f32969ff9e7efeb5a6671764fae7f26f",
+        "bytes": 64,
+        "gzipSha256": "9191a98d9d7467449e8593c1fecb39894855873d0395c425716599e4c347b7c2",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0004-36322993cf45b6d1.producer.sig",
+      "sourcePath": "releases/manifests/0004-36322993cf45b6d1.producer.sig",
+      "gitBlobSha": "ce319a15f7245567527e9eb987ca403db4b2d9c3"
+    },
+    {
+      "name": "ledger-release-a8dd54b3bd18a4a8a6725940bd50f2e68a7499f9a04cc86f4a438435881894bf",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-a8dd54b3bd18a4a8a6725940bd50f2e68a7499f9a04cc86f4a438435881894bf.gz",
+        "sha256": "d4e318bb22ac6ee0af59d9bbe7a08314b2f80211574bde1e288553db3bc07386",
+        "bytes": 6007,
+        "gzipSha256": "50e056879a47328abded4d15de0b866a237dada3216e6137cb74b35de105e834",
+        "gzipBytes": 4650,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0005-9bcc4ff6b3fad5d2.digicert.tsr",
+      "sourcePath": "releases/manifests/0005-9bcc4ff6b3fad5d2.digicert.tsr",
+      "gitBlobSha": "e778a333ad7ca23aff5aebb30de829b82dbd75a5"
+    },
+    {
+      "name": "ledger-release-0fd45156459217d1d6fbb96a69c61a898775b41ec2db8cbbb0dffca8257926c3",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-0fd45156459217d1d6fbb96a69c61a898775b41ec2db8cbbb0dffca8257926c3.gz",
+        "sha256": "5cff84b29a73dd1b683448bbd0d5e93fe5f85d84bf99dd997396170a9d931b37",
+        "bytes": 4643,
+        "gzipSha256": "e42cf250b0a79196dc724c6a26d6ca98a0c61d0344294b569b63f2700793984c",
+        "gzipBytes": 3002,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0005-9bcc4ff6b3fad5d2.freetsa.tsr",
+      "sourcePath": "releases/manifests/0005-9bcc4ff6b3fad5d2.freetsa.tsr",
+      "gitBlobSha": "6f5bd9c354603e9f81cbada36b8067386b4a990e"
+    },
+    {
+      "name": "ledger-release-8b170803d3a8a496e3f98e88c560c2bc9cc22262acafd7d52770f1d2df4938a5",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8b170803d3a8a496e3f98e88c560c2bc9cc22262acafd7d52770f1d2df4938a5.gz",
+        "sha256": "9bcc4ff6b3fad5d2c4d1d29431d8784e3aea3cbe410a5815e4b8652e1fff5db7",
+        "bytes": 658,
+        "gzipSha256": "95f48234aedcb1c14eb8eb3b439cb27b95ad496c380338badf5aef55c3a3c708",
+        "gzipBytes": 452,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0005-9bcc4ff6b3fad5d2.json",
+      "sourcePath": "releases/manifests/0005-9bcc4ff6b3fad5d2.json",
+      "gitBlobSha": "b3a81deb3b457b54912f6402a376b7f975ffa84b"
+    },
+    {
+      "name": "ledger-release-7e4826135969eb267547b576c7f9a6ef5f42f8e419b5e8c797d907b63ca9da73",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-7e4826135969eb267547b576c7f9a6ef5f42f8e419b5e8c797d907b63ca9da73.gz",
+        "sha256": "cab86ac8da1f86b7d0d8d36d33bd0d5f7ab4ab3584f6f412fc54fa08e7bec653",
+        "bytes": 64,
+        "gzipSha256": "d351de73e8c6d53926d6eccaceeb25596c05cf2d60452768f2872a080a14992d",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0005-9bcc4ff6b3fad5d2.producer.sig",
+      "sourcePath": "releases/manifests/0005-9bcc4ff6b3fad5d2.producer.sig",
+      "gitBlobSha": "d3a74558d05bc8e865f1d230bf2610ca89f5b6a8"
+    },
+    {
+      "name": "ledger-release-6acbca65894cd2cafbf8b6523b888ab6a569399006615e4918d441385475c980",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-6acbca65894cd2cafbf8b6523b888ab6a569399006615e4918d441385475c980.gz",
+        "sha256": "82638c5d69c6b5bc6083302101f867e1bb96870908307a276967212685a0e884",
+        "bytes": 6008,
+        "gzipSha256": "52a3635c35b35d7171094dfe420c73978ee5042b518785ddc48486d7f8c04244",
+        "gzipBytes": 4650,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0006-770683e59da14f45.digicert.tsr",
+      "sourcePath": "releases/manifests/0006-770683e59da14f45.digicert.tsr",
+      "gitBlobSha": "3724fafa29630216fd31b60ce6dc668cff6f5fdc"
+    },
+    {
+      "name": "ledger-release-dbefa80a04110d8da0cb941c581aea89367f67f019aedfc3b1556d4d8f09856c",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-dbefa80a04110d8da0cb941c581aea89367f67f019aedfc3b1556d4d8f09856c.gz",
+        "sha256": "719a233dbc6d8c80ee9ebd55373218bd4a4fe3a0d55d820411fbd95d641cfffb",
+        "bytes": 4643,
+        "gzipSha256": "94d5f0fe63e04ce2cef1bbc14981932b5c9f4c4bfafade83b26e55c9508e87f7",
+        "gzipBytes": 3000,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0006-770683e59da14f45.freetsa.tsr",
+      "sourcePath": "releases/manifests/0006-770683e59da14f45.freetsa.tsr",
+      "gitBlobSha": "f2f1929b7039c1398fb8b67ac9478d36da88e452"
+    },
+    {
+      "name": "ledger-release-402a05f9e9215821ad872d2ba1c1a56bc915265ba15d4768970ebff0bbabf665",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-402a05f9e9215821ad872d2ba1c1a56bc915265ba15d4768970ebff0bbabf665.gz",
+        "sha256": "770683e59da14f45716ee3de2d7344a2558622c6ec3c63c24087e05295562282",
+        "bytes": 658,
+        "gzipSha256": "8df67ee2f2a3e9a1b9253dc3b75d7aa7c2af72330ca2988aabd962ada58c1c02",
+        "gzipBytes": 449,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0006-770683e59da14f45.json",
+      "sourcePath": "releases/manifests/0006-770683e59da14f45.json",
+      "gitBlobSha": "2dbec43c8cb3c882f33092efdaca459041fee08c"
+    },
+    {
+      "name": "ledger-release-4a0bb578e0b4f7fba1ec5e9dd349a8970f9aa12bc088ee3ce57b6e71774d18ee",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-4a0bb578e0b4f7fba1ec5e9dd349a8970f9aa12bc088ee3ce57b6e71774d18ee.gz",
+        "sha256": "cf590583e5b23f8cf25f8d69eb182453bac13112178e7b6f5098dbc0df948cae",
+        "bytes": 64,
+        "gzipSha256": "5ac6da385a55dbe2f2df8b14143d4de665ccfa0053f6d9ada9b7019840591998",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0006-770683e59da14f45.producer.sig",
+      "sourcePath": "releases/manifests/0006-770683e59da14f45.producer.sig",
+      "gitBlobSha": "daf5fafbc208084cdf3320c283d3c71b698c1709"
+    },
+    {
+      "name": "ledger-release-765f6eccef3c17461ba728b053cd472756c2d5ee50559bc5b74eb1ae57c41593",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-765f6eccef3c17461ba728b053cd472756c2d5ee50559bc5b74eb1ae57c41593.gz",
+        "sha256": "5694def5cc7251921b78e8776250518c61dc14f889e16e3e7c4c9a5d2ddf012f",
+        "bytes": 6008,
+        "gzipSha256": "8a389ecbd32a52ff5279b2d9a534ef1de8110bb819c09b85fbcac1033f7b181d",
+        "gzipBytes": 4648,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0007-2b5ed02908832f0c.digicert.tsr",
+      "sourcePath": "releases/manifests/0007-2b5ed02908832f0c.digicert.tsr",
+      "gitBlobSha": "4291568e1e472e90420d1fc475ba0f5e7d4f4e49"
+    },
+    {
+      "name": "ledger-release-9ccabd76becddc4061ee374f9fcbb1f6bd225eba630ee92c5cd845903b18c835",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9ccabd76becddc4061ee374f9fcbb1f6bd225eba630ee92c5cd845903b18c835.gz",
+        "sha256": "18c1319060101ca4fbc898401e33110b427ac030f98e7be728f1dbdcbf933386",
+        "bytes": 4644,
+        "gzipSha256": "bb32708c245171613eea7fd3083df33c35e67192e95dc0c6601da5ead08ababf",
+        "gzipBytes": 3005,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0007-2b5ed02908832f0c.freetsa.tsr",
+      "sourcePath": "releases/manifests/0007-2b5ed02908832f0c.freetsa.tsr",
+      "gitBlobSha": "5d6acd69b0c0d46ef99dbf7b7a6befea4be197d1"
+    },
+    {
+      "name": "ledger-release-f77d5a0cf79bd79a5aaef218e70969eb32b01676a9669409b098f939efb96ec3",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-f77d5a0cf79bd79a5aaef218e70969eb32b01676a9669409b098f939efb96ec3.gz",
+        "sha256": "2b5ed02908832f0c35dbbcae902813f0ac43750195d03657e4c1db869d553b91",
+        "bytes": 658,
+        "gzipSha256": "ce092c19f387373827966f0abef17aa31139ee08bf24e17b726b1f94d0765150",
+        "gzipBytes": 449,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0007-2b5ed02908832f0c.json",
+      "sourcePath": "releases/manifests/0007-2b5ed02908832f0c.json",
+      "gitBlobSha": "a4b362a745db71531ef07f2cc13b530668b2cd3b"
+    },
+    {
+      "name": "ledger-release-959e1b442020e2bbf59c56819fbb391af14911fe697e405c7527f95d1413ea73",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-959e1b442020e2bbf59c56819fbb391af14911fe697e405c7527f95d1413ea73.gz",
+        "sha256": "8be30134d033538e3b2f843a5a5c3ed15a5dc86239dd8b2d698e0f7566fea36b",
+        "bytes": 64,
+        "gzipSha256": "2124d82b03775767064cfa53d7fdd2b81305cfebe2cae2520d827ddcb6ade348",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0007-2b5ed02908832f0c.producer.sig",
+      "sourcePath": "releases/manifests/0007-2b5ed02908832f0c.producer.sig",
+      "gitBlobSha": "8cc9d2344ec35899aae3d22b7fc9783192a8bf76"
+    },
+    {
+      "name": "ledger-release-bd31b0676fdbb74d8369c367f8c5a4b7dffd0915dc65a24d0788d6634e5feed1",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-bd31b0676fdbb74d8369c367f8c5a4b7dffd0915dc65a24d0788d6634e5feed1.gz",
+        "sha256": "98fd0c266c746842050082bab55c3fe0f10daf5d60e52260d4c905ad840c13b9",
+        "bytes": 6008,
+        "gzipSha256": "e39c8430153192e4adb036e207b509ee725960c4bb6d5b7cbda76707b55e6e2f",
+        "gzipBytes": 4648,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0008-070e797b855dce92.digicert.tsr",
+      "sourcePath": "releases/manifests/0008-070e797b855dce92.digicert.tsr",
+      "gitBlobSha": "811a320d85384de98ee35e5222301153e70f3c86"
+    },
+    {
+      "name": "ledger-release-b5e8c35bd03a7fb65a013a68813e7bc8baba31e3f0abd3cc97602b810f03e23e",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-b5e8c35bd03a7fb65a013a68813e7bc8baba31e3f0abd3cc97602b810f03e23e.gz",
+        "sha256": "3217c4f0b23544b1dadd2b69d8f33e95833da554bfd0392cfe1f79ea8230348c",
+        "bytes": 4643,
+        "gzipSha256": "81a2aee8b6b9bdba733f34ac0254aadcd5d48474d5c0a0054d777a0fd35522fc",
+        "gzipBytes": 3003,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0008-070e797b855dce92.freetsa.tsr",
+      "sourcePath": "releases/manifests/0008-070e797b855dce92.freetsa.tsr",
+      "gitBlobSha": "fd2a6931b91abe616f167935d44b90851186c885"
+    },
+    {
+      "name": "ledger-release-c43bb109f6d2a87bb7e90d9429e730a543c0624997a71660cc6f08fdaf997786",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-c43bb109f6d2a87bb7e90d9429e730a543c0624997a71660cc6f08fdaf997786.gz",
+        "sha256": "070e797b855dce9206994ed8a2699662998a0cbd05d08b7c09da82fb7b9a9879",
+        "bytes": 658,
+        "gzipSha256": "83a43ad679a2e74f413c5864db9849ada40facc1606cb77aa5e8e72ec1e41df3",
+        "gzipBytes": 449,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0008-070e797b855dce92.json",
+      "sourcePath": "releases/manifests/0008-070e797b855dce92.json",
+      "gitBlobSha": "fd25d4dc0c1d8e4ba65554d192ab06f5ee80af89"
+    },
+    {
+      "name": "ledger-release-acde675779452bff5182b3eb81070c9c45ed87666b285fc342fbb35c6d6a058c",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-acde675779452bff5182b3eb81070c9c45ed87666b285fc342fbb35c6d6a058c.gz",
+        "sha256": "ab75e0f50602302ce1dd79109c75dba23cfc62c63e076038f08b04901e5bfad4",
+        "bytes": 64,
+        "gzipSha256": "63d78b7a7d9a1e24e22c848bfb999ff17e61dd4c78fbadd1d0e97941ec4192fb",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0008-070e797b855dce92.producer.sig",
+      "sourcePath": "releases/manifests/0008-070e797b855dce92.producer.sig",
+      "gitBlobSha": "e2f99bef75e3dce5db8788c9f40bcca861bdae9a"
+    },
+    {
+      "name": "ledger-release-d5e5dcf6c731697edeba1a1eb61999c8e1555649c366605c69f23fe0204582b8",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-d5e5dcf6c731697edeba1a1eb61999c8e1555649c366605c69f23fe0204582b8.gz",
+        "sha256": "9bae2e6137eca4c872d1a4fb2ac66511f102fadaba14835b0f63d178656c2c20",
+        "bytes": 6007,
+        "gzipSha256": "27d75d3c8d5543646cd836beed544323797b9dd5ed5f07826c8ab7666f713342",
+        "gzipBytes": 4648,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0009-995768a31dd8fa6d.digicert.tsr",
+      "sourcePath": "releases/manifests/0009-995768a31dd8fa6d.digicert.tsr",
+      "gitBlobSha": "c11ecd0ce6cec4b3fea1afd6c948a5f7e59fb360"
+    },
+    {
+      "name": "ledger-release-18491ae3c18d376efd0ae3723b0a387032b459dfdb3bf5ad41bdb03b6a3ccb7a",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-18491ae3c18d376efd0ae3723b0a387032b459dfdb3bf5ad41bdb03b6a3ccb7a.gz",
+        "sha256": "939b2845e11f70ca691a2894a3d867d94903509300ad782951ea6197eb5650b9",
+        "bytes": 4644,
+        "gzipSha256": "9cdf02e0001cedc55c696b0f431b21b9cf2e2061748123ea3f6c69b71d9d5ece",
+        "gzipBytes": 3002,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0009-995768a31dd8fa6d.freetsa.tsr",
+      "sourcePath": "releases/manifests/0009-995768a31dd8fa6d.freetsa.tsr",
+      "gitBlobSha": "f84d54ff3d67d2e31134a3caf23d85e629aa2fc8"
+    },
+    {
+      "name": "ledger-release-25c034992cbcd06bc715704d3437b31193c43d806cc02070afbb32543dc4913a",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-25c034992cbcd06bc715704d3437b31193c43d806cc02070afbb32543dc4913a.gz",
+        "sha256": "995768a31dd8fa6d31f693a9846f45066388140b670055baeb2b7bf282131808",
+        "bytes": 658,
+        "gzipSha256": "39e9ec7bec903783227141ab7ff51f32573ec94353081a6dee323af5ea753804",
+        "gzipBytes": 454,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0009-995768a31dd8fa6d.json",
+      "sourcePath": "releases/manifests/0009-995768a31dd8fa6d.json",
+      "gitBlobSha": "f8065eb200080a8c7ce737c41ecaa9dc9eb5753a"
+    },
+    {
+      "name": "ledger-release-c6bce35e23f6cf8097baab3383d339623a01e45bbcf1edc13b4871f5a9ff1be8",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-c6bce35e23f6cf8097baab3383d339623a01e45bbcf1edc13b4871f5a9ff1be8.gz",
+        "sha256": "05a06cd5372efe82eb72f288624347c78366768081dd780fcb9408ca18d7b037",
+        "bytes": 64,
+        "gzipSha256": "e7fa77ed72ec64f06dd4f2a948b4dc55e67b4f14ddb00267676b516664642185",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0009-995768a31dd8fa6d.producer.sig",
+      "sourcePath": "releases/manifests/0009-995768a31dd8fa6d.producer.sig",
+      "gitBlobSha": "b17ae22df9d375fcedd100d4ed525eb34db01faa"
+    },
+    {
+      "name": "ledger-release-93364c38e1a38447d7058eb9931ef254abd2659103c7449d11383eea56aedc19",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-93364c38e1a38447d7058eb9931ef254abd2659103c7449d11383eea56aedc19.gz",
+        "sha256": "8a24a60cdeeb067e9523a02209e0f798029ef7ebe9bd34b5f1b1960c53f26f40",
+        "bytes": 6007,
+        "gzipSha256": "7849cacabd363776525fc0d10f5d27788de112584f7ef55cbb28c44bb4a8ab51",
+        "gzipBytes": 4647,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0010-6ba8c08f34189164.digicert.tsr",
+      "sourcePath": "releases/manifests/0010-6ba8c08f34189164.digicert.tsr",
+      "gitBlobSha": "cb6fcd36d786d96c738b5f76e07aee3e54225e02"
+    },
+    {
+      "name": "ledger-release-b33d95496d3e5827791cd9d4532cf7370d1d0ef64808af64ba2c9935d1fa097c",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-b33d95496d3e5827791cd9d4532cf7370d1d0ef64808af64ba2c9935d1fa097c.gz",
+        "sha256": "b6fb96d424088f7d79e2cb0831439faec20f5a7f6bd16d8f7bc0c7f87b31b45e",
+        "bytes": 4645,
+        "gzipSha256": "ce97834967071a1ffe073e910e20c7571ca731e0f3178ceb521e6f3a848885f3",
+        "gzipBytes": 3002,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0010-6ba8c08f34189164.freetsa.tsr",
+      "sourcePath": "releases/manifests/0010-6ba8c08f34189164.freetsa.tsr",
+      "gitBlobSha": "ead2eb8bb71bbebdb8b818931831117bc5fb2475"
+    },
+    {
+      "name": "ledger-release-bdfd6429c0ee26e07bbd47442b1a7913a13d775ee09703e9700c1cc14c75e7b3",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-bdfd6429c0ee26e07bbd47442b1a7913a13d775ee09703e9700c1cc14c75e7b3.gz",
+        "sha256": "6ba8c08f34189164679c857ee3755cbeb420c11a4125a0708b66a8c75c4f8972",
+        "bytes": 662,
+        "gzipSha256": "3e544b596f76e78a6b415fceadcf5c04f66c3335b67b76e503b3bf188262d5c1",
+        "gzipBytes": 453,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0010-6ba8c08f34189164.json",
+      "sourcePath": "releases/manifests/0010-6ba8c08f34189164.json",
+      "gitBlobSha": "2135105fb9f82b9d288b2e0cd2ab3f9ae653b546"
+    },
+    {
+      "name": "ledger-release-3a60f395dbe193969c10acdf85c904709b1f5318b87809c99ea6fcc1ffac73eb",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-3a60f395dbe193969c10acdf85c904709b1f5318b87809c99ea6fcc1ffac73eb.gz",
+        "sha256": "e5696cc6a677aa3859bc9861be5577a146f4dd9db73af1261a83cf4112a4167a",
+        "bytes": 64,
+        "gzipSha256": "642d52f9487e6129c402a665b5c0c6dcf0e6e9ff91418a136043156d0dc54034",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0010-6ba8c08f34189164.producer.sig",
+      "sourcePath": "releases/manifests/0010-6ba8c08f34189164.producer.sig",
+      "gitBlobSha": "ac4a30114bd071d055d32a9b18dcb428e3074ac0"
+    },
+    {
+      "name": "ledger-release-aafbdec9f1acd6e8a5e8a0f8dbc856c53234cd0c57bff69c2b12200582dac248",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-aafbdec9f1acd6e8a5e8a0f8dbc856c53234cd0c57bff69c2b12200582dac248.gz",
+        "sha256": "91d01320cabc0847879c05f1de2aac4b5dc19e434eef4c28f82f82549268a7b4",
+        "bytes": 6007,
+        "gzipSha256": "fa79a3ebca8f09f6ed89934e2cf104b0a0ada36438acfb2d18f8f7cad54b310e",
+        "gzipBytes": 4647,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0011-34319583df55ce83.digicert.tsr",
+      "sourcePath": "releases/manifests/0011-34319583df55ce83.digicert.tsr",
+      "gitBlobSha": "f4ea768706f53f71c5bb5178a221c96760f8e35d"
+    },
+    {
+      "name": "ledger-release-818a110d3dcbb8cd65c2417616b2c2d5acb3053b0b9882dfd200686940913de0",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-818a110d3dcbb8cd65c2417616b2c2d5acb3053b0b9882dfd200686940913de0.gz",
+        "sha256": "c266c810f6dd2ae9c08b4a03656f4d3fd41c24acafdec51ed667e6dd146af151",
+        "bytes": 4644,
+        "gzipSha256": "01359caf9fcab8323736a3a9c339d50cf4011733b4eef75f3b807ab31b28fa78",
+        "gzipBytes": 3002,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0011-34319583df55ce83.freetsa.tsr",
+      "sourcePath": "releases/manifests/0011-34319583df55ce83.freetsa.tsr",
+      "gitBlobSha": "914ade11e0ebbd3b3d49e29026ec291f02e04961"
+    },
+    {
+      "name": "ledger-release-535776ff1c9b634c8ef7ab8fb8ee0d37d82744e6c4e370b7d6b92f1d2e91d11d",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-535776ff1c9b634c8ef7ab8fb8ee0d37d82744e6c4e370b7d6b92f1d2e91d11d.gz",
+        "sha256": "34319583df55ce8372c9aa167bfdca6fb2df4a48350069c4da6efc065ba94492",
+        "bytes": 662,
+        "gzipSha256": "0416bda64dacea1b8eed22187a5918055ccfde2f7dd4157e47898bd58e149f9d",
+        "gzipBytes": 455,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0011-34319583df55ce83.json",
+      "sourcePath": "releases/manifests/0011-34319583df55ce83.json",
+      "gitBlobSha": "9cf447042f3beb37d616ae4da6ab9afcc0493378"
+    },
+    {
+      "name": "ledger-release-f05a2da62af4c41b1684580915bfd12093268954ee5ff07eb783503270b9a1ee",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-f05a2da62af4c41b1684580915bfd12093268954ee5ff07eb783503270b9a1ee.gz",
+        "sha256": "9c4296fb2edaea6f9d34ae5e45df3e60a6cd664c7f14ce95d87e8844bf4ed5c6",
+        "bytes": 64,
+        "gzipSha256": "c3c43cf18e826153487d4981a777fb06db2999c822eff1ee0d81dc09675b5b2e",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0011-34319583df55ce83.producer.sig",
+      "sourcePath": "releases/manifests/0011-34319583df55ce83.producer.sig",
+      "gitBlobSha": "076b448af628dc9eebf9ebba02bc68a7ce087d5c"
+    },
+    {
+      "name": "ledger-release-cd77dae03598380bcddf4b605fa66f05326defbf850493a07ad889ebe7b7266b",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-cd77dae03598380bcddf4b605fa66f05326defbf850493a07ad889ebe7b7266b.gz",
+        "sha256": "f4483450646be77ad22332066c9213e19a2c333a4eba0bf39d4714e136397321",
+        "bytes": 6007,
+        "gzipSha256": "f90099f87232b50ca8d3f05ac2474d9cf261b0808c06a3c094e7b80a17f66e8c",
+        "gzipBytes": 4649,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0012-3a5ef7eeee484370.digicert.tsr",
+      "sourcePath": "releases/manifests/0012-3a5ef7eeee484370.digicert.tsr",
+      "gitBlobSha": "d018edbf8a078c56bdab8021771dda2a7661a7f9"
+    },
+    {
+      "name": "ledger-release-13c5119c059b9db7fe64a61d5f3548c4faa2e21b550c6cb49917a5969a5c4551",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-13c5119c059b9db7fe64a61d5f3548c4faa2e21b550c6cb49917a5969a5c4551.gz",
+        "sha256": "9469790394cc1a56002f35c456420d8b2997029307b2dac7ada0834c3176ff13",
+        "bytes": 4643,
+        "gzipSha256": "c6249a9e634385333594edc525c5be463327c534c31443395f76291e57c9f2a6",
+        "gzipBytes": 3004,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0012-3a5ef7eeee484370.freetsa.tsr",
+      "sourcePath": "releases/manifests/0012-3a5ef7eeee484370.freetsa.tsr",
+      "gitBlobSha": "b380facaa0cc4290a4a4a79d9fd9976a60ea1b18"
+    },
+    {
+      "name": "ledger-release-13d5861bd0d5f4ba53542a20790b3d8622cd3f61e7acfd6108ce264cabb9e60c",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-13d5861bd0d5f4ba53542a20790b3d8622cd3f61e7acfd6108ce264cabb9e60c.gz",
+        "sha256": "3a5ef7eeee48437079edddbc0dc8b5edbff7f24b266c685f5791f64d36a674b9",
+        "bytes": 662,
+        "gzipSha256": "f8983089defaab100d1ee81248e37b0d9ed04c878a297497468495f474f6fd0a",
+        "gzipBytes": 454,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0012-3a5ef7eeee484370.json",
+      "sourcePath": "releases/manifests/0012-3a5ef7eeee484370.json",
+      "gitBlobSha": "9a60f33091188b11504fd15dfc983c3d4c392d1d"
+    },
+    {
+      "name": "ledger-release-9ff60a015bd514c7a36d12e7c7f11a8f00b8cac1276553e7b737dca300adf461",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9ff60a015bd514c7a36d12e7c7f11a8f00b8cac1276553e7b737dca300adf461.gz",
+        "sha256": "268900dce7d51323f6a4eaad81df955b950b2d2f523c4adadae9b8ebe3ff6cd9",
+        "bytes": 64,
+        "gzipSha256": "6d07f6c51b6d0a2c316a43b61dce6b4536af6b47a57cd7bf528705c67f69206b",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0012-3a5ef7eeee484370.producer.sig",
+      "sourcePath": "releases/manifests/0012-3a5ef7eeee484370.producer.sig",
+      "gitBlobSha": "bf856ac5703e5bf0e9f690dd9e8ca866a67115cc"
+    },
+    {
+      "name": "ledger-release-ffa56f8cccd0bdd12c900773158fcc256885646298a803738b0ae22abe5355af",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-ffa56f8cccd0bdd12c900773158fcc256885646298a803738b0ae22abe5355af.gz",
+        "sha256": "93566d4aaec9b18f237c23655fc1012641cd7175a8b3b066e51f2d35fc577d75",
+        "bytes": 6006,
+        "gzipSha256": "be4c50ff04f8a97a7e1f7679682177a912c8bd2ecd629058159d77e99eb6a7ae",
+        "gzipBytes": 4645,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0013-d47323bbaacda2d1.digicert.tsr",
+      "sourcePath": "releases/manifests/0013-d47323bbaacda2d1.digicert.tsr",
+      "gitBlobSha": "3eb9b2e3d2e990276a568c362d9011e6c943135e"
+    },
+    {
+      "name": "ledger-release-e9e31d8fb033bb84ae3d2f768fe41c78719113cff3029846db9f685ccd1eb5f7",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-e9e31d8fb033bb84ae3d2f768fe41c78719113cff3029846db9f685ccd1eb5f7.gz",
+        "sha256": "94a2bc956e1ab2944974dd7af78019d68a1d9eacec767b93d9cbf86b94ba3c71",
+        "bytes": 4644,
+        "gzipSha256": "004510aadff65646ef1d20cfe735c8e0bc6c1a0ca3f7e3f16af823b88ac5fff5",
+        "gzipBytes": 3005,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0013-d47323bbaacda2d1.freetsa.tsr",
+      "sourcePath": "releases/manifests/0013-d47323bbaacda2d1.freetsa.tsr",
+      "gitBlobSha": "43fb3447d96c54a3eaef33deb47e2acfd832205f"
+    },
+    {
+      "name": "ledger-release-e8d7b6bf9b689366b968bd6e48b043ba0afbfe9aceac81ea510d32334affd52b",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-e8d7b6bf9b689366b968bd6e48b043ba0afbfe9aceac81ea510d32334affd52b.gz",
+        "sha256": "d47323bbaacda2d1938adec43c47abad6f718634d47ec614eec1b905499f13e9",
+        "bytes": 662,
+        "gzipSha256": "514f30b03e761acf1c9ba9eaa93c6bccb4da350077e64c65594ee7cac5d23d76",
+        "gzipBytes": 453,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0013-d47323bbaacda2d1.json",
+      "sourcePath": "releases/manifests/0013-d47323bbaacda2d1.json",
+      "gitBlobSha": "05be80643451f230c79d2b081df85e6b66cd5529"
+    },
+    {
+      "name": "ledger-release-8e2724c201c004ba6df02a1c2aba751604001973ecee95caedc551b948bcc01c",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8e2724c201c004ba6df02a1c2aba751604001973ecee95caedc551b948bcc01c.gz",
+        "sha256": "886a269e679bf9ee89a6e38df8cfe688e9dd88f2c110516c368b2513ef2a6e83",
+        "bytes": 64,
+        "gzipSha256": "055e1c7fa16b03f4b0b045d0d172bdbf3df748f4abd15a6716a6ada306ba6c6a",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0013-d47323bbaacda2d1.producer.sig",
+      "sourcePath": "releases/manifests/0013-d47323bbaacda2d1.producer.sig",
+      "gitBlobSha": "be5b29776f855b32464eab609ef16f7d701df784"
+    },
+    {
+      "name": "ledger-release-4bb02f971d2e85afa22ff1941e0f928d5c3ba903fc0543ad9024f49cffd0a1e2",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-4bb02f971d2e85afa22ff1941e0f928d5c3ba903fc0543ad9024f49cffd0a1e2.gz",
+        "sha256": "33be31c87816ed007699affc8ded75fcf04a04b61b848a3d8c115c5f5f640a0f",
+        "bytes": 6007,
+        "gzipSha256": "817900ef6d180f251e31206e89c99dabeb143d800c1245acaca64bc670937fdc",
+        "gzipBytes": 4644,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0014-bd12e9e3e79a5529.digicert.tsr",
+      "sourcePath": "releases/manifests/0014-bd12e9e3e79a5529.digicert.tsr",
+      "gitBlobSha": "3da44bb9e31e5bcf64802a748970fbd7477be0b8"
+    },
+    {
+      "name": "ledger-release-5d2e59a5aea7cc32b3fe8c51b9a58b2d53727e2d526d65c45fa9ea598347834e",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-5d2e59a5aea7cc32b3fe8c51b9a58b2d53727e2d526d65c45fa9ea598347834e.gz",
+        "sha256": "b41885b6d51fa48a561a2c11ae1bf36ef2ae4c43654ca600964e7a512e9a0500",
+        "bytes": 4644,
+        "gzipSha256": "5201174a2d2aa37e022e9f0e9934f1d3264b16e164a2c53f787f8a0929e574d8",
+        "gzipBytes": 3006,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0014-bd12e9e3e79a5529.freetsa.tsr",
+      "sourcePath": "releases/manifests/0014-bd12e9e3e79a5529.freetsa.tsr",
+      "gitBlobSha": "a5f2497929561272f61a5de4d0c2045fddab9e5f"
+    },
+    {
+      "name": "ledger-release-57ba9f87ecf4a5e49547e4ddd0df2012930761802520651ba3f733f24368573b",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-57ba9f87ecf4a5e49547e4ddd0df2012930761802520651ba3f733f24368573b.gz",
+        "sha256": "bd12e9e3e79a5529680644310735d16141b1e1b516e9c86c5a1483eba25f4e17",
+        "bytes": 662,
+        "gzipSha256": "8440ebc8ed33e94cd894552ed1ff7eff3ec68acabf49c97839cdbf15ea8dedc6",
+        "gzipBytes": 453,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0014-bd12e9e3e79a5529.json",
+      "sourcePath": "releases/manifests/0014-bd12e9e3e79a5529.json",
+      "gitBlobSha": "8452b49266bbf6e36aa323cda934f0ac8c189c0d"
+    },
+    {
+      "name": "ledger-release-843d80fbe7ad5b353d2a564493e0f7f5040e182813653c756525914799ba48a1",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-843d80fbe7ad5b353d2a564493e0f7f5040e182813653c756525914799ba48a1.gz",
+        "sha256": "9f1b0de528cf85135c1b099a34d54af8bf28acd28fe479250bb5dadcd6f5b16d",
+        "bytes": 64,
+        "gzipSha256": "19a6e290508bc2934eb661fae84aa63366b4d407e19c197461a83990119121fc",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0014-bd12e9e3e79a5529.producer.sig",
+      "sourcePath": "releases/manifests/0014-bd12e9e3e79a5529.producer.sig",
+      "gitBlobSha": "e18bd2dddf1056ed888910db58c3dc29ed58c990"
+    },
+    {
+      "name": "ledger-release-09759d3d07c765272bf8ba68058987d7da7968cdde0ef6832efc3bb47f681118",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-09759d3d07c765272bf8ba68058987d7da7968cdde0ef6832efc3bb47f681118.gz",
+        "sha256": "fa56d44819e3173355d8b90b5f1a86fe650973442b55dcd5bedce88affc65f99",
+        "bytes": 6008,
+        "gzipSha256": "b10ea401cafd308773e661b8b54dd044f1f662d247f343175ac957229ee44e3a",
+        "gzipBytes": 4648,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0015-fdcfd0e570214f6b.digicert.tsr",
+      "sourcePath": "releases/manifests/0015-fdcfd0e570214f6b.digicert.tsr",
+      "gitBlobSha": "27b1fea29535e396a487f1ce77c4e15503b285f1"
+    },
+    {
+      "name": "ledger-release-00f1994e0705aaebf1d76637fff59266e0a1102c2bbbbf07d06a67211ca8966f",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-00f1994e0705aaebf1d76637fff59266e0a1102c2bbbbf07d06a67211ca8966f.gz",
+        "sha256": "f413216d56e37dcc6ff4060c9c77dd4532fad6c348990a721262013983148975",
+        "bytes": 4643,
+        "gzipSha256": "7b17c34724cc5ea44378ef206166d8da3bd7b1b73775e26f869845da855862a4",
+        "gzipBytes": 3003,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0015-fdcfd0e570214f6b.freetsa.tsr",
+      "sourcePath": "releases/manifests/0015-fdcfd0e570214f6b.freetsa.tsr",
+      "gitBlobSha": "e9decb517af3061e07da4f306de76664629e1aea"
+    },
+    {
+      "name": "ledger-release-e7c55bddb03b3acad61012476832c6ab78be975f23f5ef50ac7cb004fa3282f5",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-e7c55bddb03b3acad61012476832c6ab78be975f23f5ef50ac7cb004fa3282f5.gz",
+        "sha256": "fdcfd0e570214f6b9befa48c4fe15583b79bec60d091290e666eb8650a0bfe0f",
+        "bytes": 663,
+        "gzipSha256": "770eea937b627e5ddb11e190d9f7baca697e341edfc56c5e96468be1b00abb52",
+        "gzipBytes": 453,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0015-fdcfd0e570214f6b.json",
+      "sourcePath": "releases/manifests/0015-fdcfd0e570214f6b.json",
+      "gitBlobSha": "12adc18b6d97b2ef97c15d1718c941a86f062a28"
+    },
+    {
+      "name": "ledger-release-9390e5605178706a1a9d757b11a79611fafbf5f0b0d347149c3d0b5c540560a5",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9390e5605178706a1a9d757b11a79611fafbf5f0b0d347149c3d0b5c540560a5.gz",
+        "sha256": "4a780e2b29768771ff642b5f7b253dee07dec77f5469d0ace16aa9db74cf4c35",
+        "bytes": 64,
+        "gzipSha256": "32aff750daea6f4817cc93996e876a6b966721f3021872502061b1f8495d848e",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0015-fdcfd0e570214f6b.producer.sig",
+      "sourcePath": "releases/manifests/0015-fdcfd0e570214f6b.producer.sig",
+      "gitBlobSha": "ed1c9dc7ae77969703a8e285512d95f9ab5cc057"
+    },
+    {
+      "name": "ledger-release-605c4855bff954d6fbf495e05b22f5295926e8ad3f1cefc398d0e1db8e2d3068",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-605c4855bff954d6fbf495e05b22f5295926e8ad3f1cefc398d0e1db8e2d3068.gz",
+        "sha256": "78c9300e0df9e4dcb989be66602b8127a8a5803c396984cb871e80b90b7f6c1e",
+        "bytes": 6007,
+        "gzipSha256": "897d915e6e812643180d7051ece8330aa74a6bc8caca4045038be69f59cc50b3",
+        "gzipBytes": 4645,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0016-5226191699ae168d.digicert.tsr",
+      "sourcePath": "releases/manifests/0016-5226191699ae168d.digicert.tsr",
+      "gitBlobSha": "cc3609cc1d65509295bd710c833a4344eb68b516"
+    },
+    {
+      "name": "ledger-release-9c250d884236db0240f3353ddb8f71b0d1672247b2452cf7649c582d27b3d5d1",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9c250d884236db0240f3353ddb8f71b0d1672247b2452cf7649c582d27b3d5d1.gz",
+        "sha256": "79882497af4b7125c0d89010fc5f8dae53cf03f6d562ef53dfb4b34760a47e09",
+        "bytes": 4644,
+        "gzipSha256": "455bdf172ffd2c2c3d2ae20a81438f3697570245a72e4dbd25cc8e814d9433ff",
+        "gzipBytes": 3005,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0016-5226191699ae168d.freetsa.tsr",
+      "sourcePath": "releases/manifests/0016-5226191699ae168d.freetsa.tsr",
+      "gitBlobSha": "e66fcd9898f166c11e47a3119012a8b174f7d798"
+    },
+    {
+      "name": "ledger-release-8ce5a604e36ee5500d49728d0096a519e411b91a39c2740757f0af56044a5fb5",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8ce5a604e36ee5500d49728d0096a519e411b91a39c2740757f0af56044a5fb5.gz",
+        "sha256": "5226191699ae168d1da6573d9d7e295f8228609b92b7e0b26c9e6ee6c1bcf50d",
+        "bytes": 662,
+        "gzipSha256": "1c08630161b58cb7acbb1b57bf822bda0e9b0630a89b08647484bc406c56ae44",
+        "gzipBytes": 455,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0016-5226191699ae168d.json",
+      "sourcePath": "releases/manifests/0016-5226191699ae168d.json",
+      "gitBlobSha": "c95a516106c6c941f86cbcedd584dc8e9911e754"
+    },
+    {
+      "name": "ledger-release-4450a1775a899eb2ad7ca27678de7435bf5e3fea95ac76b545d035b6b87313ec",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-4450a1775a899eb2ad7ca27678de7435bf5e3fea95ac76b545d035b6b87313ec.gz",
+        "sha256": "175d5dc7d056325d1942f60b41d6a7dbbdc941632de54cda61a9abf4e72a0c0b",
+        "bytes": 64,
+        "gzipSha256": "949e1a9e229b42bc7f73c03081c5d0ac5b2128a2c8907c34a34c617d61637173",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0016-5226191699ae168d.producer.sig",
+      "sourcePath": "releases/manifests/0016-5226191699ae168d.producer.sig",
+      "gitBlobSha": "beb5607daa97e169ec72f2d2d9ca2bcb95067b5b"
+    },
+    {
+      "name": "ledger-release-a16077f24f2b8a08c9228c981072fe2b8722dd189de55800f794b8ddc830a937",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-a16077f24f2b8a08c9228c981072fe2b8722dd189de55800f794b8ddc830a937.gz",
+        "sha256": "106ee4c5f9e33f2f0be74e80b8ae7c853bd2ca1ff196b14c308ce72ebb2564b0",
+        "bytes": 6007,
+        "gzipSha256": "471be5700e44bbb955d4e8cd0b0b00b89c9a6ce3267392928036bf46244c2fe7",
+        "gzipBytes": 4648,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0017-efa7d60fece304f7.digicert.tsr",
+      "sourcePath": "releases/manifests/0017-efa7d60fece304f7.digicert.tsr",
+      "gitBlobSha": "625e02e3c59423a799224b7727e3a89f217c682e"
+    },
+    {
+      "name": "ledger-release-749e50359c7097d6db9699cde15f009690efacd0ab37f8a31b933a8f41f25cf0",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-749e50359c7097d6db9699cde15f009690efacd0ab37f8a31b933a8f41f25cf0.gz",
+        "sha256": "01b08811dbac1d74b19bfa1b3e689a93b771f5feb8ae3db9ef3cb9115bd8da9a",
+        "bytes": 4643,
+        "gzipSha256": "96fb74717a0b4235ed6f65669191ddc0cc861aa9186c069174a55af3fcd68eda",
+        "gzipBytes": 3003,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0017-efa7d60fece304f7.freetsa.tsr",
+      "sourcePath": "releases/manifests/0017-efa7d60fece304f7.freetsa.tsr",
+      "gitBlobSha": "98792e06a17a83d3196cf1caf2d187759dfc94dd"
+    },
+    {
+      "name": "ledger-release-8f141e4eae6fb232c93bfad9aece6dffe9195a6efaa20dc1cca73c62344667d1",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8f141e4eae6fb232c93bfad9aece6dffe9195a6efaa20dc1cca73c62344667d1.gz",
+        "sha256": "efa7d60fece304f77a403a1d8d4aa3789f87cfb174fe75e8705cf00339d45656",
+        "bytes": 662,
+        "gzipSha256": "c738005168b969e2a66777d5d777f1b7c0c19089f75e5191fdc0ba6648060b72",
+        "gzipBytes": 456,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0017-efa7d60fece304f7.json",
+      "sourcePath": "releases/manifests/0017-efa7d60fece304f7.json",
+      "gitBlobSha": "dd9e28bc8e426de4b670da3c9aeec8707e9d1c26"
+    },
+    {
+      "name": "ledger-release-c41431caca4bfbd2cfd1b7b446ad31d5a54ad3c5cb5dd571ba23983be3150e5d",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-c41431caca4bfbd2cfd1b7b446ad31d5a54ad3c5cb5dd571ba23983be3150e5d.gz",
+        "sha256": "004881256a131934a1a859bca009945ba796cb6d48444324241d43f60df6a3f0",
+        "bytes": 64,
+        "gzipSha256": "cd19cb7eedafb6e5e348ec0f8bbd0bc17b4e99f51bcaa7e099f77a100f94702a",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0017-efa7d60fece304f7.producer.sig",
+      "sourcePath": "releases/manifests/0017-efa7d60fece304f7.producer.sig",
+      "gitBlobSha": "4913e6baad0cc5e70d5e62cc834abea5c2fc5095"
+    },
+    {
+      "name": "ledger-release-25b670db641d94843f0c6cdb359875a6d4ebae3c296f394030c2dd753d94a7ba",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-25b670db641d94843f0c6cdb359875a6d4ebae3c296f394030c2dd753d94a7ba.gz",
+        "sha256": "49c1fd0738ba0e4f05e233ec3974bc44924e3988a9f7270a8ecf2bbe8c96cdb5",
+        "bytes": 6007,
+        "gzipSha256": "8433351b04aea5bf1ed75ce8fa1f15b63af291ddd247e6aac83dca3f9df53d08",
+        "gzipBytes": 4646,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0018-20974a5bdeeace01.digicert.tsr",
+      "sourcePath": "releases/manifests/0018-20974a5bdeeace01.digicert.tsr",
+      "gitBlobSha": "39d849670b9562c45287ccbed7e069735c69ed7b"
+    },
+    {
+      "name": "ledger-release-318c13b1639bf4358c7a2bcbde059aaa5c373de178939e9ce761bedf8d2b0c9d",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-318c13b1639bf4358c7a2bcbde059aaa5c373de178939e9ce761bedf8d2b0c9d.gz",
+        "sha256": "77c99a640e30b1b1704c5640c8c8a2c4e61977e459170ddd6a5219dea1acf101",
+        "bytes": 4642,
+        "gzipSha256": "186631c085dd972e19c2125c42f5d250c672f6d0ffcad6475398a201c9efd9cc",
+        "gzipBytes": 3003,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0018-20974a5bdeeace01.freetsa.tsr",
+      "sourcePath": "releases/manifests/0018-20974a5bdeeace01.freetsa.tsr",
+      "gitBlobSha": "67c62df2cb858c3145d4bf5133f922f674e8ae6e"
+    },
+    {
+      "name": "ledger-release-4f43a7347677528925cf12645658e52e3acb1ffd75ffff5a094d7a9a566d18fc",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-4f43a7347677528925cf12645658e52e3acb1ffd75ffff5a094d7a9a566d18fc.gz",
+        "sha256": "20974a5bdeeace01e2f5d34abc3b385beb249971e2d737ca56133656787ed56d",
+        "bytes": 662,
+        "gzipSha256": "ec4813102c964049d7d2587ea99fa70dc124a22bf758ab6ef0db68912e2d800d",
+        "gzipBytes": 454,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0018-20974a5bdeeace01.json",
+      "sourcePath": "releases/manifests/0018-20974a5bdeeace01.json",
+      "gitBlobSha": "60fd07468e1263c689ad9401c505e13127306f3d"
+    },
+    {
+      "name": "ledger-release-6a141903241d819337e0f728a013c43b2d03f3d341bcd7c68c1f2edcb724ac24",
+      "role": "ledger_release_file",
+      "archive": {
+        "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-6a141903241d819337e0f728a013c43b2d03f3d341bcd7c68c1f2edcb724ac24.gz",
+        "sha256": "d28650eff5c25fd7ddeeb3d3e1c36efdc69934ca39e4ef949ce8afa8ffdc0d95",
+        "bytes": 64,
+        "gzipSha256": "39d77ad3ae3e06966232a07d50d5e395695eccfbfb2850722e8af1a5b4798de1",
+        "gzipBytes": 87,
+        "contentEncoding": "gzip"
+      },
+      "url": "https://raw.githubusercontent.com/PolicyEngine/chronicle/9526211a3970993269523e1e43f4b17ccad846de/releases/manifests/0018-20974a5bdeeace01.producer.sig",
+      "sourcePath": "releases/manifests/0018-20974a5bdeeace01.producer.sig",
+      "gitBlobSha": "be59019fae6af54edc78794cca76c677f9702ebc"
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "ledger_witness",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/official-observations.jsonl.gz",
+      "sha256": "f5a0c2dfb9be58d10902e6cba61e5498aba15820fedf1efa7eaebd6ea740fde9",
+      "bytes": 46310,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/series-catalog.json.gz",
+      "sha256": "20bb3bb76c217a49a7021e8a57dbcf39c6d2ad36deabaa5efca44e5c9a48863b",
+      "bytes": 18181,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-branch-commit.json.gz",
+      "sha256": "9d896452c79964db1fd105b1e70f158e78733d54ba798163395e637d7635471a",
+      "bytes": 6016,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-main-commit.json.gz",
+      "sha256": "a46fa736a7eb9e60ff22271c9d09f5e9ad75c03cfa3f32a26271041a72cf6f15",
+      "bytes": 19612,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-commit-tree.json.gz",
+      "sha256": "f43b447fd983380f75d31306190a51f78571da068104e005666d66d5fda4b475",
+      "bytes": 919,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-releases-tree.json.gz",
+      "sha256": "9a7d4bb5587627a69cb2da27e4da5d0c29cb4aa5311bdf20b5a3c037d94fd27d",
+      "bytes": 327,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-manifests-tree.json.gz",
+      "sha256": "a6b31d066a4654b5f4435a173827e28abae4a679ecb0e21490490f208e29598d",
+      "bytes": 3053,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-0a39e7f5fa773e21024e78513c5a47b25f096f635dd247a57af4ce6cef8be32e.gz",
+      "sha256": "8f0c397f1871a5d3fc16499426423f5164339aca9ae143f3ce076b59a2ca14d1",
+      "bytes": 4646,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-066f5369e3b7c9c0fbd80f648dde7b4637938a354f5ccefd753fcb4b83a867de.gz",
+      "sha256": "4240e10e4a6e2b2eeba9a13866359e9e8ea3e921ef3f3bfac7b42512dfa7cf15",
+      "bytes": 3003,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-33205bea3cf55cc47b60421befad39472123d9e348da1594236a50ee7964e4a9.gz",
+      "sha256": "f8b1f6f3500a479499b74d4d2fb7fce12349ca4ca8aa577540a4cee214c7f4ad",
+      "bytes": 345,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-0e3fc72c63dcbf133452a5da16ba1023e05a672773affa03ab9febc605ec9cb2.gz",
+      "sha256": "e362e9fa572e38d724f1990faaf7aacee0a408a68a338163550f942bf0499f2e",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-89628dad4bc59859cc402a362fb1ecf8cc633ccd4f721eca0c9e62d389b92909.gz",
+      "sha256": "67210525e18b84130c08566f082dd8b1525e63a763c7f123be29ac3b8ae6de21",
+      "bytes": 4652,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-5c6b8060b222aeaa726972f848ba3b7e98ef800d18da78f7715d8344d897662c.gz",
+      "sha256": "8113d3148b9a751d58d4456052463a8a41dcb53e3d52e05511bd96f4379dd3cd",
+      "bytes": 3001,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-34a6415c6aebd34039c1f8f343248a2eb78549df7691c9e6d20b53544a7d0a8d.gz",
+      "sha256": "962a7d3ace708cdd06f9bbffb0db57de7936eecf9848900b1cf70039361a800c",
+      "bytes": 450,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-6ffe957e60c93145bfd9ab840352c2a14ecba64682888ca0fe9ea67968537d5e.gz",
+      "sha256": "00ba8004a4b98e033e5d09580fd327e4ea8959ce6bba3a33f6a08020f9936bb0",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-a188274f65022d808e7788b68db97a9b915ec769d2950bdd55059aa2f286398a.gz",
+      "sha256": "423b100d89bb8f45068dbf36d62b69fb8e36b49766fe55ab2d436ca45ecfaaa3",
+      "bytes": 4646,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9bc2505aff8aa875aea277ab50d1ed410f42e101aeae79912e3102982415cd13.gz",
+      "sha256": "0ac4418846bb308c0e80557b866aa98e1a93cd75f6141cf16aed8c902d21a1d7",
+      "bytes": 3004,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-5309744ee8ca047ea38826d95ab570d375b95f50c983cf4d3facade46e7e79b6.gz",
+      "sha256": "ca843d034a64e2f54c592ba698b6db61a675993742def1ff45cf698cf6d6b1da",
+      "bytes": 449,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-208f84fdb610dd6934a30b15940e5bb5fb90ebb1d99896a985b36b9adea57c34.gz",
+      "sha256": "9e1ab94fc8ba4b2557f17617f930973366d5269cb3f4ce5eca9d6d7e87cf278e",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-7e474bbe8be34680b61a6f33cae376925017340e215ccd5278feeeba6d157e4a.gz",
+      "sha256": "f2b25ecff59101a5f3126d7a0c7aee6c735a0c46ae89e81e16e2338326ef4e5f",
+      "bytes": 4648,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-ecbe3e1e22127342ead67c89622d8bb41b2f117a2ce35174badc31dc2176c104.gz",
+      "sha256": "134913ffac8498d00da7bb73737e0362fc901deb522509184a3724bb8103b8a0",
+      "bytes": 3006,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-54002731f4d2cd6f38b6a11c5939e461ae0df920281daa4030cc8c41c16d378a.gz",
+      "sha256": "5d6855b2c2b6f12e96c147346480fefd76c32b0d949cd4d3a76939122a5d6637",
+      "bytes": 450,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-ea532ec6c141ded985c013758b38d9847e4961ce9b8701a76f8aa99794943811.gz",
+      "sha256": "bdca0242a3382489b546229e394c12316af0093bf0913f63642f265c7faaf32e",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-13b9872e95029b112d4afd6ba82337176f647afd1e7ea9b6c35b6765148d6849.gz",
+      "sha256": "1275800ae3e91bc97016362c051ccf87ac6689a3d3fa30618b10d0da972fc653",
+      "bytes": 4647,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-30d18289d52db32208550a59762d932a1aa01de1661bfb4a7a4cfb5a333a11c5.gz",
+      "sha256": "3af9c4386e38e6c48de6a972f4e28f618281e14ea190de6cea7342a8d4a469a5",
+      "bytes": 3004,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8c3a7b7b4bd3f91aabf315bd93a399d90091fdf070a0ecddfbd808f0c380daa1.gz",
+      "sha256": "77d2da9e625279c4564a097ec0150c2065c2662dea1770b11f9896892b2f0188",
+      "bytes": 448,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-d92f47c5a878dfe4bc7a794f147719b8036d2f415de8433129ae95a70675828b.gz",
+      "sha256": "9191a98d9d7467449e8593c1fecb39894855873d0395c425716599e4c347b7c2",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-a8dd54b3bd18a4a8a6725940bd50f2e68a7499f9a04cc86f4a438435881894bf.gz",
+      "sha256": "50e056879a47328abded4d15de0b866a237dada3216e6137cb74b35de105e834",
+      "bytes": 4650,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-0fd45156459217d1d6fbb96a69c61a898775b41ec2db8cbbb0dffca8257926c3.gz",
+      "sha256": "e42cf250b0a79196dc724c6a26d6ca98a0c61d0344294b569b63f2700793984c",
+      "bytes": 3002,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8b170803d3a8a496e3f98e88c560c2bc9cc22262acafd7d52770f1d2df4938a5.gz",
+      "sha256": "95f48234aedcb1c14eb8eb3b439cb27b95ad496c380338badf5aef55c3a3c708",
+      "bytes": 452,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-7e4826135969eb267547b576c7f9a6ef5f42f8e419b5e8c797d907b63ca9da73.gz",
+      "sha256": "d351de73e8c6d53926d6eccaceeb25596c05cf2d60452768f2872a080a14992d",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-6acbca65894cd2cafbf8b6523b888ab6a569399006615e4918d441385475c980.gz",
+      "sha256": "52a3635c35b35d7171094dfe420c73978ee5042b518785ddc48486d7f8c04244",
+      "bytes": 4650,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-dbefa80a04110d8da0cb941c581aea89367f67f019aedfc3b1556d4d8f09856c.gz",
+      "sha256": "94d5f0fe63e04ce2cef1bbc14981932b5c9f4c4bfafade83b26e55c9508e87f7",
+      "bytes": 3000,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-402a05f9e9215821ad872d2ba1c1a56bc915265ba15d4768970ebff0bbabf665.gz",
+      "sha256": "8df67ee2f2a3e9a1b9253dc3b75d7aa7c2af72330ca2988aabd962ada58c1c02",
+      "bytes": 449,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-4a0bb578e0b4f7fba1ec5e9dd349a8970f9aa12bc088ee3ce57b6e71774d18ee.gz",
+      "sha256": "5ac6da385a55dbe2f2df8b14143d4de665ccfa0053f6d9ada9b7019840591998",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-765f6eccef3c17461ba728b053cd472756c2d5ee50559bc5b74eb1ae57c41593.gz",
+      "sha256": "8a389ecbd32a52ff5279b2d9a534ef1de8110bb819c09b85fbcac1033f7b181d",
+      "bytes": 4648,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9ccabd76becddc4061ee374f9fcbb1f6bd225eba630ee92c5cd845903b18c835.gz",
+      "sha256": "bb32708c245171613eea7fd3083df33c35e67192e95dc0c6601da5ead08ababf",
+      "bytes": 3005,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-f77d5a0cf79bd79a5aaef218e70969eb32b01676a9669409b098f939efb96ec3.gz",
+      "sha256": "ce092c19f387373827966f0abef17aa31139ee08bf24e17b726b1f94d0765150",
+      "bytes": 449,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-959e1b442020e2bbf59c56819fbb391af14911fe697e405c7527f95d1413ea73.gz",
+      "sha256": "2124d82b03775767064cfa53d7fdd2b81305cfebe2cae2520d827ddcb6ade348",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-bd31b0676fdbb74d8369c367f8c5a4b7dffd0915dc65a24d0788d6634e5feed1.gz",
+      "sha256": "e39c8430153192e4adb036e207b509ee725960c4bb6d5b7cbda76707b55e6e2f",
+      "bytes": 4648,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-b5e8c35bd03a7fb65a013a68813e7bc8baba31e3f0abd3cc97602b810f03e23e.gz",
+      "sha256": "81a2aee8b6b9bdba733f34ac0254aadcd5d48474d5c0a0054d777a0fd35522fc",
+      "bytes": 3003,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-c43bb109f6d2a87bb7e90d9429e730a543c0624997a71660cc6f08fdaf997786.gz",
+      "sha256": "83a43ad679a2e74f413c5864db9849ada40facc1606cb77aa5e8e72ec1e41df3",
+      "bytes": 449,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-acde675779452bff5182b3eb81070c9c45ed87666b285fc342fbb35c6d6a058c.gz",
+      "sha256": "63d78b7a7d9a1e24e22c848bfb999ff17e61dd4c78fbadd1d0e97941ec4192fb",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-d5e5dcf6c731697edeba1a1eb61999c8e1555649c366605c69f23fe0204582b8.gz",
+      "sha256": "27d75d3c8d5543646cd836beed544323797b9dd5ed5f07826c8ab7666f713342",
+      "bytes": 4648,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-18491ae3c18d376efd0ae3723b0a387032b459dfdb3bf5ad41bdb03b6a3ccb7a.gz",
+      "sha256": "9cdf02e0001cedc55c696b0f431b21b9cf2e2061748123ea3f6c69b71d9d5ece",
+      "bytes": 3002,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-25c034992cbcd06bc715704d3437b31193c43d806cc02070afbb32543dc4913a.gz",
+      "sha256": "39e9ec7bec903783227141ab7ff51f32573ec94353081a6dee323af5ea753804",
+      "bytes": 454,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-c6bce35e23f6cf8097baab3383d339623a01e45bbcf1edc13b4871f5a9ff1be8.gz",
+      "sha256": "e7fa77ed72ec64f06dd4f2a948b4dc55e67b4f14ddb00267676b516664642185",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-93364c38e1a38447d7058eb9931ef254abd2659103c7449d11383eea56aedc19.gz",
+      "sha256": "7849cacabd363776525fc0d10f5d27788de112584f7ef55cbb28c44bb4a8ab51",
+      "bytes": 4647,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-b33d95496d3e5827791cd9d4532cf7370d1d0ef64808af64ba2c9935d1fa097c.gz",
+      "sha256": "ce97834967071a1ffe073e910e20c7571ca731e0f3178ceb521e6f3a848885f3",
+      "bytes": 3002,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-bdfd6429c0ee26e07bbd47442b1a7913a13d775ee09703e9700c1cc14c75e7b3.gz",
+      "sha256": "3e544b596f76e78a6b415fceadcf5c04f66c3335b67b76e503b3bf188262d5c1",
+      "bytes": 453,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-3a60f395dbe193969c10acdf85c904709b1f5318b87809c99ea6fcc1ffac73eb.gz",
+      "sha256": "642d52f9487e6129c402a665b5c0c6dcf0e6e9ff91418a136043156d0dc54034",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-aafbdec9f1acd6e8a5e8a0f8dbc856c53234cd0c57bff69c2b12200582dac248.gz",
+      "sha256": "fa79a3ebca8f09f6ed89934e2cf104b0a0ada36438acfb2d18f8f7cad54b310e",
+      "bytes": 4647,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-818a110d3dcbb8cd65c2417616b2c2d5acb3053b0b9882dfd200686940913de0.gz",
+      "sha256": "01359caf9fcab8323736a3a9c339d50cf4011733b4eef75f3b807ab31b28fa78",
+      "bytes": 3002,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-535776ff1c9b634c8ef7ab8fb8ee0d37d82744e6c4e370b7d6b92f1d2e91d11d.gz",
+      "sha256": "0416bda64dacea1b8eed22187a5918055ccfde2f7dd4157e47898bd58e149f9d",
+      "bytes": 455,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-f05a2da62af4c41b1684580915bfd12093268954ee5ff07eb783503270b9a1ee.gz",
+      "sha256": "c3c43cf18e826153487d4981a777fb06db2999c822eff1ee0d81dc09675b5b2e",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-cd77dae03598380bcddf4b605fa66f05326defbf850493a07ad889ebe7b7266b.gz",
+      "sha256": "f90099f87232b50ca8d3f05ac2474d9cf261b0808c06a3c094e7b80a17f66e8c",
+      "bytes": 4649,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-13c5119c059b9db7fe64a61d5f3548c4faa2e21b550c6cb49917a5969a5c4551.gz",
+      "sha256": "c6249a9e634385333594edc525c5be463327c534c31443395f76291e57c9f2a6",
+      "bytes": 3004,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-13d5861bd0d5f4ba53542a20790b3d8622cd3f61e7acfd6108ce264cabb9e60c.gz",
+      "sha256": "f8983089defaab100d1ee81248e37b0d9ed04c878a297497468495f474f6fd0a",
+      "bytes": 454,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9ff60a015bd514c7a36d12e7c7f11a8f00b8cac1276553e7b737dca300adf461.gz",
+      "sha256": "6d07f6c51b6d0a2c316a43b61dce6b4536af6b47a57cd7bf528705c67f69206b",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-ffa56f8cccd0bdd12c900773158fcc256885646298a803738b0ae22abe5355af.gz",
+      "sha256": "be4c50ff04f8a97a7e1f7679682177a912c8bd2ecd629058159d77e99eb6a7ae",
+      "bytes": 4645,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-e9e31d8fb033bb84ae3d2f768fe41c78719113cff3029846db9f685ccd1eb5f7.gz",
+      "sha256": "004510aadff65646ef1d20cfe735c8e0bc6c1a0ca3f7e3f16af823b88ac5fff5",
+      "bytes": 3005,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-e8d7b6bf9b689366b968bd6e48b043ba0afbfe9aceac81ea510d32334affd52b.gz",
+      "sha256": "514f30b03e761acf1c9ba9eaa93c6bccb4da350077e64c65594ee7cac5d23d76",
+      "bytes": 453,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8e2724c201c004ba6df02a1c2aba751604001973ecee95caedc551b948bcc01c.gz",
+      "sha256": "055e1c7fa16b03f4b0b045d0d172bdbf3df748f4abd15a6716a6ada306ba6c6a",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-4bb02f971d2e85afa22ff1941e0f928d5c3ba903fc0543ad9024f49cffd0a1e2.gz",
+      "sha256": "817900ef6d180f251e31206e89c99dabeb143d800c1245acaca64bc670937fdc",
+      "bytes": 4644,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-5d2e59a5aea7cc32b3fe8c51b9a58b2d53727e2d526d65c45fa9ea598347834e.gz",
+      "sha256": "5201174a2d2aa37e022e9f0e9934f1d3264b16e164a2c53f787f8a0929e574d8",
+      "bytes": 3006,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-57ba9f87ecf4a5e49547e4ddd0df2012930761802520651ba3f733f24368573b.gz",
+      "sha256": "8440ebc8ed33e94cd894552ed1ff7eff3ec68acabf49c97839cdbf15ea8dedc6",
+      "bytes": 453,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-843d80fbe7ad5b353d2a564493e0f7f5040e182813653c756525914799ba48a1.gz",
+      "sha256": "19a6e290508bc2934eb661fae84aa63366b4d407e19c197461a83990119121fc",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-09759d3d07c765272bf8ba68058987d7da7968cdde0ef6832efc3bb47f681118.gz",
+      "sha256": "b10ea401cafd308773e661b8b54dd044f1f662d247f343175ac957229ee44e3a",
+      "bytes": 4648,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-00f1994e0705aaebf1d76637fff59266e0a1102c2bbbbf07d06a67211ca8966f.gz",
+      "sha256": "7b17c34724cc5ea44378ef206166d8da3bd7b1b73775e26f869845da855862a4",
+      "bytes": 3003,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-e7c55bddb03b3acad61012476832c6ab78be975f23f5ef50ac7cb004fa3282f5.gz",
+      "sha256": "770eea937b627e5ddb11e190d9f7baca697e341edfc56c5e96468be1b00abb52",
+      "bytes": 453,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9390e5605178706a1a9d757b11a79611fafbf5f0b0d347149c3d0b5c540560a5.gz",
+      "sha256": "32aff750daea6f4817cc93996e876a6b966721f3021872502061b1f8495d848e",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-605c4855bff954d6fbf495e05b22f5295926e8ad3f1cefc398d0e1db8e2d3068.gz",
+      "sha256": "897d915e6e812643180d7051ece8330aa74a6bc8caca4045038be69f59cc50b3",
+      "bytes": 4645,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-9c250d884236db0240f3353ddb8f71b0d1672247b2452cf7649c582d27b3d5d1.gz",
+      "sha256": "455bdf172ffd2c2c3d2ae20a81438f3697570245a72e4dbd25cc8e814d9433ff",
+      "bytes": 3005,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8ce5a604e36ee5500d49728d0096a519e411b91a39c2740757f0af56044a5fb5.gz",
+      "sha256": "1c08630161b58cb7acbb1b57bf822bda0e9b0630a89b08647484bc406c56ae44",
+      "bytes": 455,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-4450a1775a899eb2ad7ca27678de7435bf5e3fea95ac76b545d035b6b87313ec.gz",
+      "sha256": "949e1a9e229b42bc7f73c03081c5d0ac5b2128a2c8907c34a34c617d61637173",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-a16077f24f2b8a08c9228c981072fe2b8722dd189de55800f794b8ddc830a937.gz",
+      "sha256": "471be5700e44bbb955d4e8cd0b0b00b89c9a6ce3267392928036bf46244c2fe7",
+      "bytes": 4648,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-749e50359c7097d6db9699cde15f009690efacd0ab37f8a31b933a8f41f25cf0.gz",
+      "sha256": "96fb74717a0b4235ed6f65669191ddc0cc861aa9186c069174a55af3fcd68eda",
+      "bytes": 3003,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-8f141e4eae6fb232c93bfad9aece6dffe9195a6efaa20dc1cca73c62344667d1.gz",
+      "sha256": "c738005168b969e2a66777d5d777f1b7c0c19089f75e5191fdc0ba6648060b72",
+      "bytes": 456,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-c41431caca4bfbd2cfd1b7b446ad31d5a54ad3c5cb5dd571ba23983be3150e5d.gz",
+      "sha256": "cd19cb7eedafb6e5e348ec0f8bbd0bc17b4e99f51bcaa7e099f77a100f94702a",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-25b670db641d94843f0c6cdb359875a6d4ebae3c296f394030c2dd753d94a7ba.gz",
+      "sha256": "8433351b04aea5bf1ed75ce8fa1f15b63af291ddd247e6aac83dca3f9df53d08",
+      "bytes": 4646,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-318c13b1639bf4358c7a2bcbde059aaa5c373de178939e9ce761bedf8d2b0c9d.gz",
+      "sha256": "186631c085dd972e19c2125c42f5d250c672f6d0ffcad6475398a201c9efd9cc",
+      "bytes": 3003,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-4f43a7347677528925cf12645658e52e3acb1ffd75ffff5a094d7a9a566d18fc.gz",
+      "sha256": "ec4813102c964049d7d2587ea99fa70dc124a22bf758ab6ef0db68912e2d800d",
+      "bytes": 454,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "upstream_archive",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/upstream/ledger-release-6a141903241d819337e0f728a013c43b2d03f3d341bcd7c68c1f2edcb724ac24.gz",
+      "sha256": "39d77ad3ae3e06966232a07d50d5e395695eccfbfb2850722e8af1a5b4798de1",
+      "bytes": 87,
+      "createdAt": "2026-08-26T14:32:14Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/2026-08-26/2026-08-26t14-32-14z-ledger-witness/manifest.json",
+      "sha256": "7ff648d8b9a60d59e87e6215631243a0434626a09c3a2fa41a7171af5487c6b9",
+      "bytes": 112927,
+      "createdAt": "2026-08-26T14:32:14Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "f80e64495554a804c9b253ee427d26667b890a90c77cca12117772a8da4410b8"
+}

@@ -1,0 +1,824 @@
+{
+  "format": "numeric_cdf_v1",
+  "pointCount": 201,
+  "support": {
+    "lower": 95.35,
+    "upper": 100.85
+  },
+  "points": [
+    {
+      "value": 95.35,
+      "probability": 0.0
+    },
+    {
+      "value": 95.3775,
+      "probability": 0.00166666666667
+    },
+    {
+      "value": 95.405,
+      "probability": 0.00333333333333
+    },
+    {
+      "value": 95.4325,
+      "probability": 0.005
+    },
+    {
+      "value": 95.46,
+      "probability": 0.00666666666667
+    },
+    {
+      "value": 95.4875,
+      "probability": 0.00833333333333
+    },
+    {
+      "value": 95.515,
+      "probability": 0.01
+    },
+    {
+      "value": 95.5425,
+      "probability": 0.0116666666667
+    },
+    {
+      "value": 95.57,
+      "probability": 0.0133333333333
+    },
+    {
+      "value": 95.5975,
+      "probability": 0.015
+    },
+    {
+      "value": 95.625,
+      "probability": 0.0166666666667
+    },
+    {
+      "value": 95.6525,
+      "probability": 0.0183333333333
+    },
+    {
+      "value": 95.68,
+      "probability": 0.02
+    },
+    {
+      "value": 95.7075,
+      "probability": 0.0216666666667
+    },
+    {
+      "value": 95.735,
+      "probability": 0.0233333333333
+    },
+    {
+      "value": 95.7625,
+      "probability": 0.025
+    },
+    {
+      "value": 95.79,
+      "probability": 0.0266666666667
+    },
+    {
+      "value": 95.8175,
+      "probability": 0.0283333333333
+    },
+    {
+      "value": 95.845,
+      "probability": 0.03
+    },
+    {
+      "value": 95.8725,
+      "probability": 0.0316666666667
+    },
+    {
+      "value": 95.9,
+      "probability": 0.0333333333333
+    },
+    {
+      "value": 95.9275,
+      "probability": 0.035
+    },
+    {
+      "value": 95.955,
+      "probability": 0.0366666666667
+    },
+    {
+      "value": 95.9825,
+      "probability": 0.0383333333333
+    },
+    {
+      "value": 96.01,
+      "probability": 0.04
+    },
+    {
+      "value": 96.0375,
+      "probability": 0.0416666666667
+    },
+    {
+      "value": 96.065,
+      "probability": 0.0433333333333
+    },
+    {
+      "value": 96.0925,
+      "probability": 0.045
+    },
+    {
+      "value": 96.12,
+      "probability": 0.0466666666667
+    },
+    {
+      "value": 96.1475,
+      "probability": 0.0483333333333
+    },
+    {
+      "value": 96.175,
+      "probability": 0.05
+    },
+    {
+      "value": 96.2025,
+      "probability": 0.0516666666667
+    },
+    {
+      "value": 96.23,
+      "probability": 0.0533333333333
+    },
+    {
+      "value": 96.2575,
+      "probability": 0.055
+    },
+    {
+      "value": 96.285,
+      "probability": 0.0566666666667
+    },
+    {
+      "value": 96.3125,
+      "probability": 0.0583333333333
+    },
+    {
+      "value": 96.34,
+      "probability": 0.06
+    },
+    {
+      "value": 96.3675,
+      "probability": 0.0616666666667
+    },
+    {
+      "value": 96.395,
+      "probability": 0.0633333333333
+    },
+    {
+      "value": 96.4225,
+      "probability": 0.065
+    },
+    {
+      "value": 96.45,
+      "probability": 0.0666666666667
+    },
+    {
+      "value": 96.4775,
+      "probability": 0.0683333333333
+    },
+    {
+      "value": 96.505,
+      "probability": 0.07
+    },
+    {
+      "value": 96.5325,
+      "probability": 0.0716666666667
+    },
+    {
+      "value": 96.56,
+      "probability": 0.0733333333333
+    },
+    {
+      "value": 96.5875,
+      "probability": 0.075
+    },
+    {
+      "value": 96.615,
+      "probability": 0.0766666666667
+    },
+    {
+      "value": 96.6425,
+      "probability": 0.0783333333333
+    },
+    {
+      "value": 96.67,
+      "probability": 0.08
+    },
+    {
+      "value": 96.6975,
+      "probability": 0.0816666666667
+    },
+    {
+      "value": 96.725,
+      "probability": 0.0833333333333
+    },
+    {
+      "value": 96.7525,
+      "probability": 0.085
+    },
+    {
+      "value": 96.78,
+      "probability": 0.0866666666667
+    },
+    {
+      "value": 96.8075,
+      "probability": 0.0883333333333
+    },
+    {
+      "value": 96.835,
+      "probability": 0.09
+    },
+    {
+      "value": 96.8625,
+      "probability": 0.0916666666667
+    },
+    {
+      "value": 96.89,
+      "probability": 0.0933333333333
+    },
+    {
+      "value": 96.9175,
+      "probability": 0.095
+    },
+    {
+      "value": 96.945,
+      "probability": 0.0966666666667
+    },
+    {
+      "value": 96.9725,
+      "probability": 0.0983333333333
+    },
+    {
+      "value": 97.0,
+      "probability": 0.1
+    },
+    {
+      "value": 97.0275,
+      "probability": 0.11
+    },
+    {
+      "value": 97.055,
+      "probability": 0.12
+    },
+    {
+      "value": 97.0825,
+      "probability": 0.13
+    },
+    {
+      "value": 97.11,
+      "probability": 0.14
+    },
+    {
+      "value": 97.1375,
+      "probability": 0.15
+    },
+    {
+      "value": 97.165,
+      "probability": 0.16
+    },
+    {
+      "value": 97.1925,
+      "probability": 0.17
+    },
+    {
+      "value": 97.22,
+      "probability": 0.18
+    },
+    {
+      "value": 97.2475,
+      "probability": 0.19
+    },
+    {
+      "value": 97.275,
+      "probability": 0.2
+    },
+    {
+      "value": 97.3025,
+      "probability": 0.21
+    },
+    {
+      "value": 97.33,
+      "probability": 0.22
+    },
+    {
+      "value": 97.3575,
+      "probability": 0.23
+    },
+    {
+      "value": 97.385,
+      "probability": 0.24
+    },
+    {
+      "value": 97.4125,
+      "probability": 0.25
+    },
+    {
+      "value": 97.44,
+      "probability": 0.26
+    },
+    {
+      "value": 97.4675,
+      "probability": 0.27
+    },
+    {
+      "value": 97.495,
+      "probability": 0.28
+    },
+    {
+      "value": 97.5225,
+      "probability": 0.29
+    },
+    {
+      "value": 97.55,
+      "probability": 0.3
+    },
+    {
+      "value": 97.5775,
+      "probability": 0.31
+    },
+    {
+      "value": 97.605,
+      "probability": 0.32
+    },
+    {
+      "value": 97.6325,
+      "probability": 0.33
+    },
+    {
+      "value": 97.66,
+      "probability": 0.34
+    },
+    {
+      "value": 97.6875,
+      "probability": 0.35
+    },
+    {
+      "value": 97.715,
+      "probability": 0.36
+    },
+    {
+      "value": 97.7425,
+      "probability": 0.37
+    },
+    {
+      "value": 97.77,
+      "probability": 0.38
+    },
+    {
+      "value": 97.7975,
+      "probability": 0.39
+    },
+    {
+      "value": 97.825,
+      "probability": 0.4
+    },
+    {
+      "value": 97.8525,
+      "probability": 0.41
+    },
+    {
+      "value": 97.88,
+      "probability": 0.42
+    },
+    {
+      "value": 97.9075,
+      "probability": 0.43
+    },
+    {
+      "value": 97.935,
+      "probability": 0.44
+    },
+    {
+      "value": 97.9625,
+      "probability": 0.45
+    },
+    {
+      "value": 97.99,
+      "probability": 0.46
+    },
+    {
+      "value": 98.0175,
+      "probability": 0.47
+    },
+    {
+      "value": 98.045,
+      "probability": 0.48
+    },
+    {
+      "value": 98.0725,
+      "probability": 0.49
+    },
+    {
+      "value": 98.1,
+      "probability": 0.5
+    },
+    {
+      "value": 98.1275,
+      "probability": 0.51
+    },
+    {
+      "value": 98.155,
+      "probability": 0.52
+    },
+    {
+      "value": 98.1825,
+      "probability": 0.53
+    },
+    {
+      "value": 98.21,
+      "probability": 0.54
+    },
+    {
+      "value": 98.2375,
+      "probability": 0.55
+    },
+    {
+      "value": 98.265,
+      "probability": 0.56
+    },
+    {
+      "value": 98.2925,
+      "probability": 0.57
+    },
+    {
+      "value": 98.32,
+      "probability": 0.58
+    },
+    {
+      "value": 98.3475,
+      "probability": 0.59
+    },
+    {
+      "value": 98.375,
+      "probability": 0.6
+    },
+    {
+      "value": 98.4025,
+      "probability": 0.61
+    },
+    {
+      "value": 98.43,
+      "probability": 0.62
+    },
+    {
+      "value": 98.4575,
+      "probability": 0.63
+    },
+    {
+      "value": 98.485,
+      "probability": 0.64
+    },
+    {
+      "value": 98.5125,
+      "probability": 0.65
+    },
+    {
+      "value": 98.54,
+      "probability": 0.66
+    },
+    {
+      "value": 98.5675,
+      "probability": 0.67
+    },
+    {
+      "value": 98.595,
+      "probability": 0.68
+    },
+    {
+      "value": 98.6225,
+      "probability": 0.69
+    },
+    {
+      "value": 98.65,
+      "probability": 0.7
+    },
+    {
+      "value": 98.6775,
+      "probability": 0.71
+    },
+    {
+      "value": 98.705,
+      "probability": 0.72
+    },
+    {
+      "value": 98.7325,
+      "probability": 0.73
+    },
+    {
+      "value": 98.76,
+      "probability": 0.74
+    },
+    {
+      "value": 98.7875,
+      "probability": 0.75
+    },
+    {
+      "value": 98.815,
+      "probability": 0.76
+    },
+    {
+      "value": 98.8425,
+      "probability": 0.77
+    },
+    {
+      "value": 98.87,
+      "probability": 0.78
+    },
+    {
+      "value": 98.8975,
+      "probability": 0.79
+    },
+    {
+      "value": 98.925,
+      "probability": 0.8
+    },
+    {
+      "value": 98.9525,
+      "probability": 0.81
+    },
+    {
+      "value": 98.98,
+      "probability": 0.82
+    },
+    {
+      "value": 99.0075,
+      "probability": 0.83
+    },
+    {
+      "value": 99.035,
+      "probability": 0.84
+    },
+    {
+      "value": 99.0625,
+      "probability": 0.85
+    },
+    {
+      "value": 99.09,
+      "probability": 0.86
+    },
+    {
+      "value": 99.1175,
+      "probability": 0.87
+    },
+    {
+      "value": 99.145,
+      "probability": 0.88
+    },
+    {
+      "value": 99.1725,
+      "probability": 0.89
+    },
+    {
+      "value": 99.2,
+      "probability": 0.9
+    },
+    {
+      "value": 99.2275,
+      "probability": 0.901666666667
+    },
+    {
+      "value": 99.255,
+      "probability": 0.903333333333
+    },
+    {
+      "value": 99.2825,
+      "probability": 0.905
+    },
+    {
+      "value": 99.31,
+      "probability": 0.906666666667
+    },
+    {
+      "value": 99.3375,
+      "probability": 0.908333333333
+    },
+    {
+      "value": 99.365,
+      "probability": 0.91
+    },
+    {
+      "value": 99.3925,
+      "probability": 0.911666666667
+    },
+    {
+      "value": 99.42,
+      "probability": 0.913333333333
+    },
+    {
+      "value": 99.4475,
+      "probability": 0.915
+    },
+    {
+      "value": 99.475,
+      "probability": 0.916666666667
+    },
+    {
+      "value": 99.5025,
+      "probability": 0.918333333333
+    },
+    {
+      "value": 99.53,
+      "probability": 0.92
+    },
+    {
+      "value": 99.5575,
+      "probability": 0.921666666667
+    },
+    {
+      "value": 99.585,
+      "probability": 0.923333333333
+    },
+    {
+      "value": 99.6125,
+      "probability": 0.925
+    },
+    {
+      "value": 99.64,
+      "probability": 0.926666666667
+    },
+    {
+      "value": 99.6675,
+      "probability": 0.928333333333
+    },
+    {
+      "value": 99.695,
+      "probability": 0.93
+    },
+    {
+      "value": 99.7225,
+      "probability": 0.931666666667
+    },
+    {
+      "value": 99.75,
+      "probability": 0.933333333333
+    },
+    {
+      "value": 99.7775,
+      "probability": 0.935
+    },
+    {
+      "value": 99.805,
+      "probability": 0.936666666667
+    },
+    {
+      "value": 99.8325,
+      "probability": 0.938333333333
+    },
+    {
+      "value": 99.86,
+      "probability": 0.94
+    },
+    {
+      "value": 99.8875,
+      "probability": 0.941666666667
+    },
+    {
+      "value": 99.915,
+      "probability": 0.943333333333
+    },
+    {
+      "value": 99.9425,
+      "probability": 0.945
+    },
+    {
+      "value": 99.97,
+      "probability": 0.946666666667
+    },
+    {
+      "value": 99.9975,
+      "probability": 0.948333333333
+    },
+    {
+      "value": 100.025,
+      "probability": 0.95
+    },
+    {
+      "value": 100.0525,
+      "probability": 0.951666666667
+    },
+    {
+      "value": 100.08,
+      "probability": 0.953333333333
+    },
+    {
+      "value": 100.1075,
+      "probability": 0.955
+    },
+    {
+      "value": 100.135,
+      "probability": 0.956666666667
+    },
+    {
+      "value": 100.1625,
+      "probability": 0.958333333333
+    },
+    {
+      "value": 100.19,
+      "probability": 0.96
+    },
+    {
+      "value": 100.2175,
+      "probability": 0.961666666667
+    },
+    {
+      "value": 100.245,
+      "probability": 0.963333333333
+    },
+    {
+      "value": 100.2725,
+      "probability": 0.965
+    },
+    {
+      "value": 100.3,
+      "probability": 0.966666666667
+    },
+    {
+      "value": 100.3275,
+      "probability": 0.968333333333
+    },
+    {
+      "value": 100.355,
+      "probability": 0.97
+    },
+    {
+      "value": 100.3825,
+      "probability": 0.971666666667
+    },
+    {
+      "value": 100.41,
+      "probability": 0.973333333333
+    },
+    {
+      "value": 100.4375,
+      "probability": 0.975
+    },
+    {
+      "value": 100.465,
+      "probability": 0.976666666667
+    },
+    {
+      "value": 100.4925,
+      "probability": 0.978333333333
+    },
+    {
+      "value": 100.52,
+      "probability": 0.98
+    },
+    {
+      "value": 100.5475,
+      "probability": 0.981666666667
+    },
+    {
+      "value": 100.575,
+      "probability": 0.983333333333
+    },
+    {
+      "value": 100.6025,
+      "probability": 0.985
+    },
+    {
+      "value": 100.63,
+      "probability": 0.986666666667
+    },
+    {
+      "value": 100.6575,
+      "probability": 0.988333333333
+    },
+    {
+      "value": 100.685,
+      "probability": 0.99
+    },
+    {
+      "value": 100.7125,
+      "probability": 0.991666666667
+    },
+    {
+      "value": 100.74,
+      "probability": 0.993333333333
+    },
+    {
+      "value": 100.7675,
+      "probability": 0.995
+    },
+    {
+      "value": 100.795,
+      "probability": 0.996666666667
+    },
+    {
+      "value": 100.8225,
+      "probability": 0.998333333333
+    },
+    {
+      "value": 100.85,
+      "probability": 1.0
+    }
+  ],
+  "summary": {
+    "pointEstimate": 98.1,
+    "median": 98.1,
+    "interval80": {
+      "lower": 97.0,
+      "upper": 99.2
+    }
+  },
+  "provenance": "interval_seeded",
+  "transformVersion": "interval_anchor_v1"
+}

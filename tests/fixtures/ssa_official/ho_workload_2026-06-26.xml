@@ -1,0 +1,2975 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data created="07/10/2026" records="165">
+<title>Hearing Office Workload Data</title>
+<RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT> 
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>234</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2424</CASES_PENDING>
+        
+        <DISPOSITIONS>2451</DISPOSITIONS>
+        
+        <OFFICE>AKRON OH</OFFICE>
+        
+        <RECEIPTS>2908</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>319</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3540</CASES_PENDING>
+        
+        <DISPOSITIONS>2158</DISPOSITIONS>
+        
+        <OFFICE>ALBANY</OFFICE>
+        
+        <RECEIPTS>3937</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>264</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2145</CASES_PENDING>
+        
+        <DISPOSITIONS>1542</DISPOSITIONS>
+        
+        <OFFICE>ALBUQUERQUE</OFFICE>
+        
+        <RECEIPTS>2219</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>236</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2535</CASES_PENDING>
+        
+        <DISPOSITIONS>2469</DISPOSITIONS>
+        
+        <OFFICE>ALEXANDRIA</OFFICE>
+        
+        <RECEIPTS>3101</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>255</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4011</CASES_PENDING>
+        
+        <DISPOSITIONS>3018</DISPOSITIONS>
+        
+        <OFFICE>ATLANTA DOWNTOWN</OFFICE>
+        
+        <RECEIPTS>4696</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>240</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2079</CASES_PENDING>
+        
+        <DISPOSITIONS>1920</DISPOSITIONS>
+        
+        <OFFICE>ATLANTA NORTH</OFFICE>
+        
+        <RECEIPTS>2669</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>291</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3451</CASES_PENDING>
+        
+        <DISPOSITIONS>2688</DISPOSITIONS>
+        
+        <OFFICE>BALTIMORE</OFFICE>
+        
+        <RECEIPTS>3131</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>278</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1732</CASES_PENDING>
+        
+        <DISPOSITIONS>1191</DISPOSITIONS>
+        
+        <OFFICE>BILLINGS</OFFICE>
+        
+        <RECEIPTS>1463</RECEIPTS>
+        
+        <REGION>08</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>247</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2355</CASES_PENDING>
+        
+        <DISPOSITIONS>2676</DISPOSITIONS>
+        
+        <OFFICE>BIRMINGHAM</OFFICE>
+        
+        <RECEIPTS>2585</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>311</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1966</CASES_PENDING>
+        
+        <DISPOSITIONS>1090</DISPOSITIONS>
+        
+        <OFFICE>BOSTON</OFFICE>
+        
+        <RECEIPTS>1579</RECEIPTS>
+        
+        <REGION>01</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>316</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2455</CASES_PENDING>
+        
+        <DISPOSITIONS>1643</DISPOSITIONS>
+        
+        <OFFICE>BRONX</OFFICE>
+        
+        <RECEIPTS>2102</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>264</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1493</CASES_PENDING>
+        
+        <DISPOSITIONS>1420</DISPOSITIONS>
+        
+        <OFFICE>BUFFALO</OFFICE>
+        
+        <RECEIPTS>1466</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>225</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1856</CASES_PENDING>
+        
+        <DISPOSITIONS>1760</DISPOSITIONS>
+        
+        <OFFICE>CHARLESTON SC</OFFICE>
+        
+        <RECEIPTS>2392</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>256</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1135</CASES_PENDING>
+        
+        <DISPOSITIONS>972</DISPOSITIONS>
+        
+        <OFFICE>CHARLESTON WV</OFFICE>
+        
+        <RECEIPTS>991</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>247</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3177</CASES_PENDING>
+        
+        <DISPOSITIONS>2961</DISPOSITIONS>
+        
+        <OFFICE>CHARLOTTE</OFFICE>
+        
+        <RECEIPTS>3342</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>255</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1530</CASES_PENDING>
+        
+        <DISPOSITIONS>1362</DISPOSITIONS>
+        
+        <OFFICE>CHARLOTTESVILLE</OFFICE>
+        
+        <RECEIPTS>1773</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>271</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2189</CASES_PENDING>
+        
+        <DISPOSITIONS>1713</DISPOSITIONS>
+        
+        <OFFICE>CHATTANOOGA</OFFICE>
+        
+        <RECEIPTS>2343</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>292</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3135</CASES_PENDING>
+        
+        <DISPOSITIONS>2350</DISPOSITIONS>
+        
+        <OFFICE>CHICAGO</OFFICE>
+        
+        <RECEIPTS>3021</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>243</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1917</CASES_PENDING>
+        
+        <DISPOSITIONS>1554</DISPOSITIONS>
+        
+        <OFFICE>CINCINNATI</OFFICE>
+        
+        <RECEIPTS>1996</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>240</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3401</CASES_PENDING>
+        
+        <DISPOSITIONS>3858</DISPOSITIONS>
+        
+        <OFFICE>CLEVELAND</OFFICE>
+        
+        <RECEIPTS>4599</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>284</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1226</CASES_PENDING>
+        
+        <DISPOSITIONS>1095</DISPOSITIONS>
+        
+        <OFFICE>COLORADO SPRINGS</OFFICE>
+        
+        <RECEIPTS>1364</RECEIPTS>
+        
+        <REGION>08</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>238</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>618</CASES_PENDING>
+        
+        <DISPOSITIONS>595</DISPOSITIONS>
+        
+        <OFFICE>COLUMBIA MO</OFFICE>
+        
+        <RECEIPTS>723</RECEIPTS>
+        
+        <REGION>07</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>249</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2426</CASES_PENDING>
+        
+        <DISPOSITIONS>1934</DISPOSITIONS>
+        
+        <OFFICE>COLUMBIA SC</OFFICE>
+        
+        <RECEIPTS>2114</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>262</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2195</CASES_PENDING>
+        
+        <DISPOSITIONS>1906</DISPOSITIONS>
+        
+        <OFFICE>COLUMBUS</OFFICE>
+        
+        <RECEIPTS>2126</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>256</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2736</CASES_PENDING>
+        
+        <DISPOSITIONS>2526</DISPOSITIONS>
+        
+        <OFFICE>COVINGTON GA</OFFICE>
+        
+        <RECEIPTS>3340</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>253</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2745</CASES_PENDING>
+        
+        <DISPOSITIONS>2393</DISPOSITIONS>
+        
+        <OFFICE>DALLAS DOWNTOWN</OFFICE>
+        
+        <RECEIPTS>3400</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>257</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>5516</CASES_PENDING>
+        
+        <DISPOSITIONS>3843</DISPOSITIONS>
+        
+        <OFFICE>DALLAS NORTH OHO</OFFICE>
+        
+        <RECEIPTS>6169</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>282</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1729</CASES_PENDING>
+        
+        <DISPOSITIONS>1443</DISPOSITIONS>
+        
+        <OFFICE>DAYTON</OFFICE>
+        
+        <RECEIPTS>1743</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>247</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2533</CASES_PENDING>
+        
+        <DISPOSITIONS>2421</DISPOSITIONS>
+        
+        <OFFICE>DENVER</OFFICE>
+        
+        <RECEIPTS>2896</RECEIPTS>
+        
+        <REGION>08</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>237</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2332</CASES_PENDING>
+        
+        <DISPOSITIONS>2231</DISPOSITIONS>
+        
+        <OFFICE>DES MOINES</OFFICE>
+        
+        <RECEIPTS>2769</RECEIPTS>
+        
+        <REGION>07</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>241</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3029</CASES_PENDING>
+        
+        <DISPOSITIONS>2814</DISPOSITIONS>
+        
+        <OFFICE>DETROIT</OFFICE>
+        
+        <RECEIPTS>3804</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>248</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1055</CASES_PENDING>
+        
+        <DISPOSITIONS>932</DISPOSITIONS>
+        
+        <OFFICE>DOVER</OFFICE>
+        
+        <RECEIPTS>1186</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>272</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3949</CASES_PENDING>
+        
+        <DISPOSITIONS>3335</DISPOSITIONS>
+        
+        <OFFICE>ELKINS PARK</OFFICE>
+        
+        <RECEIPTS>4502</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>250</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1767</CASES_PENDING>
+        
+        <DISPOSITIONS>1528</DISPOSITIONS>
+        
+        <OFFICE>EUGENE</OFFICE>
+        
+        <RECEIPTS>1669</RECEIPTS>
+        
+        <REGION>10</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>254</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2233</CASES_PENDING>
+        
+        <DISPOSITIONS>1965</DISPOSITIONS>
+        
+        <OFFICE>EVANSTON</OFFICE>
+        
+        <RECEIPTS>2380</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>223</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1772</CASES_PENDING>
+        
+        <DISPOSITIONS>2007</DISPOSITIONS>
+        
+        <OFFICE>EVANSVILLE</OFFICE>
+        
+        <RECEIPTS>2336</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>228</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1512</CASES_PENDING>
+        
+        <DISPOSITIONS>1215</DISPOSITIONS>
+        
+        <OFFICE>FARGO</OFFICE>
+        
+        <RECEIPTS>1627</RECEIPTS>
+        
+        <REGION>08</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>271</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2048</CASES_PENDING>
+        
+        <DISPOSITIONS>1481</DISPOSITIONS>
+        
+        <OFFICE>FAYETTEVILLE NC</OFFICE>
+        
+        <RECEIPTS>2020</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>270</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1762</CASES_PENDING>
+        
+        <DISPOSITIONS>1197</DISPOSITIONS>
+        
+        <OFFICE>FLINT</OFFICE>
+        
+        <RECEIPTS>1727</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>237</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1400</CASES_PENDING>
+        
+        <DISPOSITIONS>1906</DISPOSITIONS>
+        
+        <OFFICE>FLORENCE</OFFICE>
+        
+        <RECEIPTS>1803</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>229</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1737</CASES_PENDING>
+        
+        <DISPOSITIONS>1400</DISPOSITIONS>
+        
+        <OFFICE>FORT MYERS FL</OFFICE>
+        
+        <RECEIPTS>2162</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>276</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1187</CASES_PENDING>
+        
+        <DISPOSITIONS>786</DISPOSITIONS>
+        
+        <OFFICE>FORT SMITH</OFFICE>
+        
+        <RECEIPTS>902</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>255</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1229</CASES_PENDING>
+        
+        <DISPOSITIONS>928</DISPOSITIONS>
+        
+        <OFFICE>FORT WAYNE</OFFICE>
+        
+        <RECEIPTS>1240</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>240</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2718</CASES_PENDING>
+        
+        <DISPOSITIONS>2067</DISPOSITIONS>
+        
+        <OFFICE>FORT WORTH</OFFICE>
+        
+        <RECEIPTS>3176</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>235</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2851</CASES_PENDING>
+        
+        <DISPOSITIONS>3232</DISPOSITIONS>
+        
+        <OFFICE>FRANKLIN TN</OFFICE>
+        
+        <RECEIPTS>3960</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>357</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1137</CASES_PENDING>
+        
+        <DISPOSITIONS>657</DISPOSITIONS>
+        
+        <OFFICE>FRESNO</OFFICE>
+        
+        <RECEIPTS>822</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>258</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4402</CASES_PENDING>
+        
+        <DISPOSITIONS>2904</DISPOSITIONS>
+        
+        <OFFICE>FT LAUDERDALE</OFFICE>
+        
+        <RECEIPTS>4633</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>239</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1840</CASES_PENDING>
+        
+        <DISPOSITIONS>1635</DISPOSITIONS>
+        
+        <OFFICE>GRAND RAPIDS</OFFICE>
+        
+        <RECEIPTS>1924</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>268</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2218</CASES_PENDING>
+        
+        <DISPOSITIONS>2295</DISPOSITIONS>
+        
+        <OFFICE>GREENSBORO</OFFICE>
+        
+        <RECEIPTS>2390</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>233</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2562</CASES_PENDING>
+        
+        <DISPOSITIONS>2196</DISPOSITIONS>
+        
+        <OFFICE>GREENVILLE</OFFICE>
+        
+        <RECEIPTS>2959</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>281</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2228</CASES_PENDING>
+        
+        <DISPOSITIONS>1859</DISPOSITIONS>
+        
+        <OFFICE>HARRISBURG</OFFICE>
+        
+        <RECEIPTS>2550</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>254</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1437</CASES_PENDING>
+        
+        <DISPOSITIONS>2113</DISPOSITIONS>
+        
+        <OFFICE>HARTFORD</OFFICE>
+        
+        <RECEIPTS>1971</RECEIPTS>
+        
+        <REGION>01</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>238</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2860</CASES_PENDING>
+        
+        <DISPOSITIONS>2445</DISPOSITIONS>
+        
+        <OFFICE>HATTIESBURG</OFFICE>
+        
+        <RECEIPTS>3378</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>286</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1165</CASES_PENDING>
+        
+        <DISPOSITIONS>707</DISPOSITIONS>
+        
+        <OFFICE>HONOLULU</OFFICE>
+        
+        <RECEIPTS>1276</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>231</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4324</CASES_PENDING>
+        
+        <DISPOSITIONS>3686</DISPOSITIONS>
+        
+        <OFFICE>HOUSTON NORTH</OFFICE>
+        
+        <RECEIPTS>5447</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>250</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4212</CASES_PENDING>
+        
+        <DISPOSITIONS>3139</DISPOSITIONS>
+        
+        <OFFICE>HOUSTON WEST</OFFICE>
+        
+        <RECEIPTS>5001</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>245</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1618</CASES_PENDING>
+        
+        <DISPOSITIONS>1368</DISPOSITIONS>
+        
+        <OFFICE>HUNTINGTON WV</OFFICE>
+        
+        <RECEIPTS>1716</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>235</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3295</CASES_PENDING>
+        
+        <DISPOSITIONS>3296</DISPOSITIONS>
+        
+        <OFFICE>INDIANAPOLIS</OFFICE>
+        
+        <RECEIPTS>3670</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>215</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1919</CASES_PENDING>
+        
+        <DISPOSITIONS>1842</DISPOSITIONS>
+        
+        <OFFICE>JACKSON MS OHO</OFFICE>
+        
+        <RECEIPTS>2498</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>252</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4604</CASES_PENDING>
+        
+        <DISPOSITIONS>2781</DISPOSITIONS>
+        
+        <OFFICE>JACKSONVILLE</OFFICE>
+        
+        <RECEIPTS>4451</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>298</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3206</CASES_PENDING>
+        
+        <DISPOSITIONS>2905</DISPOSITIONS>
+        
+        <OFFICE>JERSEY CITY</OFFICE>
+        
+        <RECEIPTS>3390</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>258</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>926</CASES_PENDING>
+        
+        <DISPOSITIONS>887</DISPOSITIONS>
+        
+        <OFFICE>JOHNSTOWN</OFFICE>
+        
+        <RECEIPTS>945</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>280</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4192</CASES_PENDING>
+        
+        <DISPOSITIONS>3285</DISPOSITIONS>
+        
+        <OFFICE>KANSAS CITY</OFFICE>
+        
+        <RECEIPTS>4749</RECEIPTS>
+        
+        <REGION>07</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>229</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2234</CASES_PENDING>
+        
+        <DISPOSITIONS>2457</DISPOSITIONS>
+        
+        <OFFICE>KINGSPORT</OFFICE>
+        
+        <RECEIPTS>2837</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>268</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1672</CASES_PENDING>
+        
+        <DISPOSITIONS>955</DISPOSITIONS>
+        
+        <OFFICE>KNOXVILLE</OFFICE>
+        
+        <RECEIPTS>1497</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>229</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1641</CASES_PENDING>
+        
+        <DISPOSITIONS>1660</DISPOSITIONS>
+        
+        <OFFICE>LANSING</OFFICE>
+        
+        <RECEIPTS>2091</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>277</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1792</CASES_PENDING>
+        
+        <DISPOSITIONS>900</DISPOSITIONS>
+        
+        <OFFICE>LAS VEGAS</OFFICE>
+        
+        <RECEIPTS>1612</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>289</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1548</CASES_PENDING>
+        
+        <DISPOSITIONS>1346</DISPOSITIONS>
+        
+        <OFFICE>LAWRENCE MA</OFFICE>
+        
+        <RECEIPTS>1636</RECEIPTS>
+        
+        <REGION>01</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>232</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3159</CASES_PENDING>
+        
+        <DISPOSITIONS>3649</DISPOSITIONS>
+        
+        <OFFICE>LEXINGTON</OFFICE>
+        
+        <RECEIPTS>4065</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>217</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3024</CASES_PENDING>
+        
+        <DISPOSITIONS>3122</DISPOSITIONS>
+        
+        <OFFICE>LITTLE ROCK</OFFICE>
+        
+        <RECEIPTS>3799</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>245</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2886</CASES_PENDING>
+        
+        <DISPOSITIONS>2803</DISPOSITIONS>
+        
+        <OFFICE>LIVONIA MI</OFFICE>
+        
+        <RECEIPTS>3492</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>257</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1843</CASES_PENDING>
+        
+        <DISPOSITIONS>1475</DISPOSITIONS>
+        
+        <OFFICE>LONG BEACH</OFFICE>
+        
+        <RECEIPTS>2161</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>296</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2805</CASES_PENDING>
+        
+        <DISPOSITIONS>1899</DISPOSITIONS>
+        
+        <OFFICE>LONG ISLAND</OFFICE>
+        
+        <RECEIPTS>2789</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>285</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1308</CASES_PENDING>
+        
+        <DISPOSITIONS>1145</DISPOSITIONS>
+        
+        <OFFICE>LOS ANGELES DOWNTOWN</OFFICE>
+        
+        <RECEIPTS>1523</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>287</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2150</CASES_PENDING>
+        
+        <DISPOSITIONS>1508</DISPOSITIONS>
+        
+        <OFFICE>LOS ANGELES WEST</OFFICE>
+        
+        <RECEIPTS>2225</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>254</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3119</CASES_PENDING>
+        
+        <DISPOSITIONS>2488</DISPOSITIONS>
+        
+        <OFFICE>LOUISVILLE</OFFICE>
+        
+        <RECEIPTS>3343</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>258</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2268</CASES_PENDING>
+        
+        <DISPOSITIONS>1981</DISPOSITIONS>
+        
+        <OFFICE>MACON</OFFICE>
+        
+        <RECEIPTS>2727</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>247</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>852</CASES_PENDING>
+        
+        <DISPOSITIONS>793</DISPOSITIONS>
+        
+        <OFFICE>MADISON</OFFICE>
+        
+        <RECEIPTS>754</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>274</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2124</CASES_PENDING>
+        
+        <DISPOSITIONS>1991</DISPOSITIONS>
+        
+        <OFFICE>MANCHESTER</OFFICE>
+        
+        <RECEIPTS>2517</RECEIPTS>
+        
+        <REGION>01</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>289</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2090</CASES_PENDING>
+        
+        <DISPOSITIONS>1525</DISPOSITIONS>
+        
+        <OFFICE>MEMPHIS</OFFICE>
+        
+        <RECEIPTS>1815</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>242</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1623</CASES_PENDING>
+        
+        <DISPOSITIONS>1850</DISPOSITIONS>
+        
+        <OFFICE>METAIRIE</OFFICE>
+        
+        <RECEIPTS>2044</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>249</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2674</CASES_PENDING>
+        
+        <DISPOSITIONS>2720</DISPOSITIONS>
+        
+        <OFFICE>MIAMI OHO</OFFICE>
+        
+        <RECEIPTS>3096</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>243</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>648</CASES_PENDING>
+        
+        <DISPOSITIONS>564</DISPOSITIONS>
+        
+        <OFFICE>MIDDLESBORO</OFFICE>
+        
+        <RECEIPTS>375</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>261</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2493</CASES_PENDING>
+        
+        <DISPOSITIONS>2124</DISPOSITIONS>
+        
+        <OFFICE>MILWAUKEE</OFFICE>
+        
+        <RECEIPTS>2863</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>263</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3216</CASES_PENDING>
+        
+        <DISPOSITIONS>2360</DISPOSITIONS>
+        
+        <OFFICE>MINNEAPOLIS</OFFICE>
+        
+        <RECEIPTS>3012</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>256</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3260</CASES_PENDING>
+        
+        <DISPOSITIONS>2954</DISPOSITIONS>
+        
+        <OFFICE>MOBILE</OFFICE>
+        
+        <RECEIPTS>3409</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>239</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2593</CASES_PENDING>
+        
+        <DISPOSITIONS>3015</DISPOSITIONS>
+        
+        <OFFICE>MONTGOMERY</OFFICE>
+        
+        <RECEIPTS>3235</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>272</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1467</CASES_PENDING>
+        
+        <DISPOSITIONS>1144</DISPOSITIONS>
+        
+        <OFFICE>MORENO VALLEY</OFFICE>
+        
+        <RECEIPTS>1310</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>234</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1506</CASES_PENDING>
+        
+        <DISPOSITIONS>1412</DISPOSITIONS>
+        
+        <OFFICE>MORGANTOWN</OFFICE>
+        
+        <RECEIPTS>1735</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>238</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1524</CASES_PENDING>
+        
+        <DISPOSITIONS>1626</DISPOSITIONS>
+        
+        <OFFICE>MT PLEASANT MI</OFFICE>
+        
+        <RECEIPTS>2007</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>237</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1466</CASES_PENDING>
+        
+        <DISPOSITIONS>1572</DISPOSITIONS>
+        
+        <OFFICE>NASHVILLE</OFFICE>
+        
+        <RECEIPTS>1714</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>72</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>78</CASES_PENDING>
+        
+        <DISPOSITIONS>579</DISPOSITIONS>
+        
+        <OFFICE>NATL ADJUDICATION TEAM</OFFICE>
+        
+        <RECEIPTS>657</RECEIPTS>
+        
+        <REGION>12</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>301</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4026</CASES_PENDING>
+        
+        <DISPOSITIONS>2672</DISPOSITIONS>
+        
+        <OFFICE>NEWARK</OFFICE>
+        
+        <RECEIPTS>3885</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>282</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1947</CASES_PENDING>
+        
+        <DISPOSITIONS>1496</DISPOSITIONS>
+        
+        <OFFICE>NEW HAVEN</OFFICE>
+        
+        <RECEIPTS>1925</RECEIPTS>
+        
+        <REGION>01</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>272</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1751</CASES_PENDING>
+        
+        <DISPOSITIONS>1316</DISPOSITIONS>
+        
+        <OFFICE>NEW ORLEANS</OFFICE>
+        
+        <RECEIPTS>1680</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>340</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2699</CASES_PENDING>
+        
+        <DISPOSITIONS>1333</DISPOSITIONS>
+        
+        <OFFICE>NEW YORK</OFFICE>
+        
+        <RECEIPTS>2136</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>275</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1672</CASES_PENDING>
+        
+        <DISPOSITIONS>1502</DISPOSITIONS>
+        
+        <OFFICE>NEW YORK VARICK</OFFICE>
+        
+        <RECEIPTS>1841</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>317</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>291</CASES_PENDING>
+        
+        <DISPOSITIONS>1096</DISPOSITIONS>
+        
+        <OFFICE>NHC ALBUQUERQUE</OFFICE>
+        
+        <RECEIPTS>355</RECEIPTS>
+        
+        <REGION>12</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>332</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>0</CASES_PENDING>
+        
+        <DISPOSITIONS>1140</DISPOSITIONS>
+        
+        <OFFICE>NHC BALTIMORE</OFFICE>
+        
+        <RECEIPTS>-893</RECEIPTS>
+        
+        <REGION>12</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>312</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1515</CASES_PENDING>
+        
+        <DISPOSITIONS>2037</DISPOSITIONS>
+        
+        <OFFICE>NHC CHICAGO</OFFICE>
+        
+        <RECEIPTS>1294</RECEIPTS>
+        
+        <REGION>12</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>346</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>0</CASES_PENDING>
+        
+        <DISPOSITIONS>679</DISPOSITIONS>
+        
+        <OFFICE>NHC FALLS CHURCH</OFFICE>
+        
+        <RECEIPTS>29</RECEIPTS>
+        
+        <REGION>12</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>335</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>871</CASES_PENDING>
+        
+        <DISPOSITIONS>1402</DISPOSITIONS>
+        
+        <OFFICE>NHC ST LOUIS</OFFICE>
+        
+        <RECEIPTS>802</RECEIPTS>
+        
+        <REGION>12</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>281</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2424</CASES_PENDING>
+        
+        <DISPOSITIONS>1977</DISPOSITIONS>
+        
+        <OFFICE>NORFOLK</OFFICE>
+        
+        <RECEIPTS>2694</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>263</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>853</CASES_PENDING>
+        
+        <DISPOSITIONS>975</DISPOSITIONS>
+        
+        <OFFICE>NORWALK</OFFICE>
+        
+        <RECEIPTS>948</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>266</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1131</CASES_PENDING>
+        
+        <DISPOSITIONS>736</DISPOSITIONS>
+        
+        <OFFICE>OAK BROOK</OFFICE>
+        
+        <RECEIPTS>962</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>260</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1804</CASES_PENDING>
+        
+        <DISPOSITIONS>1722</DISPOSITIONS>
+        
+        <OFFICE>OAKLAND</OFFICE>
+        
+        <RECEIPTS>2253</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>243</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3076</CASES_PENDING>
+        
+        <DISPOSITIONS>2642</DISPOSITIONS>
+        
+        <OFFICE>OAK PARK</OFFICE>
+        
+        <RECEIPTS>3809</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>258</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3413</CASES_PENDING>
+        
+        <DISPOSITIONS>3117</DISPOSITIONS>
+        
+        <OFFICE>OKLAHOMA CITY</OFFICE>
+        
+        <RECEIPTS>3862</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>233</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2060</CASES_PENDING>
+        
+        <DISPOSITIONS>1915</DISPOSITIONS>
+        
+        <OFFICE>OMAHA</OFFICE>
+        
+        <RECEIPTS>2527</RECEIPTS>
+        
+        <REGION>07</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>280</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2071</CASES_PENDING>
+        
+        <DISPOSITIONS>1468</DISPOSITIONS>
+        
+        <OFFICE>ORANGE</OFFICE>
+        
+        <RECEIPTS>2225</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>253</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4341</CASES_PENDING>
+        
+        <DISPOSITIONS>2873</DISPOSITIONS>
+        
+        <OFFICE>ORLANDO</OFFICE>
+        
+        <RECEIPTS>4543</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>257</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1901</CASES_PENDING>
+        
+        <DISPOSITIONS>1964</DISPOSITIONS>
+        
+        <OFFICE>ORLAND PARK</OFFICE>
+        
+        <RECEIPTS>2036</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>233</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>607</CASES_PENDING>
+        
+        <DISPOSITIONS>607</DISPOSITIONS>
+        
+        <OFFICE>PADUCAH</OFFICE>
+        
+        <RECEIPTS>528</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>265</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1091</CASES_PENDING>
+        
+        <DISPOSITIONS>1505</DISPOSITIONS>
+        
+        <OFFICE>PASADENA</OFFICE>
+        
+        <RECEIPTS>1235</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>249</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1336</CASES_PENDING>
+        
+        <DISPOSITIONS>1440</DISPOSITIONS>
+        
+        <OFFICE>PEORIA</OFFICE>
+        
+        <RECEIPTS>1486</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>265</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1545</CASES_PENDING>
+        
+        <DISPOSITIONS>1236</DISPOSITIONS>
+        
+        <OFFICE>PHILADELPHIA</OFFICE>
+        
+        <RECEIPTS>1511</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>293</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>942</CASES_PENDING>
+        
+        <DISPOSITIONS>979</DISPOSITIONS>
+        
+        <OFFICE>PHILADELPHIA EAST</OFFICE>
+        
+        <RECEIPTS>865</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>273</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1507</CASES_PENDING>
+        
+        <DISPOSITIONS>1337</DISPOSITIONS>
+        
+        <OFFICE>PHOENIX DOWNTOWN</OFFICE>
+        
+        <RECEIPTS>1438</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>350</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>825</CASES_PENDING>
+        
+        <DISPOSITIONS>809</DISPOSITIONS>
+        
+        <OFFICE>PHOENIX NORTH</OFFICE>
+        
+        <RECEIPTS>284</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>281</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2745</CASES_PENDING>
+        
+        <DISPOSITIONS>1964</DISPOSITIONS>
+        
+        <OFFICE>PITTSBURGH</OFFICE>
+        
+        <RECEIPTS>2684</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>270</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1438</CASES_PENDING>
+        
+        <DISPOSITIONS>1268</DISPOSITIONS>
+        
+        <OFFICE>PORTLAND ME</OFFICE>
+        
+        <RECEIPTS>1548</RECEIPTS>
+        
+        <REGION>01</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>246</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2286</CASES_PENDING>
+        
+        <DISPOSITIONS>1890</DISPOSITIONS>
+        
+        <OFFICE>PORTLAND OR</OFFICE>
+        
+        <RECEIPTS>2316</RECEIPTS>
+        
+        <REGION>10</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>260</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2223</CASES_PENDING>
+        
+        <DISPOSITIONS>2017</DISPOSITIONS>
+        
+        <OFFICE>PROVIDENCE</OFFICE>
+        
+        <RECEIPTS>2522</RECEIPTS>
+        
+        <REGION>01</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>306</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2107</CASES_PENDING>
+        
+        <DISPOSITIONS>1508</DISPOSITIONS>
+        
+        <OFFICE>QUEENS</OFFICE>
+        
+        <RECEIPTS>2100</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>259</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>3441</CASES_PENDING>
+        
+        <DISPOSITIONS>3342</DISPOSITIONS>
+        
+        <OFFICE>RALEIGH</OFFICE>
+        
+        <RECEIPTS>4037</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>260</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>589</CASES_PENDING>
+        
+        <DISPOSITIONS>449</DISPOSITIONS>
+        
+        <OFFICE>RENO</OFFICE>
+        
+        <RECEIPTS>564</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>260</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1809</CASES_PENDING>
+        
+        <DISPOSITIONS>1726</DISPOSITIONS>
+        
+        <OFFICE>RICHMOND</OFFICE>
+        
+        <RECEIPTS>2126</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>239</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>833</CASES_PENDING>
+        
+        <DISPOSITIONS>587</DISPOSITIONS>
+        
+        <OFFICE>RIO GRANDE VALLEY TX</OFFICE>
+        
+        <RECEIPTS>883</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>248</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1281</CASES_PENDING>
+        
+        <DISPOSITIONS>995</DISPOSITIONS>
+        
+        <OFFICE>ROANOKE</OFFICE>
+        
+        <RECEIPTS>1373</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>295</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1108</CASES_PENDING>
+        
+        <DISPOSITIONS>706</DISPOSITIONS>
+        
+        <OFFICE>ROCHESTER</OFFICE>
+        
+        <RECEIPTS>1107</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>254</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2505</CASES_PENDING>
+        
+        <DISPOSITIONS>1915</DISPOSITIONS>
+        
+        <OFFICE>SACRAMENTO</OFFICE>
+        
+        <RECEIPTS>2962</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>245</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1966</CASES_PENDING>
+        
+        <DISPOSITIONS>1656</DISPOSITIONS>
+        
+        <OFFICE>SALT LAKE CITY</OFFICE>
+        
+        <RECEIPTS>2153</RECEIPTS>
+        
+        <REGION>08</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>259</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>6897</CASES_PENDING>
+        
+        <DISPOSITIONS>5856</DISPOSITIONS>
+        
+        <OFFICE>SAN ANTONIO</OFFICE>
+        
+        <RECEIPTS>7996</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>242</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1194</CASES_PENDING>
+        
+        <DISPOSITIONS>1136</DISPOSITIONS>
+        
+        <OFFICE>SAN BERNARDINO</OFFICE>
+        
+        <RECEIPTS>1374</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>303</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2520</CASES_PENDING>
+        
+        <DISPOSITIONS>1255</DISPOSITIONS>
+        
+        <OFFICE>SAN DIEGO</OFFICE>
+        
+        <RECEIPTS>2389</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>268</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1445</CASES_PENDING>
+        
+        <DISPOSITIONS>1553</DISPOSITIONS>
+        
+        <OFFICE>SAN FRANCISCO</OFFICE>
+        
+        <RECEIPTS>1827</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>284</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>931</CASES_PENDING>
+        
+        <DISPOSITIONS>761</DISPOSITIONS>
+        
+        <OFFICE>SAN JOSE</OFFICE>
+        
+        <RECEIPTS>865</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>334</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2733</CASES_PENDING>
+        
+        <DISPOSITIONS>2594</DISPOSITIONS>
+        
+        <OFFICE>SAN JUAN</OFFICE>
+        
+        <RECEIPTS>2778</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>282</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>708</CASES_PENDING>
+        
+        <DISPOSITIONS>559</DISPOSITIONS>
+        
+        <OFFICE>SAN RAFAEL</OFFICE>
+        
+        <RECEIPTS>567</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>294</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1005</CASES_PENDING>
+        
+        <DISPOSITIONS>617</DISPOSITIONS>
+        
+        <OFFICE>SANTA BARBARA</OFFICE>
+        
+        <RECEIPTS>942</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>224</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1789</CASES_PENDING>
+        
+        <DISPOSITIONS>1561</DISPOSITIONS>
+        
+        <OFFICE>SAVANNAH</OFFICE>
+        
+        <RECEIPTS>2174</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>340</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2038</CASES_PENDING>
+        
+        <DISPOSITIONS>1234</DISPOSITIONS>
+        
+        <OFFICE>SEATTLE</OFFICE>
+        
+        <RECEIPTS>1628</RECEIPTS>
+        
+        <REGION>10</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>247</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2320</CASES_PENDING>
+        
+        <DISPOSITIONS>2203</DISPOSITIONS>
+        
+        <OFFICE>SEVEN FIELDS</OFFICE>
+        
+        <RECEIPTS>2733</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>321</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>880</CASES_PENDING>
+        
+        <DISPOSITIONS>826</DISPOSITIONS>
+        
+        <OFFICE>SHREVEPORT</OFFICE>
+        
+        <RECEIPTS>424</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>321</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2985</CASES_PENDING>
+        
+        <DISPOSITIONS>2616</DISPOSITIONS>
+        
+        <OFFICE>SOUTH JERSEY</OFFICE>
+        
+        <RECEIPTS>3170</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>680</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>7811</CASES_PENDING>
+        
+        <DISPOSITIONS>3835</DISPOSITIONS>
+        
+        <OFFICE>SPECIAL REVIEW CADRE</OFFICE>
+        
+        <RECEIPTS>4370</RECEIPTS>
+        
+        <REGION>12</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>294</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1933</CASES_PENDING>
+        
+        <DISPOSITIONS>1124</DISPOSITIONS>
+        
+        <OFFICE>SPOKANE</OFFICE>
+        
+        <RECEIPTS>1882</RECEIPTS>
+        
+        <REGION>10</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>332</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1804</CASES_PENDING>
+        
+        <DISPOSITIONS>1216</DISPOSITIONS>
+        
+        <OFFICE>SPRINGFIELD MA</OFFICE>
+        
+        <RECEIPTS>1870</RECEIPTS>
+        
+        <REGION>01</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>245</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1581</CASES_PENDING>
+        
+        <DISPOSITIONS>1179</DISPOSITIONS>
+        
+        <OFFICE>SPRINGFIELD MO</OFFICE>
+        
+        <RECEIPTS>1784</RECEIPTS>
+        
+        <REGION>07</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>263</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>5171</CASES_PENDING>
+        
+        <DISPOSITIONS>4072</DISPOSITIONS>
+        
+        <OFFICE>ST LOUIS</OFFICE>
+        
+        <RECEIPTS>6002</RECEIPTS>
+        
+        <REGION>07</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>270</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1235</CASES_PENDING>
+        
+        <DISPOSITIONS>948</DISPOSITIONS>
+        
+        <OFFICE>STOCKTON</OFFICE>
+        
+        <RECEIPTS>1306</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>221</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2338</CASES_PENDING>
+        
+        <DISPOSITIONS>1284</DISPOSITIONS>
+        
+        <OFFICE>ST PETERSBURG FL OHO</OFFICE>
+        
+        <RECEIPTS>2295</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>253</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1853</CASES_PENDING>
+        
+        <DISPOSITIONS>2333</DISPOSITIONS>
+        
+        <OFFICE>SYRACUSE</OFFICE>
+        
+        <RECEIPTS>1993</RECEIPTS>
+        
+        <REGION>02</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>253</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1952</CASES_PENDING>
+        
+        <DISPOSITIONS>1502</DISPOSITIONS>
+        
+        <OFFICE>TACOMA</OFFICE>
+        
+        <RECEIPTS>2136</RECEIPTS>
+        
+        <REGION>10</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>236</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1962</CASES_PENDING>
+        
+        <DISPOSITIONS>1372</DISPOSITIONS>
+        
+        <OFFICE>TALLAHASSEE FL OHO</OFFICE>
+        
+        <RECEIPTS>2121</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>259</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>5154</CASES_PENDING>
+        
+        <DISPOSITIONS>3067</DISPOSITIONS>
+        
+        <OFFICE>TAMPA OHO</OFFICE>
+        
+        <RECEIPTS>5277</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>249</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2244</CASES_PENDING>
+        
+        <DISPOSITIONS>2451</DISPOSITIONS>
+        
+        <OFFICE>TOLEDO OH</OFFICE>
+        
+        <RECEIPTS>2789</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>236</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1376</CASES_PENDING>
+        
+        <DISPOSITIONS>1209</DISPOSITIONS>
+        
+        <OFFICE>TOPEKA KS</OFFICE>
+        
+        <RECEIPTS>1595</RECEIPTS>
+        
+        <REGION>07</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>296</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1627</CASES_PENDING>
+        
+        <DISPOSITIONS>996</DISPOSITIONS>
+        
+        <OFFICE>TUCSON</OFFICE>
+        
+        <RECEIPTS>1504</RECEIPTS>
+        
+        <REGION>09</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>247</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2129</CASES_PENDING>
+        
+        <DISPOSITIONS>2209</DISPOSITIONS>
+        
+        <OFFICE>TULSA OHO</OFFICE>
+        
+        <RECEIPTS>2729</RECEIPTS>
+        
+        <REGION>06</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>236</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>1388</CASES_PENDING>
+        
+        <DISPOSITIONS>971</DISPOSITIONS>
+        
+        <OFFICE>TUPELO</OFFICE>
+        
+        <RECEIPTS>1153</RECEIPTS>
+        
+        <REGION>04</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>243</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>2035</CASES_PENDING>
+        
+        <DISPOSITIONS>1740</DISPOSITIONS>
+        
+        <OFFICE>VALPARAISO IN</OFFICE>
+        
+        <RECEIPTS>2269</RECEIPTS>
+        
+        <REGION>05</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>273</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>6480</CASES_PENDING>
+        
+        <DISPOSITIONS>3601</DISPOSITIONS>
+        
+        <OFFICE>WASHINGTON</OFFICE>
+        
+        <RECEIPTS>7116</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>284</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>813</CASES_PENDING>
+        
+        <DISPOSITIONS>826</DISPOSITIONS>
+        
+        <OFFICE>WICHITA</OFFICE>
+        
+        <RECEIPTS>645</RECEIPTS>
+        
+        <REGION>07</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+    <row>           
+    
+        <AVERAGE_PROCESSING_TIME>275</AVERAGE_PROCESSING_TIME>
+        
+        <CASES_PENDING>4257</CASES_PENDING>
+        
+        <DISPOSITIONS>3791</DISPOSITIONS>
+        
+        <OFFICE>WILKES BARRE</OFFICE>
+        
+        <RECEIPTS>4649</RECEIPTS>
+        
+        <REGION>03</REGION>
+        
+        <RPTG_PRD_ENDT>06/26/2026</RPTG_PRD_ENDT>
+        
+    </row>
+
+</data> 

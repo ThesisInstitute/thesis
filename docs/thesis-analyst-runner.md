@@ -47,6 +47,19 @@ inside the witnessed select-to-publish window, verifies custody, and regenerates
 `site/src/data/thesis-strategy-comparisons.ts` from every indexed strategy
 suite on disk.
 
+Selection targets mirror the registered contract's date fields exactly:
+`resolutionDateBasis`, `resolutionDate` and the top-level
+`expectedReleaseWindow` appear only when the registration snapshot binds them,
+which is what the publisher's registration projection check requires of every
+batch target. The published forecast's resolver date rides separately as
+`publishedResolutionDate`: the selector orders and gates open targets by it,
+the runner pins each comparison cell's `resolutionDate` to it, and the
+publisher requires every new comparison cell to carry it. Before 2026-09-20
+the selector copied the published date into `resolutionDate`, which the
+projection check rejected for every release-calendar contract (Actions runs
+35524670779 and 35525381224); the selector now runs that projection check
+itself so an ineligible target fails in the free select job.
+
 New median3 records use timestamp-first run directories and custody inventory
 v2. Their custody root commits the local derived distribution and cell plus
 exactly three distinct, verified constituent custody roots. The July 8, 2026
@@ -267,6 +280,12 @@ panel, or fallback-prior intervals and label `intervalMethod` accordingly.
 
 ## Activity artifacts
 
+Native Codex stages also use the repository-owned evidence MCP server. See
+[`tool-evidence.md`](tool-evidence.md) for captured source bodies, replayable
+JSON extraction and arithmetic, artifact binding, and the limits of these
+checks. Hosted search and model-authored tool summaries are not full response
+capture.
+
 Every run writes a directory under `records/thesis-analyst/YYYY-MM-DD/` with:
 
 - `prompt.md`
@@ -276,6 +295,8 @@ Every run writes a directory under `records/thesis-analyst/YYYY-MM-DD/` with:
   `codex_last_message.txt`, and `codex_trace.json` when `--codex-model` or
   `--pre-submit-review-codex-model` is used
 - `raw_response.txt`
+- `tool_evidence.json` and `tool_evidence_verification.json` for native Codex
+  runs (also draft/reviewer-prefixed copies when those stages run)
 - `draft_stdout.txt`, `pre_submit_review_stdout.txt`, and `revision_prompt.md`
   when pre-submit review is enabled
 - `parsed_cells.json`

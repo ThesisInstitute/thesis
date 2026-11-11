@@ -1,55 +1,64 @@
 {
+  "slug": "s3596-119",
   "bill": {
     "slug": "s3596-119",
-    "name": "Stronger Start for Working Families Act (S. 3596)",
-    "status": "Introduced in Senate · Hassan / Young",
-    "pages": 2,
-    "analyzed": "Full bill (Section 2)",
-    "analysisDate": "2026-07-31",
-    "sourceUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/3596"
+    "name": "Stronger Start for Working Families Act",
+    "status": "Introduced in Senate",
+    "pages": 0,
+    "analyzed": "Analyzed the introduced text supplied for S. 3596, focused on section 2 amendments to Internal Revenue Code section 24 affecting the refundable child tax credit earned income threshold, conforming amendment, and effective date.",
+    "analysisDate": "2026-09-22",
+    "sourceUrl": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml"
   },
   "provisions": [
     {
       "title": "Section 2",
-      "heading": "Earned income threshold for the refundable child tax credit: $3,000 → $1",
-      "quote": "Section 24(d)(1)(B)(i) of the Internal Revenue Code of 1986 is amended by striking ``$3,000'' and inserting ``$1''. … Section 24(h) of such Code is amended by striking paragraph (6). … The amendments made by this section shall apply to taxable years beginning after December 31, 2025.",
-      "context": "Under current law the refundable portion of the child tax credit (the additional child tax credit) phases in at 15 percent of earned income above a threshold — $3,000 in the permanent statute at §24(d)(1)(B)(i), overridden to $2,500 by §24(h)(6). The bill lowers the permanent threshold to $1 and strikes the $2,500 override, so the phase-in starts from the first dollar of earned income. The 15 percent phase-in rate and the refundable cap are unchanged; the change takes effect for taxable years beginning after December 31, 2025.",
+      "heading": "Earned income threshold for refundable child tax credit",
+      "quote": "2. Earned income threshold for refundable child tax credit (a) In general Section 24(d)(1)(B)(i)  of the Internal Revenue Code of 1986 is amended by striking  $3,000  and inserting  $1 . (b) Conforming amendment Section 24(h) of such Code is amended by striking paragraph (6). (c) Effective date The amendments made by this section shall apply to taxable years beginning after December 31, 2025.",
       "goals": [
-        "Extend the refundable child tax credit to working families with the lowest earnings by starting the phase-in at the first dollar earned.",
-        "Raise refund amounts for families whose earnings currently fall at or below the phase-in threshold."
+        "Expand access to the refundable child tax credit for taxpayers with earned income below the current threshold.",
+        "Increase after-tax resources for low-earning working families with qualifying children.",
+        "Reduce child poverty or material hardship among affected households."
       ],
       "effects": [
         {
-          "mechanism": "Phase-in floor",
-          "text": "Families with earned income below the current $2,500 threshold become newly eligible for a refundable credit; every family whose refundable credit is limited by the earnings formula gains up to 15 percent of $2,499 (about $375), holding the rate and cap fixed."
+          "mechanism": "Threshold reduction",
+          "text": "The bill replaces the permanent $3,000 amount in section 24(d)(1)(B)(i) with $1 and repeals section 24(h)(6), which currently overrides that amount with $2,500. The operative earned-income threshold would therefore fall from $2,500 to $1 for otherwise eligible taxpayers; the 15 percent phase-in rate and refundable cap remain unchanged."
         },
         {
-          "mechanism": "Filing requirement",
-          "text": "The newly eligible population is concentrated among very-low-income households, many of whom are not currently required to file; claiming the credit requires filing a return, so realized take-up depends on filing behavior, not only on eligibility."
+          "mechanism": "Refund delivery",
+          "text": "If eligible families file returns and claim the credit, the statutory change could increase refundable credit amounts paid to low-earning households after tax filing."
         },
         {
-          "mechanism": "Unchanged parameters",
-          "text": "The $2,200 credit amount, the refundable cap, and the 15 percent phase-in rate are untouched — the provision changes who reaches a given refundable amount at what earnings level, not the credit's ceiling."
+          "mechanism": "Fiscal offset",
+          "text": "Larger refundable credit eligibility could increase federal outlays or reduce receipts relative to current law, with the realized effect depending on take-up, eligibility, and filing behavior."
+        },
+        {
+          "mechanism": "Incomplete take-up",
+          "text": "Families with little earned income may have low filing rates or face documentation barriers, which could dampen the intended benefit even if eligibility expands."
         }
       ],
       "barriers": [
         {
-          "actor": "IRS",
-          "text": "The threshold change must land in TY2026 forms, instructions, and e-file schema for the 2027 filing season; the conforming strike of §24(h)(6) also touches guidance that currently cites the $2,500 figure."
+          "actor": "Internal Revenue Service",
+          "text": "The IRS would need to update forms, instructions, eligibility logic, taxpayer-facing guidance, and processing systems for taxable years beginning after December 31, 2025."
         },
         {
-          "actor": "Outreach / VITA",
-          "text": "Reaching newly eligible non-filers is an outreach problem: the households gaining eligibility are those least connected to the filing system."
+          "actor": "Taxpayers and preparers",
+          "text": "Eligible low-earning families would need to file returns, document earned income and qualifying children, and understand the changed refundable credit threshold."
+        },
+        {
+          "actor": "Treasury and IRS compliance administrators",
+          "text": "Lowering the threshold may increase the importance of verifying eligibility while avoiding delays or mistaken denials for households newly eligible for refunds."
         }
       ],
       "metrics": [
         {
-          "kind": "Direct implementation/outcome",
-          "category": "operational",
-          "layer": "participation",
-          "text": "IRS Statistics of Income, Individual Income Tax Returns (Publication 1304 line-item tables): number of returns claiming the additional child tax credit and total ACTC dollars, TY2027 versus prior years.",
-          "series_hint": "irs.soi.additional_child_tax_credit_returns",
-          "rationale": "The provision operates entirely through the ACTC formula, so ACTC returns and dollars are the most direct administrative readout: if the threshold change does anything, it must appear here first. Official, first-print resolvable from a fixed IRS publication. The registered conditional pair targets TY2027, matching its policy premise. Known weakness: SOI line-item tables publish with roughly a two-year lag, so TY2027 resolves in 2029; considered the weekly Filing Season Statistics as a faster proxy and rejected it because it does not break out the ACTC line.",
+          "kind": "Refundable child tax credit amount",
+          "text": "Annual total amount of Additional Child Tax Credit claimed, as an outcome measure of refundable credit dollars delivered after the threshold change.",
+          "series_hint": "irs.actc.total_credit_amount",
+          "rationale": "This is the closest supplied IRS concept for the direct statutory outcome because the bill changes refundability under section 24. It measures dollars claimed rather than the exact marginal increase caused by the bill, so analysis would need a baseline or microsimulation to isolate the proposal's contribution. The ACTC claims comparison forecasts return counts; it does not forecast dollar amounts.",
+          "layer": "outcome",
+          "category": "intended",
           "stances": [
             {
               "goal": 0,
@@ -57,17 +66,21 @@
             },
             {
               "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
               "stance": "serves"
             }
           ]
         },
         {
-          "kind": "Downstream outcome",
-          "category": "intended",
-          "layer": "outcome",
-          "text": "Census Bureau Supplemental Poverty Measure, child poverty rate — the SPM accounts for refundable credits, so a phase-in change for the lowest earners shows up here if realized take-up is material.",
-          "series_hint": "census.spm.child_poverty_rate",
-          "rationale": "Selected because it is the outcome the goal actually claims (resources of the lowest-earning families) and because the SPM is already a live Thesis registry series with existing forecast cells. The conditional pair targets CY2027 so its outcome can reflect the provision's TY2027 application. Thesis commits the conservative 2028-08-01 through 2028-12-31 release window and 2028-12-31 resolve-by deadline; the registered Census announcement authenticates revised-methodology identity only and establishes neither timing value. The pair is non-exhaustive: an intermediate enacted threshold satisfies neither arm. Known weakness: attribution is noisy — a sub-$400-per-family change sits inside the SPM's year-to-year movement, so this metric is informative in the enacted-versus-unchanged-current-law pair, not as a standalone level.",
+          "kind": "Refundable child tax credit claims",
+          "text": "IRS Statistics of Income, Individual Income Tax Returns, Publication 1304 Table 3.3: number of returns claiming the refundable child tax credit for TY2027, reported as millions of returns for the registered ACTC pair.",
+          "series_hint": "irs.actc.total_claims",
+          "rationale": "Claims illuminate the take-up mechanism behind the policy, but they are a participation measure and can move because of filing behavior, demographics, or outreach rather than the threshold change alone. It should complement, not replace, dollar and poverty outcomes. The reviewed comparison uses the first official TY2027 print under its existing 2029 release window and December 31, 2029 outer deadline; that window is a registered bound, not an announced exact release day.",
+          "layer": "participation",
+          "category": "operational",
           "stances": [
             {
               "goal": 0,
@@ -75,7 +88,33 @@
             },
             {
               "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
               "stance": "orthogonal"
+            }
+          ]
+        },
+        {
+          "kind": "Child poverty rate",
+          "text": "Census Bureau Supplemental Poverty Measure child poverty rate for CY2027, as a recurring official outcome that reflects refundable tax credits.",
+          "series_hint": "census.spm.child_poverty_rate",
+          "rationale": "The SPM is a more relevant poverty metric than broad labor or inflation series because refundable tax credits affect after-tax resources. It is annual and population-wide, so it may be too coarse to detect this bill alone and cannot identify eligible families below the former earned income threshold without additional microdata. The existing registration commits an August 1 through December 31, 2028 release window and December 31, 2028 outer deadline. Its Census announcement authenticates methodology identity, not these lab-committed timing bounds.",
+          "layer": "outcome",
+          "category": "intended",
+          "stances": [
+            {
+              "goal": 0,
+              "stance": "orthogonal"
+            },
+            {
+              "goal": 1,
+              "stance": "serves"
+            },
+            {
+              "goal": 2,
+              "stance": "serves"
             }
           ]
         },
@@ -94,14 +133,19 @@
             {
               "goal": 1,
               "stance": "orthogonal"
+            },
+            {
+              "goal": 2,
+              "stance": "orthogonal"
             }
           ]
         }
       ],
       "conditionals": [
-        "P(IRS SOI TY2027 ACTC returns and dollars | §24(d)(1)(B)(i) threshold ≤ $1 for TY2027 vs unchanged $2,500 current-law threshold for TY2027; an intermediate enacted threshold is outside both arms)",
+        "P(IRS SOI TY2027 ACTC returns | §24(d)(1)(B)(i) threshold ≤ $1 for TY2027 vs unchanged $2,500 current-law threshold for TY2027; an intermediate enacted threshold is outside both arms)",
         "P(Census SPM child poverty rate for CY2027 | §24(d)(1)(B)(i) threshold ≤ $1 for TY2027 vs unchanged $2,500 current-law threshold for TY2027; an intermediate enacted threshold is outside both arms)"
       ],
+      "context": "Under current law the refundable portion of the child tax credit (the additional child tax credit) phases in at 15 percent of earned income above a threshold — $3,000 in the permanent statute at §24(d)(1)(B)(i), overridden to $2,500 by §24(h)(6). The bill lowers the permanent threshold to $1 and strikes the $2,500 override, so the phase-in starts from the first dollar of earned income. The 15 percent phase-in rate and the refundable cap are unchanged; the change takes effect for taxable years beginning after December 31, 2025.",
       "compute": [
         {
           "model": "policyengine-us",

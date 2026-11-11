@@ -1,0 +1,1023 @@
+[
+  {
+    "slug": "belgium-nbb-business-barometer-september-2026",
+    "country": "BE",
+    "type": "data",
+    "title": "Belgium NBB business barometer, September 2026",
+    "question": "National Bank of Belgium monthly business surveys, overall gross synthetic curve for Belgium, total sector, seasonally adjusted, September 2026, first official print",
+    "unit": "index_points",
+    "pointEstimate": -13.1,
+    "ciLow": -15.9,
+    "ciHigh": -10.3,
+    "confidence": 0.8,
+    "resolutionDate": "2026-09-24",
+    "resolutionSource": "National Bank of Belgium business survey release",
+    "resolutionSourceUrl": "https://www.nbb.be/en/statistics/business-surveys/business-survey",
+    "resolutionRule": "Resolve to the first National Bank of Belgium published monthly business surveys overall gross synthetic curve for Belgium, total sector, seasonally adjusted, period 2026-09, reported in index points and rounded to one decimal. SDMX identity: DF_BUSSURVM key M.SYNC.BE.A999.S (FREQ monthly, BUSSURVM_INDICATOR synthetic curve, BE_AREA Belgium, BUSSURV_SECTOR Total, BUSSURVM_ADJ seasonally adjusted). Use the first official print only; ignore later NBB.Stat revisions, corrections after the first release, and third-party mirrors.",
+    "dataPointId": "nbb.business_barometer.overall.2026-09.first_print",
+    "historicalContext": [
+      {
+        "label": "2026-08",
+        "value": -13.2,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      },
+      {
+        "label": "2026-07",
+        "value": -11.9,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "2026-06",
+        "value": -12.4,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "2026-05",
+        "value": -13.3,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "2026-04",
+        "value": -14.2,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "2026-03",
+        "value": -13.7,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "2026-02",
+        "value": -13.7,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "2026-01",
+        "value": -8.8,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "2025-12",
+        "value": -11.9,
+        "period": {
+          "type": "month",
+          "value": "2025-12"
+        }
+      },
+      {
+        "label": "2025-11",
+        "value": -8.2,
+        "period": {
+          "type": "month",
+          "value": "2025-11"
+        }
+      },
+      {
+        "label": "2025-10",
+        "value": -9.1,
+        "period": {
+          "type": "month",
+          "value": "2025-10"
+        }
+      },
+      {
+        "label": "2025-09",
+        "value": -7.9,
+        "period": {
+          "type": "month",
+          "value": "2025-09"
+        }
+      }
+    ],
+    "drivers": [
+      "August first print fell to -13.2 from -11.9 in July",
+      "recent six-print average is -13.1",
+      "manufacturing worsened in August while services and trade improved",
+      "September release is scheduled by NBB for 2026-09-24 at 15:00",
+      "monthly changes imply about 2.8 index points of 80% half-width"
+    ],
+    "sourceContext": [
+      "https://www.nbb.be/en/statistical-updates?calendar_timestamp=1961708400&current=1964383200&date_format=custom&date_pattern=F&display_reset=0&next=1966975200&page=0&pager_type=calendar_month&previous=1961708400&scope=2&theme%5B5069%5D=5069&use_previous_next=1",
+      "https://www.nbb.be/en/statistics/latest-figures/business-confidence-indicator-2026m7",
+      "https://www.nbb.be/en/statistics/topics/general/online-statistical-database",
+      "https://nsidisseminate-stat.nbb.be/rest/data/DF_BUSSURVM/M.SYNC.BE.A999.S?startPeriod=2025-08&endPeriod=2026-08&dimensionAtObservation=TIME_PERIOD",
+      "https://tradingeconomics.com/belgium/business-confidence"
+    ],
+    "runAt": "2026-09-11T19:24:35Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Belgium September 2026 NBB Business Barometer Forecast"
+      },
+      {
+        "kind": "text",
+        "text": "Framing and resolver: the target is nbb.business_barometer.overall for 2026-09, country BE, unit index_points, dataPointId nbb.business_barometer.overall.2026-09.first_print. The exact resolving variant is the National Bank of Belgium monthly business surveys overall gross synthetic curve, Belgium total sector, seasonally adjusted, first print. The registered expectedReleaseWindow ends 2026-10-02, but the official NBB calendar fetched this run gives the concrete September 2026 business confidence release day as 2026-09-24, so I use 2026-09-24 as the release-calendar resolutionDate while keeping the same target identity."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Search/open NBB statistical updates calendar for business confidence September 2026.",
+        "result": "Fetched official NBB calendar entries: Business confidence Period 2026M9 Monthly business surveys Data release date 24 Sep 2026, and Business confidence Period 2026-09 Press release - Business confidence indicator release date 24 Sep 2026; calendar note says business confidence press releases are scheduled at 3 p.m."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Use public prior-run NBB SDMX query artifact for official same-variant history through July 2026, DF_BUSSURVM/M.SYNC.BE.A999.S.",
+        "result": "Fetched official NBB overall seasonally adjusted synthetic curve values from that public artifact: 2025-09 -7.9, 2025-10 -9.1, 2025-11 -8.2, 2025-12 -11.9, 2026-01 -8.8, 2026-02 -13.7, 2026-03 -13.7, 2026-04 -14.2, 2026-05 -13.3, 2026-06 -12.4, 2026-07 -11.9 index points."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Search NBB July 2026 business confidence press-release page for table identity and sector values.",
+        "result": "Fetched NBB July table: Overall synthetic curve 2026-06 -12.4 and 2026-07 -11.9, change 0.5; manufacturing 2026-07 -15.5, business-related services -3.8, building -5.0, trade -10.8 index points."
+      },
+      {
+        "kind": "tool",
+        "tool": "public.mirror.lookup",
+        "call": "Search public data mirrors carrying the NBB August 2026 first print while NBB SDMX network access was unavailable in the shell.",
+        "result": "Fetched August history from public pages attributing source to National Bank of Belgium: August 2026 business confidence -13.2, July 2026 -11.9, manufacturing August -17.8 versus July -15.5, business-related services August -1.4 versus July -3.8, trade August -5.2 versus July -10.8."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate/reference class: the recent official-source reference class is the same gross overall seasonally adjusted synthetic curve. The last twelve closed prints are -7.9, -9.1, -8.2, -11.9, -8.8, -13.7, -13.7, -14.2, -13.3, -12.4, -11.9, and -13.2; their average is about -11.9, the latest six average -13.1, the latest three average -12.5, and the latest print is -13.2. A persistence prior around -13.2 is therefore the starting point, with only a small pull toward the six-print mean."
+      },
+      {
+        "kind": "text",
+        "text": "Inside-view update: level remains weak and August interrupted the May-July recovery. Momentum is mildly negative at the aggregate level because August fell 1.3 points, but the sector composition is mixed: manufacturing and construction weakened, while services and trade improved. There is no September survey signal before the print, so the update from the previous August run is only to replace the old July endpoint of -11.9 with the August first print of -13.2."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior = -13.2 from the August 2026 first print; historical sample = NBB total synthetic curve 2025-08 through 2026-08 with monthly changes +1.0,-1.2,+0.9,-3.7,+3.1,-4.9,+0.0,-0.5,+0.9,+0.9,+0.5,-1.3. Adjustment components: -0.2 for the August aggregate setback, +0.2 for the latest six-print mean of -13.1 and improving services/trade, +0.1 for mild mean reversion from the April trough, net +0.1, so point = -13.1. For the interval, sigma = 2.18 from successive fetched monthly changes; 1.28*sigma = 2.79, rounded to half-width 2.8. Final 80% bounds: -13.1 - 2.8 = -15.9 and -13.1 + 2.8 = -10.3."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-consideration and falsification: upside risk is a broad September rebound in manufacturing and construction alongside continued services and trade gains, which would land above the interval if the first print is -10.2 or higher. Downside risk is renewed export/order-book weakness spreading from manufacturing into trade and services, which would land below the interval if the first print is -16.0 or lower. Either outside the interval would be a larger move than the recent-change sigma expects."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the blocking resolver critique by changing resolutionSourceUrl to the registered www.nbb.be business survey source binding while keeping the SDMX key in the rule for exact series identity; accepted the clarification that public mirrors are contextual only and that final resolution remains the official NBB first print; retained the official-calendar 2026-09-24 release date note."
+      },
+      {
+        "kind": "forecast",
+        "point": -13.1,
+        "ciLow": -15.9,
+        "ciHigh": -10.3
+      }
+    ],
+    "agentReportedRunAt": "2026-09-11T19:22:44Z",
+    "runStartedAt": "2026-09-11T19:22:16Z",
+    "promptMode": "fast",
+    "registrationCommit": "f527f4e54f1df0156366f87eeb5dd630eeb66fe4",
+    "targetContentHash": "5b1c21497b8b7b76398409ef924ba2fadc48fff653b2e6ce4d9d50821db0aeec",
+    "targetRegistrationPath": "records/targets/2026-09-11-5b1c21497b8b7b76398409ef924ba2fadc48fff653b2e6ce4d9d50821db0aeec.json",
+    "registeredAtUtc": "2026-09-11T19:13:41Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": -20.1,
+        "upper": -6.1
+      },
+      "points": [
+        {
+          "value": -20.1,
+          "probability": 0.0
+        },
+        {
+          "value": -20.03,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": -19.96,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": -19.89,
+          "probability": 0.005
+        },
+        {
+          "value": -19.82,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": -19.75,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": -19.68,
+          "probability": 0.01
+        },
+        {
+          "value": -19.61,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": -19.54,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": -19.47,
+          "probability": 0.015
+        },
+        {
+          "value": -19.4,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": -19.33,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": -19.26,
+          "probability": 0.02
+        },
+        {
+          "value": -19.19,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": -19.12,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": -19.05,
+          "probability": 0.025
+        },
+        {
+          "value": -18.98,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": -18.91,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": -18.84,
+          "probability": 0.03
+        },
+        {
+          "value": -18.77,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": -18.7,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": -18.63,
+          "probability": 0.035
+        },
+        {
+          "value": -18.56,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": -18.49,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": -18.42,
+          "probability": 0.04
+        },
+        {
+          "value": -18.35,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": -18.28,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": -18.21,
+          "probability": 0.045
+        },
+        {
+          "value": -18.14,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": -18.07,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": -18.0,
+          "probability": 0.05
+        },
+        {
+          "value": -17.93,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": -17.86,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": -17.79,
+          "probability": 0.055
+        },
+        {
+          "value": -17.72,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": -17.65,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": -17.58,
+          "probability": 0.06
+        },
+        {
+          "value": -17.51,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": -17.44,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": -17.37,
+          "probability": 0.065
+        },
+        {
+          "value": -17.3,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": -17.23,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": -17.16,
+          "probability": 0.07
+        },
+        {
+          "value": -17.09,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": -17.02,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": -16.95,
+          "probability": 0.075
+        },
+        {
+          "value": -16.88,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": -16.81,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": -16.74,
+          "probability": 0.08
+        },
+        {
+          "value": -16.67,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": -16.6,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": -16.53,
+          "probability": 0.085
+        },
+        {
+          "value": -16.46,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": -16.39,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": -16.32,
+          "probability": 0.09
+        },
+        {
+          "value": -16.25,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": -16.18,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": -16.11,
+          "probability": 0.095
+        },
+        {
+          "value": -16.04,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": -15.97,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": -15.9,
+          "probability": 0.1
+        },
+        {
+          "value": -15.83,
+          "probability": 0.11
+        },
+        {
+          "value": -15.76,
+          "probability": 0.12
+        },
+        {
+          "value": -15.69,
+          "probability": 0.13
+        },
+        {
+          "value": -15.62,
+          "probability": 0.14
+        },
+        {
+          "value": -15.55,
+          "probability": 0.15
+        },
+        {
+          "value": -15.48,
+          "probability": 0.16
+        },
+        {
+          "value": -15.41,
+          "probability": 0.17
+        },
+        {
+          "value": -15.34,
+          "probability": 0.18
+        },
+        {
+          "value": -15.27,
+          "probability": 0.19
+        },
+        {
+          "value": -15.2,
+          "probability": 0.2
+        },
+        {
+          "value": -15.13,
+          "probability": 0.21
+        },
+        {
+          "value": -15.06,
+          "probability": 0.22
+        },
+        {
+          "value": -14.99,
+          "probability": 0.23
+        },
+        {
+          "value": -14.92,
+          "probability": 0.24
+        },
+        {
+          "value": -14.85,
+          "probability": 0.25
+        },
+        {
+          "value": -14.78,
+          "probability": 0.26
+        },
+        {
+          "value": -14.71,
+          "probability": 0.27
+        },
+        {
+          "value": -14.64,
+          "probability": 0.28
+        },
+        {
+          "value": -14.57,
+          "probability": 0.29
+        },
+        {
+          "value": -14.5,
+          "probability": 0.3
+        },
+        {
+          "value": -14.43,
+          "probability": 0.31
+        },
+        {
+          "value": -14.36,
+          "probability": 0.32
+        },
+        {
+          "value": -14.29,
+          "probability": 0.33
+        },
+        {
+          "value": -14.22,
+          "probability": 0.34
+        },
+        {
+          "value": -14.15,
+          "probability": 0.35
+        },
+        {
+          "value": -14.08,
+          "probability": 0.36
+        },
+        {
+          "value": -14.01,
+          "probability": 0.37
+        },
+        {
+          "value": -13.94,
+          "probability": 0.38
+        },
+        {
+          "value": -13.87,
+          "probability": 0.39
+        },
+        {
+          "value": -13.8,
+          "probability": 0.4
+        },
+        {
+          "value": -13.73,
+          "probability": 0.41
+        },
+        {
+          "value": -13.66,
+          "probability": 0.42
+        },
+        {
+          "value": -13.59,
+          "probability": 0.43
+        },
+        {
+          "value": -13.52,
+          "probability": 0.44
+        },
+        {
+          "value": -13.45,
+          "probability": 0.45
+        },
+        {
+          "value": -13.38,
+          "probability": 0.46
+        },
+        {
+          "value": -13.31,
+          "probability": 0.47
+        },
+        {
+          "value": -13.24,
+          "probability": 0.48
+        },
+        {
+          "value": -13.17,
+          "probability": 0.49
+        },
+        {
+          "value": -13.1,
+          "probability": 0.5
+        },
+        {
+          "value": -13.03,
+          "probability": 0.51
+        },
+        {
+          "value": -12.96,
+          "probability": 0.52
+        },
+        {
+          "value": -12.89,
+          "probability": 0.53
+        },
+        {
+          "value": -12.82,
+          "probability": 0.54
+        },
+        {
+          "value": -12.75,
+          "probability": 0.55
+        },
+        {
+          "value": -12.68,
+          "probability": 0.56
+        },
+        {
+          "value": -12.61,
+          "probability": 0.57
+        },
+        {
+          "value": -12.54,
+          "probability": 0.58
+        },
+        {
+          "value": -12.47,
+          "probability": 0.59
+        },
+        {
+          "value": -12.4,
+          "probability": 0.6
+        },
+        {
+          "value": -12.33,
+          "probability": 0.61
+        },
+        {
+          "value": -12.26,
+          "probability": 0.62
+        },
+        {
+          "value": -12.19,
+          "probability": 0.63
+        },
+        {
+          "value": -12.12,
+          "probability": 0.64
+        },
+        {
+          "value": -12.05,
+          "probability": 0.65
+        },
+        {
+          "value": -11.98,
+          "probability": 0.66
+        },
+        {
+          "value": -11.91,
+          "probability": 0.67
+        },
+        {
+          "value": -11.84,
+          "probability": 0.68
+        },
+        {
+          "value": -11.77,
+          "probability": 0.69
+        },
+        {
+          "value": -11.7,
+          "probability": 0.7
+        },
+        {
+          "value": -11.63,
+          "probability": 0.71
+        },
+        {
+          "value": -11.56,
+          "probability": 0.72
+        },
+        {
+          "value": -11.49,
+          "probability": 0.73
+        },
+        {
+          "value": -11.42,
+          "probability": 0.74
+        },
+        {
+          "value": -11.35,
+          "probability": 0.75
+        },
+        {
+          "value": -11.28,
+          "probability": 0.76
+        },
+        {
+          "value": -11.21,
+          "probability": 0.77
+        },
+        {
+          "value": -11.14,
+          "probability": 0.78
+        },
+        {
+          "value": -11.07,
+          "probability": 0.79
+        },
+        {
+          "value": -11.0,
+          "probability": 0.8
+        },
+        {
+          "value": -10.93,
+          "probability": 0.81
+        },
+        {
+          "value": -10.86,
+          "probability": 0.82
+        },
+        {
+          "value": -10.79,
+          "probability": 0.83
+        },
+        {
+          "value": -10.72,
+          "probability": 0.84
+        },
+        {
+          "value": -10.65,
+          "probability": 0.85
+        },
+        {
+          "value": -10.58,
+          "probability": 0.86
+        },
+        {
+          "value": -10.51,
+          "probability": 0.87
+        },
+        {
+          "value": -10.44,
+          "probability": 0.88
+        },
+        {
+          "value": -10.37,
+          "probability": 0.89
+        },
+        {
+          "value": -10.3,
+          "probability": 0.9
+        },
+        {
+          "value": -10.23,
+          "probability": 0.901666666667
+        },
+        {
+          "value": -10.16,
+          "probability": 0.903333333333
+        },
+        {
+          "value": -10.09,
+          "probability": 0.905
+        },
+        {
+          "value": -10.02,
+          "probability": 0.906666666667
+        },
+        {
+          "value": -9.95,
+          "probability": 0.908333333333
+        },
+        {
+          "value": -9.88,
+          "probability": 0.91
+        },
+        {
+          "value": -9.81,
+          "probability": 0.911666666667
+        },
+        {
+          "value": -9.74,
+          "probability": 0.913333333333
+        },
+        {
+          "value": -9.67,
+          "probability": 0.915
+        },
+        {
+          "value": -9.6,
+          "probability": 0.916666666667
+        },
+        {
+          "value": -9.53,
+          "probability": 0.918333333333
+        },
+        {
+          "value": -9.46,
+          "probability": 0.92
+        },
+        {
+          "value": -9.39,
+          "probability": 0.921666666667
+        },
+        {
+          "value": -9.32,
+          "probability": 0.923333333333
+        },
+        {
+          "value": -9.25,
+          "probability": 0.925
+        },
+        {
+          "value": -9.18,
+          "probability": 0.926666666667
+        },
+        {
+          "value": -9.11,
+          "probability": 0.928333333333
+        },
+        {
+          "value": -9.04,
+          "probability": 0.93
+        },
+        {
+          "value": -8.97,
+          "probability": 0.931666666667
+        },
+        {
+          "value": -8.9,
+          "probability": 0.933333333333
+        },
+        {
+          "value": -8.83,
+          "probability": 0.935
+        },
+        {
+          "value": -8.76,
+          "probability": 0.936666666667
+        },
+        {
+          "value": -8.69,
+          "probability": 0.938333333333
+        },
+        {
+          "value": -8.62,
+          "probability": 0.94
+        },
+        {
+          "value": -8.55,
+          "probability": 0.941666666667
+        },
+        {
+          "value": -8.48,
+          "probability": 0.943333333333
+        },
+        {
+          "value": -8.41,
+          "probability": 0.945
+        },
+        {
+          "value": -8.34,
+          "probability": 0.946666666667
+        },
+        {
+          "value": -8.27,
+          "probability": 0.948333333333
+        },
+        {
+          "value": -8.2,
+          "probability": 0.95
+        },
+        {
+          "value": -8.13,
+          "probability": 0.951666666667
+        },
+        {
+          "value": -8.06,
+          "probability": 0.953333333333
+        },
+        {
+          "value": -7.99,
+          "probability": 0.955
+        },
+        {
+          "value": -7.92,
+          "probability": 0.956666666667
+        },
+        {
+          "value": -7.85,
+          "probability": 0.958333333333
+        },
+        {
+          "value": -7.78,
+          "probability": 0.96
+        },
+        {
+          "value": -7.71,
+          "probability": 0.961666666667
+        },
+        {
+          "value": -7.64,
+          "probability": 0.963333333333
+        },
+        {
+          "value": -7.57,
+          "probability": 0.965
+        },
+        {
+          "value": -7.5,
+          "probability": 0.966666666667
+        },
+        {
+          "value": -7.43,
+          "probability": 0.968333333333
+        },
+        {
+          "value": -7.36,
+          "probability": 0.97
+        },
+        {
+          "value": -7.29,
+          "probability": 0.971666666667
+        },
+        {
+          "value": -7.22,
+          "probability": 0.973333333333
+        },
+        {
+          "value": -7.15,
+          "probability": 0.975
+        },
+        {
+          "value": -7.08,
+          "probability": 0.976666666667
+        },
+        {
+          "value": -7.01,
+          "probability": 0.978333333333
+        },
+        {
+          "value": -6.94,
+          "probability": 0.98
+        },
+        {
+          "value": -6.87,
+          "probability": 0.981666666667
+        },
+        {
+          "value": -6.8,
+          "probability": 0.983333333333
+        },
+        {
+          "value": -6.73,
+          "probability": 0.985
+        },
+        {
+          "value": -6.66,
+          "probability": 0.986666666667
+        },
+        {
+          "value": -6.59,
+          "probability": 0.988333333333
+        },
+        {
+          "value": -6.52,
+          "probability": 0.99
+        },
+        {
+          "value": -6.45,
+          "probability": 0.991666666667
+        },
+        {
+          "value": -6.38,
+          "probability": 0.993333333333
+        },
+        {
+          "value": -6.31,
+          "probability": 0.995
+        },
+        {
+          "value": -6.24,
+          "probability": 0.996666666667
+        },
+        {
+          "value": -6.17,
+          "probability": 0.998333333333
+        },
+        {
+          "value": -6.1,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": -13.1,
+        "median": -13.1,
+        "interval80": {
+          "lower": -15.9,
+          "upper": -10.3
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    }
+  }
+]

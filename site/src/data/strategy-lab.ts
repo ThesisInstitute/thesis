@@ -1,3 +1,4 @@
+import { hasUsableNormalizationScale } from "./brier-lab";
 import {
   getForecastRunEntries,
   type ForecastCell,
@@ -56,7 +57,7 @@ export interface StrategyScoreRow {
   signedError: number;
   absoluteError: number;
   normalizationScale: number | null;
-  normalizationScaleSource: "ledger_dispersion" | "target_primary_width" | "unavailable";
+  normalizationScaleSource: "ledger_dispersion" | "unavailable";
   normalizedCrps: number | null;
   normalizedAbsoluteError: number | null;
   interval80Covered: boolean;
@@ -510,13 +511,18 @@ function summarizeStrategies(rows: StrategyScoreRow[]): StrategySummaryRow[] {
         strategyRows.map((row) => row.absoluteError),
       ),
       meanSignedError: meanOrNull(strategyRows.map((row) => row.signedError)),
+      // Normalized aggregates admit only rows with a usable ledger scale:
+      // a sub-epsilon dispersion is numerical zero, and dividing by it
+      // would let one row own every mean. Raw-unit aggregates keep all rows.
       meanNormalizedCrps: meanOrNull(
         strategyRows
+          .filter((row) => hasUsableNormalizationScale(row))
           .map((row) => row.normalizedCrps)
           .filter((value): value is number => value !== null),
       ),
       meanNormalizedAbsoluteError: meanOrNull(
         strategyRows
+          .filter((row) => hasUsableNormalizationScale(row))
           .map((row) => row.normalizedAbsoluteError)
           .filter((value): value is number => value !== null),
       ),
@@ -529,9 +535,16 @@ function summarizeStrategies(rows: StrategyScoreRow[]): StrategySummaryRow[] {
             row.absoluteError - persistenceRow.absoluteError,
         ),
       ),
+      // Both sides of a pair divide by the target's single ledger scale, so
+      // a degenerate scale poisons the pair as a whole and the pair drops;
+      // pairedRows itself stays unfiltered for the raw-unit comparison
+      // above.
       meanNormalizedCrpsVsPersistence: meanOrNull(
         pairedRows.flatMap(({ row, persistenceRow }) =>
-          row.normalizedCrps === null || persistenceRow.normalizedCrps === null
+          row.normalizedCrps === null ||
+          persistenceRow.normalizedCrps === null ||
+          !hasUsableNormalizationScale(row) ||
+          !hasUsableNormalizationScale(persistenceRow)
             ? []
             : [row.normalizedCrps - persistenceRow.normalizedCrps],
         ),
@@ -556,7 +569,12 @@ function buildAgentNcrpsMissesVsPersistence(
       if (
         !persistenceRow ||
         agentRow.normalizedCrps === null ||
-        persistenceRow.normalizedCrps === null
+        persistenceRow.normalizedCrps === null ||
+        // Agent and persistence rows divide by the target's single ledger
+        // scale; a sub-epsilon scale is numerical zero and would mint this
+        // ranking's top entries, so the pair drops whole.
+        !hasUsableNormalizationScale(agentRow) ||
+        !hasUsableNormalizationScale(persistenceRow)
       )
         return [];
       return [

@@ -1,9 +1,9 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { ForecastBrowser } from "@/components/ForecastBrowser";
-import { FORECAST_CELLS } from "@/data/forecast-cells";
 import { buildForecastListing } from "@/data/forecast-listing";
 import {
   loadPolicyEngineLedger,
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export default async function ForecastsPage() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
 
   return (
     <div>
@@ -43,8 +43,8 @@ export default async function ForecastsPage() {
           </h1>
           <p className="text-[1.05rem] leading-[1.65] text-[var(--theme-text-muted)]">
             Thesis provides three types of forecasts:{" "}
-            <strong>government statistics</strong>, <strong>policy states</strong>{" "}
-            (like the federal minimum wage), and{" "}
+            <strong>government statistics</strong>,{" "}
+            <strong>policy states</strong> (like the federal minimum wage), and{" "}
             <strong>conditional forecasts</strong> <em>given</em> different
             policy states. The audit trails, data, and everything else are
             visible.
@@ -87,13 +87,10 @@ export default async function ForecastsPage() {
             How forecasts are generated
           </p>
           <p className="text-[0.92rem] leading-[1.65] text-[var(--theme-text)]">
-            Every forecast cell is opened by the Thesis Institute analyst agent,
-            which decomposes the question, calls the PolicyEngine microsim
-            against scenarios drawn from encoded statutes and MICROPLEX
-            synthetic populations, checks official public data sources,
-            integrates external baselines (CBO, FOMC SEP, JCT, BLS, Census, ONS,
-            ABS, Statistics Canada), and produces a calibrated distribution.
-            Open each forecast to read the full streaming reasoning.
+            Published forecasts have successful recorded runs, validated
+            outputs, and matching activity artifacts. Open a forecast to read
+            its analysis and inspect the underlying run records. Prototype
+            estimates and failure fallbacks are excluded.
           </p>
         </section>
       </main>

@@ -1,0 +1,15 @@
+{
+  "summary": "The draft is broadly publishable, with one resolver-text warning because the official BLS September 2026 Employment Situation date conflicts with the registered ledger date/window.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "warning",
+      "summary": "The reasoning discloses that BLS schedules the September 2026 Employment Situation for 2026-10-02 while the registered target uses resolutionDate 2026-10-14 and window 2026-10-06 to 2026-10-14, but the resolver fields themselves do not carry that discrepancy.",
+      "actionRequested": "Keep the ledger-bound resolutionDate 2026-10-14, but add a compact note in the resolutionRule or publication reasoning that the official calendar appears inconsistent and the cell intentionally follows the registered target contract."
+    }
+  ],
+  "optionalSuggestions": [
+    "Clarify that the +0.031 September lift is a damped seasonal/occupation-noise adjustment rather than strong current evidence.",
+    "Consider naming the interval as an approximate 80% normal interval from recent month-to-month realized volatility."
+  ]
+}

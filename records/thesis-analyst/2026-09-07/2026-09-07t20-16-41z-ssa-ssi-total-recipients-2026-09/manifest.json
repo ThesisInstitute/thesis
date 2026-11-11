@@ -1,0 +1,397 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-07T20:16:41Z",
+  "runStartedAt": "2026-09-07T20:16:41Z",
+  "sealedAt": "2026-09-07T20:18:27Z",
+  "series": "ssa.ssi.total_recipients",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "ssi-recipients-september-2026",
+    "country": "US",
+    "dataPointId": "ssa.ssi.total_recipients.2026-09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-11-08",
+      "start": "2026-10-31"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-07T20:04:45Z",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "registrationState": "preregistered",
+    "series": "ssa.ssi.total_recipients",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.ssa.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-08",
+        "start": "2026-10-31"
+      },
+      "field": "ssa.ssi.total_recipients",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "ssa.ssi.total_recipients",
+      "sourceUrl": "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-07/table02.html",
+      "table": "Social Security Administration SSI Monthly Statistics",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "9509b1552284e3dcd59b3e1c6a6752efb3be2cf74e57824022343f3a837dde2f",
+    "targetRegistrationPath": "records/targets/2026-09-07-9509b1552284e3dcd59b3e1c6a6752efb3be2cf74e57824022343f3a837dde2f.json",
+    "targetUnit": "millions",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+  "targetContentHash": "9509b1552284e3dcd59b3e1c6a6752efb3be2cf74e57824022343f3a837dde2f",
+  "targetRegistrationPath": "records/targets/2026-09-07-9509b1552284e3dcd59b3e1c6a6752efb3be2cf74e57824022343f3a837dde2f.json",
+  "registeredAtUtc": "2026-09-07T20:04:45Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-07T20:16:41Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "139b00330be7618f10045708d92aeb68b0b84249f77013cced090be641802921"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "The draft sets resolutionSourceUrl to the predicted September 2026 table URL, but the ledger sourceBinding sourceUrl is the registered SSA July 2026 Table 2 URL and the target is bounded by expectedReleaseWindow ending 2026-11-08.",
+        "actionRequested": "Align the resolver/source text and URL with the registered target contract, or explicitly state any concrete ledger discrepancy while keeping the same target."
+      },
+      {
+        "findingId": "review.finding.2",
+        "severity": "warning",
+        "rubricItem": "resolver",
+        "summary": "The resolutionRule says convert whole-recipient first print to millions by dividing by 1,000,000, while the registered sourceBinding transform is multiply by 0.001.",
+        "actionRequested": "Clarify the source extraction unit so the stated conversion is consistent with the registered transform and final unit 'millions'."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The prior/update/interval step is strong; keep the explicit sigma and 80% bound arithmetic."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The downside tail threshold could be restated relative to the final interval lower bound to make the tail math easier to audit."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking source-binding critique by aligning resolutionSourceUrl and resolver text with the registered July 2026 SSA Table 2 sourceBinding while explicitly noting the September-period target; accepted the transform critique by clarifying that the registered 0.001 factor applies to a thousands-extracted field and is equivalent to dividing visible whole recipients by 1,000,000 for millions; kept the sigma-based interval arithmetic.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.finding.2",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking source-binding critique by aligning resolutionSourceUrl and resolver text with the registered July 2026 SSA Table 2 sourceBinding while explicitly noting the September-period target; accepted the transform critique by clarifying that the registered 0.001 factor applies to a thousands-extracted field and is equivalent to dividing visible whole recipients by 1,000,000 for millions; kept the sigma-based interval arithmetic.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking source-binding critique by aligning resolutionSourceUrl and resolver text with the registered July 2026 SSA Table 2 sourceBinding while explicitly noting the September-period target; accepted the transform critique by clarifying that the registered 0.001 factor applies to a thousands-extracted field and is equivalent to dividing visible whole recipients by 1,000,000 for millions; kept the sigma-based interval arithmetic.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking source-binding critique by aligning resolutionSourceUrl and resolver text with the registered July 2026 SSA Table 2 sourceBinding while explicitly noting the September-period target; accepted the transform critique by clarifying that the registered 0.001 factor applies to a thousands-extracted field and is equivalent to dividing visible whole recipients by 1,000,000 for millions; kept the sigma-based interval arithmetic.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is broadly publishable but has a blocking resolver/source mismatch against the registered ledger contract."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/prompt.md",
+      "sha256": "4c82966320e1ef84ba85cad9daf0f5147f19c0495bf2fe7cc7a89bd1abb74b6b",
+      "bytes": 10488,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_command.json",
+      "sha256": "e846e5e1928accf621e414fbd2268f650385d484df691534cc6669dcae5c9327",
+      "bytes": 754,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "4323ab96069654dbd291d5c61a36c7743066149e1af635deb6c08e2c2db7c2c2",
+      "bytes": 42653,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_codex_stderr.log",
+      "sha256": "95c4de7fff7487155c482af901acf9890d1112fcf177fe723ae43dd651a371f1",
+      "bytes": 233,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_codex_events.jsonl",
+      "sha256": "9d4500e9bfa30f2ad4c9d509c39fca06b0c2e558d2be474cd3cb9739e9ced3c4",
+      "bytes": 42889,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_codex_last_message.txt",
+      "sha256": "c1fb7d8cee386ed6c1f255850168aee1047ccf39758a2f293d521ca272ecfaa8",
+      "bytes": 6734,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_codex_trace.json",
+      "sha256": "4b25075952fac54f2027ac176a16a3c64a55abb6af40a61378501d04c3da7382",
+      "bytes": 560,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_stdout.txt",
+      "sha256": "c1fb7d8cee386ed6c1f255850168aee1047ccf39758a2f293d521ca272ecfaa8",
+      "bytes": 6734,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/draft_stderr.txt",
+      "sha256": "69d467419aeed5ae4b46693e2bcdc77dc05a7d1f71f24f1d2874ebb2e3412c5e",
+      "bytes": 248,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_prompt.md",
+      "sha256": "5666b05b15291be0dbd2b280b1ff94c76a737f959849672328fb27e0683a8503",
+      "bytes": 9987,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_command.json",
+      "sha256": "52fec666374aaa460db8ac3de575458ae5d7c4b2bc7356c2fe7305863a25a242",
+      "bytes": 750,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "da7de13f02ce66f43df61b156af65f841bee9133affab01b586f3bb6c8dce677",
+      "bytes": 1731,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "582aaa8da8f100d0b31742090faa0e65cf13d961bb3bedc4b257bc2a028decaf",
+      "bytes": 233,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "a220f41e5fa922d7246e176c2602236160441dc8df54dd9626f2387148328b5a",
+      "bytes": 1753,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "2c2d3c0cc41608692ac15afcc7fd8899d38c8ed285f38da9e443cf1f3e9d4315",
+      "bytes": 1350,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "c513d4dc83aba6cc0d8d394b4cd82324622329c232a2669c2134b214937e77e1",
+      "bytes": 555,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "2c2d3c0cc41608692ac15afcc7fd8899d38c8ed285f38da9e443cf1f3e9d4315",
+      "bytes": 1350,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "300ec09039d0b6d01ec1a6280a0b21db1f9f68ddd2b1094c817238cbbd64705e",
+      "bytes": 248,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/revision_prompt.md",
+      "sha256": "516aa5bfa66a72d1329315e8c9ecb9be1d35717df0d15ddac45e94f9893cda16",
+      "bytes": 19508,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/command.json",
+      "sha256": "e602b817d93bcc9be30b65200300b28ac4410da37caa890c38038975e53c4f4b",
+      "bytes": 748,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/codex_stdout.jsonl",
+      "sha256": "913dba2cd39f97c3c02ecb17675ff610a9cb2ca15a3aadd7db77619737fadc19",
+      "bytes": 8783,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/codex_stderr.log",
+      "sha256": "7d6750f7a4da1b6c51d1217900c116db5ab8e2c68c01d3e1a554ace996aead9b",
+      "bytes": 233,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/codex_events.jsonl",
+      "sha256": "8d7036164a46b9be41a88a56badfa7ac84e9d618c6d2e2fc863a9d9b461c2d76",
+      "bytes": 8805,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/codex_last_message.txt",
+      "sha256": "94124307351f621eab06d6fe6a4e1d2ad5c3c3e5bf71c8a1ea6f923e87ea9281",
+      "bytes": 8057,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/codex_trace.json",
+      "sha256": "ac1e09189984eda22f6ecf408421d07759be1f698980e2b5fa76f1c2f7ef0d43",
+      "bytes": 555,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/stdout.txt",
+      "sha256": "94124307351f621eab06d6fe6a4e1d2ad5c3c3e5bf71c8a1ea6f923e87ea9281",
+      "bytes": 8057,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/stderr.txt",
+      "sha256": "9970cdb5dd9a217119c25cddbe31f78713dbdaa950a2eac490f186584aa481d5",
+      "bytes": 248,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/raw_response.txt",
+      "sha256": "94124307351f621eab06d6fe6a4e1d2ad5c3c3e5bf71c8a1ea6f923e87ea9281",
+      "bytes": 8057,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/parsed_cells.json",
+      "sha256": "57fca28b73f9241b5004093a9e8c84d17ea868c025f876286985a604e61272cb",
+      "bytes": 9738,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/normalized_cells.json",
+      "sha256": "82564ec4cbed48ab8c79f1ffdb593e5b273ef1d3a8fb8e59866abae1c98874de",
+      "bytes": 27272,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/distribution.json",
+      "sha256": "53a454624790a02606df5662cf472d4f31ab001cab82dc79aa3b878890c1080c",
+      "bytes": 13750,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/validation.json",
+      "sha256": "0ba48ca4f2d4271a80c2edd4c34f745604ec981127473bca876541aee6205872",
+      "bytes": 130,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/cells.with_activity.json",
+      "sha256": "ae3e1c11c4217f9ab701d695a47cad05dc46d2ade3246dd158d261d1cd304d14",
+      "bytes": 43385,
+      "createdAt": "2026-09-07T20:16:41Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-16-41z-ssa-ssi-total-recipients-2026-09/manifest.json",
+      "sha256": "4aea0e816678b1723d9b0efb526529691d4d872c0b569caed56eeb4799afcb3d",
+      "bytes": 16207,
+      "createdAt": "2026-09-07T20:16:41Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "ssi-recipients-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "f1baea413714fe099f71118840f6363977fcdb5c",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "66390754867f0f515d9a01259dec53da3ff75aab05d44975f629c5718188579b"
+}

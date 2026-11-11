@@ -91,6 +91,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Provision custody replay runtime
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+
       - name: Adopt proven series into the registry
         # Skipped in retry mode: adoption writes docket_series.json, and
         # retry skips the commit steps — a pending adoption would leave a
@@ -194,6 +199,7 @@ jobs:
               exit 1
             fi
             git pull --rebase origin main
+            uv sync --locked --extra custody
             uv run --locked --extra custody python scripts/verify_record_chain.py records
             while IFS= read -r -d '' root; do
               python3 scripts/verify_custody.py "$(dirname "$root")"
@@ -270,11 +276,17 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
+      - uses: astral-sh/setup-uv@v5
       - uses: actions/checkout@v5
         with:
           ref: ${{ needs.register.outputs.source_sha }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Provision custody replay runtime
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Download privileged target artifact
         uses: actions/download-artifact@v8
@@ -449,6 +461,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Provision custody replay runtime
+        if: needs.register.result == 'success' && needs.register.outputs.count != '0' && needs.generate.result == 'success'
+        run: |
+          uv sync --locked --extra custody
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+
       - uses: oven-sh/setup-bun@v2
         if: needs.register.result == 'success' && needs.register.outputs.count != '0' && needs.generate.result == 'success'
 
@@ -581,6 +599,7 @@ jobs:
               exit 1
             fi
             git pull --rebase origin main
+            uv sync --locked --extra custody
             # A rebase can absorb docket changes (anchors included) that
             # landed after the initial publish bind. Re-run the complete
             # registration binding at the rebased HEAD and require the

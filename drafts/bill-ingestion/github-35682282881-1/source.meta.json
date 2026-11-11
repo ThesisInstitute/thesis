@@ -1,0 +1,14 @@
+{
+  "slug": "s3596-119",
+  "bill_number": "S.3596",
+  "title": "Stronger Start for Working Families Act",
+  "resolved_via": "congress.gov-api",
+  "source_url": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml",
+  "version_label": "Introduced in Senate",
+  "format": "xml",
+  "text_sha256": "c45170c8e73d94d2d9b542135dc9e0abba2361fb0d9658422788fc3e3d865352",
+  "source_fetched_at": null,
+  "retrieved_at": "2026-09-22T03:12:46+00:00",
+  "text_file": "source.txt",
+  "source_file": "source.bin"
+}

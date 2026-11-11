@@ -66,7 +66,13 @@ from run_thesis_analyst import (
     parse_review_payload,
     seal_normalized_cells,
     stamp_runtime_invocation,
+    tool_evidence_mcp_config,
     validate_cells,
+)
+from verify_custody import (
+    TOOL_EVIDENCE_SERVER,
+    CustodyError,
+    verify_tool_evidence_stage,
 )
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -788,6 +794,36 @@ def _replay_codex_stage(
                 f"run {run.index} {trace_filename} {field} does not match "
                 "the ticket runner",
             )
+    if "toolEvidence" in command:
+        for suffix, artifact_type in (
+            ("tool_evidence.json", "tool_evidence"),
+            ("tool_evidence_verification.json", "tool_evidence_verification"),
+        ):
+            _json_artifact(
+                bundle_repo,
+                run,
+                filename=stage_name(suffix),
+                artifact_type=artifact_type,
+                phase=phase,
+            )
+    try:
+        verify_tool_evidence_stage(
+            bundle_repo.joinpath(*run.run_relative.parts),
+            [
+                {
+                    **entry,
+                    "path": pathlib.PurePosixPath(entry["path"])
+                    .relative_to(run.run_relative)
+                    .as_posix(),
+                }
+                for entry in run.manifest["artifacts"]
+            ],
+            prefix=prefix,
+            command=command,
+            run_succeeded=run.manifest.get("ok") is True,
+        )
+    except (CustodyError, ValueError) as exc:
+        raise _fail(phase, f"run {run.index} {exc}") from exc
     return CodexStageEvidence(
         last_message=last_message,
         stdout_events=tuple(stdout_parsed["events"]),
@@ -802,6 +838,13 @@ def _check_prompts(
     policy = state.ticket["policy"]
     evidence: dict[int, PromptEvidence] = {}
     for run in runs:
+        draft_command = _json_artifact(
+            bundle_repo,
+            run,
+            filename="draft_command.json",
+            artifact_type="command",
+            phase="prompt reconstruction",
+        )
         try:
             prompt, meta = build_run_prompt(
                 run.target["series"],
@@ -811,6 +854,9 @@ def _check_prompts(
                 run.target,
                 ticket=state.prompt_context,
                 network_tools=policy["codexNetwork"],
+                tool_evidence=(
+                    isinstance(draft_command, dict) and "toolEvidence" in draft_command
+                ),
             )
         except (KeyError, TicketError, ValueError) as exc:
             raise _fail(
@@ -932,6 +978,7 @@ def _check_command_argv(
     search: bool,
     policy: dict[str, Any],
     announcement_url: str | None,
+    tool_evidence: bool = False,
 ) -> None:
     if (
         not isinstance(argv, list)
@@ -994,6 +1041,22 @@ def _check_command_argv(
                 "sandbox_workspace_write.network_access=true",
                 label=filename,
             )
+        observed_evidence_config: list[str] = []
+        if tool_evidence:
+            config_count = len(
+                tool_evidence_mcp_config(
+                    pathlib.Path("/tmp/thesis-tool-evidence-check/tool_evidence.json"),
+                    allow_fetch=search or policy["codexNetwork"],
+                )
+            )
+            for _ in range(config_count):
+                index = _consume(argv, index, "-c", label=filename)
+                if index >= len(argv):
+                    raise ValueError(
+                        f"{filename} has an incomplete tool evidence MCP config"
+                    )
+                observed_evidence_config.append(argv[index])
+                index += 1
         observed_mcp_config: list[str] = []
         if announcement_url is not None:
             for _ in range(len(announcement_mcp_config(announcement_url))):
@@ -1012,6 +1075,61 @@ def _check_command_argv(
         index = _consume(argv, index, "<prompt>", label=filename)
         if index != len(argv):
             raise ValueError(f"{filename} has unexpected trailing argv: {argv[index:]}")
+
+        if tool_evidence:
+            command_prefix = f"mcp_servers.{TOOL_EVIDENCE_SERVER}.command="
+            args_prefix = f"mcp_servers.{TOOL_EVIDENCE_SERVER}.args="
+            if not observed_evidence_config[0].startswith(
+                command_prefix
+            ) or not observed_evidence_config[1].startswith(args_prefix):
+                raise ValueError(f"{filename} tool evidence MCP config is invalid")
+            try:
+                mcp_python = json.loads(
+                    observed_evidence_config[0][len(command_prefix) :]
+                )
+                mcp_args = json.loads(observed_evidence_config[1][len(args_prefix) :])
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"{filename} tool evidence MCP config is invalid"
+                ) from exc
+            if not isinstance(mcp_python, str) or not isinstance(mcp_args, list):
+                raise ValueError(f"{filename} tool evidence MCP config is invalid")
+            python_path = pathlib.PurePosixPath(mcp_python)
+            if (
+                python_path.parent != checkout_path / ".venv" / "bin"
+                or python_path.name not in {"python", "python3"}
+            ):
+                raise ValueError(
+                    f"{filename} tool evidence MCP Python is not the checkout "
+                    "virtual environment interpreter"
+                )
+            if len(mcp_args) < 3 or not isinstance(mcp_args[2], str):
+                raise ValueError(f"{filename} tool evidence MCP output is invalid")
+            spool = pathlib.PurePosixPath(mcp_args[2])
+            if (
+                not spool.is_absolute()
+                or str(spool) != mcp_args[2]
+                or ".." in spool.parts
+                or spool.name != "tool_evidence.json"
+                or not re.fullmatch(
+                    r"thesis-tool-evidence-[A-Za-z0-9_-]+", spool.parent.name
+                )
+                or spool.is_relative_to(checkout_path)
+            ):
+                raise ValueError(
+                    f"{filename} tool evidence MCP output is not an isolated spool"
+                )
+            expected_evidence_config = tool_evidence_mcp_config(
+                spool,
+                checkout_root=checkout_path,
+                python_executable=mcp_python,
+                allow_fetch=search or policy["codexNetwork"],
+            )
+            if observed_evidence_config != expected_evidence_config:
+                raise ValueError(
+                    f"{filename} tool evidence MCP config does not match "
+                    "the trusted runner"
+                )
 
         if announcement_url is not None:
             command_prefix = f"mcp_servers.{ANNOUNCEMENT_MCP_SERVER}.command="
@@ -1129,6 +1247,7 @@ def _check_commands(
                 f"ticket runner: {actual_commands} != {expected_commands}",
             )
         stage_times: dict[str, tuple[dt.datetime, dt.datetime, Any, Any]] = {}
+        evidence_modes: set[bool] = set()
         binding = run.target.get("sourceBinding")
         target_announcement_url = (
             binding.get("sourceUrl")
@@ -1171,6 +1290,7 @@ def _check_commands(
                     "command shape",
                     f"run {run.index} {filename} backend is not native codex",
                 )
+            evidence_modes.add("toolEvidence" in command)
             if not canonical_equal(command.get("generationTicket"), expected_ticket):
                 raise _fail(
                     "command shape",
@@ -1271,6 +1391,12 @@ def _check_commands(
                 announcement_url=(
                     target_announcement_url if fetch_announcement else None
                 ),
+                tool_evidence="toolEvidence" in command,
+            )
+        if len(evidence_modes) != 1:
+            raise _fail(
+                "command shape",
+                f"run {run.index} tool evidence capture was downgraded between stages",
             )
         draft_started, draft_finished, draft_started_raw, draft_finished_raw = (
             stage_times["draft_command.json"]

@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a091f2-2984-7ea2-9592-6f9ba356fa5c"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"summary\":\"Draft is publishable as a target-tied forecast, with the main caveat that it records a concrete ledger/calendar discrepancy for the resolution date.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Consider adding a short note explaining why February and April 2026 same-row observations are absent from the historical sample if they were unavailable rather than intentionally excluded.\",\"Before publication, separately review the registered target window/date because the draft reports an official BLS September 2026 release date of 2026-10-02 while the ledger contract uses 2026-10-15.\"]}"}}
+{"type":"turn.completed","usage":{"input_tokens":19673,"cached_input_tokens":9600,"output_tokens":640,"reasoning_output_tokens":516}}

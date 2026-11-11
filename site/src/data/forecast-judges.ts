@@ -1,3 +1,4 @@
+import { isNormalizedScoreAggregateEligible } from "./brier-lab";
 import type {
   ForecastCell,
   ForecastRunEntry,
@@ -170,14 +171,19 @@ type NormalizedForecastScore = ResolvedForecastScore & {
   sharpness: number;
 };
 
-function hasNormalizationScale(
+// Eligibility gate for every normalized-metric aggregate in this module,
+// delegated to the shared brier-lab predicate: a sub-epsilon
+// ledger-dispersion scale is numerical zero left over from equal decimal
+// steps, never a usable denominator, and scores carrying one must stay out
+// of normalized aggregates. The normalizedAbsoluteError check only narrows
+// the local type — every normalized field is null exactly when the scale
+// is null.
+function isAggregateEligibleNormalizedScore(
   score: ResolvedForecastScore,
 ): score is NormalizedForecastScore {
   return (
-    score.normalizationScale !== null &&
-    score.normalizedCrps !== null &&
-    score.normalizedAbsoluteError !== null &&
-    score.sharpness !== null
+    isNormalizedScoreAggregateEligible(score) &&
+    score.normalizedAbsoluteError !== null
   );
 }
 
@@ -376,7 +382,9 @@ export function buildForecastJudgeCalibrationReport({
   const scoresByRunId = new Map(scores.map((score) => [score.runId, score]));
   const scoredJudges = traceQuality.flatMap((judge) => {
     const score = scoresByRunId.get(judge.runId);
-    return score && hasNormalizationScale(score) ? [{ judge, score }] : [];
+    return score && isAggregateEligibleNormalizedScore(score)
+      ? [{ judge, score }]
+      : [];
   });
   const correlation = pearsonCorrelation(
     scoredJudges.map((row) => row.judge.overallScore),
@@ -776,10 +784,12 @@ function buildScoreBands(
       judgedRuns: judges.length,
       scoredRuns: scores.length,
       meanJudgeScore: mean(judges.map((judge) => judge.overallScore)),
+      // Only the normalized mean is scale-gated; the raw-unit and coverage
+      // aggregates below keep every resolved score in the band.
       meanNormalizedCrps: mean(
         scores
-          .map((score) => score.normalizedCrps)
-          .filter((value): value is number => value !== null),
+          .filter(isNormalizedScoreAggregateEligible)
+          .map((score) => score.normalizedCrps),
       ),
       meanAbsoluteError: mean(scores.map((score) => score.absoluteError)),
       interval80Coverage: mean(

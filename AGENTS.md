@@ -60,6 +60,62 @@ deadline. A bounded target must set `resolutionDate` to its window's end and
 require the attested replay to contain a successful structured exact-URL fetch
 event for the registered announcement; never infer a day from cadence.
 
+### Register only what the resolver can execute
+
+A registration is a public promise to score a forecast against one number, so
+`scripts/register_targets.py` refuses to write a NEW registration unless
+`resolve_pending.execution_plan_refusal` finds an executable plan for that
+exact contract. The check runs the contract's `dataPointId` through the
+resolver's own routers, then the main loop's date-independent refusals in its
+order: resolution-date basis, emitted unit, registered adapter, and the routed
+family's own predicates (full binding template, verified anchors). It makes no
+network request and reads no records: whether the print exists yet is a
+runtime question; whether any code could ever read it is not.
+
+- `generic-url` names a page, not an executor, and is always refused,
+  whatever the main loop would do with it: the weekly claims, A-19 and CMS
+  provider-data legs would execute such a contract today, and the gate
+  refuses it anyway, on purpose. A seed with no adapter
+  still binds to `generic-url`, so a docket series needs a `sourceBinding`
+  template for an admitted adapter before it can mint targets. The two weekly
+  claims series are the exception: `register_targets.SERIES_BINDINGS` binds
+  them to ALFRED in code.
+- The gate is stricter than the main loop in two more places, also on purpose:
+  `allowedHosts` must be a list of hosts for every family, and an ALFRED
+  contract's `sourceSeriesId` must be the series its stem's executor reads
+  (the ALFRED leg itself never reads the binding).
+- A refused series stays on the docket and mints nothing. Each roll prints one
+  `skip …: no executable resolution plan` line for it and carries on; nothing
+  fails. When this landed, 30 of the 94 docket series were in that state.
+- The roller drops such candidates before the cap, and prospect validation
+  rejects such proposals, with the same verdict.
+- A resolver family the router names must appear in either
+  `EXECUTION_PLAN_FAMILY_CHECKS` or `EXECUTION_PLAN_UNREGISTRABLE_FAMILIES`.
+  A family in neither refuses every new registration, and a test fails.
+- When two families claim one stem, the registered adapter picks the route.
+  Four BLS docket stems are claimed by both the ALFRED family and the BLS API
+  family: a target that binds `bls-api` routes to the BLS API leg, and every
+  other reference for the stem keeps its ALFRED route. A `bls-api` contract
+  takes the docket's canonical series as its id stem, and its docket
+  `releaseDates` must never name a period that is already registered under
+  another adapter. The six
+  Table A-19 stems follow the same rule between the Archive-capture `a19` leg
+  and the BLS API family.
+- A resolved fact must not give a Chronicle lineage a second unit: Chronicle's
+  catalog build refuses it. The resolver then leaves that row out
+  (`CATALOG REFUSED`) and appends the rest. If the rest of the run succeeds,
+  the run ends red with a "Resolution rows refused" issue naming the row; if
+  a later step fails, the "Resolution loop failed" issue names it. Do not
+  register a series whose facts would do that. The BLS API leg also refuses
+  such a capture before it spends a request (`LEDGER UNIT CONFLICT`).
+- Existing snapshots are never re-judged: retries reuse them, and what happens
+  to already-published targets with no executor is a disposition decision, not
+  a registration one. The run-time exceptions for two reviewed legacy contracts
+  (one ABS content hash, the legacy QCEW binding) do not admit new ones.
+- Nothing in `waivers.json` waives this, and it has no grandfather set. The
+  way through is admission: adapter or family reuse, anchors verified from
+  official prints per `docs/anchor-verifications.md`, docket template, tests.
+
 ## Common Tasks
 
 ### Add Or Run Forecasts
@@ -287,9 +343,134 @@ Resolution and scoring code should preserve these invariants:
 - unresolved rows have null reward;
 - resolved rows link to official observations;
 - training cannot see future official outcomes;
-- reward rows include provenance hashes and activity-artifact count.
+- reward rows include provenance hashes and activity-artifact count;
+- a superseded Chronicle row never grades.
+
+Chronicle is append-only, so a correction is a new row whose
+`assertionVersion.supersedes` names the version it replaces. The site grades
+on the ledger's current view (`site/src/data/ledger-current-view.ts`, a port
+of receipt 0.6.2's `effective_current_rows`), which works as follows:
+
+- The correction grades in place of the row it supersedes, and it still has to
+  pass `getResolutionContractViolation`.
+- A pre-versioning row is addressed by its recomputed `av2` content address,
+  as the append gate addresses it.
+- Chronology comes from the earliest print in the correction's chain, and
+  ledger membership (finding N5) from the chain's first acceptance. A
+  later-dated correction therefore cannot admit a late run, and a correction
+  cannot launder a print the registration's pinned state already held. This
+  holds when the superseded row recorded a later vintage than the correction
+  (the first-vintage claims corrections): a later vintage in the pinned state
+  means the first print was public even earlier.
+- Cutoff histories (baselines and normalization scales) use the view as of
+  the cutoff, so a correction accepted later never rewrites them. A
+  superseded row leaves every history, even when its correction fails the
+  history's unit or series filter. A correction that takes its record out of
+  a history that held it (a unit change, say) must be listed with its reason
+  in `INTENDED_HISTORY_DROP_OUTS` (`site/src/__tests__/ledger-corrections.test.ts`).
+  Any other drop-out fails CI, because it looks exactly like a filter that has
+  started rejecting corrections. A history orders its rows by each record's
+  first print, the earliest `observedAt` in its chain, so a later-dated
+  correction keeps its record's place, and a persistence baseline's last print
+  is the record that printed last.
+- A correction's resolution event is `<historical id>.<its own assertion
+  version>`, so an event id never names two outcomes. Every other row keeps
+  the id it always had. A pin that brings a correction of a graded row
+  changes that forecast's event, score ids and the hashes over them. Its
+  observed value changes only if the correction changes the value. Its
+  published `observedAt` changes only if the correction prints earlier than
+  the rest of its chain, which also moves the chronology boundary.
+
+Chronicle's Thesis ledger moves to plain numbers (Max, 2026-10-21): a row says
+`7716000` in `count`, not `7.716` in `millions`. A registered contract keeps
+the unit it registered, so the site still grades in that unit
+(`site/src/data/ledger-restatements.ts` and `ledger-units.ts`; the resolver's
+copy of the unit table is `scripts/ledger_units.py`):
+
+- A row the resolver writes in base units carries the pair it recorded, in
+  `source.recorded_value` and `source.recorded_unit`. Its entry reads that
+  pair and keeps what Chronicle stores as `ledgerValue` and `ledgerUnit`. A
+  pair that doesn't state the stored value exactly fails the build.
+- A `unit_restatement` row (its `assertionVersion.relation`) says one scaled
+  row in base units and changes nothing else. The site checks it against the
+  exact line it names and goes on grading that line, so no score, baseline,
+  event id or hash moves. A correction of a restatement grades in place of the
+  row the restatement names (`gradedSupersedes`).
+- `/forecasts/ledger.json` keeps each restated row in `entries` and lists the
+  restatements apart, under `restatements`, once the pin holds one. A consumer
+  that wants Chronicle's current view must apply them: `entries` alone holds
+  the registered-unit values the site grades.
+
+The resolver writes base units (`scripts/resolve_pending.py`):
+
+- A run writes every new row in its unit's base unit. The writer converts after
+  the contract check, which reads the registered unit. It refuses a value with
+  no exact base form as it refuses a contract mismatch, that row alone. It
+  converts the value its adapter parsed and adds no precision to it, so 3189.0
+  thousands becomes 3189000 though BLS printed 3,189,009. The row's
+  `source.method_notes` says so: the value carries that figure's precision,
+  and the archived response may hold more digits.
+- A run with pending work stops after it reads the ledger and before it
+  fetches any source if a current ledger row carries a scale word
+  (`refuse_a_scaled_ledger`), because a new row in base units would give that
+  row's series a second unit. `--restate-base-units` restates such a row.
+- A row's `sourceBindingProjection.transform` still maps the source's response
+  to the contract's registered unit, while the projection's `unit` is the unit
+  the row stores, which the append gate holds to the row's. A claims row in
+  `count` keeps ICSA's `{"factor": 0.001, "operation": "multiply"}`, which
+  yields thousands, the registered unit its recorded pair names.
+- `--restate-base-units` (the workflow's `restate_base_units` input) appends a
+  `unit_restatement` row for every current scaled row, in one release or not
+  at all. It restated 83 rows on 2026-11-08 (run
+  [42526506760](https://github.com/ThesisInstitute/thesis/actions/runs/42526506760)).
+  Before it proposes, it runs `check_restatements`, its port of the site's
+  checks, on the exact lines Chronicle will hold. It also runs
+  Chronicle's series-catalog generator on them: the catalog may change only
+  units, each to its base unit, and the UUID registry must not move. The
+  proposal merges only once Chronicle's Arch checks pass. A restatement
+  archives the exact line it restates, and its projection's `responseSha256`
+  hashes that line, not a source response. Its method notes add that it
+  carries the old figure's precision and that the row's other notes predate
+  it, since the site's restatement check and its port, `check_restatements`,
+  keep every other note as it was. The records of a run that merged but never
+  reached Thesis rebuild to the byte: the next dispatch, or the next daily run
+  with pending work, rebuilds them first (`restored`), and the workflow
+  publishes them. If a records, ledger or custody fault stops a daily run's
+  rebuild, the rebuild removes any directory it wrote, and the run prints
+  `RESTORE REFUSED`, resolves the rest and exits 3; the run's issue names the
+  fault. GitHub keeps one waiting run per concurrency group, so dispatch
+  a restatement only when no other run of the workflow is waiting. A
+  restatement resolves nothing, so it leaves the status page alone.
+- `scripts/generate_ledger_restatement_fixture.py` runs the writer and the
+  port over real Chronicle rows, and
+  `site/src/__tests__/ledger-restatement-fixture.test.ts` holds the site's
+  reader to them. The reader refuses exactly what the port refuses, and the
+  writer's rows leave every entry in place.
+
+The build also re-runs the append gate's assertion-version checks on the pinned
+rows. Every explicit id must equal its recomputed content address, and every
+supersede must name the active version of its record. If the port drifted from
+receipt anywhere it could change what grades, the build fails before any score
+is published.
+`scripts/generate_receipt_current_view_fixture.py` runs receipt itself over
+seeded ledgers to produce the fixture the port is tested against. Regenerate
+it whenever the `receipt` pin in `pyproject.toml` moves.
+
+A published target whose registration no resolver leg can execute is
+witnessed, not resolved. `witness-registered-windows.yml` asks the Internet
+Archive to capture that target's `sourceUrl` on each day of its registered
+`expectedReleaseWindow`, reads the Archive's index back, and commits nothing.
+It keeps a later disposition ruling possible and makes none: do not read a
+capture as a resolution, and do not add record writes to that workflow. See
+`docs/registered-window-custody.md`.
 
 ### Bills end to end — series ingestion is part of the pipeline
+
+The remote extraction, Chronicle mapping, reviewed bill binding and paired
+comparison workflow is documented in `docs/bill-pipeline.md`. Use
+`ingest-bill.yml` for proposal extraction and `strategy-docket.yml`'s reviewed
+`bill_slug` mode for fresh comparisons of already-published conditional pairs.
+Never mint duplicate registrations merely to re-exercise an existing pair.
 
 Founder rule (2026-08-03): a bill metric whose official series is not yet
 admitted is a **worklist item, never a stopping point**. "End to end" for
@@ -366,16 +547,32 @@ git config core.hooksPath .githooks
 ```
 
 It refuses any local push that would publish a commit touching
-`records/**` — the same commit-level walk the provenance audit runs, so
-the guard blocks exactly the pushes the audit would redden main for.
+`records/**`, using the same commit-level walk the provenance audit
+runs. It blocks every push the audit would redden main for, and some the
+audit would pass: a merge is exempt only when its records equal those of
+the merge base git would use to merge it into the destination main (so
+it changes no records, and a later merge takes main's side even after
+main moves on) and merging it into that main (`git merge-tree`) leaves
+main's records exactly as they are. A merge that would roll main's
+records back is refused on a branch, where the audit, which only sees
+main, would not call it a rollback. Every merge in the push whose records
+differ from any parent is judged that way, including the ones git's path
+walk skips because their only differing parent is already on main. The
+check uses main as fetched at push time; when that fetch fails it falls
+back to the branch's remote tip and says so, and the audit on main
+remains the check of what a merge actually lands.
 Pushes to `main` are judged on every commit they publish; any other ref
 is judged on the branch's own contribution against the main of the
 destination that push is actually landing in — fetched at push time and
 pinned to an immutable id, so no remote name, URL spelling, or stale
-local ref decides it — and a branch rebased over main's attested
-recorder commits therefore does not trip it. Pushes the guard cannot
-verify (no comparator at the destination, unwalkable history, a shallow
-clone) fail closed.
+local ref decides it. If that fetch fails, an existing ref is judged
+against its own remote tip and a new ref is refused. A branch rebased
+over main's attested recorder commits therefore does not trip it, nor
+does a branch that merged main forward and then merges a side branch
+lagging main's records (the merge carries main's records tree through a
+parent main does not yet contain). Pushes the guard cannot verify (no
+comparator at the destination, unwalkable history, a shallow clone) fail
+closed.
 It prints the offending commits and can be overridden deliberately with
 `THESIS_ALLOW_RECORDS_PUSH=1` — an override that still lands unattested and
 still costs a permanent public waiver. Nine such waivers already exist

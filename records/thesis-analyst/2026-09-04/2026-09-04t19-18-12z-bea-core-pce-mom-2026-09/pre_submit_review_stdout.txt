@@ -1,0 +1,21 @@
+{
+  "summary": "Draft is publishable after a small resolver/source cleanup; the forecast logic is otherwise coherent and traceable.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "warning",
+      "summary": "The draft correctly identifies the BEA first-print September 2026 Personal Income and Outlays release date as 2026-10-29, but its `resolutionSourceUrl` is a future news-release URL while the ledger binding currently names the BEA core PCE series page and has an August table-label discrepancy.",
+      "actionRequested": "Align the resolver fields with the registered source binding where possible, and keep the explicit reasoning note that the ledger table label says August 2026 while the target period, slug, and dataPointId are September 2026."
+    },
+    {
+      "rubricItem": "update",
+      "severity": "warning",
+      "summary": "The +0.01 sticky-services adjustment is directionally plausible but not tied to a concrete cited component value or named BEA table observation.",
+      "actionRequested": "Either cite the specific BEA component evidence supporting sticky services/core persistence or describe the +0.01 as a judgmental residual rather than evidence-driven movement."
+    }
+  ],
+  "optionalSuggestions": [
+    "State that the seven-month volatility sample is intentionally short because it uses same-year first prints, or add a longer historical volatility cross-check if available.",
+    "Make the final forecast step repeat the rounded implied bounds 0.10 to 0.38 so the JSON interval and reasoning are visibly identical."
+  ]
+}

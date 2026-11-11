@@ -1,0 +1,4 @@
+{"type": "thread.started", "thread_id": "01a0876e-eff6-76c0-9729-964ae0fc5067"}
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "{\"summary\":\"The draft is publishable: resolver, prior/update/interval, tails, and JSON fields are coherent with the registered target.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Add the June 2026 Bank of England Money and Credit URL or avoid relying on exact June approval/rate figures if that source is not otherwise captured.\",\"Note that the volatility estimate uses a short recent sample, so the 80% interval is mechanically derived but sample-limited.\"]}"}}
+{"type": "turn.completed", "usage": {"input_tokens": 19629, "cached_input_tokens": 0, "output_tokens": 616, "reasoning_output_tokens": 516}}

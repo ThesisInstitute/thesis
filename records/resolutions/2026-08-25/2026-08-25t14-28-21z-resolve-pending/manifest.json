@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-08-25T14:28:21Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "54dbabc8e861bf66ef824da11a3005372b34c4b4",
+  "facts": [
+    {
+      "dataPointId": "census.new_residential_sales.new_single_family_houses_sold_saar.2026_07.first_print",
+      "sourceVintage": "2026-08-25",
+      "retrievedAt": "2026-08-25T14:28:21Z",
+      "targetContentHash": "0f2d2e4dcfee851ef8eef4f673d139bc9935d1db55456076f8a6694d439db399",
+      "responseArchive": {
+        "path": "records/resolutions/2026-08-25/2026-08-25t14-28-21z-resolve-pending/responses/hsn1f-2026-08-25-5e0b043ecae853af.csv.gz",
+        "sha256": "5e0b043ecae853af7de98192d92caee90b6ce1a4ab2219d0620dc808dc0b273f",
+        "bytes": 11526,
+        "gzipSha256": "b1ed24efb6af444edf53cd2371180fecb2bdaf20d3f52d74c03f63769ad603ba",
+        "gzipBytes": 3146,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-08-25/2026-08-25t14-28-21z-resolve-pending/responses/hsn1f-2026-08-25-5e0b043ecae853af.csv.gz",
+      "sha256": "b1ed24efb6af444edf53cd2371180fecb2bdaf20d3f52d74c03f63769ad603ba",
+      "bytes": 3146,
+      "createdAt": "2026-08-25T14:28:21Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-08-25/2026-08-25t14-28-21z-resolve-pending/manifest.json",
+      "sha256": "2c4096781e4dcbb3aeb4ca8a9c4799c1e8154ed1e548f0bbb8f834a535f0e407",
+      "bytes": 1329,
+      "createdAt": "2026-08-25T14:28:21Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "1384f42d0529590fd59dc9222864222fda52e3d51eb121014519924a1b0a1d13"
+}

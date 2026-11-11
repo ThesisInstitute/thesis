@@ -1,0 +1,2706 @@
+{
+ "comment": "Registry for the auto-roll loop (scripts/roll_docket.py). Recurring series derive their next period from the latest published run; a series without a published run may use one reviewed seedPeriod with an exact official release date. Reviewed annual registered-query snapshots instead carry one explicit period and capture window and are never cadence-stepped. Neither seed path cadence-steps itself. The live catalog slug set is the final duplicate guard.",
+ "series": [
+  {
+   "series": "us.dol.initial_claims.sa",
+   "cadence": "weekly",
+   "slug": "initial-claims-week-{period}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "thousands"
+   },
+   "ledger": {
+    "uuid": "1ad67747-d9d8-4ff9-9ebc-58206e658518",
+    "concept": "us.dol.initial_claims.sa"
+   }
+  },
+  {
+   "series": "dol.eta.continued_claims.sa",
+   "cadence": "weekly",
+   "slug": "continued-claims-week-{period}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions"
+   },
+   "ledger": {
+    "uuid": "38773338-f84a-466e-94cb-fce55f5e2549",
+    "concept": "dol.eta.continued_claims.sa"
+   }
+  },
+  {
+   "series": "bls.cpi.u.headline_mom",
+   "cadence": "monthly",
+   "slug": "us-cpi-u-mom-{month}-{year}",
+   "ledger": {
+    "uuid": "3e796803-a194-4c83-9dc9-27cc870ff08e",
+    "concept": "bls.cpi.u.headline_mom"
+   }
+  },
+  {
+   "series": "bls.cpi.u.core_mom",
+   "cadence": "monthly",
+   "slug": "us-core-cpi-mom-{month}-{year}",
+   "ledger": {
+    "uuid": "d85c3c7f-874b-4caa-bfad-1ec7a473c293",
+    "concept": "bls.cpi.u.core_mom"
+   }
+  },
+  {
+   "series": "bls.ces.nonfarm_payrolls.change",
+   "cadence": "monthly",
+   "slug": "nonfarm-payrolls-{month}-{year}",
+   "ledger": {
+    "uuid": "d8ab9f3a-aa0c-4b7f-89df-a0c9107cfdbb",
+    "concept": "bls.ces.nonfarm_payrolls.change"
+   }
+  },
+  {
+   "series": "bls.cps.unemployment_rate",
+   "cadence": "monthly",
+   "slug": "unemployment-rate-{month}-{year}",
+   "ledger": {
+    "uuid": "8dbbd54f-4bfd-4735-ad0d-5b55b8bb4ec5",
+    "concept": "bls.cps.unemployment_rate"
+   }
+  },
+  {
+   "series": "bls.jolts.job_openings",
+   "cadence": "monthly",
+   "slug": "jolts-openings-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions"
+   },
+   "ledger": {
+    "uuid": "020dafc2-2ca3-453b-a6bc-f96d443a5f77",
+    "concept": "bls.jolts.job_openings"
+   }
+  },
+  {
+   "series": "bls.jolts.quits_rate",
+   "cadence": "monthly",
+   "slug": "jolts-quits-rate-{month}-{year}",
+   "ledger": {
+    "uuid": "e6aed5ae-2f23-413b-a600-4c5b80edeb18",
+    "concept": "bls.jolts.quits_rate"
+   }
+  },
+  {
+   "series": "bls.real_earnings.avg_hourly_mom",
+   "cadence": "monthly",
+   "slug": "us-real-avg-hourly-earnings-mom-{month}-{year}",
+   "ledger": {
+    "uuid": "2e3a7126-41fd-4d88-99b6-cf4f2057c277",
+    "concept": "bls.real_earnings.avg_hourly_mom"
+   }
+  },
+  {
+   "series": "bls.cps.telework_share",
+   "cadence": "monthly",
+   "slug": "us-telework-rate-{month}-{year}",
+   "ledger": {
+    "uuid": "94a5a046-ea77-449a-8ba9-95ffebc9039c",
+    "concept": "bls.cps.telework_share"
+   }
+  },
+  {
+   "series": "bea.core_pce.mom",
+   "cadence": "monthly",
+   "slug": "us-core-pce-mom-{month}-{year}",
+   "ledger": {
+    "uuid": "efc3259b-eb44-49c3-9bc6-e92fd7cf6243",
+    "concept": "bea.core_pce.mom"
+   }
+  },
+  {
+   "series": "treasury.mts.monthly_deficit",
+   "cadence": "monthly",
+   "slug": "us-mts-deficit-{month}-{year}",
+   "ledger": {
+    "uuid": "f471eabf-fcff-449b-bac7-60a8561b063b",
+    "concept": "treasury.mts.monthly_deficit"
+   }
+  },
+  {
+   "series": "fns.wic.total_participation",
+   "cadence": "monthly",
+   "slug": "wic-participation-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions"
+   },
+   "ledger": {
+    "uuid": "5a76270d-3418-49c8-b510-a08c0df0fc8c",
+    "concept": "fns.wic.total_participation"
+   }
+  },
+  {
+   "series": "fns.snap.total_persons",
+   "cadence": "monthly",
+   "slug": "snap-participation-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+     "sourceSeriesId": "fns.snap.total_persons",
+     "field": "Persons",
+     "table": "FNS SNAP data tables, national monthly participation (thousands)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "748670af-cafa-416e-afcd-b2c303593782",
+    "concept": "fns.snap.total_persons"
+   }
+  },
+  {
+   "series": "ssa.ssi.total_recipients",
+   "cadence": "monthly",
+   "slug": "ssi-recipients-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions"
+   },
+   "ledger": {
+    "uuid": "b908460f-bc4c-4416-a7d6-75b43244b752",
+    "concept": "ssa.ssi.total_recipients"
+   }
+  },
+  {
+   "series": "eurostat.hicp.flash.yoy",
+   "cadence": "monthly",
+   "slug": "euro-flash-hicp-{month}-{year}",
+   "releaseCalendarUrl": "https://ec.europa.eu/eurostat/news/euro-indicators/release-calendar",
+   "releaseDates": {
+    "2026-07": "2026-07-31"
+   },
+   "extras": {
+    "sourceBinding": {
+     "adapter": "eurostat-api",
+     "sourceUrl": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/prc_hicp_minr/M.RCH_A.TOTAL.EA21?format=JSON&lastNObservations=36",
+     "sourceSeriesId": "prc_hicp_minr/M.RCH_A.TOTAL.EA21",
+     "field": "prc_hicp_minr/M.RCH_A.TOTAL.EA21",
+     "table": "HICP (ECOICOP ver.2) monthly rates, prc_hicp_minr (all-items annual rate, euro area)",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "1e84eb13-9e80-4dda-9b82-71361b886c1e",
+    "concept": "eurostat.hicp.flash.yoy"
+   }
+  },
+  {
+   "series": "eurostat.unemployment_rate",
+   "cadence": "monthly",
+   "slug": "euro-area-unemployment-rate-{month}-{year}",
+   "extras": {
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21?format=JSON",
+     "sourceSeriesId": "une_rt_m/M.SA.TOTAL.PC_ACT.T.EA21",
+     "field": "PC_ACT",
+     "table": "Unemployment by sex and age (une_rt_m), euro area, SA, total; first print captured between monthly releases",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "2c59f506-873f-45df-b6c5-588c82dcd640",
+    "concept": "eurostat.unemployment_rate"
+   }
+  },
+  {
+   "series": "abs.cpi.all_groups.yoy",
+   "cadence": "monthly",
+   "slug": "australia-cpi-annual-rate-{month}-{year}",
+   "releaseCalendarUrl": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia",
+   "releaseDates": {
+    "2026-06": "2026-07-29",
+    "2026-07": "2026-08-26",
+    "2026-08": "2026-09-30"
+   },
+   "extras": {
+    "sourceBinding": {
+     "adapter": "abs-data-api",
+     "sourceUrl": "https://data.api.abs.gov.au/rest/data/CPI/3.10001.10.50.M?lastNObservations=30&format=jsondata",
+     "sourceSeriesId": "CPI/3.10001.10.50.M",
+     "field": "CPI/3.10001.10.50.M",
+     "table": "Monthly Consumer Price Index (complete monthly CPI, dataflow CPI: annual change, all groups, original, weighted average of eight capital cities)",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "92220fc5-fd61-46f5-b02d-467948889e2d",
+    "concept": "abs.cpi.all_groups.yoy"
+   }
+  },
+  {
+   "series": "abs.labour.unemployment_rate",
+   "cadence": "monthly",
+   "slug": "australia-unemployment-rate-{month}-{year}",
+   "releaseCalendarUrl": "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia",
+   "releaseDates": {
+    "2026-06": "2026-07-23",
+    "2026-07": "2026-08-20",
+    "2026-08": "2026-09-24"
+   },
+   "extras": {
+    "sourceBinding": {
+     "adapter": "abs-data-api",
+     "sourceUrl": "https://data.api.abs.gov.au/rest/data/LF/M13.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+     "sourceSeriesId": "LF/M13.3.1599.20.AUS.M",
+     "field": "LF/M13.3.1599.20.AUS.M",
+     "table": "Labour Force, Australia (dataflow LF: unemployment rate, persons, total age, seasonally adjusted, Australia)",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "443cb1bf-49d3-4e1e-9897-9556c8a8c768",
+    "concept": "abs.labour.unemployment_rate"
+   }
+  },
+  {
+   "series": "statcan.gdp_by_industry.monthly_growth",
+   "cadence": "monthly",
+   "slug": "canada-monthly-gdp-growth-{month}-{year}",
+   "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+   "releaseDates": {
+    "2026-05": "2026-07-31",
+    "2026-06": "2026-08-28",
+    "2026-07": "2026-09-29",
+    "2026-08": "2026-10-30",
+    "2026-09": "2026-11-30",
+    "2026-10": "2026-12-23",
+    "2026-11": "2027-01-29",
+    "2026-12": "2027-03-01",
+    "2027-01": "2027-03-31"
+   },
+   "extras": {
+    "sourceBinding": {
+     "adapter": "statcan-wds",
+     "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+     "sourceSeriesId": "v65201210",
+     "field": "v65201210",
+     "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+     "transform": {
+      "operation": "percent_change_previous_period",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "166d1a5a-b627-4d1f-9f79-682f28692dd5",
+    "concept": "statcan.gdp_by_industry.monthly_growth"
+   }
+  },
+  {
+   "series": "statcan.cpi.allitems.yoy",
+   "cadence": "monthly",
+   "slug": "canada-cpi-annual-rate-{month}-{year}",
+   "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+   "releaseDates": {
+    "2026-06": "2026-07-20",
+    "2026-07": "2026-08-17",
+    "2026-08": "2026-09-14",
+    "2026-09": "2026-10-19",
+    "2026-10": "2026-11-16",
+    "2026-11": "2026-12-14",
+    "2026-12": "2027-01-18",
+    "2027-01": "2027-02-16",
+    "2027-02": "2027-03-15"
+   },
+   "extras": {
+    "sourceBinding": {
+     "adapter": "statcan-wds",
+     "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+     "sourceSeriesId": "v41690973",
+     "field": "v41690973",
+     "table": "Consumer Price Index, Table 18-10-0004-01 (all-items, Canada)",
+     "transform": {
+      "operation": "percent_change_year_ago",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "23bf4da6-874a-4b29-affb-ee68d03d2dee",
+    "concept": "statcan.cpi.allitems.yoy"
+   }
+  },
+  {
+   "series": "statcan.employment_insurance.regular_beneficiaries",
+   "cadence": "monthly",
+   "slug": "canada-ei-regular-beneficiaries-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "thousands",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+     "sourceSeriesId": "v64549350",
+     "field": "v64549350",
+     "table": "Statistics Canada Table 14-10-0011-01, EI regular beneficiaries, Canada, seasonally adjusted (persons)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "52fba74f-ea83-4b12-981f-3ca2c581686d",
+    "concept": "statcan.employment_insurance.regular_beneficiaries.canada"
+   }
+  },
+  {
+   "series": "statjp.cpi.tokyo_all_items_yoy",
+   "cadence": "monthly",
+   "slug": "japan-tokyo-cpi-annual-rate-{month}-{year}-prelim",
+   "extras": {
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www.stat.go.jp/data/cpi/sokuhou/tsuki/index-t.html",
+     "sourceSeriesId": "statjp.tokyo_cpi.all_items",
+     "field": "0001",
+     "table": "2020-base CPI Tokyo ku-area mid-month preliminary; machine-readable vintage is the release's e-Stat table 1-2 workbook (all items, series code 0001), YoY computed from rounded index",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "62e78be0-309e-49ba-8604-67abb80f1a03",
+    "concept": "statjp.cpi.tokyo_all_items_yoy"
+   }
+  },
+  {
+   "series": "statbel.cpi.headline_yoy",
+   "cadence": "monthly",
+   "slug": "belgium-cpi-annual-rate-{month}-{year}",
+   "extras": {
+    "country": "BE"
+   },
+   "ledger": {
+    "uuid": "99a7178c-5085-4ec2-9714-c4d03f10f184",
+    "concept": "statbel.cpi.headline_yoy"
+   }
+  },
+  {
+   "series": "statbel.health_index.yoy",
+   "cadence": "monthly",
+   "slug": "belgium-health-index-annual-rate-{month}-{year}",
+   "extras": {
+    "country": "BE"
+   },
+   "ledger": {
+    "uuid": "8fc8eb86-6f04-4c6b-91ae-ca2a490a175f",
+    "concept": "statbel.health_index.yoy"
+   }
+  },
+  {
+   "series": "eurostat.unemployment_rate.belgium",
+   "cadence": "monthly",
+   "slug": "belgium-unemployment-rate-{month}-{year}",
+   "extras": {
+    "country": "BE"
+   },
+   "ledger": {
+    "uuid": "c7f994ce-3d0b-4a28-ba5b-e286237cd14d",
+    "concept": "eurostat.unemployment_rate.belgium"
+   }
+  },
+  {
+   "series": "nbb.business_barometer.overall",
+   "cadence": "monthly",
+   "slug": "belgium-nbb-business-barometer-{month}-{year}",
+   "extras": {
+    "country": "BE",
+    "targetUnit": "index_points"
+   },
+   "ledger": {
+    "uuid": "a3e8d1fb-5f29-40a8-ab14-a06a53ecb6af",
+    "concept": "nbb.business_barometer.overall"
+   }
+  },
+  {
+   "series": "nbb.consumer_confidence.indicator",
+   "cadence": "monthly",
+   "slug": "belgium-consumer-confidence-{month}-{year}",
+   "extras": {
+    "country": "BE",
+    "targetUnit": "index_points"
+   },
+   "ledger": {
+    "uuid": "64bd2834-d559-4bf2-abff-3eae6fcf6b4b",
+    "concept": "nbb.consumer_confidence.indicator"
+   }
+  },
+  {
+   "series": "nbb.gdp.flash_qoq",
+   "cadence": "quarterly",
+   "slug": "belgium-gdp-flash-q{quarter}-{year}",
+   "extras": {
+    "country": "BE"
+   },
+   "ledger": {
+    "uuid": "03a9d380-e5cf-45d8-b4d8-b3da28aad043",
+    "concept": "nbb.gdp.flash_qoq"
+   }
+  },
+  {
+   "series": "bls.productivity.nonfarm_qoq_prelim",
+   "cadence": "quarterly",
+   "slug": "us-nonfarm-productivity-q{quarter}-{year}-prelim",
+   "ledger": {
+    "uuid": "6e671a89-65f6-4da9-b092-4e6d74a36a08",
+    "concept": "bls.productivity.nonfarm_qoq_prelim"
+   }
+  },
+  {
+   "series": "fed.g17.industrial_production.total_index_mom",
+   "cadence": "monthly",
+   "slug": "fed-g17-industrial-production-total-index-mom-{month}-{year}",
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=INDPRO",
+     "sourceSeriesId": "INDPRO",
+     "field": "INDPRO",
+     "table": "G.17 Industrial Production and Capacity Utilization, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "dbfd5050-e5df-40af-8922-dc8927d6363a",
+    "concept": "fed.g17.industrial_production.total_index_mom"
+   }
+  },
+  {
+   "series": "fed.g17.manufacturing_production_mom",
+   "cadence": "monthly",
+   "slug": "us-manufacturing-production-mom-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.federalreserve.gov/releases/g17/release_dates.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-18"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=IPMAN",
+     "sourceSeriesId": "IPMAN",
+     "field": "IPMAN",
+     "table": "G.17 Industrial Production and Capacity Utilization, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "41d26958-709c-44ab-a5ab-b385157db0ac",
+    "concept": "fed.g17.manufacturing_production_mom"
+   }
+  },
+  {
+   "series": "fed.g17.capacity_utilization.total_industry",
+   "cadence": "monthly",
+   "slug": "fed-g17-capacity-utilization-total-industry-{month}-{year}",
+   "extras": {
+    "targetUnit": "percent",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=TCU",
+     "sourceSeriesId": "TCU",
+     "field": "TCU",
+     "table": "G.17 Industrial Production and Capacity Utilization, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "9668ecdb-5f61-422d-a653-8e8956257ade",
+    "concept": "fed.g17.capacity_utilization.total_industry"
+   }
+  },
+  {
+   "series": "fed.g17.capacity_utilization.manufacturing",
+   "cadence": "monthly",
+   "slug": "us-manufacturing-capacity-utilization-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.federalreserve.gov/releases/g17/release_dates.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-18"
+   },
+   "extras": {
+    "targetUnit": "percent",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=MCUMFN",
+     "sourceSeriesId": "MCUMFN",
+     "field": "MCUMFN",
+     "table": "G.17 Industrial Production and Capacity Utilization, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "40f48c12-3611-4e57-9482-055e62bf35ae",
+    "concept": "fed.g17.capacity_utilization.manufacturing"
+   }
+  },
+  {
+   "series": "census.housing_starts.saar",
+   "cadence": "monthly",
+   "slug": "census-housing-starts-saar-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=HOUST",
+     "sourceSeriesId": "HOUST",
+     "field": "HOUST",
+     "table": "New Residential Construction, seasonally adjusted annual rates",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "8c999902-84e2-4e90-b49c-325cd535062a",
+    "concept": "census.housing_starts.saar"
+   }
+  },
+  {
+   "series": "census.housing.permits_saar",
+   "cadence": "monthly",
+   "slug": "us-building-permits-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.census.gov/construction/soc/schedule.html",
+   "releaseDates": {
+    "2026-07": "2026-08-18"
+   },
+   "extras": {
+    "targetUnit": "thousands",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PERMIT",
+     "sourceSeriesId": "PERMIT",
+     "field": "PERMIT",
+     "table": "New Residential Construction, seasonally adjusted annual rates",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "420c8935-70b8-4d8f-a82d-e772446adc6e",
+    "concept": "census.housing.permits_saar"
+   }
+  },
+  {
+   "series": "census.housing.completions_saar",
+   "cadence": "monthly",
+   "slug": "us-housing-completions-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.census.gov/construction/soc/schedule.html",
+   "releaseDates": {
+    "2026-07": "2026-08-18"
+   },
+   "extras": {
+    "targetUnit": "thousands",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=COMPUTSA",
+     "sourceSeriesId": "COMPUTSA",
+     "field": "COMPUTSA",
+     "table": "New Residential Construction, seasonally adjusted annual rates",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "e16080e3-02e9-4ae1-95c6-3ded737cf697",
+    "concept": "census.housing.completions_saar"
+   }
+  },
+  {
+   "series": "census.new_residential_sales.new_single_family_houses_sold_saar",
+   "cadence": "monthly",
+   "slug": "us-new-home-sales-saar-{month}-{year}",
+   "extras": {
+    "targetUnit": "thousands",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=HSN1F",
+     "sourceSeriesId": "HSN1F",
+     "field": "HSN1F",
+     "table": "New Residential Sales, Table 1",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "5654403e-f6c5-412e-94e0-feeda778ad81",
+    "concept": "census.new_residential_sales.new_single_family_houses_sold_saar"
+   }
+  },
+  {
+   "series": "census.m3.durable_goods_new_orders_mom",
+   "cadence": "monthly",
+   "slug": "us-durable-goods-orders-mom-{month}-{year}",
+   "seedPeriod": "2026-06",
+   "releaseCalendarUrl": "https://www.census.gov/manufacturing/m3/release_schedule.html",
+   "releaseDates": {
+    "2026-06": "2026-07-27"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=DGORDER",
+     "sourceSeriesId": "DGORDER",
+     "field": "DGORDER",
+     "table": "Advance Report on Durable Goods Manufacturers' Shipments, Inventories, and Orders",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "294d82e8-3711-4d0d-89f6-a5a7a087f1be",
+    "concept": "census.m3.durable_goods_new_orders_mom"
+   }
+  },
+  {
+   "series": "census.m3.durable_goods_shipments_mom",
+   "cadence": "monthly",
+   "slug": "us-durable-goods-shipments-mom-{month}-{year}",
+   "seedPeriod": "2026-06",
+   "releaseCalendarUrl": "https://www.census.gov/manufacturing/m3/release_schedule.html",
+   "releaseDates": {
+    "2026-06": "2026-07-27"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=AMDMVS",
+     "sourceSeriesId": "AMDMVS",
+     "field": "AMDMVS",
+     "table": "Advance Report on Durable Goods Manufacturers' Shipments, Inventories, and Orders",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "5cbc4c1a-e387-4b64-bb56-67ef349fbd51",
+    "concept": "census.m3.durable_goods_shipments_mom"
+   }
+  },
+  {
+   "series": "census.construction_spending.total_mom",
+   "cadence": "monthly",
+   "slug": "us-construction-spending-mom-{month}-{year}",
+   "seedPeriod": "2026-06",
+   "releaseCalendarUrl": "https://www.census.gov/construction/c30/release.html",
+   "releaseDates": {
+    "2026-06": "2026-08-03"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=TTLCONS",
+     "sourceSeriesId": "TTLCONS",
+     "field": "TTLCONS",
+     "table": "Value of Construction Put in Place Survey",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "63222847-045a-4784-bd89-4d7878a2a6d8",
+    "concept": "census.construction_spending.total_mom"
+   }
+  },
+  {
+   "series": "census.mtis.total_business_inventories_level",
+   "cadence": "monthly",
+   "slug": "us-total-business-inventories-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "usd_billions",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=BUSINV",
+     "sourceSeriesId": "BUSINV",
+     "field": "BUSINV",
+     "table": "Manufacturing and Trade Inventories and Sales",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "26bb1475-8685-4142-8472-7bcd6d998fcc",
+    "concept": "census.mtis.total_business_inventories_level"
+   }
+  },
+  {
+   "series": "bea.trade.goods_services_deficit",
+   "cadence": "monthly",
+   "slug": "us-goods-services-trade-deficit-{month}-{year}",
+   "extras": {
+    "valueScale": -0.001,
+    "targetUnit": "usd_billions",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=BOPGSTB",
+     "sourceSeriesId": "BOPGSTB",
+     "field": "BOPGSTB",
+     "table": "U.S. International Trade in Goods and Services, Exhibit 1",
+     "transform": {
+      "operation": "multiply",
+      "factor": -0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "7be75093-832c-4734-a002-a0ff19c610ce",
+    "concept": "bea.trade.goods_services_deficit"
+   }
+  },
+  {
+   "series": "bea.private_nonresidential_fixed_investment",
+   "cadence": "quarterly",
+   "slug": "us-private-nonresidential-fixed-investment-q{quarter}-{year}",
+   "seedPeriod": "2026-Q3",
+   "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
+   "releaseDates": {
+    "2026-Q3": "2026-10-29"
+   },
+   "extras": {
+    "targetUnit": "usd_billions",
+    "sourceBinding": {
+     "adapter": "bea-release",
+     "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+     "sourceSeriesId": "T50305:L2",
+     "field": "Line 2: Nonresidential",
+     "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 2 (Nonresidential)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "2e36a67f-ae8d-4717-a70e-9de016e28d3f",
+    "concept": "bea.private_nonresidential_fixed_investment"
+   }
+  },
+  {
+   "series": "bea.research_and_development_fixed_investment",
+   "cadence": "quarterly",
+   "slug": "us-private-research-development-fixed-investment-q{quarter}-{year}",
+   "seedPeriod": "2026-Q3",
+   "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
+   "releaseDates": {
+    "2026-Q3": "2026-10-29"
+   },
+   "extras": {
+    "targetUnit": "usd_billions",
+    "sourceBinding": {
+     "adapter": "bea-release",
+     "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+     "sourceSeriesId": "T50305:L18",
+     "field": "Line 18: Research and development",
+     "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 18 (Research and development)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "3efd33de-5be6-4150-bf62-6e4a1e9a1291",
+    "concept": "bea.research_and_development_fixed_investment"
+   }
+  },
+  {
+   "series": "bea.ita.personal_transfer_payments",
+   "cadence": "quarterly",
+   "slug": "us-personal-transfer-payments-q{quarter}-{year}",
+   "seedPeriod": "2026-Q2",
+   "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
+   "releaseDates": {
+    "2026-Q2": "2026-09-24"
+   },
+   "extras": {
+    "targetUnit": "usd_millions",
+    "anchors": {
+     "2026-Q1": 18511
+    },
+    "sourceBinding": {
+     "adapter": "bea-ita-itable",
+     "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=62&step=6&isuri=1&tablelist=62&product=1",
+     "sourceSeriesId": "ITA:T5.1:L18:QSA",
+     "field": "Line 18: Personal transfers (QSA)",
+     "table": "U.S. International Transactions, Table 5.1, line 18 (Personal transfers), quarterly seasonally adjusted",
+     "transform": {
+      "operation": "identity",
+      "factor": 1,
+      "applicationId": 62,
+      "productId": "1",
+      "tableList": "62",
+      "lineNumber": "18",
+      "rowLabel": "Personal transfers",
+      "basis": "QSA",
+      "unit": "usd_millions",
+      "cadence": "quarterly"
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "47d53b27-f420-4fa2-9d29-3c8832474cb8",
+    "concept": "bea.ita.personal_transfer_payments"
+   },
+   "comment": "BEA ITA Table 5.1 line 18 Personal transfers, quarterly seasonally adjusted in millions of dollars, is a broad personal-transfers flow proxy (https://apps.bea.gov/iTable/?ReqID=62&step=6&isuri=1&tablelist=62&product=1). It does not measure the section 4475 remittance-excise base, sender citizenship, provider qualification, tax liability or receipts, or section 36C credits; no value is attributed to H.R. 5595, and this series never resolves any H.R. 5595 causal claim (https://www.congress.gov/119/bills/hr5595/BILLS-119hr5595ih.pdf).",
+   "billSlugs": [
+    "remit-act-hr5595-119"
+   ]
+  },
+  {
+   "series": "bls.import_price_index.all_imports_mom",
+   "cadence": "monthly",
+   "slug": "bls-import-price-index-all-imports-mom-{month}-{year}",
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=IR",
+     "sourceSeriesId": "IR",
+     "field": "IR",
+     "table": "U.S. Import Price Indexes, Table 1",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "1d271205-0e71-4a74-9d5f-47e77577e2b2",
+    "concept": "bls.import_price_index.all_imports_mom"
+   }
+  },
+  {
+   "series": "bls.export_prices.all_commodities_mom",
+   "cadence": "monthly",
+   "slug": "us-export-prices-mom-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/ximpim.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-18"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=IQ",
+     "sourceSeriesId": "IQ",
+     "field": "IQ",
+     "table": "U.S. Export Price Indexes, Table 2",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "7dc8b980-8f14-4581-ad7c-3963de6a42d9",
+    "concept": "bls.export_prices.all_commodities_mom"
+   }
+  },
+  {
+   "series": "bls.ppi.final_demand_monthly_change",
+   "cadence": "monthly",
+   "slug": "bls-ppi-final-demand-monthly-change-{month}-{year}",
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PPIFIS",
+     "sourceSeriesId": "PPIFIS",
+     "field": "PPIFIS",
+     "table": "Producer Price Index, final demand, seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "a7ec4618-1ade-4f5e-bbbd-1c0680c7fccd",
+    "concept": "bls.ppi.final_demand_monthly_change"
+   }
+  },
+  {
+   "series": "bls.eci.total_compensation_private_industry_qoq",
+   "cadence": "quarterly",
+   "slug": "us-employment-cost-index-total-compensation-q{quarter}-{year}",
+   "seedPeriod": "2026-Q3",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/eci.htm",
+   "releaseDates": {
+    "2026-Q2": "2026-07-31",
+    "2026-Q3": "2026-10-30"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ECICOM",
+     "sourceSeriesId": "ECICOM",
+     "field": "ECICOM",
+     "table": "Employment Cost Index, Table 1",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "2820e965-4c7b-40d2-b5b8-e03792cf3fbf",
+    "concept": "bls.eci.total_compensation_private_industry_qoq"
+   }
+  },
+  {
+   "series": "bls.eci.private_wages_salaries_qoq",
+   "cadence": "quarterly",
+   "slug": "us-eci-private-wages-salaries-q{quarter}-{year}",
+   "seedPeriod": "2026-Q3",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/eci.htm",
+   "releaseDates": {
+    "2026-Q2": "2026-07-31",
+    "2026-Q3": "2026-10-30"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ECIWAG",
+     "sourceSeriesId": "ECIWAG",
+     "field": "ECIWAG",
+     "table": "Employment Cost Index, Table 2",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "6d2e1191-9e14-4719-a2bb-c3561fca49e6",
+    "concept": "bls.eci.private_wages_salaries_qoq"
+   }
+  },
+  {
+   "series": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim",
+   "cadence": "quarterly",
+   "slug": "us-unit-labor-costs-q{quarter}-{year}-prelim",
+   "seedPeriod": "2026-Q2",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/prod2.htm",
+   "releaseDates": {
+    "2026-Q2": "2026-08-06"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PRS85006112",
+     "sourceSeriesId": "PRS85006112",
+     "field": "PRS85006112",
+     "table": "Productivity and Costs, nonfarm business sector",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "205885c4-de46-47df-a916-253ae2a0299a",
+    "concept": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim"
+   }
+  },
+  {
+   "series": "fed.g19.consumer_credit_total_annual_rate",
+   "cadence": "monthly",
+   "slug": "us-consumer-credit-annual-rate-{month}-{year}",
+   "seedPeriod": "2026-06",
+   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/2026-august.htm",
+   "releaseDates": {
+    "2026-06": "2026-08-07"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=TOTALSLAR",
+     "sourceSeriesId": "TOTALSLAR",
+     "field": "TOTALSLAR",
+     "table": "G.19 Consumer Credit, outstanding, seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "dac76c03-0630-4859-898d-b4849383d147",
+    "concept": "fed.g19.consumer_credit_total_annual_rate"
+   }
+  },
+  {
+   "series": "fed.g19.consumer_credit_revolving_annual_rate",
+   "cadence": "monthly",
+   "slug": "us-revolving-consumer-credit-annual-rate-{month}-{year}",
+   "seedPeriod": "2026-06",
+   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/2026-august.htm",
+   "releaseDates": {
+    "2026-06": "2026-08-07"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=REVOLSLAR",
+     "sourceSeriesId": "REVOLSLAR",
+     "field": "REVOLSLAR",
+     "table": "G.19 Consumer Credit, outstanding, seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "8a82c6a5-7c83-4ac8-ab5b-7dd6eaf97e8f",
+    "concept": "fed.g19.consumer_credit_revolving_annual_rate"
+   }
+  },
+  {
+   "series": "fed.g19.consumer_credit_nonrevolving_annual_rate",
+   "cadence": "monthly",
+   "slug": "us-nonrevolving-consumer-credit-annual-rate-{month}-{year}",
+   "seedPeriod": "2026-06",
+   "releaseCalendarUrl": "https://www.federalreserve.gov/newsevents/2026-august.htm",
+   "releaseDates": {
+    "2026-06": "2026-08-07"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=NONREVSLAR",
+     "sourceSeriesId": "NONREVSLAR",
+     "field": "NONREVSLAR",
+     "table": "G.19 Consumer Credit, outstanding, seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "bd0643c4-6716-41ae-988d-c985272e38ae",
+    "concept": "fed.g19.consumer_credit_nonrevolving_annual_rate"
+   }
+  },
+  {
+   "series": "bls.cpi.shelter_mom",
+   "cadence": "monthly",
+   "slug": "us-cpi-shelter-mom-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-12"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CUSR0000SAH1",
+     "sourceSeriesId": "CUSR0000SAH1",
+     "field": "CUSR0000SAH1",
+     "table": "Consumer Price Index, U.S. city average, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "4c5b4292-0bcf-4c42-9fc5-39d22e791f75",
+    "concept": "bls.cpi.shelter_mom"
+   }
+  },
+  {
+   "series": "bls.cpi.rent_primary_residence_mom",
+   "cadence": "monthly",
+   "slug": "us-cpi-primary-rent-mom-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-12"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CUSR0000SEHA",
+     "sourceSeriesId": "CUSR0000SEHA",
+     "field": "CUSR0000SEHA",
+     "table": "Consumer Price Index, U.S. city average, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "615ac1b1-27e8-437d-bf69-86d760488dc0",
+    "concept": "bls.cpi.rent_primary_residence_mom"
+   }
+  },
+  {
+   "series": "bls.cpi.owners_equivalent_rent_mom",
+   "cadence": "monthly",
+   "slug": "us-cpi-owners-equivalent-rent-mom-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-12"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CUSR0000SEHC",
+     "sourceSeriesId": "CUSR0000SEHC",
+     "field": "CUSR0000SEHC",
+     "table": "Consumer Price Index, U.S. city average, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "d0dc87fb-fd6d-4234-832a-869d5b2d8f3d",
+    "concept": "bls.cpi.owners_equivalent_rent_mom"
+   }
+  },
+  {
+   "series": "bls.cpi.services_less_energy_mom",
+   "cadence": "monthly",
+   "slug": "us-cpi-services-less-energy-mom-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-12"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CUSR0000SASLE",
+     "sourceSeriesId": "CUSR0000SASLE",
+     "field": "CUSR0000SASLE",
+     "table": "Consumer Price Index, U.S. city average, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "3bab6696-88c0-44c8-988c-737d2d00c37c",
+    "concept": "bls.cpi.services_less_energy_mom"
+   }
+  },
+  {
+   "series": "bls.cpi.services_less_rent_shelter_mom",
+   "cadence": "monthly",
+   "slug": "us-cpi-services-less-rent-shelter-mom-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-12"
+   },
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CUSR0000SASL2RS",
+     "sourceSeriesId": "CUSR0000SASL2RS",
+     "field": "CUSR0000SASL2RS",
+     "table": "Consumer Price Index, U.S. city average, monthly seasonally adjusted",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "975e942b-d456-480d-859f-a9ffaffcfe34",
+    "concept": "bls.cpi.services_less_rent_shelter_mom"
+   }
+  },
+  {
+   "series": "bls.jolts.hires_rate",
+   "cadence": "monthly",
+   "slug": "jolts-hires-rate-{month}-{year}",
+   "seedPeriod": "2026-06",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/jolts.htm",
+   "releaseDates": {
+    "2026-06": "2026-08-04"
+   },
+   "extras": {
+    "targetUnit": "percent",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=JTSHIR",
+     "sourceSeriesId": "JTSHIR",
+     "field": "JTSHIR",
+     "table": "JOLTS news release, Table 1",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "3bddc6d0-e581-42dc-9c13-b731a9ede21f",
+    "concept": "bls.jolts.hires_rate"
+   }
+  },
+  {
+   "series": "bls.ces.average_hourly_earnings_private",
+   "cadence": "monthly",
+   "slug": "average-hourly-earnings-mom-{month}-{year}",
+   "extras": {
+    "targetUnit": "percent_growth",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CES0500000003",
+     "sourceSeriesId": "CES0500000003",
+     "field": "CES0500000003",
+     "table": "Employment Situation, Table B-3",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "0edb7ad9-0541-4bd2-9597-bffc9e73cd92",
+    "concept": "bls.ces.average_hourly_earnings_private_monthly_change"
+   }
+  },
+  {
+   "series": "bls.lns11300000",
+   "cadence": "monthly",
+   "slug": "labor-force-participation-{month_abbr}-{year}",
+   "extras": {
+    "targetUnit": "percent",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CIVPART",
+     "sourceSeriesId": "CIVPART",
+     "field": "CIVPART",
+     "table": "Employment Situation, Table A-1",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "0006af01-72ba-4e63-8d88-54500588f215",
+    "concept": "bls.lns11300000"
+   }
+  },
+  {
+   "series": "bls.cps.u6_underemployment_rate",
+   "cadence": "monthly",
+   "slug": "u6-underemployment-rate-{month}-{year}",
+   "seedPeriod": "2026-07",
+   "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+   "releaseDates": {
+    "2026-07": "2026-08-07"
+   },
+   "extras": {
+    "targetUnit": "percent",
+    "sourceBinding": {
+     "adapter": "alfred-fred",
+     "sourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=U6RATE",
+     "sourceSeriesId": "U6RATE",
+     "field": "U6RATE",
+     "table": "Employment Situation, Table A-15",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "e0be267e-d74c-4ad2-a5cd-5ac9f821e018",
+    "concept": "bls.cps.u6_underemployment_rate"
+   }
+  },
+  {
+   "series": "usaspending.dod.prime_award_obligations",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-dod-prime-award-obligations-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1e-09,
+    "targetUnit": "billions USD",
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+     "sourceSeriesId": "usaspending.agency.097.awards.obligations",
+     "field": "obligations",
+     "table": "USAspending API v2, agency 097 (DoD) award summary, prime award obligations, fiscal year to date",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-09
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "a2649fd9-f382-4003-ba70-01030bc93b5e",
+    "concept": "usaspending.dod.prime_award_obligations"
+   }
+  },
+  {
+   "series": "usaspending.dod.prime_contract_obligations",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-dod-prime-contract-obligations-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1e-09,
+    "targetUnit": "billions USD",
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year={fiscal_year}",
+     "sourceSeriesId": "usaspending.agency.097.obligations_by_award_category.contracts",
+     "field": "results[category=contracts].aggregated_amount",
+     "table": "USAspending API v2, agency 097 (DoD) obligations by award category, contracts row, fiscal year to date",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-09
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "11ea0d3d-fab9-42bb-b679-3471d4b60323",
+    "concept": "usaspending.dod.prime_contract_obligations"
+   }
+  },
+  {
+   "series": "usaspending.dod.new_prime_awards",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-dod-new-prime-awards-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1e-06,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year={fiscal_year}",
+     "sourceSeriesId": "usaspending.agency.097.awards.new_award_count",
+     "field": "new_award_count",
+     "table": "USAspending API v2, agency 097 (DoD) new award count, fiscal year to date",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-06
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "8146ecb0-3ef3-49eb-b8a0-e61d15aa276e",
+    "concept": "usaspending.dod.new_prime_awards"
+   }
+  },
+  {
+   "series": "usaspending.dod.prime_award_transactions",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-dod-prime-award-transactions-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1e-06,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+     "sourceSeriesId": "usaspending.agency.097.awards.transaction_count",
+     "field": "transaction_count",
+     "table": "USAspending API v2, agency 097 (DoD) award summary, transaction count, fiscal year to date",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-06
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "82ff2d7f-04ee-4366-8fe4-b8e919e6efa6",
+    "concept": "usaspending.dod.prime_award_transactions"
+   }
+  },
+  {
+   "series": "usaspending.dod.unique_prime_contract_recipients",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-dod-unique-prime-contract-recipients-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 0.001,
+    "targetUnit": "thousands",
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+     "sourceSeriesId": "usaspending.search.spending_by_category.recipient.dod.contracts.distinct",
+     "field": "results[].recipient_id",
+     "table": "USAspending API v2 advanced search, DoD prime-contract obligations grouped by recipient, fiscal year to date",
+     "transform": {
+      "operation": "count_distinct",
+      "requestMethod": "POST",
+      "fiscalYear": "{fiscal_year}",
+      "spendingLevel": "transactions",
+      "agency": {
+       "type": "awarding",
+       "tier": "toptier",
+       "name": "Department of Defense"
+      },
+      "awardTypeCodes": [
+       "A",
+       "B",
+       "C",
+       "D"
+      ],
+      "identityField": "recipient_id",
+      "excludeNullIdentity": true,
+      "pageSize": 100,
+      "factor": 0.001
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "96d17026-b54c-4409-98c9-339b6725fde7",
+    "concept": "usaspending.dod.unique_prime_contract_recipients"
+   }
+  },
+  {
+   "series": "usaspending.dod.small_business_contract_obligation_share",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-dod-small-business-contract-obligation-share-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1,
+    "targetUnit": "percent",
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+     "sourceSeriesId": "usaspending.search.spending_over_time.dod.contracts.small_business_obligation_share",
+     "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+     "table": "USAspending API v2 advanced search, small-business share of DoD prime-contract obligations, fiscal year to date",
+     "transform": {
+      "operation": "ratio_percent",
+      "requestMethod": "POST",
+      "fiscalYear": "{fiscal_year}",
+      "group": "fiscal_year",
+      "spendingLevel": "transactions",
+      "agency": {
+       "type": "awarding",
+       "tier": "toptier",
+       "name": "Department of Defense"
+      },
+      "awardTypeCodes": [
+       "A",
+       "B",
+       "C",
+       "D"
+      ],
+      "numeratorRecipientTypeNames": [
+       "small_business"
+      ],
+      "denominatorRecipientTypeNames": [],
+      "factor": 1
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "91e3b668-cb4b-4682-94a5-7ae404a6565d",
+    "concept": "usaspending.dod.small_business_contract_obligation_share"
+   }
+  },
+  {
+   "series": "usaspending.dhs.title_vi.award_transaction_obligations",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-dhs-title-vi-award-transaction-obligations-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1,
+    "targetUnit": "usd",
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+     "sourceSeriesId": "usaspending.search.spending_over_time.dhs.title_vi.award_transaction_obligations",
+     "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+     "table": "USAspending API v2 advanced search, DHS Title VI award transactions filtered to named Treasury accounts, obligations by fiscal year",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1,
+      "requestMethod": "POST",
+      "fiscalYear": "{fiscal_year}",
+      "group": "fiscal_year",
+      "spendingLevel": "transactions",
+      "awardTypeCodes": [
+       "02",
+       "03",
+       "04",
+       "05",
+       "06",
+       "07",
+       "08",
+       "09",
+       "10",
+       "11",
+       "A",
+       "B",
+       "C",
+       "D",
+       "IDV_A",
+       "IDV_B",
+       "IDV_B_A",
+       "IDV_B_B",
+       "IDV_B_C",
+       "IDV_C",
+       "IDV_D",
+       "IDV_E"
+      ],
+      "treasuryAccountComponents": [
+       {
+        "aid": "070",
+        "bpoa": "2025",
+        "epoa": "2029",
+        "main": "0530",
+        "sub": "000"
+       },
+       {
+        "aid": "070",
+        "bpoa": "2025",
+        "epoa": "2029",
+        "main": "0532",
+        "sub": "000"
+       },
+       {
+        "aid": "070",
+        "bpoa": "2025",
+        "epoa": "2029",
+        "main": "0509",
+        "sub": "000"
+       },
+       {
+        "aid": "070",
+        "bpoa": "2025",
+        "epoa": "2029",
+        "main": "0510",
+        "sub": "000"
+       },
+       {
+        "aid": "070",
+        "bpoa": "2025",
+        "epoa": "2029",
+        "main": "0413",
+        "sub": "000"
+       },
+       {
+        "aid": "070",
+        "main": "0722"
+       }
+      ]
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "e64ea5db-b72a-4a46-8948-6142dbc59d91",
+    "concept": "usaspending.dhs.title_vi.award_transaction_obligations"
+   }
+  },
+  {
+   "series": "usaspending.cdfi.assistance_transaction_obligations",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-cdfi-assistance-transaction-obligations-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1e-06,
+    "targetUnit": "usd_millions",
+    "anchors": {
+     "2025": 319.455176
+    },
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+     "sourceSeriesId": "usaspending.search.spending_over_time.cdfi.program_obligations",
+     "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+     "table": "USAspending API v2 advanced search, CDFI Fund awarding-subagency financial-assistance award transactions, obligations by fiscal year",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-06,
+      "requestMethod": "POST",
+      "fiscalYear": "{fiscal_year}",
+      "group": "fiscal_year",
+      "spendingLevel": "transactions",
+      "agency": {
+       "name": "Community Development Financial Institutions Fund",
+       "tier": "subtier",
+       "type": "awarding"
+      },
+      "awardTypeCodes": [
+       "02",
+       "03",
+       "04",
+       "05",
+       "06",
+       "07",
+       "08",
+       "09",
+       "10",
+       "11"
+      ]
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "69834e1f-1fbf-432c-9913-6b391321b3a8",
+    "concept": "usaspending.cdfi.assistance_transaction_obligations"
+   },
+   "comment": "USAspending award-transaction aggregate for the CDFI Fund awarding subtier. Not all CDFI Fund financial-account obligations or outlays; not purchases, guarantees, loan-loss reserves, or other assistance authorized by S. 2718; not CDFI loan originations, liquidity, competitiveness, or other downstream outcomes; and no spending is attributed to the bill or amended section 113.",
+   "billSlugs": [
+    "cdfi-fund-s2718-119"
+   ]
+  },
+  {
+   "series": "usaspending.ondcp.hidta_al95001_obligations",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-ondcp-hidta-al95001-obligations-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1e-06,
+    "targetUnit": "usd_millions",
+    "anchors": {
+     "2025": 271.6576756
+    },
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+     "sourceSeriesId": "usaspending.search.spending_over_time.ondcp.hidta_program_obligations",
+     "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+     "table": "USAspending API v2 advanced search, financial-assistance award transactions filtered to Assistance Listing 95.001, obligations by fiscal year",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-06,
+      "requestMethod": "POST",
+      "fiscalYear": "{fiscal_year}",
+      "group": "fiscal_year",
+      "spendingLevel": "transactions",
+      "awardTypeCodes": [
+       "02",
+       "03",
+       "04",
+       "05",
+       "06",
+       "07",
+       "08",
+       "09",
+       "10",
+       "11"
+      ],
+      "programNumbers": [
+       "95.001"
+      ]
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "02662bfc-b77d-48f3-938b-7a5b2f9e5c73",
+    "concept": "usaspending.ondcp.hidta_al95001_obligations"
+   },
+   "comment": "The whole Assistance Listing 95.001 award-transaction aggregate. Not section 707(s) supplemental competitive grants or spending under a newly permitted purpose; not all HIDTA financial-account obligations, outlays, appropriations, budget authority, or authorization; and no spending is attributed to S. 767.",
+   "billSlugs": [
+    "hidta-enhancement-s767-119"
+   ]
+  },
+  {
+   "series": "usaspending.ntia.broadband_al11038_obligations",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-ntia-broadband-al11038-obligations-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1e-06,
+    "targetUnit": "usd_millions",
+    "anchors": {
+     "2025": 409.85240647
+    },
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+     "sourceSeriesId": "usaspending.search.spending_over_time.ntia.broadband_program_obligations",
+     "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+     "table": "USAspending API v2 advanced search, financial-assistance award transactions filtered to Assistance Listing 11.038, obligations by fiscal year",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-06,
+      "requestMethod": "POST",
+      "fiscalYear": "{fiscal_year}",
+      "group": "fiscal_year",
+      "spendingLevel": "transactions",
+      "awardTypeCodes": [
+       "02",
+       "03",
+       "04",
+       "05",
+       "06",
+       "07",
+       "08",
+       "09",
+       "10",
+       "11"
+      ],
+      "programNumbers": [
+       "11.038"
+      ]
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "f37307e0-91c6-49ee-afc7-2021e33ea863",
+    "concept": "usaspending.ntia.broadband_al11038_obligations"
+   },
+   "comment": "The Assistance Listing 11.038 award-transaction aggregate (FY2025 awards under this listing were assigned to NIST). Not the proposed 6G Task Force, its work, reports, recommendations, or outcomes; not all NTIA, NIST, Commerce, or FCC obligations or account 013-0565; and no spending is attributed to or treated as caused or authorized by H.R. 2449.",
+   "billSlugs": [
+    "future-networks-hr2449-119"
+   ]
+  },
+  {
+   "series": "usaspending.usfs.minnesota_place_of_performance_obligations",
+   "cadence": "annual",
+   "period": "FY2026",
+   "slug": "us-usfs-minnesota-place-of-performance-obligations-{period}",
+   "extras": {
+    "expectedReleaseWindow": {
+     "start": "2026-10-15",
+     "end": "2026-10-22"
+    },
+    "valueScale": 1e-06,
+    "targetUnit": "usd_millions",
+    "anchors": {
+     "2025": 46.83255679
+    },
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+     "sourceSeriesId": "usaspending.search.spending_over_time.usfs.minnesota_obligations",
+     "field": "results[time_period.fiscal_year={fiscal_year}].aggregated_amount",
+     "table": "USAspending API v2 advanced search, prime award transactions filtered to the Forest Service awarding subagency and Minnesota place of performance, obligations by fiscal year",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-06,
+      "requestMethod": "POST",
+      "fiscalYear": "{fiscal_year}",
+      "group": "fiscal_year",
+      "spendingLevel": "transactions",
+      "agency": {
+       "name": "Forest Service",
+       "tier": "subtier",
+       "toptier_name": "Department of Agriculture",
+       "type": "awarding"
+      },
+      "awardTypeCodes": [
+       "02",
+       "03",
+       "04",
+       "05",
+       "06",
+       "07",
+       "08",
+       "09",
+       "10",
+       "11",
+       "A",
+       "B",
+       "C",
+       "D",
+       "IDV_A",
+       "IDV_B",
+       "IDV_B_A",
+       "IDV_B_B",
+       "IDV_B_C",
+       "IDV_C",
+       "IDV_D",
+       "IDV_E"
+      ],
+      "placeOfPerformanceLocations": [
+       {
+        "country": "USA",
+        "state": "MN"
+       }
+      ]
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "720be189-a4a5-4b0c-a25c-49233ff388a4",
+    "concept": "usaspending.usfs.minnesota_place_of_performance_obligations"
+   },
+   "comment": "Minnesota-wide award-transaction context only, not Superior National Forest obligations or activity confined to the bill's covered lands; not H.R. 978 implementation, mineral instruments, or deadline compliance; and no spending is attributed to or treated as caused by H.R. 978.",
+   "billSlugs": [
+    "superior-national-forest-hr978-119"
+   ]
+  },
+  {
+   "series": "bls.qcew.child_day_care_services.annual_avg_employment",
+   "cadence": "annual",
+   "period": "2026",
+   "seedPeriod": "2026",
+   "slug": "us-private-child-day-care-annual-average-employment-{year}",
+   "releaseCalendarUrl": "https://www.bls.gov/cew/release-calendar.htm",
+   "releaseDates": {
+    "2025": "2026-06-02"
+   },
+   "extras": {
+    "country": "US",
+    "valueScale": 1,
+    "targetUnit": "count",
+    "anchors": {
+     "2023": 954796,
+     "2024": 983412,
+     "2025": 991735
+    },
+    "sourceBinding": {
+     "adapter": "bls-qcew",
+     "sourceUrl": "https://www.bls.gov/cew/downloadable-data-files.htm",
+     "sourceSeriesId": "area_fips=US000;own_code=5;industry_code=624410;agglvl_code=18;size_code=0;qtr=A",
+     "field": "annual_avg_emplvl",
+     "table": "QCEW NAICS-based annual averages industry CSV, U.S. total, private ownership, NAICS 624410 Child care services",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "c6c98b8b-55f6-4543-b057-96726c38a2bf",
+    "concept": "bls.qcew.child_day_care_services.annual_avg_employment"
+   },
+   "comment": "National private child-day-care payroll employment context. Not rural-county employment, all-ownership coverage, self-employment, slots/affordability/capacity, or any employment change caused by or attributable to the bill.",
+   "billSlugs": [
+    "farm-bill-2-0"
+   ]
+  },
+  {
+   "series": "eia.ng.vented_flared.us.annual",
+   "cadence": "annual",
+   "period": "2025",
+   "seedPeriod": "2025",
+   "slug": "us-natural-gas-vented-flared-{period}",
+   "extras": {
+    "country": "US",
+    "valueScale": 1,
+    "targetUnit": "million_cubic_feet",
+    "resolutionDate": "2026-10-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2026-10-01",
+     "end": "2026-10-31"
+    },
+    "anchors": {
+     "2022": 271682,
+     "2023": 324207,
+     "2024": 335163
+    },
+    "sourceBinding": {
+     "adapter": "eia-dnav-xls",
+     "sourceUrl": "https://www.eia.gov/dnav/ng/hist/n9040us2a.htm",
+     "sourceSeriesId": "N9040US2",
+     "field": "annual_value_mmcf",
+     "table": "EIA DNav U.S. Natural Gas Vented and Flared annual history workbook, Data 1 sheet",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "52011655-2184-4c46-9f22-a97d5db88959",
+    "concept": "eia.ng.vented_flared.us.annual"
+   },
+   "comment": "Broad U.S. natural-gas venting-and-flaring outcome and timing-tracking context only. Not facility-level activity, compliance, enforcement, fees, or emissions reductions under S. 1188; no annual value or change is attributed to or treated as caused by the FLARE Act.",
+   "billSlugs": [
+    "flare-act-s1188-119"
+   ]
+  },
+  {
+   "series": "bls.cps.employed_people_by_occupation.business_financial_operations",
+   "cadence": "monthly",
+   "slug": "cps-business-financial-employment-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+     "sourceSeriesId": "bls.cps.employed_people_by_occupation.business_financial_operations",
+     "field": "Business and financial operations occupations",
+     "table": "CPS Employment Situation Table A-19, employed persons by occupation, not seasonally adjusted (thousands)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "3cbdbc7f-3e6b-4b76-8758-57e519906bd4",
+    "concept": "bls.cps.employed_people_by_occupation.business_financial_operations"
+   }
+  },
+  {
+   "series": "bls.cps.employed_people_by_occupation.computer_mathematical",
+   "cadence": "monthly",
+   "slug": "cps-computer-math-employment-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+     "sourceSeriesId": "bls.cps.employed_people_by_occupation.computer_mathematical",
+     "field": "Computer and mathematical occupations",
+     "table": "CPS Employment Situation Table A-19, employed persons by occupation, not seasonally adjusted (thousands)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "54f19551-6288-48e2-9fa0-17933e55d390",
+    "concept": "bls.cps.employed_people_by_occupation.computer_mathematical"
+   }
+  },
+  {
+   "series": "bls.cps.employed_people_by_occupation.healthcare_support",
+   "cadence": "monthly",
+   "slug": "cps-healthcare-support-employment-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+     "sourceSeriesId": "bls.cps.employed_people_by_occupation.healthcare_support",
+     "field": "Healthcare support occupations",
+     "table": "CPS Employment Situation Table A-19, employed persons by occupation, not seasonally adjusted (thousands)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "25457957-df59-4e16-ae3f-431b4c63e7bf",
+    "concept": "bls.cps.employed_people_by_occupation.healthcare_support"
+   }
+  },
+  {
+   "series": "bls.cps.employed_people_by_occupation.office_administrative_support",
+   "cadence": "monthly",
+   "slug": "cps-office-admin-employment-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+     "sourceSeriesId": "bls.cps.employed_people_by_occupation.office_administrative_support",
+     "field": "Office and administrative support occupations",
+     "table": "CPS Employment Situation Table A-19, employed persons by occupation, not seasonally adjusted (thousands)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "2316f164-f13f-4025-980c-b92cc46b4d1a",
+    "concept": "bls.cps.employed_people_by_occupation.office_administrative_support"
+   }
+  },
+  {
+   "series": "bls.cps.employed_people_by_occupation.production",
+   "cadence": "monthly",
+   "slug": "cps-production-employment-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+     "sourceSeriesId": "bls.cps.employed_people_by_occupation.production",
+     "field": "Production occupations",
+     "table": "CPS Employment Situation Table A-19, employed persons by occupation, not seasonally adjusted (thousands)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "3240539a-c5b8-43de-a240-cc6754fb59aa",
+    "concept": "bls.cps.employed_people_by_occupation.production"
+   }
+  },
+  {
+   "series": "bls.cps.employed_people_by_occupation.transportation_material_moving",
+   "cadence": "monthly",
+   "slug": "cps-transport-material-moving-employment-{month}-{year}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "millions",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "sourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+     "sourceSeriesId": "bls.cps.employed_people_by_occupation.transportation_material_moving",
+     "field": "Transportation and material moving occupations",
+     "table": "CPS Employment Situation Table A-19, employed persons by occupation, not seasonally adjusted (thousands)",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "e2502908-1e16-46e3-b330-4d6612e510c2",
+    "concept": "bls.cps.employed_people_by_occupation.transportation_material_moving"
+   }
+  },
+  {
+   "series": "abs.labour.employment_change.australia",
+   "cadence": "monthly",
+   "slug": "abs-labour-employment-change-australia-{month}-{year}",
+   "extras": {
+    "valueScale": 1,
+    "targetUnit": "thousands",
+    "country": "AU",
+    "sourceBinding": {
+     "adapter": "generic-url",
+     "field": "LF/M3.3.1599.20.AUS.M",
+     "releasePolicy": "first_print",
+     "sourceSeriesId": "LF/M3.3.1599.20.AUS.M",
+     "sourceUrl": "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+     "table": "Labour Force, Australia (dataflow LF: employed persons, seasonally adjusted, Australia; month-over-month change)",
+     "transform": {
+      "factor": 1,
+      "operation": "identity"
+     }
+    }
+   },
+   "ledger": {
+    "uuid": "ab7e3632-e9d3-453e-bdc5-aa5a8dca77c9",
+    "concept": "abs.labour.employment_change.australia"
+   }
+  },
+  {
+   "series": "usda.fsa.crp.enrolled_acres_total",
+   "cadence": "monthly",
+   "slug": "us-crp-enrolled-acres-{month}-{year}",
+   "period": "2027-09",
+   "comment": "Fresh 2026-08-13 registration after the 2026-08-03 pair terminated unforecast when its sole FSA source remained unreachable through the published grace deadline. FSA recovered on 2026-08-13 at https://www.fsa.usda.gov/tools/informational/reports/conservation-statistics/crp; these arms preserve the same legal-state design but use new source-recovered identity tokens and a new post-recovery information set.",
+   "conditionalPair": {
+    "conditionDeadline": "2027-09-30",
+    "arms": [
+     {
+      "catalogSlug": "us-crp-enrolled-acres-september-2027-ceiling-27-million-source-recovered-2026-08-13",
+      "dataPointId": "usda.fsa.crp.enrolled_acres_total.2027_09.first_print.ceiling_27_million_source_recovered_2026_08_13",
+      "conditionId": "cond.crp-acreage-ceiling-fy2027-31.enacted",
+      "conditional": "an enacted farm bill sets the CRP acreage ceiling at 27,000,000 acres for FY2027-31"
+     },
+     {
+      "catalogSlug": "us-crp-enrolled-acres-september-2027-no-fy2027-31-ceiling-source-recovered-2026-08-13",
+      "dataPointId": "usda.fsa.crp.enrolled_acres_total.2027_09.first_print.no_fy2027_31_ceiling_source_recovered_2026_08_13",
+      "conditionId": "cond.crp-acreage-ceiling-fy2027-31.current-law",
+      "conditional": "No farm bill enacted by 2027-09-30 sets a CRP acreage ceiling for fiscal years 2027 through 2031; current law holds."
+     }
+    ]
+   },
+   "extras": {
+    "valueScale": 1,
+    "targetUnit": "count",
+    "country": "US",
+    "resolutionDate": "2027-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2027-12-01",
+     "end": "2027-12-31"
+    },
+    "anchors": {
+     "2025-11": 26317011,
+     "2026-03": 26203615,
+     "2026-04": 26182019
+    },
+    "sourceBinding": {
+     "adapter": "fsa-crp-monthly-summary",
+     "sourceUrl": "https://www.fsa.usda.gov/tools/informational/reports/conservation-statistics/crp",
+     "sourceSeriesId": "usda.fsa.crp.enrolled_acres_total",
+     "field": "enrolled_acres_total",
+     "table": "USDA FSA Conservation Reserve Program Statistics, CRP Monthly Summary, total row",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "4266e63f-dbf3-4c86-be8d-44315dbe32e3",
+    "concept": "usda.fsa.crp.enrolled_acres_total"
+   }
+  },
+  {
+   "series": "irs.soi.credit_30d.total_claims",
+   "cadence": "annual",
+   "period": "2027",
+   "seedPeriod": "2027",
+   "slug": "clean-vehicle-credit-total-claims-ty{period}",
+   "extras": {
+    "valueScale": 1,
+    "targetUnit": "count",
+    "country": "US",
+    "resolutionDate": "2030-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2029-01-01",
+     "end": "2030-12-31"
+    },
+    "anchors": {
+     "2020": 61793,
+     "2021": 166244,
+     "2022": 248052,
+     "2023": 493953
+    },
+    "sourceBinding": {
+     "adapter": "irs-soi-pub1304",
+     "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+     "sourceSeriesId": "irs.soi.credit_30d.total_claims",
+     "field": "clean_vehicle_credit_returns",
+     "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, clean vehicle credit or qualified plug-in electric vehicle credit, number of returns",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "f5eacf8a-ce09-4721-a92a-9b19766a0d3c",
+    "concept": "irs.soi.credit_30d.total_claims"
+   }
+  },
+  {
+   "series": "irs.soi.credit_30d.total_credit_amount",
+   "cadence": "annual",
+   "period": "2027",
+   "seedPeriod": "2027",
+   "slug": "clean-vehicle-credit-total-credit-amount-ty{period}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "usd_millions",
+    "country": "US",
+    "resolutionDate": "2030-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2029-01-01",
+     "end": "2030-12-31"
+    },
+    "anchors": {
+     "2020": 313.118,
+     "2021": 1037.358,
+     "2022": 1652.554,
+     "2023": 3231.102
+    },
+    "sourceBinding": {
+     "adapter": "irs-soi-pub1304",
+     "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+     "sourceSeriesId": "irs.soi.credit_30d.total_credit_amount",
+     "field": "clean_vehicle_credit_amount",
+     "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, clean vehicle credit or qualified plug-in electric vehicle credit, amount",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "c70d0bc6-d299-4727-959a-3c7bdb324861",
+    "concept": "irs.soi.credit_30d.total_credit_amount"
+   }
+  },
+  {
+   "series": "irs.actc.total_credit_amount",
+   "cadence": "annual",
+   "period": "2027",
+   "seedPeriod": "2027",
+   "slug": "additional-child-tax-credit-total-credit-amount-ty{period}",
+   "extras": {
+    "valueScale": 0.001,
+    "targetUnit": "usd_millions",
+    "country": "US",
+    "resolutionDate": "2030-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2029-01-01",
+     "end": "2030-12-31"
+    },
+    "anchors": {
+     "2020": 33664.804,
+     "2021": 115869.125,
+     "2022": 34843.071,
+     "2023": 34533.251
+    },
+    "sourceBinding": {
+     "adapter": "irs-soi-pub1304",
+     "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+     "sourceSeriesId": "irs.actc.total_credit_amount",
+     "field": "refundable_child_tax_credit_amount",
+     "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, amount",
+     "transform": {
+      "operation": "multiply",
+      "factor": 0.001
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "05d4b329-d6c0-4050-ab25-f1a1deddf465",
+    "concept": "irs.actc.total_credit_amount"
+   }
+  },
+  {
+   "series": "irs.actc.total_claims",
+   "cadence": "annual",
+   "period": "2027",
+   "conditionalPair": {
+    "conditionDeadline": "2027-12-31",
+    "arms": [
+     {
+      "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+      "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+      "conditionId": "cond.s3596-actc-threshold.enacted",
+      "conditional": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027."
+     },
+     {
+      "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+      "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+      "conditionId": "cond.s3596-actc-threshold.current-law",
+      "conditional": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount."
+     }
+    ]
+   },
+   "extras": {
+    "valueScale": 1e-06,
+    "targetUnit": "millions",
+    "country": "US",
+    "resolutionDate": "2029-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2029-01-01",
+     "end": "2029-12-31"
+    },
+    "anchors": {
+     "2020": 19.119,
+     "2021": 37.772,
+     "2022": 18.077,
+     "2023": 17.626
+    },
+    "sourceBinding": {
+     "adapter": "irs-soi-pub1304",
+     "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+     "sourceSeriesId": "irs.actc.total_claims",
+     "field": "refundable_child_tax_credit_returns",
+     "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-06
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "23396038-b31d-43cd-be08-4aa9fe916b56",
+    "concept": "irs.actc.total_claims"
+   }
+  },
+  {
+   "series": "census.spm.child_poverty_rate",
+   "cadence": "annual",
+   "period": "2027",
+   "comment": "Anchors are intentionally absent until Census publishes the revised-methodology 2019-2024 SPM estimates announced for September 2026; current-method prints are not comparable calibration anchors.",
+   "conditionalPair": {
+    "conditionDeadline": "2027-12-31",
+    "arms": [
+     {
+      "catalogSlug": "spm-child-poverty-rate-cy2027-threshold-one-dollar",
+      "dataPointId": "census.spm.child_poverty_rate.2027.first_print.threshold_one_dollar",
+      "conditionId": "cond.s3596-actc-threshold.enacted",
+      "conditional": "For the CY2027 Census Supplemental Poverty Measure child-poverty outcome, legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027."
+     },
+     {
+      "catalogSlug": "spm-child-poverty-rate-cy2027-current-law",
+      "dataPointId": "census.spm.child_poverty_rate.2027.first_print.current_law",
+      "conditionId": "cond.s3596-actc-threshold.current-law",
+      "conditional": "For the CY2027 Census Supplemental Poverty Measure child-poverty outcome, no legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount."
+     }
+    ]
+   },
+   "extras": {
+    "valueScale": 1,
+    "targetUnit": "percent",
+    "country": "US",
+    "resolutionDate": "2028-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2028-08-01",
+     "end": "2028-12-31"
+    },
+    "resolutionSource": "U.S. Census Bureau revised-SPM methodology announcement (identity) and Poverty in the United States: 2027, Supplemental Poverty Measure Table B-2 (resolving artifact)",
+    "resolutionSourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+    "resolutionRule": "Resolve to the first Census annual income-and-poverty release artifact for CY2027 using the revised SPM methodology whose identity is authenticated by the registered 2026-07-17 Census announcement: Poverty in the United States: 2027, Supplemental Poverty Measure Table B-2, ALL RACES 2027 row, Under 18 years / Below Poverty / Percent column. The 2028-08-01 through 2028-12-31 expected release window and 2028-12-31 resolve-by deadline are Thesis lab commitments; the announcement does not establish either timing value. Record the published percent without scaling or rounding and ignore later revisions.",
+    "sourceBinding": {
+     "adapter": "census-spm-annual-report",
+     "sourceUrl": "https://www.census.gov/newsroom/press-releases/2026/statement-on-supplemental-poverty-measure.html",
+     "sourceSeriesId": "census.spm.child_poverty_rate",
+     "field": "under_18_percent_in_poverty",
+     "table": "Poverty in the United States annual income-and-poverty release, revised-methodology Supplemental Poverty Measure Table B-2, ALL RACES year row, Under 18 years / Below Poverty / Percent column",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "37841d30-5bd6-42a0-aea7-fc7b6d32dbcc",
+    "concept": "census.spm.child_poverty_rate"
+   }
+  },
+  {
+   "series": "sba.disaster.loan_program.charge_off_amount",
+   "cadence": "annual",
+   "period": "2026",
+   "seedPeriod": "2026",
+   "slug": "sba-disaster-loan-program-charge-off-amount-fy{period}",
+   "extras": {
+    "valueScale": 1,
+    "targetUnit": "usd",
+    "country": "US",
+    "resolutionDate": "2028-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2026-10-01",
+     "end": "2028-12-31"
+    },
+    "anchors": {
+     "2024": 299971326
+    },
+    "sourceBinding": {
+     "adapter": "sba-loan-program-performance-pdf",
+     "sourceUrl": "https://legacy.sba.gov/document/report-small-business-administration-loan-program-performance",
+     "sourceSeriesId": "sba.disaster.loan_program.charge_off_amount",
+     "field": "Disaster / Disaster",
+     "table": "Table 5 - Charge Off Amount by Program",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "c0b2e780-847d-4780-8671-c8b38f0ad3d6",
+    "concept": "sba.disaster.loan_program.charge_off_amount"
+   }
+  },
+  {
+   "series": "sba.disaster.loan_program.charge_off_rate_upb",
+   "cadence": "annual",
+   "period": "2026",
+   "seedPeriod": "2026",
+   "slug": "sba-disaster-loan-program-charge-off-rate-upb-fy{period}",
+   "extras": {
+    "valueScale": 1,
+    "targetUnit": "percent",
+    "country": "US",
+    "resolutionDate": "2028-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2026-10-01",
+     "end": "2028-12-31"
+    },
+    "anchors": {
+     "2024": 3.06
+    },
+    "sourceBinding": {
+     "adapter": "sba-loan-program-performance-pdf",
+     "sourceUrl": "https://legacy.sba.gov/document/report-small-business-administration-loan-program-performance",
+     "sourceSeriesId": "sba.disaster.loan_program.charge_off_rate_upb",
+     "field": "Disaster / Disaster",
+     "table": "Table 9 - Charge Off Rates as a Percent of Unpaid Principal Balance (UPB) Amount by Program",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "0b925fe8-b841-4d0e-84f7-65bef6fc611c",
+    "concept": "sba.disaster.loan_program.charge_off_rate_upb"
+   }
+  },
+  {
+   "series": "sba.disaster.loan_program.post_charge_off_recovery",
+   "cadence": "annual",
+   "period": "2026",
+   "seedPeriod": "2026",
+   "slug": "sba-disaster-loan-program-post-charge-off-recovery-fy{period}",
+   "extras": {
+    "valueScale": 1,
+    "targetUnit": "usd",
+    "country": "US",
+    "resolutionDate": "2028-12-31",
+    "resolutionDateBasis": "resolve-by-bound",
+    "expectedReleaseWindow": {
+     "start": "2026-10-01",
+     "end": "2028-12-31"
+    },
+    "anchors": {
+     "2024": 126510000
+    },
+    "sourceBinding": {
+     "adapter": "sba-loan-program-performance-pdf",
+     "sourceUrl": "https://legacy.sba.gov/document/report-small-business-administration-loan-program-performance",
+     "sourceSeriesId": "sba.disaster.loan_program.post_charge_off_recovery",
+     "field": "Disaster / Disaster",
+     "table": "Table 7 - Post-Charge Off Recovery Amount by Program",
+     "transform": {
+      "operation": "identity",
+      "factor": 1
+     },
+     "releasePolicy": "first_print"
+    }
+   },
+   "ledger": {
+    "uuid": "282e0e7a-6290-4114-aaf8-caaf96b99418",
+    "concept": "sba.disaster.loan_program.post_charge_off_recovery"
+   }
+  },
+  {
+   "series": "usaspending.dod.prime_award_obligations",
+   "cadence": "annual",
+   "period": "2027",
+   "comment": "Both arms measure the same registered query: DoD (agency 097) prime award obligations for fiscal year 2027, snapshot in the 2027-10 window. The pair reads the timing-of-authorization question - obligations under an enacted FY2027 NDAA versus under continuing-resolution authority - and never attributes any specific program, award, or dollar to the Act.",
+   "conditionalPair": {
+    "conditionDeadline": "2026-12-31",
+    "arms": [
+     {
+      "catalogSlug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+      "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted",
+      "conditionId": "cond.fy27-ndaa-enactment.enacted",
+      "conditional": "An Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress, House Report 119-698) is enacted into law on or before 2026-12-31."
+     },
+     {
+      "catalogSlug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+      "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+      "conditionId": "cond.fy27-ndaa-enactment.not-enacted",
+      "conditional": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31."
+     }
+    ]
+   },
+   "extras": {
+    "country": "US",
+    "expectedReleaseWindow": {
+     "start": "2027-10-15",
+     "end": "2027-10-22"
+    },
+    "valueScale": 1e-09,
+    "targetUnit": "billions USD",
+    "sourceBinding": {
+     "adapter": "usaspending-api",
+     "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+     "sourceSeriesId": "usaspending.agency.097.awards.obligations",
+     "field": "obligations",
+     "table": "USAspending API v2, agency 097 (DoD) award summary, prime award obligations, fiscal year to date",
+     "transform": {
+      "operation": "multiply",
+      "factor": 1e-09
+     },
+     "releasePolicy": "registered_query_snapshot"
+    }
+   },
+   "ledger": {
+    "uuid": "a2649fd9-f382-4003-ba70-01030bc93b5e",
+    "concept": "usaspending.dod.prime_award_obligations"
+   }
+  }
+ ]
+}

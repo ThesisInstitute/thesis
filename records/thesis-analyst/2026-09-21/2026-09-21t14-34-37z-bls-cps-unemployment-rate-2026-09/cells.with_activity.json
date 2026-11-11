@@ -1,0 +1,1327 @@
+[
+  {
+    "slug": "unemployment-rate-september-2026",
+    "country": "US",
+    "type": "data",
+    "title": "US unemployment rate, September 2026",
+    "question": "What will the first-print seasonally adjusted unemployment rate for the total civilian labor force, 16 years and over, be in the BLS Employment Situation household survey table A-1 for September 2026?",
+    "unit": "percent",
+    "pointEstimate": 4.1,
+    "ciLow": 4,
+    "ciHigh": 4.2,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-02",
+    "resolutionSource": "U.S. Bureau of Labor Statistics Employment Situation",
+    "resolutionSourceUrl": "https://www.bls.gov/news.release/empsit.nr0.htm",
+    "resolutionRule": "Resolve to the first-print seasonally adjusted unemployment rate for total civilian labor force, 16 years and over, in BLS Employment Situation household survey table A-1 for September 2026, as initially published on October 2, 2026. Use the value rounded to one decimal percent as printed by BLS; do not use later revisions, annual seasonal-factor revisions, corrected subsequent database vintages, or same-day corrections unless BLS replaces the initial release before public availability.",
+    "dataPointId": "bls.cps.unemployment_rate.september_2026.first_print",
+    "historicalContext": [
+      {
+        "label": "March 2026",
+        "value": 4.3,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 4.3,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 4.3,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 4.2,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": 4.1,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "August 2026",
+        "value": 4.1,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      }
+    ],
+    "drivers": [
+      "Recent CPS unemployment rate has drifted down from 4.3 to 4.1 percent",
+      "Persistence is the strongest monthly prior for the unemployment rate",
+      "Payroll employment still increased through August, reducing near-term upside pressure",
+      "Household-survey sampling noise and labor-force participation moves can shift the rounded one-decimal print"
+    ],
+    "sourceContext": [
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/LNS14000000?startyear=2025&endyear=2026",
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001?startyear=2026&endyear=2026",
+      "https://www.bls.gov/schedule/news_release/empsit.htm",
+      "https://www.bls.gov/schedule/2026/10_sched_list.htm",
+      "https://www.bls.gov/news.release/empsit.nr0.htm"
+    ],
+    "runAt": "2026-09-21T14:36:42Z",
+    "thresholdLadder": {
+      "thresholds": [
+        3.9,
+        3.95,
+        4,
+        4.05,
+        4.1,
+        4.15,
+        4.2,
+        4.24,
+        4.3,
+        4.4,
+        4.5
+      ],
+      "cumulativeProbabilities": [
+        0.05,
+        0.1,
+        0.18,
+        0.32,
+        0.5,
+        0.68,
+        0.82,
+        0.9,
+        0.95,
+        0.98,
+        0.99
+      ]
+    },
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast for September 2026 BLS CPS unemployment rate"
+      },
+      {
+        "kind": "text",
+        "text": "Resolver: use BLS Employment Situation household survey table A-1, seasonally adjusted unemployment rate for the total civilian labor force, 16 years and over, series LNS14000000, first print for September 2026, rounded to one decimal percent. The BLS schedule observed this run lists Employment Situation for September 2026 on October 2, 2026 at 8:30 a.m. ET; fetch_source calls to BLS schedule pages returned 403 in the evidence channel, so the schedule verification is from public BLS search excerpts rather than a captured response receipt."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0001 to BLS public API series LNS14000000 for 2025-2026",
+        "result": "Fetched official CPS unemployment-rate values included 2026-08 4.1, 2026-07 4.1, 2026-06 4.2, 2026-05 4.3, 2026-04 4.3, 2026-03 4.3, plus 2025-12 4.4 and 2025-11 4.5; October 2025 was unavailable due to the 2025 lapse in appropriations."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0011 to BLS public API series CES0000000001 for total nonfarm payroll employment",
+        "result": "Fetched payroll levels were 159075 thousand in 2026-08, 158913 thousand in 2026-07, 158892 thousand in 2026-06, 158861 thousand in 2026-05, 158798 thousand in 2026-04, and 158650 thousand in 2026-03."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate and reference class: for a monthly level rate like unemployment, the outside view is high persistence around the latest print. The six most recent official CPS unemployment observations were 4.3, 4.3, 4.3, 4.2, 4.1, and 4.1 percent from March through August 2026, all using the same seasonally adjusted CPS variant as the target."
+      },
+      {
+        "kind": "tool",
+        "tool": "calculator",
+        "call": "calculate call-0006 stdev(diff(history)) using [4.3,4.3,4.3,4.2,4.1,4.1]",
+        "result": "Successive monthly changes were 0.0, 0.0, -0.1, -0.1, and 0.0 percentage point; sample sigma = 0.05477225575051666."
+      },
+      {
+        "kind": "tool",
+        "tool": "calculator",
+        "call": "calculate call-0007 1.28*sigma from call-0006 and call-0008 mean(history)",
+        "result": "The recent-history 80 percent normal half-width proxy was 1.28*sigma = 0.07010848736066133, and the six-month mean level was 4.216666666666667."
+      },
+      {
+        "kind": "math",
+        "text": "Ladder: P(X <= 3.9) = 0.05; P(X <= 3.95) = 0.10; P(X <= 4.0) = 0.18; P(X <= 4.05) = 0.32; P(X <= 4.1) = 0.50; P(X <= 4.15) = 0.68; P(X <= 4.2) = 0.82; P(X <= 4.24) = 0.90; P(X <= 4.3) = 0.95; P(X <= 4.4) = 0.98; P(X <= 4.5) = 0.99. Linear interpolation gives latent q10 = 3.95, median = 4.10, and q90 = 4.24, which round to printed-value bounds of 4.0, 4.1, and 4.2 percent at the BLS one-decimal precision."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior starts at the August 2026 unemployment rate of 4.1 percent; historical sample is the March-August 2026 official CPS LNS14000000 sequence. Level effect is anchored at 4.1 after the recent 4.3 to 4.1 drift, momentum effect is modestly downward but fading because July and August were both 4.1, one-off household-survey noise is symmetric, and the payroll-policy mechanism is not signaling a sharp September break. From call-0006, sigma = 0.05477225575051666 for recent successive changes, so 1.28*sigma = 0.07010848736066133 as the simple 80 percent half-width. The ladder-implied latent 80 percent interval is 3.95 to 4.24, a full width of 0.29 and half-width of 0.145, about 2.07 times the simple sigma half-width; I widen because the target is a rounded first print still unreleased, household-survey sampling noise can dominate the last-six-change dispersion, and a single labor-force participation swing can move the unemployment rate by a tenth."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk is a September labor-force increase with weak household employment that pushes the rounded print to 4.3 or higher; downside risk is a rebound in household employment or lower participation that keeps the print at 4.0 or below. A recessionary household-employment break would land above the interval, while a large participation drop with steady employment would land below the interval."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the interval-clarity critique by treating 1.28*sigma as a half-width, comparing it to the ladder-implied half-width, and removing the dangling call reference; also clarified that the published 80 percent bounds are rounded printed-value bounds from latent q10/q90 ladder interpolation."
+      },
+      {
+        "kind": "forecast",
+        "point": 4.1,
+        "ciLow": 4,
+        "ciHigh": 4.2
+      }
+    ],
+    "agentReportedRunAt": "2026-09-21T14:35:00Z",
+    "runStartedAt": "2026-09-21T14:34:37Z",
+    "promptMode": "ladder",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "targetContentHash": "4f9351e9599bb007177abdf8c158ee801328243b30407e6ff10d9b25084c2d8a",
+    "targetRegistrationPath": "records/targets/2026-09-04-4f9351e9599bb007177abdf8c158ee801328243b30407e6ff10d9b25084c2d8a.json",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 3.85,
+        "upper": 4.5
+      },
+      "points": [
+        {
+          "value": 3.85,
+          "probability": 0.0
+        },
+        {
+          "value": 3.85325,
+          "probability": 0.00325
+        },
+        {
+          "value": 3.8565,
+          "probability": 0.0065
+        },
+        {
+          "value": 3.85975,
+          "probability": 0.00975
+        },
+        {
+          "value": 3.863,
+          "probability": 0.013
+        },
+        {
+          "value": 3.86625,
+          "probability": 0.01625
+        },
+        {
+          "value": 3.8695,
+          "probability": 0.0195
+        },
+        {
+          "value": 3.87275,
+          "probability": 0.02275
+        },
+        {
+          "value": 3.876,
+          "probability": 0.026
+        },
+        {
+          "value": 3.87925,
+          "probability": 0.02925
+        },
+        {
+          "value": 3.8825,
+          "probability": 0.0325
+        },
+        {
+          "value": 3.88575,
+          "probability": 0.03575
+        },
+        {
+          "value": 3.889,
+          "probability": 0.039
+        },
+        {
+          "value": 3.89225,
+          "probability": 0.04225
+        },
+        {
+          "value": 3.8955,
+          "probability": 0.0455
+        },
+        {
+          "value": 3.89875,
+          "probability": 0.04875
+        },
+        {
+          "value": 3.902,
+          "probability": 0.052
+        },
+        {
+          "value": 3.90525,
+          "probability": 0.05525
+        },
+        {
+          "value": 3.9085,
+          "probability": 0.0585
+        },
+        {
+          "value": 3.91175,
+          "probability": 0.06175
+        },
+        {
+          "value": 3.915,
+          "probability": 0.065
+        },
+        {
+          "value": 3.91825,
+          "probability": 0.06825
+        },
+        {
+          "value": 3.9215,
+          "probability": 0.0715
+        },
+        {
+          "value": 3.92475,
+          "probability": 0.07475
+        },
+        {
+          "value": 3.928,
+          "probability": 0.078
+        },
+        {
+          "value": 3.93125,
+          "probability": 0.08125
+        },
+        {
+          "value": 3.9345,
+          "probability": 0.0845
+        },
+        {
+          "value": 3.93775,
+          "probability": 0.08775
+        },
+        {
+          "value": 3.941,
+          "probability": 0.091
+        },
+        {
+          "value": 3.94425,
+          "probability": 0.09425
+        },
+        {
+          "value": 3.9475,
+          "probability": 0.0975
+        },
+        {
+          "value": 3.95075,
+          "probability": 0.1012
+        },
+        {
+          "value": 3.954,
+          "probability": 0.1064
+        },
+        {
+          "value": 3.95725,
+          "probability": 0.1116
+        },
+        {
+          "value": 3.9605,
+          "probability": 0.1168
+        },
+        {
+          "value": 3.96375,
+          "probability": 0.122
+        },
+        {
+          "value": 3.967,
+          "probability": 0.1272
+        },
+        {
+          "value": 3.97025,
+          "probability": 0.1324
+        },
+        {
+          "value": 3.9735,
+          "probability": 0.1376
+        },
+        {
+          "value": 3.97675,
+          "probability": 0.1428
+        },
+        {
+          "value": 3.98,
+          "probability": 0.148
+        },
+        {
+          "value": 3.98325,
+          "probability": 0.1532
+        },
+        {
+          "value": 3.9865,
+          "probability": 0.1584
+        },
+        {
+          "value": 3.98975,
+          "probability": 0.1636
+        },
+        {
+          "value": 3.993,
+          "probability": 0.1688
+        },
+        {
+          "value": 3.99625,
+          "probability": 0.174
+        },
+        {
+          "value": 3.9995,
+          "probability": 0.1792
+        },
+        {
+          "value": 4.00275,
+          "probability": 0.1877
+        },
+        {
+          "value": 4.006,
+          "probability": 0.1968
+        },
+        {
+          "value": 4.00925,
+          "probability": 0.2059
+        },
+        {
+          "value": 4.0125,
+          "probability": 0.215
+        },
+        {
+          "value": 4.01575,
+          "probability": 0.2241
+        },
+        {
+          "value": 4.019,
+          "probability": 0.2332
+        },
+        {
+          "value": 4.02225,
+          "probability": 0.2423
+        },
+        {
+          "value": 4.0255,
+          "probability": 0.2514
+        },
+        {
+          "value": 4.02875,
+          "probability": 0.2605
+        },
+        {
+          "value": 4.032,
+          "probability": 0.2696
+        },
+        {
+          "value": 4.03525,
+          "probability": 0.2787
+        },
+        {
+          "value": 4.0385,
+          "probability": 0.2878
+        },
+        {
+          "value": 4.04175,
+          "probability": 0.2969
+        },
+        {
+          "value": 4.045,
+          "probability": 0.306
+        },
+        {
+          "value": 4.04825,
+          "probability": 0.3151
+        },
+        {
+          "value": 4.0515,
+          "probability": 0.3254
+        },
+        {
+          "value": 4.05475,
+          "probability": 0.3371
+        },
+        {
+          "value": 4.058,
+          "probability": 0.3488
+        },
+        {
+          "value": 4.06125,
+          "probability": 0.3605
+        },
+        {
+          "value": 4.0645,
+          "probability": 0.3722
+        },
+        {
+          "value": 4.06775,
+          "probability": 0.3839
+        },
+        {
+          "value": 4.071,
+          "probability": 0.3956
+        },
+        {
+          "value": 4.07425,
+          "probability": 0.4073
+        },
+        {
+          "value": 4.0775,
+          "probability": 0.419
+        },
+        {
+          "value": 4.08075,
+          "probability": 0.4307
+        },
+        {
+          "value": 4.084,
+          "probability": 0.4424
+        },
+        {
+          "value": 4.08725,
+          "probability": 0.4541
+        },
+        {
+          "value": 4.0905,
+          "probability": 0.4658
+        },
+        {
+          "value": 4.09375,
+          "probability": 0.4775
+        },
+        {
+          "value": 4.097,
+          "probability": 0.4892
+        },
+        {
+          "value": 4.10025,
+          "probability": 0.5009
+        },
+        {
+          "value": 4.1035,
+          "probability": 0.5126
+        },
+        {
+          "value": 4.10675,
+          "probability": 0.5243
+        },
+        {
+          "value": 4.11,
+          "probability": 0.536
+        },
+        {
+          "value": 4.11325,
+          "probability": 0.5477
+        },
+        {
+          "value": 4.1165,
+          "probability": 0.5594
+        },
+        {
+          "value": 4.11975,
+          "probability": 0.5711
+        },
+        {
+          "value": 4.123,
+          "probability": 0.5828
+        },
+        {
+          "value": 4.12625,
+          "probability": 0.5945
+        },
+        {
+          "value": 4.1295,
+          "probability": 0.6062
+        },
+        {
+          "value": 4.13275,
+          "probability": 0.6179
+        },
+        {
+          "value": 4.136,
+          "probability": 0.6296
+        },
+        {
+          "value": 4.13925,
+          "probability": 0.6413
+        },
+        {
+          "value": 4.1425,
+          "probability": 0.653
+        },
+        {
+          "value": 4.14575,
+          "probability": 0.6647
+        },
+        {
+          "value": 4.149,
+          "probability": 0.6764
+        },
+        {
+          "value": 4.15225,
+          "probability": 0.6863
+        },
+        {
+          "value": 4.1555,
+          "probability": 0.6954
+        },
+        {
+          "value": 4.15875,
+          "probability": 0.7045
+        },
+        {
+          "value": 4.162,
+          "probability": 0.7136
+        },
+        {
+          "value": 4.16525,
+          "probability": 0.7227
+        },
+        {
+          "value": 4.1685,
+          "probability": 0.7318
+        },
+        {
+          "value": 4.17175,
+          "probability": 0.7409
+        },
+        {
+          "value": 4.175,
+          "probability": 0.75
+        },
+        {
+          "value": 4.17825,
+          "probability": 0.7591
+        },
+        {
+          "value": 4.1815,
+          "probability": 0.7682
+        },
+        {
+          "value": 4.18475,
+          "probability": 0.7773
+        },
+        {
+          "value": 4.188,
+          "probability": 0.7864
+        },
+        {
+          "value": 4.19125,
+          "probability": 0.7955
+        },
+        {
+          "value": 4.1945,
+          "probability": 0.8046
+        },
+        {
+          "value": 4.19775,
+          "probability": 0.8137
+        },
+        {
+          "value": 4.201,
+          "probability": 0.822
+        },
+        {
+          "value": 4.20425,
+          "probability": 0.8285
+        },
+        {
+          "value": 4.2075,
+          "probability": 0.835
+        },
+        {
+          "value": 4.21075,
+          "probability": 0.8415
+        },
+        {
+          "value": 4.214,
+          "probability": 0.848
+        },
+        {
+          "value": 4.21725,
+          "probability": 0.8545
+        },
+        {
+          "value": 4.2205,
+          "probability": 0.861
+        },
+        {
+          "value": 4.22375,
+          "probability": 0.8675
+        },
+        {
+          "value": 4.227,
+          "probability": 0.874
+        },
+        {
+          "value": 4.23025,
+          "probability": 0.8805
+        },
+        {
+          "value": 4.2335,
+          "probability": 0.887
+        },
+        {
+          "value": 4.23675,
+          "probability": 0.8935
+        },
+        {
+          "value": 4.24,
+          "probability": 0.9
+        },
+        {
+          "value": 4.24325,
+          "probability": 0.9027083333
+        },
+        {
+          "value": 4.2465,
+          "probability": 0.9054166667
+        },
+        {
+          "value": 4.24975,
+          "probability": 0.908125
+        },
+        {
+          "value": 4.253,
+          "probability": 0.9108333333
+        },
+        {
+          "value": 4.25625,
+          "probability": 0.9135416667
+        },
+        {
+          "value": 4.2595,
+          "probability": 0.91625
+        },
+        {
+          "value": 4.26275,
+          "probability": 0.9189583333
+        },
+        {
+          "value": 4.266,
+          "probability": 0.9216666667
+        },
+        {
+          "value": 4.26925,
+          "probability": 0.924375
+        },
+        {
+          "value": 4.2725,
+          "probability": 0.9270833333
+        },
+        {
+          "value": 4.27575,
+          "probability": 0.9297916667
+        },
+        {
+          "value": 4.279,
+          "probability": 0.9325
+        },
+        {
+          "value": 4.28225,
+          "probability": 0.9352083333
+        },
+        {
+          "value": 4.2855,
+          "probability": 0.9379166667
+        },
+        {
+          "value": 4.28875,
+          "probability": 0.940625
+        },
+        {
+          "value": 4.292,
+          "probability": 0.9433333333
+        },
+        {
+          "value": 4.29525,
+          "probability": 0.9460416667
+        },
+        {
+          "value": 4.2985,
+          "probability": 0.94875
+        },
+        {
+          "value": 4.30175,
+          "probability": 0.950525
+        },
+        {
+          "value": 4.305,
+          "probability": 0.9515
+        },
+        {
+          "value": 4.30825,
+          "probability": 0.952475
+        },
+        {
+          "value": 4.3115,
+          "probability": 0.95345
+        },
+        {
+          "value": 4.31475,
+          "probability": 0.954425
+        },
+        {
+          "value": 4.318,
+          "probability": 0.9554
+        },
+        {
+          "value": 4.32125,
+          "probability": 0.956375
+        },
+        {
+          "value": 4.3245,
+          "probability": 0.95735
+        },
+        {
+          "value": 4.32775,
+          "probability": 0.958325
+        },
+        {
+          "value": 4.331,
+          "probability": 0.9593
+        },
+        {
+          "value": 4.33425,
+          "probability": 0.960275
+        },
+        {
+          "value": 4.3375,
+          "probability": 0.96125
+        },
+        {
+          "value": 4.34075,
+          "probability": 0.962225
+        },
+        {
+          "value": 4.344,
+          "probability": 0.9632
+        },
+        {
+          "value": 4.34725,
+          "probability": 0.964175
+        },
+        {
+          "value": 4.3505,
+          "probability": 0.96515
+        },
+        {
+          "value": 4.35375,
+          "probability": 0.966125
+        },
+        {
+          "value": 4.357,
+          "probability": 0.9671
+        },
+        {
+          "value": 4.36025,
+          "probability": 0.968075
+        },
+        {
+          "value": 4.3635,
+          "probability": 0.96905
+        },
+        {
+          "value": 4.36675,
+          "probability": 0.970025
+        },
+        {
+          "value": 4.37,
+          "probability": 0.971
+        },
+        {
+          "value": 4.37325,
+          "probability": 0.971975
+        },
+        {
+          "value": 4.3765,
+          "probability": 0.97295
+        },
+        {
+          "value": 4.37975,
+          "probability": 0.973925
+        },
+        {
+          "value": 4.383,
+          "probability": 0.9749
+        },
+        {
+          "value": 4.38625,
+          "probability": 0.975875
+        },
+        {
+          "value": 4.3895,
+          "probability": 0.97685
+        },
+        {
+          "value": 4.39275,
+          "probability": 0.977825
+        },
+        {
+          "value": 4.396,
+          "probability": 0.9788
+        },
+        {
+          "value": 4.39925,
+          "probability": 0.979775
+        },
+        {
+          "value": 4.4025,
+          "probability": 0.9805
+        },
+        {
+          "value": 4.40575,
+          "probability": 0.98115
+        },
+        {
+          "value": 4.409,
+          "probability": 0.9818
+        },
+        {
+          "value": 4.41225,
+          "probability": 0.98245
+        },
+        {
+          "value": 4.4155,
+          "probability": 0.9831
+        },
+        {
+          "value": 4.41875,
+          "probability": 0.98375
+        },
+        {
+          "value": 4.422,
+          "probability": 0.9844
+        },
+        {
+          "value": 4.42525,
+          "probability": 0.98505
+        },
+        {
+          "value": 4.4285,
+          "probability": 0.9857
+        },
+        {
+          "value": 4.43175,
+          "probability": 0.98635
+        },
+        {
+          "value": 4.435,
+          "probability": 0.987
+        },
+        {
+          "value": 4.43825,
+          "probability": 0.98765
+        },
+        {
+          "value": 4.4415,
+          "probability": 0.9883
+        },
+        {
+          "value": 4.44475,
+          "probability": 0.98895
+        },
+        {
+          "value": 4.448,
+          "probability": 0.9896
+        },
+        {
+          "value": 4.45125,
+          "probability": 0.99025
+        },
+        {
+          "value": 4.4545,
+          "probability": 0.9909
+        },
+        {
+          "value": 4.45775,
+          "probability": 0.99155
+        },
+        {
+          "value": 4.461,
+          "probability": 0.9922
+        },
+        {
+          "value": 4.46425,
+          "probability": 0.99285
+        },
+        {
+          "value": 4.4675,
+          "probability": 0.9935
+        },
+        {
+          "value": 4.47075,
+          "probability": 0.99415
+        },
+        {
+          "value": 4.474,
+          "probability": 0.9948
+        },
+        {
+          "value": 4.47725,
+          "probability": 0.99545
+        },
+        {
+          "value": 4.4805,
+          "probability": 0.9961
+        },
+        {
+          "value": 4.48375,
+          "probability": 0.99675
+        },
+        {
+          "value": 4.487,
+          "probability": 0.9974
+        },
+        {
+          "value": 4.49025,
+          "probability": 0.99805
+        },
+        {
+          "value": 4.4935,
+          "probability": 0.9987
+        },
+        {
+          "value": 4.49675,
+          "probability": 0.99935
+        },
+        {
+          "value": 4.5,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 4.1,
+        "median": 4.1,
+        "interval80": {
+          "lower": 4,
+          "upper": 4.2
+        }
+      },
+      "provenance": "agent_reported",
+      "transformVersion": "agent_cdf_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/prompt.md",
+        "sha256": "2e6b5541138ed01c8a642fc2f11caa398dd2175b8ce0b209f5981b903c4231bb",
+        "bytes": 14435,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_command.json",
+        "sha256": "ac252f5a8c3a0e0f90013b19356a4d32a33fb6f9d2d13b974ec53187b2dbefc1",
+        "bytes": 1905,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_tool_evidence.json",
+        "sha256": "a5c72bef8523aa382b41361f8cff331ac24289a59f4fd21352ac6168cd34e003",
+        "bytes": 28251,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_tool_evidence_verification.json",
+        "sha256": "698d260d1db2929ea741acc87d2f879f9637ab8c21a132dd172cc91a57348cfe",
+        "bytes": 2229,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_codex_stdout.jsonl",
+        "sha256": "19ea57effff9d4c9899aa232ea3cab89e1099af9833986f1da83355469be9fb4",
+        "bytes": 38171,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_codex_stderr.log",
+        "sha256": "822086581e3b43be5a696cff34cd56dda3f2ba09dfb251147717d70e90dc8716",
+        "bytes": 233,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_codex_events.jsonl",
+        "sha256": "d65773fd0be7fe8bce2826058fd9972c9c705d90a92feae7ab8ea76e481eadbd",
+        "bytes": 39353,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_codex_last_message.txt",
+        "sha256": "2fbd96d213f615c4d6338a9da6b24ef21652d446767232056f87b1c9f0d7c719",
+        "bytes": 6726,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_codex_trace.json",
+        "sha256": "b0e99b50e744606103f67844dce81551a5049cf30ab8dce5a6f4e39ecd300809",
+        "bytes": 560,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_stdout.txt",
+        "sha256": "2fbd96d213f615c4d6338a9da6b24ef21652d446767232056f87b1c9f0d7c719",
+        "bytes": 6726,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_stderr.txt",
+        "sha256": "aa58430bd3f0cb86e057fcb1ca1f17ef2a2178a61200bab36ead2f7ed9a464f3",
+        "bytes": 248,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_prompt.md",
+        "sha256": "60d6e500c9af121f6066cff85fec543f73324022ad7ec4df4d24e149dd4edd37",
+        "bytes": 11167,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_command.json",
+        "sha256": "aa4cb445dbfcc084285811e8d4d117d3a540cdb9b7485dd7c845e1585fbf6bf9",
+        "bytes": 1828,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "65e8623b45e967e62652c00bb0d0541589aa5df99f17e1e16def0284fe3002b6",
+        "bytes": 1952,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_codex_stderr.log",
+        "sha256": "33ed8faeb9a9a7d707bed810419f05d3ec7c132566f08b317ab6317fe386b87e",
+        "bytes": 233,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_codex_events.jsonl",
+        "sha256": "bda56133deeb96932f587f2455a34369680dd9cc568a65ea9ee8ac9fff2812d6",
+        "bytes": 1973,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_codex_last_message.txt",
+        "sha256": "62b59871cd353c06d54a0eac9e2ce12e54227659e9a8566281e3bf05471712ed",
+        "bytes": 857,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_codex_trace.json",
+        "sha256": "a91d0aa0744b6e2c2e4715c99cc13642a478238976c615741700e2d1fee16751",
+        "bytes": 553,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_stdout.txt",
+        "sha256": "62b59871cd353c06d54a0eac9e2ce12e54227659e9a8566281e3bf05471712ed",
+        "bytes": 857,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_stderr.txt",
+        "sha256": "6d59497f3cba0625b73c48f190a983910e61283a5182686026183bad9b811365",
+        "bytes": 248,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/revision_prompt.md",
+        "sha256": "a2708d82acd8b84296b8d9e24986c6be86736caa3f07f354a9c14aa56e05bf22",
+        "bytes": 22954,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/command.json",
+        "sha256": "7b633a20f5974e0b38575c3a4382f25b9291700a0fd7886edfef12012d942cac",
+        "bytes": 1887,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/codex_stdout.jsonl",
+        "sha256": "716c6280a3780758ebdafef36dc7578aa7a9a955f94b09079c4197f368db039a",
+        "bytes": 7768,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/codex_stderr.log",
+        "sha256": "39dfdebc2aeee339723302ccf61e31c9c66957aa916a7371ae11e6ec50ea9a22",
+        "bytes": 233,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/codex_events.jsonl",
+        "sha256": "c3cccb8e596edecf3c5014196b9945f77c0cea5ce49be006b035551e5212a18f",
+        "bytes": 7790,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/codex_last_message.txt",
+        "sha256": "1063d60828a30d25de44adc08cd0bb4642353b40c4fc256bba02673ea0523ba7",
+        "bytes": 7139,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/codex_trace.json",
+        "sha256": "2518cba6c930317d758ba73eb752081a70cbe73208921f69f64ed157c4f09fe7",
+        "bytes": 552,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/stdout.txt",
+        "sha256": "1063d60828a30d25de44adc08cd0bb4642353b40c4fc256bba02673ea0523ba7",
+        "bytes": 7139,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/stderr.txt",
+        "sha256": "4933535ca5de5b279072f76d94ade9ebbcb95323b2984f59e3b5d67177df74b8",
+        "bytes": 248,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/raw_response.txt",
+        "sha256": "1063d60828a30d25de44adc08cd0bb4642353b40c4fc256bba02673ea0523ba7",
+        "bytes": 7139,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/parsed_cells.json",
+        "sha256": "d3813eff033598920b693c0540ed0825e0a98588838d9a637692249ef53370a6",
+        "bytes": 8560,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/normalized_cells.json",
+        "sha256": "d3a1aaee6142c7b7cb435a7337acdb2bf2b4f96262b0972357f0614a67472c53",
+        "bytes": 25695,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/distribution.json",
+        "sha256": "b01d47f4a158f0bcedbb493c77eed63692234c05c2299f1d5def0f8246ce5493",
+        "bytes": 13349,
+        "createdAt": "2026-09-21T14:34:37Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/validation.json",
+        "sha256": "fc1a4c83d0e7d71318079793ab852cc89f3faff8208c5959488b1f650833b5e5",
+        "bytes": 133,
+        "createdAt": "2026-09-21T14:34:37Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-21T14:34:37Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "0fadecb026ddfbdf740077d00c9eb45090daa43e45ab597d7d7822dfe81a7a3d"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-21/2026-09-21t14-34-37z-bls-cps-unemployment-rate-2026-09/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.finding.1",
+          "severity": "warning",
+          "rubricItem": "prior_update_interval",
+          "summary": "The interval explanation says 1.28*sigma is a full-width comparison and references call-0013, which is not present in the draft trace.",
+          "actionRequested": "Correct the wording to distinguish half-width from full 80% width, and remove or fix the dangling call reference."
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Replace the schedule-verification caveat about 403/search excerpts with a successful official BLS schedule receipt if the runner can capture one."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Clarify that the 80% interval fields are rounded printed-value bounds derived from latent q10/q90 values of 3.95 and 4.24."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.finding.1",
+          "decision": "accepted",
+          "rationale": "Review disposition: accepted the interval-clarity critique by treating 1.28*sigma as a half-width, comparing it to the ladder-implied half-width, and removing the dangling call reference; also clarified that the published 80 percent bounds are rounded printed-value bounds from latent q10/q90 ladder interpolation.",
+          "forecastChanged": true
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the interval-clarity critique by treating 1.28*sigma as a half-width, comparing it to the ladder-implied half-width, and removing the dangling call reference; also clarified that the published 80 percent bounds are rounded printed-value bounds from latent q10/q90 ladder interpolation.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the interval-clarity critique by treating 1.28*sigma as a half-width, comparing it to the ladder-implied half-width, and removing the dangling call reference; also clarified that the published 80 percent bounds are rounded printed-value bounds from latent q10/q90 ladder interpolation.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "Draft is publishable with no blocking issues; resolver/date/unit match the target and the forecast has a clear persistence prior, update, interval method, tails, and coherent JSON fields."
+    }
+  }
+]

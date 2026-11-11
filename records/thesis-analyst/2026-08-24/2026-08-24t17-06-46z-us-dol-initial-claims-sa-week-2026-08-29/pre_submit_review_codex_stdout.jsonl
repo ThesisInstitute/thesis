@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a034be-9937-7190-8e96-7356045a746a"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"summary\":\"The draft is publication-ready with no blocking issues; it follows the registered target contract and clearly flags the DOL-calendar versus ledger resolution-date discrepancy.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Consider noting that the volatility estimate is based on only seven week-to-week changes, so the interval method is transparent but sample-limited.\",\"The resolver text could avoid saying 'rounded' unless the registered adapter itself performs rounding, but this is not material given the integer-thousands forecast fields.\"]}"}}
+{"type":"turn.completed","usage":{"input_tokens":19719,"cached_input_tokens":0,"output_tokens":621,"reasoning_output_tokens":516}}

@@ -1,4 +1,5 @@
-import { getForecastCell, type ForecastCell } from "./forecast-cells";
+import { getPublishedForecast } from "@/lib/forecast-publication";
+import { type ForecastCell } from "./forecast-cells";
 
 export interface ConditionalGroup {
   slug: string;
@@ -116,9 +117,9 @@ export function getConditionalGroup(
 ): ResolvedConditionalGroup | undefined {
   const group = CONDITIONAL_GROUPS.find((g) => g.slug === slug);
   if (!group) return undefined;
-  const trueArm = getForecastCell(group.trueArmSlug);
+  const trueArm = getPublishedForecast(group.trueArmSlug);
   const falseArm = group.falseArmSlug
-    ? getForecastCell(group.falseArmSlug)
+    ? getPublishedForecast(group.falseArmSlug)
     : undefined;
   if (!trueArm) return undefined;
   // A named-but-missing baseline arm is a data error — fail closed.
@@ -128,10 +129,10 @@ export function getConditionalGroup(
     trueArm,
     falseArm,
     probability: group.probabilitySlug
-      ? getForecastCell(group.probabilitySlug)
+      ? getPublishedForecast(group.probabilitySlug)
       : undefined,
     unconditional: group.unconditionalSlug
-      ? getForecastCell(group.unconditionalSlug)
+      ? getPublishedForecast(group.unconditionalSlug)
       : undefined,
   };
 }

@@ -1,0 +1,1257 @@
+[
+  {
+    "slug": "cps-transport-material-moving-employment-september-2026",
+    "country": "US",
+    "type": "data",
+    "title": "CPS transportation/material moving employment, Sep 2026",
+    "question": "What will the first official BLS CPS Employment Situation Table A-19 not-seasonally-adjusted employed people count be for Transportation and material moving occupations, total 16 years and over, in September 2026?",
+    "unit": "millions",
+    "pointEstimate": 12.096,
+    "ciLow": 11.891,
+    "ciHigh": 12.301,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-14",
+    "resolutionSource": "BLS Employment Situation Table A-19",
+    "resolutionSourceUrl": "https://www.bls.gov/web/empsit/cpseea19.htm",
+    "resolutionRule": "Resolve to the first official BLS CPS Employment Situation Table A-19, employed people by occupation, sex, and age, not seasonally adjusted, row Transportation and material moving occupations, Total 16 years and over column for September 2026, reported in thousands; multiply by 0.001 to convert to millions and round to three decimals. Use the first print only, with no later revisions or same-day correction grace unless the registered target is updated. The BLS release calendar checked for this run appeared to list the September 2026 Employment Situation for 2026-10-02, which conflicts with the registered Thesis resolutionDate/window; this cell intentionally follows the registered target contract date of 2026-10-14.",
+    "dataPointId": "bls.cps.employed_people_by_occupation.transportation_material_moving.september_2026.first_print",
+    "historicalContext": [
+      {
+        "label": "March 2026",
+        "value": 12.214,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 12.127,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 12.12,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 12.01,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": 12.223,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "August 2026",
+        "value": 12.011,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      }
+    ],
+    "drivers": [
+      "CPS household-survey occupation series is noisy month to month",
+      "not-seasonally-adjusted September level usually near late-summer level",
+      "August 2026 latest official table value was 12.011 million",
+      "recent six-print level centered near 12.118 million",
+      "transportation and warehousing payrolls showed little change in the latest Employment Situation narrative"
+    ],
+    "sourceContext": [
+      "https://www.bls.gov/web/empsit/cpseea19.htm",
+      "https://www.bls.gov/schedule/news_release/empsit.htm",
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032214",
+      "https://fred.stlouisfed.org/series/LNU02032214",
+      "https://www.bls.gov/news.release/archives/empsit_11202025.htm",
+      "https://www.bls.gov/news.release/archives/empsit_10042024.htm",
+      "https://www.bls.gov/news.release/archives/empsit_10062023.htm",
+      "https://www.bls.gov/news.release/archives/empsit_10072022.htm"
+    ],
+    "runAt": "2026-09-14T20:35:21Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast for September 2026 CPS transportation and material moving employment"
+      },
+      {
+        "kind": "text",
+        "text": "The target is the BLS CPS household-survey occupation line, not seasonally adjusted, Table A-19 row Transportation and material moving occupations, total 16 years and over. The resolving public series corresponds to source code LNU02032214, reported in thousands and converted to millions by multiplying by 0.001."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched the current BLS Table A-19 page at https://www.bls.gov/web/empsit/cpseea19.htm and read the Transportation and material moving occupations row.",
+        "result": "Current Table A-19 shows Transportation and material moving occupations total 16 years and over at Aug. 2025 = 11,647 thousand and Aug. 2026 = 12,011 thousand; the broader Production, transportation, and material moving occupations row is Aug. 2026 = 19,727 thousand."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Checked the BLS Employment Situation release calendar for the September 2026 reference month.",
+        "result": "The BLS schedule lists September 2026 Employment Situation release date Oct. 02, 2026 at 08:30 AM. The registered Thesis target has resolutionDate 2026-10-14 and expectedReleaseWindow 2026-10-06 to 2026-10-14, which appears inconsistent with the official calendar; I keep the registered resolutionDate because the prompt instructs using the ledger target contract."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Used the BLS public API series endpoint for LNU02032214 and the FRED mirror of that BLS source to assemble recent monthly official-source history.",
+        "result": "Recent LNU02032214 values are Mar 2026 = 12,214 thousand, Apr 2026 = 12,127 thousand, May 2026 = 12,120 thousand, Jun 2026 = 12,010 thousand, Jul 2026 = 12,223 thousand, and Aug 2026 = 12,011 thousand."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched archived BLS Employment Situation releases to check same-month September reference values for the occupation line.",
+        "result": "Archived BLS releases show Transportation and material moving occupations employment at Sep 2022 = 11,866 thousand, Sep 2023 = 11,761 thousand, Sep 2024 = 12,217 thousand, and Sep 2025 = 11,910 thousand."
+      },
+      {
+        "kind": "text",
+        "text": "For the base rate and reference class, I anchor on a persistence prior from the latest same-variant NSA CPS occupation level plus the recent six-print distribution. The six recent values average about 12.118 million, while the latest August 2026 level is 12.011 million. September 2025 was 0.263 million above August 2025, but this line has high sampling noise and the current August-to-July move was negative, so I only partially apply a damped September seasonal lift."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior = Aug 2026 value 12.011 million; historical sample = Mar-Aug 2026 official-source values 12.214, 12.127, 12.120, 12.010, 12.223, 12.011. Adjustment components: +0.054 million toward the recent six-print mean, +0.031 million for a damped September seasonal/occupation-noise adjustment rather than strong current evidence, for point 12.096 million. Successive changes are -0.087, -0.007, -0.110, +0.213, -0.212 million, so sigma = 0.160 million; an approximate 80% normal interval uses 1.28*sigma = 0.205 million. Applying that half-width gives 12.096 +/- 0.205 = [11.891, 12.301]."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk would be a normal September pickup in logistics, warehousing, and school-related transport categories plus household-survey rotation noise, which would land above the interval if the first print exceeds 12.301 million. Downside risk would be another large CPS occupation-allocation reversal or softer goods-movement employment, which would land below the interval if the first print is under 11.891 million."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the resolver warning by carrying the official-calendar discrepancy into the resolutionRule while keeping the ledger-bound 2026-10-14 date; accepted the optional clarifications that the +0.031 million lift is damped and that the interval is an approximate 80% normal interval from recent month-to-month realized volatility."
+      },
+      {
+        "kind": "forecast",
+        "point": 12.096,
+        "ciLow": 11.891,
+        "ciHigh": 12.301
+      }
+    ],
+    "agentReportedRunAt": "2026-09-14T20:33:28Z",
+    "runStartedAt": "2026-09-14T20:33:08Z",
+    "promptMode": "fast",
+    "registrationCommit": "0f2c009b27e9b65c2aeb9b253934fd8b301b787e",
+    "targetContentHash": "d6e9c92086ea70e8b59790dcc9ac070c7eb079e22a59c17d88d559ebccc62072",
+    "targetRegistrationPath": "records/targets/2026-09-14-d6e9c92086ea70e8b59790dcc9ac070c7eb079e22a59c17d88d559ebccc62072.json",
+    "registeredAtUtc": "2026-09-14T20:23:15Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 11.5835,
+        "upper": 12.6085
+      },
+      "points": [
+        {
+          "value": 11.5835,
+          "probability": 0.0
+        },
+        {
+          "value": 11.588625,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 11.59375,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 11.598875,
+          "probability": 0.005
+        },
+        {
+          "value": 11.604,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 11.609125,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 11.61425,
+          "probability": 0.01
+        },
+        {
+          "value": 11.619375,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 11.6245,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 11.629625,
+          "probability": 0.015
+        },
+        {
+          "value": 11.63475,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 11.639875,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 11.645,
+          "probability": 0.02
+        },
+        {
+          "value": 11.650125,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 11.65525,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 11.660375,
+          "probability": 0.025
+        },
+        {
+          "value": 11.6655,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 11.670625,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 11.67575,
+          "probability": 0.03
+        },
+        {
+          "value": 11.680875,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 11.686,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 11.691125,
+          "probability": 0.035
+        },
+        {
+          "value": 11.69625,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 11.701375,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 11.7065,
+          "probability": 0.04
+        },
+        {
+          "value": 11.711625,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 11.71675,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 11.721875,
+          "probability": 0.045
+        },
+        {
+          "value": 11.727,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 11.732125,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 11.73725,
+          "probability": 0.05
+        },
+        {
+          "value": 11.742375,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 11.7475,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 11.752625,
+          "probability": 0.055
+        },
+        {
+          "value": 11.75775,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 11.762875,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 11.768,
+          "probability": 0.06
+        },
+        {
+          "value": 11.773125,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 11.77825,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 11.783375,
+          "probability": 0.065
+        },
+        {
+          "value": 11.7885,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 11.793625,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 11.79875,
+          "probability": 0.07
+        },
+        {
+          "value": 11.803875,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 11.809,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 11.814125,
+          "probability": 0.075
+        },
+        {
+          "value": 11.81925,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 11.824375,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 11.8295,
+          "probability": 0.08
+        },
+        {
+          "value": 11.834625,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 11.83975,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 11.844875,
+          "probability": 0.085
+        },
+        {
+          "value": 11.85,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 11.855125,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 11.86025,
+          "probability": 0.09
+        },
+        {
+          "value": 11.865375,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 11.8705,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 11.875625,
+          "probability": 0.095
+        },
+        {
+          "value": 11.88075,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 11.885875,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 11.891,
+          "probability": 0.1
+        },
+        {
+          "value": 11.896125,
+          "probability": 0.11
+        },
+        {
+          "value": 11.90125,
+          "probability": 0.12
+        },
+        {
+          "value": 11.906375,
+          "probability": 0.13
+        },
+        {
+          "value": 11.9115,
+          "probability": 0.14
+        },
+        {
+          "value": 11.916625,
+          "probability": 0.15
+        },
+        {
+          "value": 11.92175,
+          "probability": 0.16
+        },
+        {
+          "value": 11.926875,
+          "probability": 0.17
+        },
+        {
+          "value": 11.932,
+          "probability": 0.18
+        },
+        {
+          "value": 11.937125,
+          "probability": 0.19
+        },
+        {
+          "value": 11.94225,
+          "probability": 0.2
+        },
+        {
+          "value": 11.947375,
+          "probability": 0.21
+        },
+        {
+          "value": 11.9525,
+          "probability": 0.22
+        },
+        {
+          "value": 11.957625,
+          "probability": 0.23
+        },
+        {
+          "value": 11.96275,
+          "probability": 0.24
+        },
+        {
+          "value": 11.967875,
+          "probability": 0.25
+        },
+        {
+          "value": 11.973,
+          "probability": 0.26
+        },
+        {
+          "value": 11.978125,
+          "probability": 0.27
+        },
+        {
+          "value": 11.98325,
+          "probability": 0.28
+        },
+        {
+          "value": 11.988375,
+          "probability": 0.29
+        },
+        {
+          "value": 11.9935,
+          "probability": 0.3
+        },
+        {
+          "value": 11.998625,
+          "probability": 0.31
+        },
+        {
+          "value": 12.00375,
+          "probability": 0.32
+        },
+        {
+          "value": 12.008875,
+          "probability": 0.33
+        },
+        {
+          "value": 12.014,
+          "probability": 0.34
+        },
+        {
+          "value": 12.019125,
+          "probability": 0.35
+        },
+        {
+          "value": 12.02425,
+          "probability": 0.36
+        },
+        {
+          "value": 12.029375,
+          "probability": 0.37
+        },
+        {
+          "value": 12.0345,
+          "probability": 0.38
+        },
+        {
+          "value": 12.039625,
+          "probability": 0.39
+        },
+        {
+          "value": 12.04475,
+          "probability": 0.4
+        },
+        {
+          "value": 12.049875,
+          "probability": 0.41
+        },
+        {
+          "value": 12.055,
+          "probability": 0.42
+        },
+        {
+          "value": 12.060125,
+          "probability": 0.43
+        },
+        {
+          "value": 12.06525,
+          "probability": 0.44
+        },
+        {
+          "value": 12.070375,
+          "probability": 0.45
+        },
+        {
+          "value": 12.0755,
+          "probability": 0.46
+        },
+        {
+          "value": 12.080625,
+          "probability": 0.47
+        },
+        {
+          "value": 12.08575,
+          "probability": 0.48
+        },
+        {
+          "value": 12.090875,
+          "probability": 0.49
+        },
+        {
+          "value": 12.096,
+          "probability": 0.5
+        },
+        {
+          "value": 12.101125,
+          "probability": 0.51
+        },
+        {
+          "value": 12.10625,
+          "probability": 0.52
+        },
+        {
+          "value": 12.111375,
+          "probability": 0.53
+        },
+        {
+          "value": 12.1165,
+          "probability": 0.54
+        },
+        {
+          "value": 12.121625,
+          "probability": 0.55
+        },
+        {
+          "value": 12.12675,
+          "probability": 0.56
+        },
+        {
+          "value": 12.131875,
+          "probability": 0.57
+        },
+        {
+          "value": 12.137,
+          "probability": 0.58
+        },
+        {
+          "value": 12.142125,
+          "probability": 0.59
+        },
+        {
+          "value": 12.14725,
+          "probability": 0.6
+        },
+        {
+          "value": 12.152375,
+          "probability": 0.61
+        },
+        {
+          "value": 12.1575,
+          "probability": 0.62
+        },
+        {
+          "value": 12.162625,
+          "probability": 0.63
+        },
+        {
+          "value": 12.16775,
+          "probability": 0.64
+        },
+        {
+          "value": 12.172875,
+          "probability": 0.65
+        },
+        {
+          "value": 12.178,
+          "probability": 0.66
+        },
+        {
+          "value": 12.183125,
+          "probability": 0.67
+        },
+        {
+          "value": 12.18825,
+          "probability": 0.68
+        },
+        {
+          "value": 12.193375,
+          "probability": 0.69
+        },
+        {
+          "value": 12.1985,
+          "probability": 0.7
+        },
+        {
+          "value": 12.203625,
+          "probability": 0.71
+        },
+        {
+          "value": 12.20875,
+          "probability": 0.72
+        },
+        {
+          "value": 12.213875,
+          "probability": 0.73
+        },
+        {
+          "value": 12.219,
+          "probability": 0.74
+        },
+        {
+          "value": 12.224125,
+          "probability": 0.75
+        },
+        {
+          "value": 12.22925,
+          "probability": 0.76
+        },
+        {
+          "value": 12.234375,
+          "probability": 0.77
+        },
+        {
+          "value": 12.2395,
+          "probability": 0.78
+        },
+        {
+          "value": 12.244625,
+          "probability": 0.79
+        },
+        {
+          "value": 12.24975,
+          "probability": 0.8
+        },
+        {
+          "value": 12.254875,
+          "probability": 0.81
+        },
+        {
+          "value": 12.26,
+          "probability": 0.82
+        },
+        {
+          "value": 12.265125,
+          "probability": 0.83
+        },
+        {
+          "value": 12.27025,
+          "probability": 0.84
+        },
+        {
+          "value": 12.275375,
+          "probability": 0.85
+        },
+        {
+          "value": 12.2805,
+          "probability": 0.86
+        },
+        {
+          "value": 12.285625,
+          "probability": 0.87
+        },
+        {
+          "value": 12.29075,
+          "probability": 0.88
+        },
+        {
+          "value": 12.295875,
+          "probability": 0.89
+        },
+        {
+          "value": 12.301,
+          "probability": 0.9
+        },
+        {
+          "value": 12.306125,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 12.31125,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 12.316375,
+          "probability": 0.905
+        },
+        {
+          "value": 12.3215,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 12.326625,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 12.33175,
+          "probability": 0.91
+        },
+        {
+          "value": 12.336875,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 12.342,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 12.347125,
+          "probability": 0.915
+        },
+        {
+          "value": 12.35225,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 12.357375,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 12.3625,
+          "probability": 0.92
+        },
+        {
+          "value": 12.367625,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 12.37275,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 12.377875,
+          "probability": 0.925
+        },
+        {
+          "value": 12.383,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 12.388125,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 12.39325,
+          "probability": 0.93
+        },
+        {
+          "value": 12.398375,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 12.4035,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 12.408625,
+          "probability": 0.935
+        },
+        {
+          "value": 12.41375,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 12.418875,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 12.424,
+          "probability": 0.94
+        },
+        {
+          "value": 12.429125,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 12.43425,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 12.439375,
+          "probability": 0.945
+        },
+        {
+          "value": 12.4445,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 12.449625,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 12.45475,
+          "probability": 0.95
+        },
+        {
+          "value": 12.459875,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 12.465,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 12.470125,
+          "probability": 0.955
+        },
+        {
+          "value": 12.47525,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 12.480375,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 12.4855,
+          "probability": 0.96
+        },
+        {
+          "value": 12.490625,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 12.49575,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 12.500875,
+          "probability": 0.965
+        },
+        {
+          "value": 12.506,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 12.511125,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 12.51625,
+          "probability": 0.97
+        },
+        {
+          "value": 12.521375,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 12.5265,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 12.531625,
+          "probability": 0.975
+        },
+        {
+          "value": 12.53675,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 12.541875,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 12.547,
+          "probability": 0.98
+        },
+        {
+          "value": 12.552125,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 12.55725,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 12.562375,
+          "probability": 0.985
+        },
+        {
+          "value": 12.5675,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 12.572625,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 12.57775,
+          "probability": 0.99
+        },
+        {
+          "value": 12.582875,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 12.588,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 12.593125,
+          "probability": 0.995
+        },
+        {
+          "value": 12.59825,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 12.603375,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 12.6085,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 12.096,
+        "median": 12.096,
+        "interval80": {
+          "lower": 11.891,
+          "upper": 12.301
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/prompt.md",
+        "sha256": "fa4a7a2192dbd44d72d88aa5b22b316acb9ec411de6db5395fc58442b5908cab",
+        "bytes": 10799,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_command.json",
+        "sha256": "be3899273c6f6e15e77010abf7247b79639c1d2eccbfca306985211dfbd1f36c",
+        "bytes": 798,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_codex_stdout.jsonl",
+        "sha256": "bac6d70a57a20c6a2285bd3617e38cb1218966d5bd339b20dd1dda6f204ebc15",
+        "bytes": 1379916,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_codex_stderr.log",
+        "sha256": "9c7d87a9ccd928e7e6eb4a3b921a5fdbc12640d37b6a86ab92ae2fb587872e2c",
+        "bytes": 233,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_codex_events.jsonl",
+        "sha256": "1d059f39f03999d83dc736bf9d0d1d723c0a99fed31c9504a61285322ccb2902",
+        "bytes": 1380093,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_codex_last_message.txt",
+        "sha256": "7cc9a20e9aa460008a418136e89d5886577caa33f9d8f631dc24da9a9448af6f",
+        "bytes": 6489,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_codex_trace.json",
+        "sha256": "a0773709fd5e626aef1f85dc9aadabd67af209f1df4b32b2ad3cec48bd06884d",
+        "bytes": 560,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_stdout.txt",
+        "sha256": "7cc9a20e9aa460008a418136e89d5886577caa33f9d8f631dc24da9a9448af6f",
+        "bytes": 6489,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_stderr.txt",
+        "sha256": "fbeac775ae2364ef18671d84a2498bad4a9c2ba1cb77bb7c37631effbe977a10",
+        "bytes": 248,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_prompt.md",
+        "sha256": "5b0bb1b7c6d89426c1dd583e6641b3198d864a40ea90a32fefddd64075aaf594",
+        "bytes": 9949,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_command.json",
+        "sha256": "ed839ca3832c09ea1c0e3d533439cb7d190c59509bb6472cc1d6d6a399c54f1c",
+        "bytes": 794,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "bba5afda9e8c1c035c3f0c1121a6b3d408febafe1633afb40624da2b27caa9f9",
+        "bytes": 5503,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_codex_stderr.log",
+        "sha256": "8134096b841fbdf9a22227e09ab3ea7994fa66d6a54a8180fe7f74de743df85a",
+        "bytes": 233,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_codex_events.jsonl",
+        "sha256": "a78c79ec5f1078c7ccba9a63df6fade1a51068f908345797692ab1262a8b2ee5",
+        "bytes": 5607,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_codex_last_message.txt",
+        "sha256": "7e43d55fd67d7f1199916eafc60fdfc14c69e831d813e12e2e6d276308fb5aa6",
+        "bytes": 1124,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_codex_trace.json",
+        "sha256": "244f79244166c7023ccc4b7f246a3173a88121af81a3609e44fd4a026a1b887e",
+        "bytes": 559,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_stdout.txt",
+        "sha256": "7e43d55fd67d7f1199916eafc60fdfc14c69e831d813e12e2e6d276308fb5aa6",
+        "bytes": 1124,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_stderr.txt",
+        "sha256": "8d558417292ea8a89df887a7b0aa62e3ee888ec77ce0a9bd69b3d46842211e6d",
+        "bytes": 248,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/revision_prompt.md",
+        "sha256": "c8b17243c9b07ecd46b899d64be0c244df633271b85bee9f51fedf8c360762fd",
+        "bytes": 19348,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/command.json",
+        "sha256": "90e6d307be15fad1b03be750df99e9c0fb5098407c0f3a9ffea38fe108397de9",
+        "bytes": 792,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/codex_stdout.jsonl",
+        "sha256": "d22fb3da072d28a5e84645a6f815c012389882922729e84dd9f100037030d58b",
+        "bytes": 7801,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/codex_stderr.log",
+        "sha256": "ba84a4056beaea0bf90cba761c38cd9d51af2b9c71897575a8f1a9c0da1dc961",
+        "bytes": 233,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/codex_events.jsonl",
+        "sha256": "f7183dd27d34491383125e59578ce88c1ed3320a96cebbd6a1119e42695e0765",
+        "bytes": 7823,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/codex_last_message.txt",
+        "sha256": "be249ba1d58c2d74a3609cd80788d4016424559773be9a2fa70c81ed921ea4d6",
+        "bytes": 7176,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/codex_trace.json",
+        "sha256": "d96d6913f767e41d00efbb9aca189622091f01e3730df825020f02131fe95541",
+        "bytes": 554,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/stdout.txt",
+        "sha256": "be249ba1d58c2d74a3609cd80788d4016424559773be9a2fa70c81ed921ea4d6",
+        "bytes": 7176,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/stderr.txt",
+        "sha256": "26a66cfd3866d83be05a98b39ac257bdf2e2e726314d8a548141e9f888b2cbfd",
+        "bytes": 248,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/raw_response.txt",
+        "sha256": "be249ba1d58c2d74a3609cd80788d4016424559773be9a2fa70c81ed921ea4d6",
+        "bytes": 7176,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/parsed_cells.json",
+        "sha256": "3e27f3c3a2726f109558c9593c8fab59306e0329cceb80076db2ffbd8f6280a7",
+        "bytes": 8352,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/normalized_cells.json",
+        "sha256": "71fb03ce8b6b119a43c15e17fcec629b7e58bb8c8327da542a829148517b5aa7",
+        "bytes": 26231,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/distribution.json",
+        "sha256": "af9ce7f28204b1c9f8f6a55e563a27a6f29f21996d60949cb6c3b956ed3a8e34",
+        "bytes": 14095,
+        "createdAt": "2026-09-14T20:33:08Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/validation.json",
+        "sha256": "df1acec58b56d06ca46603dafc315a0a72640fe2ee2bd553f92b7de9f36708b2",
+        "bytes": 156,
+        "createdAt": "2026-09-14T20:33:08Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-14T20:33:08Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "5efc5627e20eb372132fd3802b7260bb1ede995d92265bae045d06c3e98c6152"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-14/2026-09-14t20-33-08z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-09/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.finding.1",
+          "severity": "warning",
+          "rubricItem": "resolver",
+          "summary": "The reasoning discloses that BLS schedules the September 2026 Employment Situation for 2026-10-02 while the registered target uses resolutionDate 2026-10-14 and window 2026-10-06 to 2026-10-14, but the resolver fields themselves do not carry that discrepancy.",
+          "actionRequested": "Keep the ledger-bound resolutionDate 2026-10-14, but add a compact note in the resolutionRule or publication reasoning that the official calendar appears inconsistent and the cell intentionally follows the registered target contract."
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Clarify that the +0.031 September lift is a damped seasonal/occupation-noise adjustment rather than strong current evidence."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Consider naming the interval as an approximate 80% normal interval from recent month-to-month realized volatility."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.finding.1",
+          "decision": "accepted",
+          "rationale": "Review disposition: accepted the resolver warning by carrying the official-calendar discrepancy into the resolutionRule while keeping the ledger-bound 2026-10-14 date; accepted the optional clarifications that the +0.031 million lift is damped and that the interval is an approximate 80% normal interval from recent month-to-month realized volatility.",
+          "forecastChanged": true
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the resolver warning by carrying the official-calendar discrepancy into the resolutionRule while keeping the ledger-bound 2026-10-14 date; accepted the optional clarifications that the +0.031 million lift is damped and that the interval is an approximate 80% normal interval from recent month-to-month realized volatility.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the resolver warning by carrying the official-calendar discrepancy into the resolutionRule while keeping the ledger-bound 2026-10-14 date; accepted the optional clarifications that the +0.031 million lift is damped and that the interval is an approximate 80% normal interval from recent month-to-month realized volatility.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "The draft is broadly publishable, with one resolver-text warning because the official BLS September 2026 Employment Situation date conflicts with the registered ledger date/window."
+    }
+  }
+]

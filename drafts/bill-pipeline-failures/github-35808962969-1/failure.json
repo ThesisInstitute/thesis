@@ -1,0 +1,101 @@
+{
+  "publishable": false,
+  "workflowRunId": 35808962969,
+  "workflowRunAttempt": 1,
+  "sourceCommit": "39e0498be81259764979e9a3cb4cdc9847a747b2",
+  "supersedesFailedRunId": 35689483342,
+  "jobs": [
+    {
+      "id": 107015951079,
+      "name": "select",
+      "conclusion": "success"
+    },
+    {
+      "id": 107016558241,
+      "name": "generate",
+      "conclusion": "failure"
+    },
+    {
+      "id": 107018264670,
+      "name": "publish",
+      "conclusion": "failure"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 10729375949,
+      "name": "strategy-attempt-35808962969-1-execution-1",
+      "size_in_bytes": 1099730,
+      "digest": "sha256:04058d13aebeff821d04497a3ff6e7df1029912b82ea81645d5319e2e387d04c",
+      "created_at": "2026-09-23T02:16:26Z",
+      "expires_at": "2026-12-22T02:05:29Z"
+    },
+    {
+      "id": 10728714136,
+      "name": "strategy-selection-probe-35808962969-1",
+      "size_in_bytes": 3264,
+      "digest": "sha256:e9759c49d5d6760d6829f0618c072b0b0a6c964fc946827662ad8dcfb3ebde7a",
+      "created_at": "2026-09-23T02:08:18Z",
+      "expires_at": "2026-09-30T02:08:17Z"
+    },
+    {
+      "id": 10728664389,
+      "name": "strategy-selection-35808962969-1",
+      "size_in_bytes": 3365,
+      "digest": "sha256:f98bf0345e4206e55719fa06eda2a7035503b9e52e74f01f24149fee745b2ca2",
+      "created_at": "2026-09-23T02:08:19Z",
+      "expires_at": "2026-09-30T02:08:18Z"
+    }
+  ],
+  "failure": {
+    "stage": "Stage one exact-scope strategy bundle",
+    "error": "strategy artifact may contain AWS access key: first run draft_tool_evidence.json",
+    "bothForecastValidationsOk": true,
+    "published": false,
+    "recorderDispatched": false,
+    "diagnosticRetainedFileCount": 81,
+    "omitted": [
+      {
+        "path": "records/thesis-analyst/2026-09-23/2026-09-23t02-09-07z-irs-actc-total-claims-2027/draft_tool_evidence.json",
+        "reason": "possible secret"
+      },
+      {
+        "path": "records/thesis-analyst/2026-09-23/2026-09-23t02-12-57z-irs-actc-total-claims-2027/draft_tool_evidence.json",
+        "reason": "possible secret"
+      },
+      {
+        "path": "records/thesis-analyst/2026-09-23/2026-09-23t02-12-57z-irs-actc-total-claims-2027/tool_evidence.json",
+        "reason": "possible secret"
+      }
+    ],
+    "preservationLimit": "Three full evidence JSON artifacts intentionally omitted by diagnostic secret scan; original exact matched byte/field unavailable. Do not reconstruct missing evidence or claim complete custody. Native streams and custody commitments retained.",
+    "runDirectories": [
+      "records/thesis-analyst/2026-09-23/2026-09-23t02-09-07z-irs-actc-total-claims-2027",
+      "records/thesis-analyst/2026-09-23/2026-09-23t02-12-57z-irs-actc-total-claims-2027"
+    ],
+    "diagnosticManifestSha256": "3fc343f861ee38040941c19ebf0276dea5e261ebe9d1ee193329d493574f7fd5",
+    "hypothesis": "Regex over JSON-encoded binary response bodies may yield incidental AWS-shaped substring. Not yet established for exact missing artifact."
+  },
+  "retainedFiles": [
+    {
+      "path": "attempt_manifest.json",
+      "bytes": 20365,
+      "sha256": "3fc343f861ee38040941c19ebf0276dea5e261ebe9d1ee193329d493574f7fd5"
+    },
+    {
+      "path": "fresh-source-diagnostic.json",
+      "bytes": 949,
+      "sha256": "e3645373ec7bf2c44d0a8fbd6d088b38287770ee43a21da5adb46719b6ef29a9"
+    },
+    {
+      "path": "generate.log",
+      "bytes": 92738,
+      "sha256": "be37f4b1761cbfa92fea2ce42ba838e7d0e4cd34dc4afa50b623c4db192a819c"
+    },
+    {
+      "path": "selection.json",
+      "bytes": 13128,
+      "sha256": "e659cc8b3564be5e46a42d1ced4d4b7ef805a2a299996f271a63c01a3fc46c1f"
+    }
+  ]
+}

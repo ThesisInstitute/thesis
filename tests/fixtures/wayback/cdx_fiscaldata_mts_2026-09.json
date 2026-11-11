@@ -1,0 +1,5 @@
+[["timestamp","original","statuscode","mimetype","digest","length"],
+["20260916151753","https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/","-","warc/revisit","3PUWHSVCKRBZWGWJ3MFWR5JEAKWCFJBZ","1458"],
+["20260919232205","https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/","-","warc/revisit","BXKYEXOFU4KELX5XG3XRT5BQRG66KQ3D","1494"],
+["20260920210816","https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/","200","text/html","BXKYEXOFU4KELX5XG3XRT5BQRG66KQ3D","96698"],
+["20260920233105","https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/","200","text/html","BXKYEXOFU4KELX5XG3XRT5BQRG66KQ3D","96707"]]

@@ -14,6 +14,15 @@ batch) resolve straight from the BLS Public Data API v2 series their
 resolutionSourceUrls bind, under a temporal first-print gate and runtime
 anchor verification (see BLS_API_ADAPTERS).
 
+Aging/disability batch (2026-08-23): BLS CPS series (no preliminary
+footnote; latest-month gate), CES home health care, LAUS Colorado (BLS API);
+the VA VBA Monday Morning Workload Report workbook (VA_MMWR_ADAPTERS,
+Last-Modified first-posting gate); SSA SSI Monthly Statistics / Monthly
+Statistical Snapshot editions and the OHO workload XML
+(SSA_OFFICIAL_ADAPTERS) through a declared headless-browser transport
+(scripts/official_browser_fetch.py) with Wayback corroboration, because
+ssa.gov refuses every non-browser client. See docs/anchor-verifications.md.
+
 Usage:
     python3 scripts/resolve_pending.py [--dry-run]
         [--ledger-repo PolicyEngine/chronicle]
@@ -51,9 +60,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
-from collections.abc import Callable, Mapping
+import zlib
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, replace
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from html import unescape
 from html.parser import HTMLParser
 from typing import Any
@@ -61,6 +71,9 @@ from urllib.parse import quote, urlparse
 from xml.etree import ElementTree as ET
 from zoneinfo import ZoneInfo
 
+import ledger_units
+import ssa_official_pages
+import va_mmwr
 import verify_records_attestations as records_provenance
 from canonical_json import canonical_bytes, canonical_sha256
 from ledger_release_chain import (
@@ -82,8 +95,11 @@ from ledger_release_chain import (
 from pin_ledger import PinError, _validate_catalog_binding
 from register_targets import (
     LEGACY_BOUNDED_CONDITIONAL_IDS,
+    WEEKLY_CLAIMS_RELEASE_EXCEPTIONS,
+    WEEKLY_CLAIMS_SCHEDULE_URL,
     RegistrationError,
     registration_content_hash,
+    weekly_claims_release_day,
 )
 from sba_loan_performance import (
     CHARGE_OFF_AMOUNT_SERIES,
@@ -105,7 +121,16 @@ from sba_loan_performance import (
     PARTIAL_REFUSAL as SBA_PARTIAL_REFUSAL,
 )
 from thesis_log_client import load_thesis_log
-from verify_custody import CustodyError, verify_run
+from verify_custody import (
+    CLAIMS_LABEL_LAG,
+    CustodyError,
+    claims_vintages_consistent,
+    judge_claims_first_print,
+    parse_alfred_claims_vintage,
+    read_alfred_claims_vintage,
+    require_claims_vintage_label,
+    verify_run,
+)
 from witnessed_timeline import TimelineError, extract_timeline
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -120,6 +145,57 @@ FRED_CSV = (
 MAX_TIMESTAMP_TOKEN_BYTES = 1024 * 1024
 DEFAULT_TIMESTAMP_TIMEOUT_SECONDS = 45.0
 PRODUCER_SIGNING_KEY_ENV = "LEDGER_PRODUCER_SIGNING_KEY"
+
+# The chronicle gate jobs wait for a runner before they judge anything. The
+# 2026-09-22 and 2026-09-23 proposals (chronicle #285, #286) sat queued for
+# 33 and 68 minutes, and the old 30 x 20 s poll closed both PRs while their
+# gates were still queued, reporting that the gate "did not pass". Wait on
+# a wall-clock budget instead; the resolve job's timeout-minutes in
+# .github/workflows/resolve-and-rebuild.yml must cover it.
+DEFAULT_APPEND_GATE_TIMEOUT_MINUTES = 150.0
+APPEND_GATE_TIMEOUT_ENV = "LEDGER_APPEND_GATE_TIMEOUT_MINUTES"
+APPEND_GATE_MAX_POLL_SECONDS = 120.0
+APPEND_GATE_MAX_READ_FAILURES = 5
+# GitHub lists check runs 100 to a page. Ten pages is far beyond any
+# proposal seen so far; a listing longer than that is refused, not truncated.
+APPEND_GATE_CHECK_RUN_PAGE_SIZE = 100
+APPEND_GATE_MAX_CHECK_RUN_PAGES = 10
+# One `gh api` page read may take at most this long, and no longer than the
+# budget has left, but never less than the floor: a read always gets long
+# enough to finish, even the one at the deadline.
+APPEND_GATE_MAX_READ_SECONDS = 120.0
+APPEND_GATE_MIN_READ_SECONDS = 15.0
+# Both are required checks on the ledger branch, but the resolver's token is
+# a repository admin and enforce_admins is off: its merges have gone through
+# with checks that are required today failing (chronicle #240) or still
+# running (#162, trusted base). This tuple is therefore what enforces either
+# verdict on a resolver merge. The trusted job runs the default branch's
+# workflow definition, which the proposal cannot edit.
+REQUIRED_APPEND_GATES = ("Append gate", "Trusted base append gate")
+# Branch protection requires a third check, Chronicle CI's "Arch checks",
+# whose series-catalog audit fails when an append needs catalog curation (a
+# concept's first period strip in a new identifier shape, or a moved
+# identity anchor). The resolver never awaited it: 17 of the 28 appends from
+# 2026-07-10 to 2026-10-19 merged with it red, and the branch stayed red,
+# blocking every other pull request into it, until a curation pull request
+# landed (chronicle#363 and #371 after #361 and #369). Proposals now carry the
+# curation the resolver can prove (catalog_curation), and the resolver
+# awaits Arch checks. What a red verdict does is ARCH_CHECKS_POLICY:
+# "land" merges and files the curation work as a Chronicle issue, the
+# behaviour before this check was awaited; "refuse" closes the proposal like
+# a failed append gate, so the rows wait, and a row whose registered window
+# closes meanwhile can no longer resolve. The choice is Max's (decision
+# queued 2026-10-19); until he rules, nothing lands later than it did.
+ARCH_CHECKS_GATE = "Arch checks"
+ARCH_CHECKS_POLICY_LAND = "land"
+ARCH_CHECKS_POLICY_REFUSE = "refuse"
+ARCH_CHECKS_POLICIES = (ARCH_CHECKS_POLICY_LAND, ARCH_CHECKS_POLICY_REFUSE)
+ARCH_CHECKS_POLICY = ARCH_CHECKS_POLICY_LAND
+# Under "land", once both append gates have passed, how long to keep waiting
+# for an Arch checks verdict before merging without one. Arch checks
+# usually finishes before the append gate does.
+ARCH_CHECKS_GRACE_SECONDS = 20 * 60
+LEDGER_CURATION_ISSUE_TITLE = "Ledger branch red after a resolver append"
 
 SBA_CUSTODY_ABSENT = "SBA CUSTODY ABSENT (refusing):"
 SBA_CUSTODY_UNWITNESSED = "SBA CUSTODY UNWITNESSED (refusing):"
@@ -219,6 +295,13 @@ TSA_ENDPOINTS = {
     "digicert": "http://timestamp.digicert.com",
 }
 TimestampRequester = Callable[[str, bytes, float], bytes]
+
+
+# main's exit status when it finished cleanly but refused one or more rows
+# (a contract-binding or ledger-catalog refusal). Whatever it appended must
+# still be committed and published, so the workflow tells this apart from a
+# crash (1), publishes, and then fails the job so the alert fires.
+EXIT_REFUSED_ROWS = 3
 
 
 class LedgerProposalError(RuntimeError):
@@ -2063,14 +2146,22 @@ def bea_ita_release_snapshot_envelope(
 # immutable Wayback Machine snapshot of the cells' OWN bound source page
 # (bls.gov blocks non-browser fetches; web.archive.org serves the exact
 # bytes and independently timestamps them). One snapshot per data month,
-# captured right after the Employment Situation release. The three rows
-# that DO have FRED mirrors (office/admin, production, transport) were
+# captured between that month's Employment Situation release and the next.
+# The three rows that DO have FRED mirrors (office/admin, production, transport) were
 # cross-checked against ALFRED at the release vintage and matched exactly.
+#
+# Every pin is a capture taken between the Employment Situation that first
+# printed the month and the next one (BLS schedule, archived 2026-07-31:
+# https://web.archive.org/web/20260731041428/https://www.bls.gov/schedule/news_release/empsit.htm
+# — June printed 2026-07-02, July 2026-08-07, August 2026-09-04, September
+# 2026-10-02). The page is overwritten each month, so the capture's own
+# current-month header is checked against the target period before any row is
+# read (a19_snapshot_period); a pin to the wrong capture refuses.
+A19_SOURCE_URL = "https://www.bls.gov/web/empsit/cpseea19.htm"
 A19_SNAPSHOT_URLS: dict[str, str] = {
-    "2026-06": (
-        "https://web.archive.org/web/20260710110509/"
-        "https://www.bls.gov/web/empsit/cpseea19.htm"
-    ),
+    "2026-06": f"https://web.archive.org/web/20260710110509/{A19_SOURCE_URL}",
+    "2026-07": f"https://web.archive.org/web/20260819191418/{A19_SOURCE_URL}",
+    "2026-08": f"https://web.archive.org/web/20260904170006/{A19_SOURCE_URL}",
 }
 A19_ROW_LABELS: dict[str, str] = {
     "business_financial_operations": "Business and financial operations occupations",
@@ -2202,9 +2293,450 @@ BLS_API_ADAPTERS: dict[str, dict[str, Any]] = {
             "2025": 2.6,
         },
     },
+    # Aging/disability batch (wired 2026-08-23). CPS household-survey series
+    # never carry BLS's preliminary "P" footnote (verified live: every
+    # LNS11324230 and LNU02374597 row has empty footnotes), so their
+    # first-print gate is purely temporal (`first_print_gate: latest_month`):
+    # a period is captured only while it is still the series' latest
+    # published month, i.e. before the next Employment Situation. BLS's
+    # stated policy makes that window a first-print window: "BLS policy is to
+    # not revise previous months' official seasonally adjusted CPS estimates
+    # as new data become available during the year. Instead, revisions are
+    # introduced for the most recent 5 years of data at the end of each
+    # year" (bls.gov/cps/seasonal-adjustment-methodology.htm, read
+    # 2026-08-23). LAUS state series carry "P" on the latest month and use
+    # the default gate; the API serves persons, so that spec scales to the
+    # catalog's thousands. Anchors reproduce the cells' own recorded
+    # histories (docs/anchor-verifications.md).
+    "bls.cps.lfpr_55_plus": {
+        "series_id": "LNS11324230",
+        "period_type": "month",
+        "unit": "percent",
+        "label": "US labor force participation rate, 55 years and over (SA)",
+        "source_name": "bls_cps",
+        "source_table": (
+            "Current Population Survey, labor force participation rate, "
+            "55 years and over, seasonally adjusted"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "LNS11324230",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2025,
+        "anchors": {
+            "2025-06": 38.0,
+            "2025-12": 37.9,
+            "2026-04": 37.1,
+            "2026-06": 37.1,
+        },
+    },
+    "bls.cps.LNU02374597": {
+        "series_id": "LNU02374597",
+        "period_type": "month",
+        "unit": "percent",
+        "label": (
+            "US employment-population ratio, persons with a disability, "
+            "16 years and over (NSA)"
+        ),
+        "source_name": "bls_cps",
+        "source_table": (
+            "Current Population Survey, employment-population ratio, persons "
+            "with a disability, 16 years and over, not seasonally adjusted "
+            "(Employment Situation Table A-6)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "LNU02374597",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2025,
+        "anchors": {
+            "2025-06": 22.7,
+            "2025-12": 23.4,
+            "2026-04": 21.8,
+            "2026-06": 21.8,
+        },
+    },
+    "bls.ces.home_health_care_services.employment": {
+        "series_id": "CES6562160001",
+        "period_type": "month",
+        "unit": "thousands",
+        "label": "US home health care services employment (SA)",
+        "source_name": "bls_ces",
+        "source_table": (
+            "Current Employment Statistics, all employees, home health care "
+            "services (NAICS 6216), seasonally adjusted"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CES6562160001",
+        "anchor_start_year": 2025,
+        "anchors": {
+            "2025-06": 1778.8,
+            "2025-12": 1830.3,
+            "2026-04": 1868.0,
+            "2026-05": 1878.0,
+        },
+    },
+    "bls.laus.colorado.labor_force": {
+        "series_id": "LASST080000000000006",
+        "period_type": "month",
+        "unit": "thousands",
+        "scale": 0.001,
+        "round": 1,
+        "label": "Colorado civilian labor force (SA)",
+        "source_name": "bls_laus",
+        "source_table": (
+            "Local Area Unemployment Statistics, Colorado, civilian labor "
+            "force, seasonally adjusted (State Employment and Unemployment, "
+            "Table 1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "LASST080000000000006",
+        "anchor_start_year": 2025,
+        # API units are persons; the ledger value is scaled to thousands.
+        "anchors": {
+            "2025-06": 3258203,
+            "2025-12": 3254073,
+            "2026-04": 3215558,
+            "2026-06": 3193312,
+        },
+    },
+    # Registrable recurring docket series (wired 2026-09-20). These six are the
+    # first BLS API specs a NEW registration may bind: each carries a
+    # ``binding_transform``, which is what ``bls_api_binding_template`` turns
+    # into the reviewed seven-key sourceBinding and what the registration-time
+    # execution-plan gate requires. Its shape is the prospector's
+    # (``prospect_targets._transform_errors``): exactly ``operation`` and
+    # ``factor``, from that function's operation vocabulary, because a later
+    # proposal carries this binding as its ``previousTarget.sourceBinding``.
+    # Rounding is the executor's (``round``), as for the StatCan growth series.
+    # The older specs above have no ``binding_transform``, so they keep
+    # resolving only the cells that predate bindings.
+    #
+    # The keyless API answers ``calculations`` with "Calculations have been
+    # disabled for this request" (probed 2026-09-20), so month-over-month
+    # figures are derived here from two served rows. ``mom_pct`` and
+    # ``mom_diff`` require the immediately preceding CALENDAR month: BLS
+    # published no October 2025 value for several series (the API serves
+    # ``"-"``), and a change across a gap is not a statistic BLS printed.
+    #
+    # Anchors are in the transformed unit and are months whose values no longer
+    # move between releases: CPS and CPI months other than the latest (revised
+    # only in the annual seasonal revision), JOLTS second estimates, and CES
+    # third estimates. They are NOT first prints: the API drops a first print
+    # one release later (June 2026 openings printed 7,359 and are served as
+    # 7,182; July 2026 payrolls printed -23 and are served as +21). First-print
+    # custody comes from the gate, never from an anchor. Each anchor is
+    # verified against the release that printed it; see "Anchor verifications
+    # — BLS registrable docket series (2026-09-20)" in
+    # docs/anchor-verifications.md.
+    # ``anchor_abs_tolerance`` replaces the relative tolerance on one-decimal
+    # figures. 0.1 is a lab choice, one step of the published precision, not a
+    # bound BLS states: the annual CPS revision and the February CPI seasonal
+    # revision re-derive these months, and a larger move refuses every capture
+    # with ANCHOR MISMATCH until the anchors are re-verified. Extending a
+    # docket calendar across a series' annual revision therefore means
+    # re-verifying and re-committing its anchors in the same change.
+    #
+    # The unemployment rate and the two CPI series took their docket
+    # templates after Chronicle folded each concept's two lineages into the
+    # ``economy/aggregate`` one these specs write (Max's ruling d353,
+    # PolicyEngine/chronicle#344); see the docs section.
+    "bls.cps.unemployment_rate": {
+        "series_id": "LNS14000000",
+        "period_type": "month",
+        "unit": "percent",
+        "label": "US unemployment rate, 16 years and over (SA)",
+        "source_name": "bls_cps",
+        "source_table": (
+            "Current Population Survey, unemployment rate, 16 years and over, "
+            "seasonally adjusted (Employment Situation, Table A-1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "LNS14000000",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-04": 4.3,
+            "2026-05": 4.3,
+            "2026-06": 4.2,
+            "2026-07": 4.1,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 1},
+    },
+    "bls.cpi.u.headline_mom": {
+        "series_id": "CUSR0000SA0",
+        "period_type": "month",
+        "transform": "mom_pct",
+        "unit": "percent_growth",
+        "round": 1,
+        "label": "US CPI-U all items, one-month percent change (SA)",
+        "source_name": "bls_cpi",
+        "source_table": (
+            "Consumer Price Index for All Urban Consumers, US city average, "
+            "all items, seasonally adjusted (CPI news release, Table A)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CUSR0000SA0",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-05": 0.5,
+            "2026-06": -0.4,
+            "2026-07": 0.1,
+        },
+        "binding_transform": {
+            "operation": "percent_change_previous_period",
+            "factor": 1,
+        },
+    },
+    "bls.cpi.u.core_mom": {
+        "series_id": "CUSR0000SA0L1E",
+        "period_type": "month",
+        "transform": "mom_pct",
+        "unit": "percent_growth",
+        "round": 1,
+        "label": (
+            "US CPI-U all items less food and energy, one-month percent change (SA)"
+        ),
+        "source_name": "bls_cpi",
+        "source_table": (
+            "Consumer Price Index for All Urban Consumers, US city average, "
+            "all items less food and energy, seasonally adjusted (CPI news "
+            "release, Table A)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CUSR0000SA0L1E",
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-05": 0.2,
+            "2026-06": 0.0,
+            "2026-07": 0.2,
+        },
+        "binding_transform": {
+            "operation": "percent_change_previous_period",
+            "factor": 1,
+        },
+    },
+    "bls.jolts.job_openings": {
+        "series_id": "JTS000000000000000JOL",
+        "period_type": "month",
+        "unit": "millions",
+        "scale": 0.001,
+        "round": 3,
+        "label": "US job openings, total nonfarm (SA)",
+        "source_name": "bls_jolts",
+        "source_table": (
+            "Job Openings and Labor Turnover Survey, job openings level, total "
+            "nonfarm, seasonally adjusted (JOLTS news release, Table 1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "JTS000000000000000JOL",
+        "anchor_start_year": 2026,
+        # The API serves thousands; anchors are in the ledger's millions.
+        "anchors": {
+            "2026-04": 7.585,
+            "2026-05": 7.537,
+            "2026-06": 7.182,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 0.001},
+    },
+    "bls.jolts.quits_rate": {
+        "series_id": "JTS000000000000000QUR",
+        "period_type": "month",
+        "unit": "percent",
+        "label": "US quits rate, total nonfarm (SA)",
+        "source_name": "bls_jolts",
+        "source_table": (
+            "Job Openings and Labor Turnover Survey, quits rate, total "
+            "nonfarm, seasonally adjusted (JOLTS news release, Table 4)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "JTS000000000000000QUR",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.1,
+        "anchors": {
+            "2026-04": 1.9,
+            "2026-05": 2.0,
+            "2026-06": 2.0,
+        },
+        "binding_transform": {"operation": "multiply", "factor": 1},
+    },
+    "bls.ces.nonfarm_payrolls.change": {
+        "series_id": "CES0000000001",
+        "period_type": "month",
+        "transform": "mom_diff",
+        "unit": "thousands",
+        "round": 0,
+        "label": "US total nonfarm payroll employment, one-month change (SA)",
+        "source_name": "bls_ces",
+        "source_table": (
+            "Current Employment Statistics, all employees, total nonfarm, "
+            "seasonally adjusted (Employment Situation, Table B-1)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": "CES0000000001",
+        "anchor_start_year": 2026,
+        # Annual benchmarking moves a published monthly change by tens of
+        # thousands. This bound cannot tell total nonfarm from a neighbouring
+        # CES aggregate, and the payload's echoed seriesID proves only that
+        # the response matches the request. What ties CES0000000001 to the
+        # published statistic is the zero-tolerance reproduction of the
+        # captured official bytes in tests/test_bls_api_registrable.py and the
+        # release-text verification in the docs. At run time the bound only
+        # has to catch a wrong unit or transform, which is off by orders of
+        # magnitude.
+        "anchor_abs_tolerance": 75.0,
+        "anchors": {
+            "2026-04": 148.0,
+            "2026-05": 63.0,
+            "2026-06": 31.0,
+        },
+        "binding_transform": {
+            "operation": "difference_previous_period",
+            "factor": 1,
+        },
+    },
 }
+# Employment Situation Table A-19 ("Employed people by occupation, sex, and
+# age", not seasonally adjusted, in thousands): the six rows the docket
+# forecasts, each from the CPS series that prints its "Total, 16 years and
+# over" column. The legacy ``a19`` leg reads the same rows from Internet
+# Archive captures of cpseea19.htm and stays unregistrable; these specs are
+# how a NEW A-19 target registers (Max's ruling, 2026-09-25). BLS's
+# series catalog (ln.series) titles each id "(Unadj) Employment Level - <row>",
+# employed, monthly, not seasonally adjusted.
+#
+# The anchors are first prints, not only settled values: each is the figure
+# Table A-19 printed in the Employment Situation that first published the
+# month (tests/fixtures/a19, the Archive's captures of 2026-07-10, 2026-08-19
+# and 2026-09-04), and the API capture of each series in tests/fixtures/bls_api
+# serves the same integer. That equality is also what ties each series id to
+# its A-19 row.
+# ``anchor_abs_tolerance`` is one step of the published precision (1,000
+# people, 0.001 million), the same lab choice as the 0.1 on one-decimal
+# rates: BLS does not normally revise unadjusted CPS data, and a revision
+# that reaches an anchor month refuses every capture with ANCHOR MISMATCH
+# until the anchors are re-verified.
+A19_BLS_API_SERIES: dict[str, tuple[str, dict[str, float]]] = {
+    "business_financial_operations": (
+        "LNU02032454",
+        {"2026-06": 9.720, "2026-07": 9.835, "2026-08": 10.167},
+    ),
+    "computer_mathematical": (
+        "LNU02032455",
+        {"2026-06": 6.950, "2026-07": 6.924, "2026-08": 7.010},
+    ),
+    "healthcare_support": (
+        "LNU02032463",
+        {"2026-06": 5.691, "2026-07": 5.797, "2026-08": 5.709},
+    ),
+    "office_administrative_support": (
+        "LNU02032207",
+        {"2026-06": 16.184, "2026-07": 16.457, "2026-08": 16.154},
+    ),
+    "production": (
+        "LNU02032213",
+        {"2026-06": 7.759, "2026-07": 8.121, "2026-08": 7.716},
+    ),
+    "transportation_material_moving": (
+        "LNU02032214",
+        {"2026-06": 12.010, "2026-07": 12.223, "2026-08": 12.011},
+    ),
+}
+for _row, (_series_id, _anchors) in A19_BLS_API_SERIES.items():
+    BLS_API_ADAPTERS[f"{A19_STEM}.{_row}"] = {
+        "series_id": _series_id,
+        "period_type": "month",
+        "unit": "millions",
+        "scale": 0.001,
+        "round": 3,
+        "label": f"US employed people, {A19_ROW_LABELS[_row]}, 16 years and over (NSA)",
+        "source_name": "bls_cps",
+        "source_table": (
+            f"Current Population Survey, employed people, {A19_ROW_LABELS[_row]}, "
+            "total 16 years and over, not seasonally adjusted, in thousands "
+            "(Employment Situation, Table A-19)"
+        ),
+        "concept_authority": "bls",
+        "source_concept": _series_id,
+        "first_print_gate": "latest_month",
+        "anchor_start_year": 2026,
+        "anchor_abs_tolerance": 0.001,
+        "anchors": dict(_anchors),
+        "binding_transform": {"operation": "multiply", "factor": 0.001},
+        "evidence_notes": (
+            "First print for {period} captured from {source_url} (BLS Public "
+            "Data API v2, current estimates only), in thousands and divided by "
+            "1,000. At capture {period} was still the series' latest published "
+            "month, so no later Employment Situation had been published and "
+            "the value is the one that release's Table A-19 printed. CPS rows "
+            "carry no preliminary footnote, and BLS states that the original "
+            "(unadjusted) sample data normally are not revised. The one "
+            "exception observed, the population-control revision of January "
+            "2026, was published with the February estimates, after which "
+            "January was no longer the latest month."
+        ),
+    }
+for _stem, _spec in BLS_API_ADAPTERS.items():
+    if "binding_transform" in _spec:
+        # Every registrable spec pins anchors in the unit it emits (see the
+        # note above the six entries); legacy specs pin the served level.
+        _spec["anchor_unit"] = "emitted"
+        # The main loop's unit guard needs the series a spec resolves.
+        _spec["series_stem"] = _stem
+_BLS_EVIDENCE_NOTES_LATEST_CPI = (
+    "One-month percent change for {period}, derived as 100 x (index / prior "
+    "month's index - 1) rounded to one decimal from the seasonally adjusted "
+    "index served by {source_url} (BLS Public Data API v2, current estimates "
+    "only). At capture {period} was still the series' latest published month, "
+    "so both index values are the ones its own release carried: CPI-U rows "
+    "have no preliminary footnote, and BLS revises seasonally adjusted "
+    "indexes once a year, in February, for the previous 5 years."
+)
+BLS_API_ADAPTERS["bls.cpi.u.headline_mom"]["evidence_notes"] = (
+    _BLS_EVIDENCE_NOTES_LATEST_CPI
+)
+BLS_API_ADAPTERS["bls.cpi.u.core_mom"]["evidence_notes"] = (
+    _BLS_EVIDENCE_NOTES_LATEST_CPI
+)
+BLS_API_ADAPTERS["bls.cps.unemployment_rate"]["evidence_notes"] = (
+    "First print for {period} captured from {source_url} (BLS Public Data API "
+    "v2, current estimates only). At capture {period} was still the series' "
+    "latest published month, so no later Employment Situation had been "
+    "published. CPS rows carry no preliminary footnote. BLS's stated policy is "
+    "not to revise previous months' official seasonally adjusted CPS estimates "
+    "as new data arrive during the year. It has made exceptions, and the one "
+    "observed, the population-control revision of January 2026, was published "
+    "with the February estimates, after which January was no longer the "
+    "latest month."
+)
+BLS_API_ADAPTERS["bls.ces.nonfarm_payrolls.change"]["evidence_notes"] = (
+    "One-month change for {period}, derived as the level for {period} minus "
+    "the prior month's level, both served by {source_url} (BLS Public Data "
+    "API v2, current estimates only). At capture {period} was still the "
+    "series' latest published month and still carried BLS's preliminary "
+    "footnote, so the pair is the one its own Employment Situation printed: "
+    "the first estimate for {period} and that release's revised prior month."
+)
 for _spec in BLS_API_ADAPTERS.values():
-    if _spec["period_type"] == "month":
+    if "evidence_notes" in _spec:
+        # A spec that states its own first-print basis keeps it: the notes
+        # below describe CPS policy and the preliminary footnote only.
+        continue
+    if _spec.get("first_print_gate") == "latest_month":
+        _spec["evidence_notes"] = (
+            "First print for {period} captured from {source_url} (BLS Public "
+            "Data API v2, current estimates only) inside the first-print "
+            "window: at capture the value was still the series' latest "
+            "published month. CPS household-survey rows carry no preliminary "
+            "footnote, and BLS policy is not to revise previous months' "
+            "official seasonally adjusted CPS estimates during the year "
+            "(annual end-of-year revision of the latest 5 years), so the value "
+            "served before the next Employment Situation is the first print."
+        )
+    elif _spec["period_type"] == "month":
         _spec["evidence_notes"] = (
             "First print for {period} captured from {source_url} (BLS Public "
             "Data API v2, current estimates only) inside the first-print "
@@ -3003,6 +3535,542 @@ def cms_provider_data_value(
             "row/column or upstream restructuring"
         )
     return round(value, spec.get("round", 4)), None
+
+
+# ---------------------------------------------------------------------------
+# VA VBA Monday Morning Workload Report (weekly rating-bundle inventory).
+#
+# The cell family binds the VBA Detailed Claims Data page; the resolvable
+# artifact is the weekly MMWR workbook that page links under each Monday
+# report date (the file is named by the preceding Saturday's data-through
+# date: report 07/13/2026 -> MMWR-07-11-2026.xlsx). The national
+# "Compensation and Pension Rating Bundle" "# Pending" cell of the
+# Transformation sheet is the page's headline "Pending Claims" status card.
+# First-posting evidence is the workbook's Last-Modified header: every
+# observed 2026 report was modified on its report Monday (07/06, a holiday
+# week, on the Tuesday), so a file modified more than
+# VA_MMWR_POSTING_WINDOW_DAYS after its report date is a re-post and is
+# refused. Anchors are reproduced from the official workbooks at wiring time
+# and re-verified from the live files at every run; the forecasting cell's
+# own recorded history is deliberately NOT used as an anchor source here —
+# three of its four "fetched" historical values do not exist in any VA
+# workbook (see docs/anchor-verifications.md).
+VA_MMWR_ALLOWED_HOSTS = ("www.benefits.va.gov", "benefits.va.gov")
+VA_MMWR_POSTING_WINDOW_DAYS = 7
+VA_MMWR_ENVELOPE_SCHEMA = "va_mmwr_workbook_capture_v1"
+VA_MMWR_ADAPTERS: dict[str, dict[str, Any]] = {
+    "va.vba.mmwr.claims_inventory": {
+        "series_id": "va-vba-mmwr-rating-bundle-pending",
+        "unit": "thousands",
+        "scale": 0.001,
+        "round": 3,
+        "label": (
+            "VA VBA Monday Morning Workload Report, Compensation and Pension "
+            "Rating Bundle pending claims (national)"
+        ),
+        "source_name": "va_vba_mmwr",
+        "source_table": (
+            "Monday Morning Workload Report workbook, Transformation sheet, "
+            "Compensation and Pension Rating Bundle Metrics (National View), "
+            "# Pending, Compensation and Pension Rating Bundle / Total row"
+        ),
+        "concept_authority": "va_vba",
+        "source_concept": "Compensation and Pension Rating Bundle: # Pending",
+        "source_url": va_mmwr.LANDING_URL,
+        # Report Mondays -> whole pending claims reproduced 2026-08-23 from
+        # the official workbooks the landing page links for those dates.
+        "anchors": {
+            "2026-06-22": 593770,
+            "2026-06-29": 589026,
+            "2026-07-06": 601630,
+        },
+        "sanity_range": (100_000, 2_000_000),
+        "evidence_notes": (
+            "First print for the {period} report captured from the VBA "
+            "Detailed Claims Data page's own link for that report date "
+            "({source_url}): the linked MMWR workbook's Transformation sheet, "
+            "Compensation and Pension Rating Bundle / Total, # Pending (cached "
+            "value of the data_only read), whose Last-Modified header placed "
+            "its posting inside the first-posting window after the report "
+            "date; the workbook's 'Reporting through' cell matched the file's "
+            "data-through date and its cached percent reproduced the counts."
+        ),
+    },
+}
+
+
+def parse_va_mmwr_ref(ref: str, stem: str) -> str | None:
+    """``<stem>.week_YYYY-MM-DD.first_print`` -> ``YYYY-MM-DD`` (report date)."""
+    match = re.fullmatch(
+        rf"{re.escape(stem)}\.week_(\d{{4}}-\d{{2}}-\d{{2}})(?:\.first_print)?", ref
+    )
+    if not match:
+        return None
+    try:
+        dt.date.fromisoformat(match.group(1))
+    except ValueError:
+        return None
+    return match.group(1)
+
+
+def va_mmwr_http_get(url: str) -> tuple[bytes, dict[str, str], str, str]:
+    """(body, lower-cased headers, retrievedAt, finalUrl) with host pinning."""
+    _require_allowed_host(url, VA_MMWR_ALLOWED_HOSTS)
+    request = urllib.request.Request(url, headers={"User-Agent": INTL_USER_AGENT})
+    retrieved_at = utc_now()
+    opener = urllib.request.build_opener(_PinnedRedirectHandler(VA_MMWR_ALLOWED_HOSTS))
+    with opener.open(request, timeout=300) as response:
+        final_url = response.geturl()
+        _require_allowed_host(final_url, VA_MMWR_ALLOWED_HOSTS)
+        headers = {key.lower(): value for key, value in response.headers.items()}
+        return response.read(), headers, retrieved_at, final_url
+
+
+@dataclass(frozen=True)
+class VaMmwrCapture:
+    report_date: dt.date
+    href: str
+    workbook_url: str
+    file_date: dt.date
+    raw: bytes
+    headers: dict[str, str]
+    retrieved_at: str
+    last_modified: dt.datetime
+    reading: va_mmwr.RatingBundleReading
+
+
+def va_mmwr_capture_report(
+    landing_raw: bytes,
+    report_date: dt.date,
+    workbook_cache: dict[str, tuple[bytes, dict[str, str], str, str]],
+) -> tuple[VaMmwrCapture | None, str | None]:
+    """Resolve one report date to its workbook and parsed rating-bundle cell.
+
+    (capture, refusal): identity refusals (no or several links, a file date
+    far from the report date, a non-workbook body, a failed posting gate, a
+    restructured sheet) come back as text; transport failures propagate.
+    """
+    try:
+        href = va_mmwr.landing_workbook_href(landing_raw, report_date)
+        file_date = va_mmwr.workbook_file_date(href)
+        va_mmwr.require_file_date_near_report(file_date, report_date)
+    except va_mmwr.VaMmwrError as exc:
+        return None, str(exc)
+    url = va_mmwr.workbook_url(href)
+    if url not in workbook_cache:
+        workbook_cache[url] = va_mmwr_http_get(url)
+    raw, headers, retrieved_at, final_url = workbook_cache[url]
+    if final_url != url:
+        return None, f"workbook request for {url} landed on {final_url}"
+    content_type = headers.get("content-type", "")
+    if "spreadsheetml" not in content_type and "ms-excel" not in content_type:
+        return None, (
+            f"workbook response is {content_type!r}, not a spreadsheet (the VA "
+            "site answers missing files with an HTML page and HTTP 200)"
+        )
+    last_modified, gate = va_mmwr.posting_gate(
+        headers.get("last-modified"),
+        file_date=file_date,
+        report_date=report_date,
+        window_days=VA_MMWR_POSTING_WINDOW_DAYS,
+    )
+    if gate:
+        return None, gate
+    assert last_modified is not None
+    try:
+        reading = va_mmwr.read_rating_bundle_pending(raw, expected_through=file_date)
+    except va_mmwr.VaMmwrError as exc:
+        return None, str(exc)
+    return (
+        VaMmwrCapture(
+            report_date=report_date,
+            href=href,
+            workbook_url=url,
+            file_date=file_date,
+            raw=raw,
+            headers=headers,
+            retrieved_at=retrieved_at,
+            last_modified=last_modified,
+            reading=reading,
+        ),
+        None,
+    )
+
+
+def va_mmwr_capture_envelope(
+    *,
+    spec: Mapping[str, Any],
+    landing_raw: bytes,
+    landing_retrieved_at: str,
+    target: VaMmwrCapture,
+    anchors: list[VaMmwrCapture],
+    value: float,
+) -> bytes:
+    """Archive every response that authenticated the weekly first print."""
+
+    def capture_block(capture: VaMmwrCapture, *, include_body: bool) -> dict[str, Any]:
+        block: dict[str, Any] = {
+            "reportDate": capture.report_date.isoformat(),
+            "href": capture.href,
+            "url": capture.workbook_url,
+            "dataThroughDate": capture.file_date.isoformat(),
+            "retrievedAt": capture.retrieved_at,
+            "lastModified": capture.headers.get("last-modified"),
+            "etag": capture.headers.get("etag"),
+            "contentType": capture.headers.get("content-type"),
+            "bytes": len(capture.raw),
+            "sha256": hashlib.sha256(capture.raw).hexdigest(),
+            "reading": {
+                "sheet": capture.reading.sheet,
+                "cell": capture.reading.cell,
+                "pending": capture.reading.pending,
+                "pendingOver125": capture.reading.pending_over_125,
+                "pctOver125": capture.reading.pct_over_125,
+                "reportingThrough": capture.reading.reporting_through.isoformat(),
+            },
+        }
+        if include_body:
+            block["bodyBase64"] = base64.b64encode(capture.raw).decode()
+        return block
+
+    return canonical_bytes(
+        {
+            "schemaVersion": VA_MMWR_ENVELOPE_SCHEMA,
+            "landingPage": {
+                "url": va_mmwr.LANDING_URL,
+                "retrievedAt": landing_retrieved_at,
+                "bytes": len(landing_raw),
+                "sha256": hashlib.sha256(landing_raw).hexdigest(),
+                "bodyBase64": base64.b64encode(landing_raw).decode(),
+            },
+            "workbook": capture_block(target, include_body=True),
+            "anchors": [
+                capture_block(anchor, include_body=False) for anchor in anchors
+            ],
+            "derived": {
+                "sourceSeriesId": spec["series_id"],
+                "reportDate": target.report_date.isoformat(),
+                "unit": spec["unit"],
+                "value": value,
+                "postingWindowDays": VA_MMWR_POSTING_WINDOW_DAYS,
+            },
+        }
+    )
+
+
+# ---------------------------------------------------------------------------
+# SSA official statistical pages (SSI Monthly Statistics, Monthly Statistical
+# Snapshot) and the OHO Hearing Office Workload Data XML.
+#
+# Transport: ssa.gov sits behind Akamai Bot Manager and answers every
+# non-browser TLS client with HTTP 403 (verified 2026-08-23: curl/urllib with
+# browser headers, from a laptop and from a GitHub Actions runner; the
+# Wayback Machine's Save Page Now also fails on these URLs). A real headless
+# Chromium, with an honest User-Agent suffix naming this resolver, is served
+# normally; robots.txt disallows none of these paths. The family therefore
+# fetches through scripts/official_browser_fetch.py and records the engine,
+# UA, headers, and hashes in every capture envelope. The Wayback Machine is
+# used only as corroboration: when a capture of the same URL exists, its
+# parsed value must agree with the live page.
+#
+# First-print discipline: SSI Monthly Statistics and Monthly Statistical
+# Snapshot editions live at per-period URLs (…/ssi_monthly/2026-06/table01
+# .html, …/stat_snapshot/2026-06.html). Overlapping months are identical
+# across editions (verified 2026-08-23: May 2026 total recipients 7,322,937
+# in the May, June, and July editions' Table 2; the July edition's June row
+# equals June's Table 1; Table 4 "All areas" equals Table 2's month), so a
+# capture of an edition page reproduces its first print. The OHO workload
+# XML is a rolling URL that is overwritten monthly, so its period must be
+# authenticated from RPTG_PRD_ENDT, falling back to the earliest Wayback
+# capture that carries the target period once the live file has rolled.
+SSA_ALLOWED_HOSTS = ("www.ssa.gov",)
+SSA_CAPTURE_SCHEMA = "ssa_official_page_capture_v1"
+SSA_SSI_MONTHLY_URL = (
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/{period}/{table}.html"
+)
+SSA_SNAPSHOT_URL = (
+    "https://www.ssa.gov/policy/docs/quickfacts/stat_snapshot/{period}.html"
+)
+SSA_OHO_WORKLOAD_XML_URL = (
+    "https://www.ssa.gov/appeals/DataSets/02_HO_Workload_Data.xml"
+)
+SSA_OFFICIAL_ADAPTERS: dict[str, dict[str, Any]] = {
+    "ssa.ssi.recipients_aged_65_plus": {
+        "reader": "ssi_table1",
+        "release_evidence": "edition_page",
+        "row": "Total",
+        "column": "65 or older",
+        "url_template": SSA_SSI_MONTHLY_URL,
+        "table": "table01",
+        "series_id": "ssa-ssi-monthly-table01-total-65-plus",
+        "unit": "thousands",
+        "scale": 0.001,
+        "round": 3,
+        "label": (
+            "US SSI recipients aged 65 or older, all federally administered payments"
+        ),
+        "source_name": "ssa_ssi_monthly",
+        "source_table": (
+            "SSI Monthly Statistics, Table 1 (All Federally Administered "
+            "Payments), Number of recipients, Total row, Age 65 or older"
+        ),
+        "concept_authority": "ssa",
+        "source_concept": "Table 1: Number of recipients, Total, 65 or older",
+        "anchors": {"2026-05": 2501549},
+        "sanity_range": (1_500_000, 4_000_000),
+    },
+    "ssa.ssi.recipients.colorado.aged_65_plus": {
+        "reader": "ssi_table4",
+        "release_evidence": "edition_page",
+        "state": "Colorado",
+        "column": "65 or older",
+        "url_template": SSA_SSI_MONTHLY_URL,
+        "table": "table04",
+        "series_id": "ssa-ssi-monthly-table04-colorado-65-plus",
+        "unit": "count",
+        "label": (
+            "Colorado SSI recipients aged 65 or older, all federally "
+            "administered payments"
+        ),
+        "source_name": "ssa_ssi_monthly",
+        "source_table": (
+            "SSI Monthly Statistics, Table 4 (All Federally Administered "
+            "Payments), Colorado row, Age 65 or older"
+        ),
+        "concept_authority": "ssa",
+        "source_concept": "Table 4: Number of recipients, Colorado, 65 or older",
+        "anchors": {"2026-06": 23063},
+        "sanity_range": (10_000, 60_000),
+    },
+    "ssa.ssi.recipients.colorado": {
+        "reader": "ssi_table4",
+        "release_evidence": "edition_page",
+        "state": "Colorado",
+        "column": "Total",
+        "url_template": SSA_SSI_MONTHLY_URL,
+        "table": "table04",
+        "series_id": "ssa-ssi-monthly-table04-colorado-total",
+        "unit": "thousands",
+        "scale": 0.001,
+        "round": 3,
+        "label": "Colorado SSI recipients, all federally administered payments",
+        "source_name": "ssa_ssi_monthly",
+        "source_table": (
+            "SSI Monthly Statistics, Table 4 (All Federally Administered "
+            "Payments), Colorado row, Total"
+        ),
+        "concept_authority": "ssa",
+        "source_concept": "Table 4: Number of recipients, Colorado, Total",
+        "anchors": {"2026-06": 66417},
+        "sanity_range": (30_000, 150_000),
+    },
+    "ssa.ssi.total_recipients": {
+        "reader": "ssi_table2",
+        "release_evidence": "edition_page",
+        "url_template": SSA_SSI_MONTHLY_URL,
+        "table": "table02",
+        "series_id": "ssa-ssi-monthly-table02-total-recipients",
+        "unit": "millions",
+        "scale": 0.000001,
+        "round": 6,
+        "label": "US SSI recipients, all federally administered payments",
+        "source_name": "ssa_ssi_monthly",
+        "source_table": (
+            "SSI Monthly Statistics, Table 2 (All Federally Administered "
+            "Payments), Number of recipients, Total, the edition's own month"
+        ),
+        "concept_authority": "ssa",
+        "source_concept": "Table 2: Number of recipients, Total",
+        "anchors": {"2026-06": 7323731},
+        "sanity_range": (5_000_000, 10_000_000),
+    },
+    "ssa.oasdi.disabled_worker_beneficiaries": {
+        "reader": "snapshot_table2",
+        "release_evidence": "edition_page",
+        "group": "Disability Insurance",
+        "row": "Disabled workers",
+        "url_template": SSA_SNAPSHOT_URL,
+        "series_id": "ssa-stat-snapshot-table02-disabled-workers",
+        "unit": "thousands",
+        "label": (
+            "US disabled-worker beneficiaries in current-payment status "
+            "(Monthly Statistical Snapshot)"
+        ),
+        "source_name": "ssa_stat_snapshot",
+        "source_table": (
+            "Monthly Statistical Snapshot, Table 2 (Social Security benefits), "
+            "Disability Insurance, Disabled workers, Beneficiaries Number "
+            "(thousands)"
+        ),
+        "concept_authority": "ssa",
+        "source_concept": (
+            "Table 2: Disability Insurance, Disabled workers, Number (thousands)"
+        ),
+        "anchors": {"2026-05": 7029},
+        "sanity_range": (5_000, 10_000),
+    },
+    "ssa.hearings.average_processing_time_days": {
+        "reader": "oho_workload_xml",
+        "url_template": SSA_OHO_WORKLOAD_XML_URL,
+        "series_id": "ssa-oho-hearing-office-workload-national-apt",
+        "unit": "count",
+        "label": (
+            "SSA hearings national fiscal-year-to-date average processing time (days)"
+        ),
+        "source_name": "ssa_oho_public_data",
+        "source_table": (
+            "Office of Hearings Operations, Hearing Office Workload Data "
+            "(02_HO_Workload_Data.xml), national Average Processing Time"
+        ),
+        "concept_authority": "ssa",
+        "source_concept": "DSPN_AVGPT (national)",
+        "anchors": {},
+        "sanity_range": (100, 1_000),
+    },
+}
+
+
+def ssa_period_url(spec: Mapping[str, Any], period: str) -> str:
+    return str(spec["url_template"]).format(period=period, table=spec.get("table", ""))
+
+
+def ssa_read_value(
+    spec: Mapping[str, Any], raw: bytes, period: str
+) -> ssa_official_pages.SsaTableReading:
+    """Dispatch to the reviewed reader for ``spec``; raises SsaPageError."""
+    reader = spec["reader"]
+    if reader == "ssi_table1":
+        return ssa_official_pages.ssi_table1_count(
+            raw, period, row=spec["row"], column=spec["column"]
+        )
+    if reader == "ssi_table4":
+        return ssa_official_pages.ssi_table4_count(
+            raw, period, state=spec["state"], column=spec["column"]
+        )
+    if reader == "ssi_table2":
+        return ssa_official_pages.ssi_table2_total_recipients(raw, period)
+    if reader == "snapshot_table2":
+        return ssa_official_pages.snapshot_table2_thousands(
+            raw, period, group=spec["group"], row=spec["row"]
+        )
+    raise ValueError(f"no table reader for {reader!r}")
+
+
+def ssa_scaled_value(spec: Mapping[str, Any], raw_value: int) -> float:
+    value = raw_value * spec.get("scale", 1)
+    digits = spec.get("round")
+    if digits is not None:
+        value = round(value, digits)
+    return round(value, 9) + 0.0
+
+
+def ssa_wayback_fetch(url: str) -> bytes:
+    raw, _retrieved_at, _final = http_get(
+        url, allowed_hosts=("web.archive.org",), timeout=90
+    )
+    return raw
+
+
+def ssa_wayback_corroboration(
+    url: str,
+    parse: Callable[[bytes], int],
+    *,
+    fetch: Callable[[str], bytes] | None = None,
+) -> dict[str, Any]:
+    """Compare the live parsed value with the earliest parseable Wayback capture.
+
+    Never a hard dependency: an unreachable CDX or no capture records
+    ``status: unavailable`` / ``none``. A capture that parses to a different
+    value is reported (``corroboratingCapture.value``) and the caller refuses.
+    ``fetch`` defaults to the module-level ``ssa_wayback_fetch`` looked up at
+    call time so tests can substitute it.
+    """
+    fetch = fetch or ssa_wayback_fetch
+    try:
+        captures = ssa_official_pages.wayback_captures(url, fetch)
+    except Exception as exc:  # noqa: BLE001 - corroboration is best effort
+        return {"status": "unavailable", "error": str(exc)[:300], "captures": []}
+    summary = [
+        {
+            "timestamp": c["timestamp"],
+            "digest": c.get("digest"),
+            "length": c.get("length"),
+        }
+        for c in captures
+    ]
+    for capture in captures:
+        try:
+            body = ssa_official_pages.wayback_capture_body(
+                capture["timestamp"], url, fetch
+            )
+            value = parse(body)
+        except Exception as exc:  # noqa: BLE001 - try the next capture
+            summary_entry = next(
+                s for s in summary if s["timestamp"] == capture["timestamp"]
+            )
+            summary_entry["parse_error"] = str(exc)[:200]
+            continue
+        return {
+            "status": "parsed",
+            "captures": summary,
+            "corroboratingCapture": {
+                "timestamp": capture["timestamp"],
+                "capturedAt": ssa_official_pages.wayback_timestamp_to_iso(
+                    capture["timestamp"]
+                ),
+                "url": ssa_official_pages.wayback_raw_url(capture["timestamp"], url),
+                "sha256": hashlib.sha256(body).hexdigest(),
+                "value": value,
+            },
+        }
+    return {"status": "none" if not captures else "unparseable", "captures": summary}
+
+
+def ssa_capture_envelope(
+    *,
+    spec: Mapping[str, Any],
+    period: str,
+    capture: Any,
+    reading: ssa_official_pages.SsaTableReading | None,
+    raw_value: int | None,
+    value: float | None,
+    anchors: list[dict[str, Any]],
+    wayback: dict[str, Any],
+    extra: dict[str, Any] | None = None,
+) -> bytes:
+    """Archive the browser capture plus everything that authenticated it."""
+    derived: dict[str, Any] = {
+        "sourceSeriesId": spec["series_id"],
+        "reader": spec["reader"],
+        "period": period,
+        "unit": spec["unit"],
+        "rawValue": raw_value,
+        "value": value,
+    }
+    if reading is not None:
+        derived.update(
+            {
+                "row": reading.row,
+                "column": reading.column,
+                "tableCaption": reading.table_caption,
+                "identities": list(reading.identities),
+            }
+        )
+    if extra:
+        derived.update(extra)
+    return canonical_bytes(
+        {
+            "schemaVersion": SSA_CAPTURE_SCHEMA,
+            "transport": capture.transport_record(),
+            "page": {
+                **capture.response_record(),
+                "bodyBase64": base64.b64encode(capture.body).decode(),
+            },
+            "anchors": anchors,
+            "wayback": wayback,
+            "derived": derived,
+        }
+    )
 
 
 MONTH_NUMBERS = {
@@ -5221,6 +6289,39 @@ def intl_binding_mismatches(spec: dict[str, Any], binding: dict[str, Any]) -> li
     return mismatches
 
 
+_INTL_ROUTING_KEYS = frozenset({"period_type", "target_series"})
+
+
+def intl_registry_origin(spec: dict[str, Any]) -> dict[str, Any] | None:
+    """The canonical adapter object that ``spec`` is, or was routed from.
+
+    ``pending_adapter_refs`` does not hand the main loop the adapter object
+    itself. It hands it ``{**adapter, "period_type": ..., "target_series":
+    stem}``, so an identity test against the registry can never pass on a
+    routed spec. That refused every registered international target with an
+    empty mismatch list ("registry drift? — ") from the day the identity
+    test was added; the direct-call tests passed the registry object and
+    never saw it.
+
+    A routed copy is traced back through the stem the router recorded, and
+    is accepted only if it still equals that adapter on every key the
+    adapter defines and adds nothing but the two routing keys. A copy that
+    was altered on the way therefore has no origin.
+    """
+    if any(spec is known for known in INTL_ADAPTER_CANDIDATES.values()):
+        return spec
+    if any(spec is known for known in INTL_REGISTRY_ADAPTERS.values()):
+        return spec
+    origin = INTL_ADAPTERS.get(str(spec.get("target_series")))
+    if origin is None:
+        return None
+    if any(key not in spec or spec[key] != value for key, value in origin.items()):
+        return None
+    if not set(spec) - set(origin) <= _INTL_ROUTING_KEYS:
+        return None
+    return origin
+
+
 def intl_execution_spec(
     registration: dict[str, Any], spec: dict[str, Any]
 ) -> dict[str, Any] | None:
@@ -5241,7 +6342,7 @@ def intl_execution_spec(
     # parser spec. Otherwise an unrelated target could borrow a valid binding
     # and be resolved by the wrong series implementation.
     registry_spec = INTL_REGISTRY_ADAPTERS.get(str(contract.get("series")))
-    if registry_spec is not spec:
+    if registry_spec is None or registry_spec is not intl_registry_origin(spec):
         return None
     if not intl_binding_mismatches(spec, binding):
         return {**spec, "target_series": contract.get("series")}
@@ -5729,28 +6830,53 @@ def _replay_sba_candidate(
     )
 
 
+class _MemoizedTimeline:
+    """`extract_timeline(records)` for one run: read at most once, and only
+    when a caller asks. A failure is kept and raised again to every later
+    caller, so a chain that does not verify is not re-verified per target."""
+
+    def __init__(self, records: pathlib.Path) -> None:
+        self._records = records
+        self._timeline: Mapping[str, Any] | None = None
+        self._error: Exception | None = None
+        self.loads = 0
+
+    def __call__(self) -> Mapping[str, Any]:
+        if self._error is not None:
+            raise self._error
+        if self._timeline is None:
+            self.loads += 1
+            try:
+                self._timeline = extract_timeline(self._records)
+            except (OSError, TimelineError, ValueError) as exc:
+                self._error = exc
+                raise
+        return self._timeline
+
+
 def resolve_sba_pdf_first_print(
     records: pathlib.Path,
     *,
     series: str,
     fiscal_year: int,
     timeline: Mapping[str, Any] | None = None,
+    timeline_loader: Callable[[], Mapping[str, Any]] | None = None,
 ) -> tuple[SbaPdfResolution | None, str | None]:
-    """Replay the earliest witnessed covered SBA ZIP, never later/live bytes."""
+    """Replay the earliest witnessed covered SBA ZIP, never later/live bytes.
+
+    The witnessed record timeline is read only once some retained capture
+    covers `fiscal_year`, from `timeline`, else `timeline_loader`, else
+    `extract_timeline(records)`. No candidate is judged without it, and a
+    year no capture covers is refused without it: re-verifying the whole
+    record chain took 49 minutes on 2026-10-12 and stopped every scheduled
+    resolver run at its timeout, before the references after it.
+    """
 
     if series not in SBA_PDF_ADAPTERS:
         raise ValueError(f"unsupported SBA loan-performance series {series!r}")
     if type(fiscal_year) is not int:
         raise TypeError("fiscal_year must be an integer")
     records = records.resolve()
-    if timeline is None:
-        try:
-            timeline = extract_timeline(records)
-        except (OSError, TimelineError, ValueError) as exc:
-            return _sba_refusal(
-                SBA_CUSTODY_INVALID,
-                f"witnessed record timeline does not verify: {exc}",
-            )
     run_dirs = _sba_capture_directories(records)
     if not run_dirs:
         return _sba_refusal(
@@ -5820,6 +6946,14 @@ def resolve_sba_pdf_first_print(
             SBA_CUSTODY_ABSENT,
             f"no retained capture covers {series} fiscal year {fiscal_year}",
         )
+    if timeline is None:
+        try:
+            timeline = (timeline_loader or (lambda: extract_timeline(records)))()
+        except (OSError, TimelineError, ValueError) as exc:
+            return _sba_refusal(
+                SBA_CUSTODY_INVALID,
+                f"witnessed record timeline does not verify: {exc}",
+            )
 
     candidates: list[_SbaPdfCandidate] = []
     try:
@@ -6765,17 +7899,902 @@ def sba_pdf_fact(
     }
 
 
-def a19_values_from_html(html: str) -> dict[str, float]:
-    """June-style A-19 parse: each row label followed by year-ago then
-    current-month totals; the CURRENT month (second number) is the print."""
-    text = re.sub(r"<[^>]+>", "|", html)
-    text = re.sub(r"[\s|]+", " ", text)
-    out: dict[str, float] = {}
+_A19_HEADER_MONTHS = {
+    "jan.": 1,
+    "feb.": 2,
+    "mar.": 3,
+    "apr.": 4,
+    "may": 5,
+    "june": 6,
+    "july": 7,
+    "aug.": 8,
+    "sept.": 9,
+    "oct.": 10,
+    "nov.": 11,
+    "dec.": 12,
+}
+_A19_COLUMN_GROUP = ("Total", "16 years and over")
+
+
+_A19_TABLE_ID = "cps_eande_m19"
+
+
+class _A19TableParser(HTMLParser):
+    """Collect Table A-19's header cells by id and its data cells by ``headers``.
+
+    Only the table whose id is ``cps_eande_m19`` is read: the rest of the
+    page, including any table that wraps this one, is ignored, so page chrome
+    cannot supply a value; it can make the page unidentifiable only through a
+    duplicate id or a repeated attribute (below). There must
+    be exactly one such table and it must close. Inside it, a cell's closing
+    tag may be omitted, as HTML allows; the next cell, the next row or the
+    end of the table closes it. A table nested inside one of its cells is not
+    read either, and anything that would split or lose a recorded cell's
+    text without an error marks the page malformed: a cell or any text in a
+    nested table while a recorded cell is open, or text in the table outside
+    any cell or caption. The id of every other element on the page, inside
+    this table or out, is kept apart (``foreign_ids``): one equal to a header
+    id of this table makes the ``headers`` reference ambiguous, and
+    ``a19_table`` refuses it. An element that repeats its ``id`` or
+    ``headers`` attribute is malformed: a browser keeps the first, a parser
+    the last. The text pieces of a cell are joined with spaces, so markup
+    inside a number splits it and the page is refused rather than misread.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.header_text: dict[str, str] = {}
+        self.duplicate_ids: set[str] = set()
+        self.foreign_ids: set[str] = set()
+        self.malformed = False
+        self.closed = False
+        self.cells: list[tuple[tuple[str, ...], str]] = []
+        # One frame per open <table>: [kind, open cell or None, in caption],
+        # the kind being "target", "inner" (nested in the target) or
+        # "outside". An open cell is [tag, attrs, text parts, recorded].
+        self._frames: list[list[Any]] = []
+        self._seen = False
+
+    def _in_recorded_cell(self) -> bool:
+        for frame in self._frames:
+            if frame[0] == "target":
+                return frame[1] is not None and frame[1][3]
+        return False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = {name: value or "" for name, value in attrs}
+        names = [name for name, _ in attrs]
+        if names.count("id") > 1 or names.count("headers") > 1:
+            self.malformed = True
+        frame = self._frames[-1] if self._frames else None
+        kind = frame[0] if frame else "outside"
+        if values.get("id") and not (tag == "th" and kind == "target"):
+            self.foreign_ids.add(values["id"])
+        if tag == "table":
+            if kind != "outside":
+                if values.get("id") == _A19_TABLE_ID:
+                    self.malformed = True
+                self._frames.append(["inner", None, False])
+            elif values.get("id") == _A19_TABLE_ID:
+                if self._seen:
+                    self.malformed = True
+                self._seen = True
+                self._frames.append(["target", None, False])
+            else:
+                self._frames.append(["outside", None, False])
+        elif tag in ("th", "td"):
+            if kind != "target":
+                if kind == "inner" and self._in_recorded_cell():
+                    self.malformed = True
+                return
+            if frame[1] is not None:
+                self._close_cell(frame)
+            recorded = bool(values.get("headers") if tag == "td" else values.get("id"))
+            frame[1] = [tag, values, [], recorded]
+        elif tag == "tr" and kind == "target" and frame[1] is not None:
+            self._close_cell(frame)
+        elif tag == "caption" and kind == "target":
+            frame[2] = True
+
+    def handle_data(self, data: str) -> None:
+        frame = self._frames[-1] if self._frames else None
+        if frame is None or frame[0] == "outside":
+            return
+        if frame[0] == "inner":
+            if data.strip() and self._in_recorded_cell():
+                self.malformed = True
+            return
+        if frame[1] is not None:
+            frame[1][2].append(data)
+        elif not frame[2] and data.strip():
+            self.malformed = True
+
+    def handle_endtag(self, tag: str) -> None:
+        frame = self._frames[-1] if self._frames else None
+        if frame is None:
+            return
+        if tag == "table":
+            if frame[0] == "target":
+                if frame[1] is not None:
+                    self._close_cell(frame)
+                self.closed = True
+            self._frames.pop()
+        elif frame[0] != "target":
+            return
+        elif tag == "tr" and frame[1] is not None:
+            self._close_cell(frame)
+        elif tag in ("td", "th") and frame[1] is not None and frame[1][0] == tag:
+            self._close_cell(frame)
+        elif tag == "caption":
+            frame[2] = False
+
+    def _close_cell(self, frame: list[Any]) -> None:
+        tag, values, parts, _ = frame[1]
+        frame[1] = None
+        text = " ".join(" ".join(parts).split())
+        if tag == "th" and values.get("id"):
+            if values["id"] in self.header_text:
+                self.duplicate_ids.add(values["id"])
+            self.header_text[values["id"]] = text
+        elif tag == "td" and values.get("headers"):
+            self.cells.append((tuple(values["headers"].split()), text))
+
+
+def _a19_header_month(text: str) -> tuple[int, int] | None:
+    match = re.fullmatch(r"([A-Za-z]+\.?) ([0-9]{4})", text)
+    month = _A19_HEADER_MONTHS.get(match.group(1).lower()) if match else None
+    return (int(match.group(2)), month) if match and month else None
+
+
+def a19_table(html: str) -> tuple[str, dict[str, float]] | None:
+    """(data month, thousands by occupation) the page prints, or None.
+
+    BLS marks up the table accessibly: every data cell's ``headers``
+    attribute names the ids of its row header and of its three column headers
+    (group, age, month). Each value is therefore found by WHAT it is headed
+    by, never by position: the occupation's row, "Total", "16 years and
+    over", and the later of exactly two same-month headings one year apart.
+    All six occupations must agree on the month. Anything else (a missing
+    row, an unknown month label, a third dated column, a non-numeric cell, a
+    reused id, a malformed or unclosed table, a second table with this id, a
+    page without it) returns None: the page is overwritten monthly, and a
+    value from a capture that cannot be identified must never be recorded.
+    """
+
+    parser = _A19TableParser()
+    try:
+        parser.feed(html)
+        parser.close()
+    except (AssertionError, ValueError):
+        return None
+    if (
+        not parser.closed
+        or parser.malformed
+        or parser.duplicate_ids
+        or parser.foreign_ids & parser.header_text.keys()
+    ):
+        return None
+    ids_by_text: dict[str, list[str]] = {}
+    for header_id, text in parser.header_text.items():
+        ids_by_text.setdefault(text, []).append(header_id)
+    values: dict[str, float] = {}
+    months: set[tuple[int, int]] = set()
     for key, label in A19_ROW_LABELS.items():
-        m = re.search(re.escape(label) + r"\s+([0-9,]+)\s+([0-9,]+)", text)
-        if m:
-            out[key] = float(m.group(2).replace(",", ""))
-    return out
+        row_ids = ids_by_text.get(label, [])
+        if len(row_ids) != 1:
+            return None
+        dated: list[tuple[tuple[int, int], str]] = []
+        for header_ids, text in parser.cells:
+            if row_ids[0] not in header_ids:
+                continue
+            columns = [
+                parser.header_text.get(header_id)
+                for header_id in header_ids
+                if header_id != row_ids[0]
+            ]
+            if None in columns:
+                return None
+            if not all(part in columns for part in _A19_COLUMN_GROUP):
+                continue
+            stamps = [stamp for stamp in map(_a19_header_month, columns) if stamp]
+            if len(columns) != 3 or len(stamps) != 1:
+                return None
+            dated.append((stamps[0], text))
+        dated.sort()
+        if len(dated) != 2:
+            return None
+        ((year_ago, month_ago), _), ((year, month), printed) = dated
+        if (year - year_ago, month) != (1, month_ago):
+            return None
+        if not re.fullmatch(r"[0-9]{1,3}(,[0-9]{3})*", printed):
+            return None
+        values[key] = float(printed.replace(",", ""))
+        months.add((year, month))
+    if len(months) != 1:
+        return None
+    ((year, month),) = months
+    return f"{year}-{month:02d}", values
+
+
+def a19_values_from_html(html: str) -> dict[str, float]:
+    """Thousands by occupation for the month the page prints ({} if unidentified)."""
+
+    table = a19_table(html)
+    return table[1] if table else {}
+
+
+def a19_snapshot_period(html: str) -> str | None:
+    """The data month (YYYY-MM) the page prints (None if unidentified)."""
+
+    table = a19_table(html)
+    return table[0] if table else None
+
+
+def a19_capture(snapshot_url: str) -> tuple[dt.datetime, str] | None:
+    """(capture instant, archived publisher URL) of a pinned Wayback URL."""
+
+    match = re.fullmatch(
+        r"https://web\.archive\.org/web/(\d{14})/(https://.+)", snapshot_url
+    )
+    if not match:
+        return None
+    try:
+        captured = dt.datetime.strptime(match.group(1), "%Y%m%d%H%M%S").replace(
+            tzinfo=dt.timezone.utc
+        )
+    except ValueError:
+        return None
+    return captured, match.group(2)
+
+
+# Every status and the stored URL form, so the index can be reported in
+# full: a capture the Archive recorded as a 403 (bls.gov's answer to
+# non-browser clients) or under another form of the URL is not a capture
+# this resolver can use, but "no capture" and "no usable capture" are
+# different findings.
+WAYBACK_CDX_URL = (
+    "https://web.archive.org/cdx/search/cdx?url={url}&from={start}&to={end}"
+    "&output=json&fl=timestamp,original,statuscode,digest"
+)
+_WAYBACK_CDX_HEADER = ["timestamp", "original", "statuscode", "digest"]
+# The form of the index's content digest as observed (32 base-32 characters,
+# 2026-09-22). Any other value is treated as unknown and never as a match:
+# two placeholders are not the same bytes.
+_A19_DIGEST = re.compile(r"[A-Z2-7]{32}")
+WAYBACK_SAVE_URL = "https://web.archive.org/save/{url}"
+A19_MAX_WINDOW_CAPTURES = 32
+A19_CAPTURE_REQUESTED = "asked the Internet Archive to capture the page"
+_WAYBACK_READ_ERRORS = (OSError, EOFError, http.client.HTTPException)
+
+
+class A19CaptureError(ValueError):
+    """The Archive did not serve the exact capture that was asked for."""
+
+
+@dataclass(frozen=True)
+class A19Row:
+    """One index row that could hold the page: HTTP 200, or without a status."""
+
+    stamp: str
+    status: str
+    digest: str | None
+    """The index's content digest, or None when it is not of the observed form."""
+    original: str = A19_SOURCE_URL
+    """The URL the Archive stored it under."""
+
+    @property
+    def exact(self) -> bool:
+        """Stored under exactly the bound URL, so a capture this resolver reads."""
+        return self.original == A19_SOURCE_URL
+
+    @property
+    def url(self) -> str:
+        return f"https://web.archive.org/web/{self.stamp}/{A19_SOURCE_URL}"
+
+
+@dataclass
+class A19Index:
+    """What the Archive's index lists for one registered window.
+
+    Every count is disjoint: ``listed == len(captures) + len(revisits) +
+    other_status + other_form``.
+    """
+
+    rows: list[A19Row]
+    """Every row with status 200 or ``-``, under any form of the URL, oldest
+    first: the rows that could hold the page."""
+    listed: int
+    """Every row dated inside the window."""
+    other_status: int
+    """Rows for the bound URL whose status is neither 200 nor ``-``."""
+    other_form: int
+    """Rows stored under another form of the URL (scheme, host), any status;
+    never read."""
+
+    @property
+    def captures(self) -> list[str]:
+        """HTTP 200 captures of exactly the bound URL, oldest first."""
+        return [row.url for row in self.rows if row.exact and row.status == "200"]
+
+    @property
+    def revisits(self) -> list[A19Row]:
+        """Rows for exactly the bound URL without a status, oldest first."""
+        return [row for row in self.rows if row.exact and row.status == "-"]
+
+    @property
+    def other_form_rows(self) -> list[A19Row]:
+        """Rows under another form of the URL with status 200 or ``-``."""
+        return [row for row in self.rows if not row.exact]
+
+    def describe(self, window: Any) -> str:
+        text = (
+            f"{self.listed} capture(s) dated inside the registered window "
+            f"{window!r}, {len(self.captures)} of them HTTP 200 for this exact URL"
+        )
+        detail = [
+            f"{count} {label}"
+            for count, label in (
+                (len(self.revisits), "without a status"),
+                (self.other_status, "with another status"),
+                (self.other_form, "under another form of the URL"),
+            )
+            if count
+        ]
+        return text + (f"; {', '.join(detail)}" if detail else "")
+
+
+def _wayback_read(url: str) -> tuple[bytes, str]:
+    """(body, final URL after redirects) for one Internet Archive request."""
+
+    request = urllib.request.Request(url, headers={"User-Agent": INTL_USER_AGENT})
+    with urllib.request.urlopen(request, timeout=120) as response:
+        return response.read(), response.geturl()
+
+
+def a19_digest(raw: bytes) -> str:
+    """The Archive index's digest of a stored body: base-32 SHA-1 of its bytes.
+
+    Checked 2026-09-25 against the index rows of the 2026-07-10, 2026-08-19
+    and 2026-09-04 captures of this page: each equals the SHA-1 of the bytes
+    the ``id_`` form serves, before the resolver decompresses BLS's gzip.
+    """
+
+    return base64.b32encode(hashlib.sha1(raw).digest()).decode()
+
+
+def a19_read_capture(
+    capture_url: str,
+    read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+    digest: str | None = None,
+) -> bytes:
+    """BLS's own bytes for exactly one capture of the A-19 page.
+
+    With ``digest`` (the index's digest for the row), the stored bytes must
+    hash to it, so what is read is exactly what the index lists: a truncated,
+    spliced or substituted body refuses.
+
+    Asked for a timestamp it holds no capture of, the Archive answers with
+    the nearest capture and rewrites the path (observed 2026-09-20: a request
+    for 20260901000000 returned the 20260904170006 capture with HTTP 200). A
+    window check on the requested timestamp would then judge a date nothing
+    served, so the final URL must name the same timestamp and page. The
+    ``id_`` form returns the response the Archive stored, without its replay
+    toolbar or link rewriting, so the hash recorded for the fact is one
+    anybody can reproduce; the Archive passes BLS's gzip encoding through.
+    """
+
+    capture = a19_capture(capture_url)
+    if capture is None or capture[1] != A19_SOURCE_URL:
+        raise A19CaptureError(f"not a capture of {A19_SOURCE_URL}: {capture_url}")
+    stamp = f"{capture[0]:%Y%m%d%H%M%S}"
+    raw, final_url = read(f"https://web.archive.org/web/{stamp}id_/{A19_SOURCE_URL}")
+    served = re.fullmatch(
+        r"https?://web\.archive\.org/web/(\d{14})id_/(https://.+)", final_url
+    )
+    if not served or served.groups() != (stamp, A19_SOURCE_URL):
+        raise A19CaptureError(
+            f"asked the Archive for capture {stamp} and was served {final_url}"
+        )
+    if digest is not None and a19_digest(raw) != digest:
+        raise A19CaptureError(
+            f"capture {stamp} does not hash to its index digest {digest}"
+        )
+    if raw[:2] == b"\x1f\x8b":
+        try:
+            raw = gzip.decompress(raw)
+        except (OSError, EOFError, zlib.error) as exc:
+            raise A19CaptureError(f"capture {stamp} is not valid gzip") from exc
+    return raw
+
+
+def a19_window_captures(
+    window: Mapping[str, Any],
+    read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+) -> A19Index:
+    """Internet Archive captures of the A-19 page dated inside ``window``.
+
+    The Archive's own index supplies the timestamps, so a registered target
+    needs no per-period hand pin. A body that is not the index's requested
+    table raises ValueError.
+    """
+
+    start = dt.date.fromisoformat(str(window["start"]))
+    end = dt.date.fromisoformat(str(window["end"]))
+    body, _ = read(
+        WAYBACK_CDX_URL.format(
+            url=urllib.parse.quote(A19_SOURCE_URL, safe=""),
+            start=f"{start:%Y%m%d}000000",
+            end=f"{end:%Y%m%d}235959",
+        )
+    )
+    index = json.loads(body.decode())
+    # The JSON list ``[]`` is an empty index (observed 2026-09-22 for a
+    # window with no capture). Anything else must be exactly the requested
+    # shape: an empty body, a malformed row, an impossible timestamp or a
+    # non-numeric status is an index failure, never evidence that the window
+    # holds no capture.
+    if not isinstance(index, list) or (index and index[0] != _WAYBACK_CDX_HEADER):
+        raise ValueError("the Archive index is not the requested table")
+    # One row per (stamp, stored URL): a row listed both with a status and
+    # without one is the capture with the status, and a digest fills in for
+    # a "-". Two different statuses, or two different digests, for one row
+    # make the index ambiguous, which is an index failure, not a choice. A
+    # digest not of the observed form is kept as unknown: it verifies and
+    # accounts for nothing.
+    rows: dict[tuple[str, str], tuple[str, str]] = {}
+    for row in index[1:]:
+        if (
+            not isinstance(row, list)
+            or len(row) != 4
+            or not all(isinstance(cell, str) for cell in row)
+        ):
+            raise ValueError(f"malformed Archive index row (shape): {row!r}")
+        for field, ok in (
+            ("timestamp", re.fullmatch(r"[0-9]{14}", row[0])),
+            ("original", row[1]),
+            ("status", re.fullmatch(r"[0-9]{3}|-", row[2])),
+            ("digest", row[3]),
+        ):
+            if not ok:
+                raise ValueError(f"malformed Archive index row ({field}): {row!r}")
+        key = (row[0], row[1])
+        status, digest = row[2], row[3]
+        if key in rows:
+            kept_status, kept_digest = rows[key]
+            if "-" not in (status, kept_status) and status != kept_status:
+                raise ValueError(
+                    f"the Archive index lists {row[0]} with statuses "
+                    f"{kept_status} and {status}"
+                )
+            if "-" not in (digest, kept_digest) and digest != kept_digest:
+                raise ValueError(f"the Archive index lists {row[0]} with two digests")
+            status = kept_status if status == "-" else status
+            digest = kept_digest if digest == "-" else digest
+        rows[key] = (status, digest)
+    result = A19Index(rows=[], listed=0, other_status=0, other_form=0)
+    for (stamp, original), (status, listed_digest) in sorted(rows.items()):
+        digest = listed_digest if _A19_DIGEST.fullmatch(listed_digest) else None
+        capture = a19_capture(f"https://web.archive.org/web/{stamp}/{A19_SOURCE_URL}")
+        if capture is None:
+            raise ValueError(f"impossible Archive index timestamp {stamp!r}")
+        if not start <= capture[0].date() <= end:
+            continue
+        result.listed += 1
+        if original != A19_SOURCE_URL:
+            result.other_form += 1
+        elif status not in ("200", "-"):
+            result.other_status += 1
+        if status in ("200", "-"):
+            result.rows.append(A19Row(stamp, status, digest, original))
+    return result
+
+
+@dataclass
+class A19Discovery:
+    """The outcome of walking one registered window's index.
+
+    Unpacks as ``(url, raw, verdict)`` for callers that want only those.
+    """
+
+    url: str | None
+    """The capture whose bytes ``raw`` are, when the cell resolves."""
+    raw: bytes | None
+    verdict: str
+    """The line to print when nothing resolves; empty otherwise."""
+    witness: str | None = None
+    """When set, the stamp of an earlier row the index lists with the same
+    digest as ``url`` that was not itself read: the earliest print inside the
+    window. ``url``'s bytes hash to that digest, so they are its bytes."""
+    witness_reason: str | None = None
+    """Why the witness row itself was not read: it could not be read and
+    verified at its own timestamp, or it is stored under another form of the
+    URL."""
+
+    def __iter__(self) -> Iterator[Any]:
+        return iter((self.url, self.raw, self.verdict))
+
+
+def a19_registered_capture(
+    period: str,
+    window: Any,
+    today: dt.date,
+    read: Callable[[str], tuple[bytes, str]] = _wayback_read,
+    *,
+    request_capture: bool = True,
+) -> A19Discovery:
+    """The capture a registered A-19 target resolves from, or why not yet.
+
+    Takes the EARLIEST row dated inside the registered window that prints
+    ``period``, walking the index in order. The index's digest is the SHA-1
+    of a row's stored bytes (``a19_digest``), and every read is verified
+    against it, so two rows with one digest hold the same bytes. Every row
+    stored under exactly the bound URL is read at its own timestamp, unless
+    a verified read of its digest already says what it holds; an HTTP 200
+    capture that cannot be read, verified or identified stops the walk there
+    (a later capture is the earliest only if this one is known not to print
+    the month). A row without a status that cannot be read and verified at
+    its own timestamp is not a stop, and a row under another form of the URL
+    is never read: what either holds is known when a verified read carries
+    the same digest. So a later read can account for an earlier unread row,
+    and an earlier unread row whose digest a read capture of the month
+    carries is the earliest print, with that capture supplying its bytes
+    (``witness``). A row nobody accounts for that is dated before the first
+    print defers the result. A row whose digest is not of the observed form
+    is read without verification and accounts for nothing.
+
+    ``FIRST-PRINT WINDOW MISSED`` is reserved for one finding: the window is
+    closed, every row in it is accounted for, and each prints another month.
+    Rows that were not read and are not accounted for make the outcome
+    unknown, which defers. An index failure, an unreadable or unidentified
+    HTTP 200 capture, or a scan that reached its cap without settling
+    reports itself and asks for nothing. Only when the
+    window is still open, every row read prints another month, and
+    ``request_capture`` is set (once per run) does it ask the Archive to
+    capture the page, and defer.
+    """
+
+    state = snapshot_window_state(today, window)
+    if state == "invalid":
+        return A19Discovery(None, None, "NO REGISTERED RELEASE WINDOW (refusing)")
+    if state == "pending":
+        return A19Discovery(
+            None, None, f"release window opens {window['start']} (deferring)"
+        )
+    try:
+        index = a19_window_captures(window, read)
+    except (*_WAYBACK_READ_ERRORS, ValueError) as exc:
+        return A19Discovery(
+            None,
+            None,
+            (
+                f"WAYBACK INDEX FETCH FAILED (deferring): {type(exc).__name__}: "
+                f"{str(exc)[:200]}"
+            ),
+        )
+    rows = index.rows
+    # What each read capture printed, by stamp, and by digest once the
+    # digest's read captures agree; raw bytes by stamp; why each unread row
+    # is unread.
+    table_by_stamp: dict[str, tuple[str, dict[str, float]]] = {}
+    table_by_digest: dict[str, tuple[tuple[str, dict[str, float]], str]] = {}
+    raw_by_stamp: dict[str, bytes] = {}
+    unread: dict[str, str] = {
+        row.stamp: "which is stored under another form of the URL and not read"
+        for row in rows
+        if not row.exact
+    }
+
+    def month_of(row: A19Row) -> str | None:
+        if row.exact and row.stamp in table_by_stamp:
+            return table_by_stamp[row.stamp][0]
+        if row.digest is not None and row.digest in table_by_digest:
+            return table_by_digest[row.digest][0][0]
+        return None
+
+    def settled() -> A19Discovery | None:
+        # The first row known to print the month, once every row before it
+        # is known to print another.
+        for row in rows:
+            month = month_of(row)
+            if month is None:
+                return None
+            if month != period:
+                continue
+            if row.exact and row.stamp in raw_by_stamp:
+                return A19Discovery(row.url, raw_by_stamp[row.stamp], "")
+            source = table_by_digest[row.digest][1]
+            return A19Discovery(
+                f"https://web.archive.org/web/{source}/{A19_SOURCE_URL}",
+                raw_by_stamp[source],
+                "",
+                witness=row.stamp,
+                witness_reason=unread[row.stamp],
+            )
+        return None
+
+    reads = 0
+    capped = False
+    for row in rows:
+        found = settled()
+        if found is not None:
+            return found
+        if not row.exact:
+            continue
+        if row.digest is not None and row.digest in table_by_digest:
+            # A verified read of this digest already says what it holds.
+            continue
+        if reads == A19_MAX_WINDOW_CAPTURES:
+            capped = True
+            break
+        reads += 1
+        try:
+            raw = a19_read_capture(row.url, read, row.digest)
+        except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
+            if row.status != "200":
+                unread[row.stamp] = (
+                    "which could not be read and verified at that timestamp"
+                )
+                continue
+            return A19Discovery(
+                None,
+                None,
+                (
+                    f"CAPTURE READ FAILED (deferring): {row.url} could not be read "
+                    f"({type(exc).__name__}: {str(exc)[:160]}), and an unread "
+                    "earlier capture cannot be skipped"
+                ),
+            )
+        table = a19_table(raw.decode(errors="replace"))
+        if table is None:
+            # Not "a different month": an error page, a changed layout or an
+            # empty body says nothing about what the page printed.
+            if row.status != "200":
+                unread[row.stamp] = (
+                    "which was served at that timestamp as something other than "
+                    "this table"
+                )
+                continue
+            return A19Discovery(
+                None,
+                None,
+                (
+                    f"CAPTURE UNIDENTIFIED (deferring): {row.url} does not parse as "
+                    "Table A-19, and an unidentified earlier capture cannot be "
+                    "skipped"
+                ),
+            )
+        table_by_stamp[row.stamp] = table
+        raw_by_stamp[row.stamp] = raw
+        if row.digest is not None:
+            table_by_digest.setdefault(row.digest, (table, row.stamp))
+    found = settled()
+    if found is not None:
+        return found
+    first = next((row for row in rows if month_of(row) == period), None)
+    blocking = (
+        [r.stamp for r in rows if r.stamp < first.stamp and month_of(r) is None]
+        if first is not None
+        else []
+    )
+    if capped:
+        where = (
+            f"{first.url} prints {period}, but {len(blocking)} earlier row(s) "
+            f"({', '.join(blocking[:3])}) are not accounted for"
+            if first is not None
+            else f"none of the rows identified so far prints {period}"
+        )
+        return A19Discovery(
+            None,
+            None,
+            (
+                f"CAPTURE SCAN LIMIT REACHED (deferring): {reads} read attempt(s) "
+                f"made, of {len(rows)} row(s) inside {window!r} that could hold the "
+                f"page; the earliest print of {period} is not settled: {where}"
+            ),
+        )
+    if first is not None:
+        return A19Discovery(
+            None,
+            None,
+            (
+                f"EARLIER ROW UNREAD (deferring): {first.url} prints {period}, but "
+                f"{len(blocking)} earlier row(s) ({', '.join(blocking[:3])}) were "
+                "not read and identified at their own timestamp, and no read "
+                "capture carries their digest, so it may not be the earliest"
+            ),
+        )
+    revisits = index.revisits
+    others = index.other_form_rows
+    unknown = [row for row in rows if month_of(row) is None]
+    notes = [
+        f"all {len(index.captures)} HTTP 200 capture(s) were read or accounted "
+        "for by a verified digest, and none "
+        f"prints {period}"
+    ]
+    if revisits:
+        served = sum(1 for row in revisits if row.stamp in table_by_stamp)
+        missing = sum(1 for row in revisits if month_of(row) is None)
+        notes.append(
+            f"of {len(revisits)} row(s) without a status, {served} were served at "
+            f"their own timestamp and read, {len(revisits) - served - missing} "
+            f"share the digest of a read capture, {missing} remain unknown"
+        )
+    if index.other_form:
+        missing = sum(1 for row in others if month_of(row) is None)
+        notes.append(
+            f"{index.other_form} row(s) under another form of the URL were not "
+            f"read: {len(others) - missing} share the digest of a read capture, "
+            f"{missing} remain unknown, {index.other_form - len(others)} have a "
+            "status other than 200"
+        )
+    read_note = "; ".join(notes)
+    if state == "missed" and unknown:
+        # A row under another form of the URL, or without a status and
+        # matched by nothing, may be a capture of this page that prints the
+        # month. Unknown is not "missed": what was read prints another month,
+        # and what was not read is not known.
+        return A19Discovery(
+            None,
+            None,
+            (
+                "WINDOW OUTCOME UNKNOWN (deferring): the Archive's index lists "
+                f"{index.describe(window)}; {read_note}"
+            ),
+        )
+    if state == "missed":
+        return A19Discovery(
+            None,
+            None,
+            (
+                "FIRST-PRINT WINDOW MISSED (refusing): the Archive's index lists "
+                f"{index.describe(window)}; {read_note}"
+            ),
+        )
+    if not request_capture:
+        return A19Discovery(
+            None,
+            None,
+            (
+                f"none of the rows read inside the registered window prints "
+                f"{period} yet: the Archive's index lists {index.describe(window)}; "
+                f"{read_note} (deferring)"
+            ),
+        )
+    # An error from the save endpoint does not mean no capture was made: on
+    # 2026-09-21 three requests were each answered HTTP 500 and the index then
+    # held a new capture (20260921154639) that read back through
+    # a19_read_capture. So a failed request still counts as this run's one
+    # request, and the verdict does not say the capture failed.
+    try:
+        read(WAYBACK_SAVE_URL.format(url=A19_SOURCE_URL))
+        requested = A19_CAPTURE_REQUESTED
+    except _WAYBACK_READ_ERRORS as exc:
+        requested = (
+            f"{A19_CAPTURE_REQUESTED}; the request returned "
+            f"{type(exc).__name__}, outcome unknown"
+        )
+    return A19Discovery(
+        None,
+        None,
+        (
+            f"none of the rows read inside the registered window prints {period} "
+            f"yet: the Archive's index lists {index.describe(window)}; {read_note}; "
+            f"{requested} (deferring)"
+        ),
+    )
+
+
+def a19_fact(
+    ref: str,
+    spec: dict[str, Any],
+    period_type: str,
+    period: str,
+    value: float,
+    release_day: dt.date,
+    capture_url: str,
+    source_file: str,
+) -> dict:
+    """A-19 ledger fact: BLS is the source, the Archive capture the evidence.
+
+    bls.gov refuses non-browser fetches and overwrites this page monthly, so
+    the Internet Archive is the transport that kept the month's bytes. The
+    fact names the publisher's page as its source, which is what a registered
+    contract's allowedHosts constrains, and keeps the exact capture as its
+    evidence URL. Callers have checked that the capture archives that page.
+    """
+
+    row = generic_fact(
+        ref, spec, period_type, period, value, release_day, capture_url, source_file
+    )
+    row["source"]["url"] = A19_SOURCE_URL
+    row["source"]["extraction_method"] = (
+        "Automated read of an Internet Archive capture of the BLS page by "
+        "scripts/resolve_pending.py (anchor-verified adapter)"
+    )
+    return row
+
+
+A19_REGISTERED_TABLE = (
+    "CPS Employment Situation Table A-19, employed persons by occupation, not "
+    "seasonally adjusted (thousands)"
+)
+A19_BINDING_KEYS = frozenset(
+    {
+        "adapter",
+        "allowedHosts",
+        "expectedReleaseWindow",
+        "field",
+        "releasePolicy",
+        "sourceSeriesId",
+        "sourceUrl",
+        "table",
+        "transform",
+    }
+)
+
+
+# What a registered A-19 contract may ask of the table. BLS prints thousands;
+# the docket registers these cells in millions with an explicit x0.001
+# transform. Like every other adapter, the executor emits the unit its spec
+# declares and the refusal ladder compares that with the forecast: the
+# registration selects the spec, it is never a free-form multiplier.
+A19_REGISTERED_SCALES: dict[str, tuple[float, int]] = {
+    "thousands": (1.0, 0),
+    "millions": (0.001, 3),
+}
+
+
+def a19_execution_spec(
+    spec: dict[str, Any], registration: Mapping[str, Any] | None
+) -> tuple[dict[str, Any] | None, str | None]:
+    """(spec to execute, refusal) for an A-19 cell.
+
+    A cell that predates registration keeps the table's own thousands. A
+    registered cell must carry exactly the reviewed binding (this page, this
+    table, this row, this series, BLS's host, first print) and one of the two
+    reviewed unit contracts, with ``valueScale`` and ``transform`` agreeing;
+    then the spec emits the registered unit. The release window is the one
+    free field, and the capture is judged against it.
+    """
+
+    if not registration:
+        return spec, None
+    contract = registration.get("contract") or {}
+    binding = contract.get("sourceBinding") or {}
+    unit = contract.get("unit")
+    scale = A19_REGISTERED_SCALES.get(str(unit))
+    problems = []
+    if not isinstance(binding, dict) or set(binding) != A19_BINDING_KEYS:
+        return None, "sourceBinding keys"
+    # The only adapter an A-19 contract has ever been registered under. It
+    # names no executor, which is why every other field is pinned here.
+    if binding.get("adapter") != "generic-url":
+        problems.append("adapter")
+    if binding.get("allowedHosts") != [urlparse(A19_SOURCE_URL).hostname]:
+        problems.append("allowedHosts")
+    if binding.get("table") != A19_REGISTERED_TABLE:
+        problems.append("table")
+    series = f"{A19_STEM}.{spec['a19_row']}"
+    if contract.get("series") != series or binding.get("sourceSeriesId") != series:
+        problems.append("series")
+    if binding.get("sourceUrl") != A19_SOURCE_URL:
+        problems.append("sourceUrl")
+    if binding.get("field") != spec["source_concept"]:
+        problems.append("field")
+    if binding.get("releasePolicy") != "first_print":
+        problems.append("releasePolicy")
+    if scale is None:
+        problems.append("unit")
+    else:
+        factor, _ = scale
+        if binding.get("transform") != {"operation": "multiply", "factor": factor}:
+            problems.append("transform")
+        if contract.get("valueScale") != factor:
+            problems.append("valueScale")
+    if problems:
+        return None, ", ".join(problems)
+    factor, digits = scale
+    return {**spec, "unit": unit, "scale": factor, "round": digits}, None
 
 
 def bls_rows_from_payload(raw: bytes, series_id: str) -> dict[str, dict[str, Any]]:
@@ -6911,12 +8930,26 @@ def bls_annual_first_print(
     return value, None
 
 
+BLS_FIRST_PRINT_GATES = {"latest_preliminary", "latest_month"}
+
+
 def bls_first_print(
-    rows: dict[str, dict[str, Any]], period: str
+    rows: dict[str, dict[str, Any]],
+    period: str,
+    gate: str = "latest_preliminary",
 ) -> tuple[float | None, str | None]:
     """(value, refusal): a value only while `period` is still the series'
-    latest preliminary print; a present-but-revised period is refused, an
-    absent one defers."""
+    latest print; a present-but-revised period is refused, an absent one
+    defers.
+
+    ``gate="latest_preliminary"`` (CES, LAUS, every series BLS flags) also
+    requires the preliminary "P" footnote. ``gate="latest_month"`` is for CPS
+    household-survey series, which BLS never flags preliminary and does not
+    revise between Employment Situation releases: the period must simply
+    still be the latest published month.
+    """
+    if gate not in BLS_FIRST_PRINT_GATES:
+        raise ValueError(f"unknown BLS first-print gate {gate!r}")
     latest_period = max(rows, default=None)
     state = rows.get(period)
     if state is None:
@@ -6927,13 +8960,356 @@ def bls_first_print(
                 "target period was not published"
             )
         return None, None
-    if not (period == latest_period and state["latest"] and state["preliminary"]):
+    is_latest = period == latest_period and state["latest"]
+    if gate == "latest_month":
+        if not is_latest:
+            return None, (
+                f"{period} is published but no longer the latest month; the "
+                "first-print window was missed — resolve manually from an "
+                "archived vintage"
+            )
+        return state["value"], None
+    if not (is_latest and state["preliminary"]):
         return None, (
             f"{period} is published but no longer the latest preliminary "
             "print; the first-print window was missed — resolve manually "
             "from an archived vintage"
         )
     return state["value"], None
+
+
+BLS_MONTHLY_TRANSFORMS = {"level", "mom_diff", "mom_pct"}
+
+
+def bls_transformed_value(
+    rows: dict[str, dict[str, Any]], spec: Mapping[str, Any], period: str
+) -> tuple[float | None, str | None]:
+    """(value, refusal) for one month in the unit the spec emits.
+
+    ``mom_diff`` and ``mom_pct`` read the immediately preceding calendar
+    month and refuse when the API serves no value for it: BLS published no
+    October 2025 figure for several series, and a change measured across a
+    gap is not a number BLS printed. An absent target month defers.
+    """
+    transform = spec.get("transform", "level")
+    if transform not in BLS_MONTHLY_TRANSFORMS:
+        raise ValueError(f"unknown monthly BLS transform {transform!r}")
+    state = rows.get(period)
+    if state is None:
+        return None, None
+    if transform == "level":
+        value = state["value"]
+    else:
+        prior_period = prior_period_date(period, "month")
+        prior = rows.get(prior_period)
+        if prior is None:
+            return None, (
+                f"{prior_period} has no served value, so the one-month change "
+                f"for {period} cannot be derived from two published months"
+            )
+        if transform == "mom_diff":
+            value = state["value"] - prior["value"]
+        elif prior["value"] == 0:
+            return None, f"{prior_period} is zero; a percent change is undefined"
+        else:
+            # Exact decimal arithmetic on the served figures, rounded half away
+            # from zero. A binary float decides an exact half by noise
+            # (12.00 -> 12.03 is exactly +0.25 and float ``round`` gives 0.2,
+            # while 12.00 -> 12.09, exactly +0.75, gives 0.8). Which way BLS
+            # breaks a tie is not verified; this makes the choice one rule.
+            # Level specs keep float ``round`` so the specs that predate
+            # bindings stay byte-identical (all eight are levels). A payroll
+            # difference is an integer, so no tie can arise there.
+            percent = (
+                Decimal(repr(state["value"])) / Decimal(repr(prior["value"])) - 1
+            ) * 100
+            digits = spec.get("round")
+            if digits is not None:
+                percent = percent.quantize(
+                    Decimal(1).scaleb(-int(digits)), rounding=ROUND_HALF_UP
+                )
+            return round(float(percent) * spec.get("scale", 1), 4) + 0.0, None
+    value *= spec.get("scale", 1)
+    digits = spec.get("round")
+    if digits is not None:
+        value = round(value, digits)
+    # Same IEEE -0.0 guard as apply_transform: core CPI rounded to -0.0 in
+    # June 2026, which BLS printed as "unchanged".
+    return round(value, 4) + 0.0, None
+
+
+def bls_spec_anchor_mismatches(
+    rows: dict[str, dict[str, Any]], spec: Mapping[str, Any]
+) -> list[str]:
+    """Anchor periods the fetched response cannot reproduce.
+
+    Specs that predate registrable bindings pin the served level and keep
+    ``bls_anchor_mismatches`` unchanged. A spec with ``anchor_unit:
+    "emitted"`` pins the value its transform emits, so the same check proves
+    the transform and the scale, within ``anchor_abs_tolerance`` when the
+    spec states one and the relative ``BLS_ANCHOR_TOLERANCE`` otherwise.
+    """
+    anchors = spec["anchors"]
+    if spec.get("anchor_unit") != "emitted":
+        return bls_anchor_mismatches(rows, anchors)
+    abs_tolerance = spec.get("anchor_abs_tolerance")
+    problems = []
+    for anchor_period, expected in sorted(anchors.items()):
+        got, refusal = bls_transformed_value(rows, spec, anchor_period)
+        if got is None:
+            problems.append(
+                f"{anchor_period}=missing ({refusal or 'not served'}; "
+                f"verified {expected})"
+            )
+            continue
+        allowed = (
+            abs_tolerance
+            if abs_tolerance is not None
+            else BLS_ANCHOR_TOLERANCE * abs(expected)
+        )
+        if abs(got - expected) > allowed + 1e-9:
+            problems.append(f"{anchor_period}={got} (verified {expected})")
+    return problems
+
+
+BLS_API_BINDING_ADAPTER = "bls-api"
+BLS_API_ALLOWED_HOSTS = ("api.bls.gov",)
+BLS_API_SOURCE_URL = "https://api.bls.gov/publicAPI/v2/timeseries/data/{series}"
+BLS_API_BINDING_TEMPLATE_KEYS = {
+    "adapter",
+    "sourceUrl",
+    "sourceSeriesId",
+    "field",
+    "table",
+    "transform",
+    "releasePolicy",
+}
+BLS_API_BINDING_DERIVED_KEYS = {"expectedReleaseWindow", "allowedHosts"}
+BLS_API_MIN_ANCHORS = 3
+
+
+def bls_api_binding_template(spec: Mapping[str, Any]) -> dict[str, Any] | None:
+    """The reviewed seven-key sourceBinding, or None for a legacy spec.
+
+    Only a spec that declares ``binding_transform`` is registrable. The
+    ``sourceUrl`` is the executor's own request without its year range, so
+    the registered host is the host every resolution fetches.
+    """
+    transform = spec.get("binding_transform")
+    if not isinstance(transform, Mapping):
+        return None
+    return {
+        "adapter": BLS_API_BINDING_ADAPTER,
+        "sourceUrl": BLS_API_SOURCE_URL.format(series=spec["series_id"]),
+        "sourceSeriesId": spec["series_id"],
+        "field": "value",
+        "table": spec["source_table"],
+        "transform": copy.deepcopy(dict(transform)),
+        "releasePolicy": "first_print",
+    }
+
+
+def bls_api_binding_matches_spec(binding: Any, spec: Mapping[str, Any]) -> bool:
+    """Require the registered seven keys and hosts to match the executor."""
+
+    template = bls_api_binding_template(spec)
+    if template is None or not isinstance(binding, dict):
+        return False
+    if set(binding) - BLS_API_BINDING_DERIVED_KEYS != BLS_API_BINDING_TEMPLATE_KEYS:
+        return False
+    # Required, not optional: ``source_binding_projection`` checks the appended
+    # fact's host only when the registration lists hosts, so a binding without
+    # the list would resolve with no custody check at all.
+    allowed_hosts = binding.get("allowedHosts")
+    if not isinstance(allowed_hosts, list) or sorted(allowed_hosts) != sorted(
+        BLS_API_ALLOWED_HOSTS
+    ):
+        return False
+    projection = {key: binding[key] for key in BLS_API_BINDING_TEMPLATE_KEYS}
+    return canonical_bytes(projection) == canonical_bytes(template)
+
+
+def bls_api_verified_anchors(spec: Mapping[str, Any]) -> dict[str, float] | None:
+    """The spec's anchors when it carries enough of them to be admitted."""
+
+    anchors = spec.get("anchors")
+    if not isinstance(anchors, Mapping) or len(anchors) < BLS_API_MIN_ANCHORS:
+        return None
+    return dict(anchors)
+
+
+def bls_ledger_unit_conflict(
+    ledger_rows: list[Mapping[str, Any]],
+    stem: str,
+    spec: Mapping[str, Any],
+) -> str | None:
+    """Why a fact for ``stem`` would break Chronicle's catalog, or None.
+
+    Chronicle's ``scripts/build_series_catalog.py`` groups current
+    observations by (concept, geography, entity) and exits with "unit
+    conflict within identity" when one identity holds two units (verified
+    2026-09-25 against Chronicle's generator). The resolver regenerates that
+    catalog for every append and sends all of a run's rows in one proposal, so
+    on this base one conflicting fact fails the whole run's append.
+    (thesis#269 adds an append-time exclusion; this check still saves the
+    keyless request.) The resolver stores a fact in its unit's base unit
+    (``base_unit_row``), so the check compares that unit.
+
+    Current rows follow Chronicle's append gate (receipt 0.6.2), which the
+    generator follows too since chronicle#306: a row drops out when another
+    row's ``assertionVersion.supersedes`` names its effective id, its explicit
+    id or, for a row written before assertion versioning, its av2 content
+    address.
+
+    A row belongs to the series when its measure concept is ``stem`` itself or
+    ``stem`` plus a spelling of the row's own month (``2026_06``,
+    ``2026-06``, ``june_2026``, ``jun_2026``), with the entity and geography
+    the fact would carry. Chronicle strips those spellings and may strip or
+    merge more, so its identity holds at least these rows. A refusal here
+    therefore means Chronicle would refuse the fact too; the check can miss a
+    conflict, never invent one. It runs before the fetch, so it also refuses
+    on a day no fact would be produced.
+    """
+
+    entity = spec.get("entity", {"name": "economy", "role": "aggregate"})
+    identity = (
+        (entity.get("name"), entity.get("role")),
+        (US_GEOGRAPHY["level"], US_GEOGRAPHY["id"], US_GEOGRAPHY["vintage"]),
+    )
+    stored = ledger_units.base_unit(spec["unit"]) or spec["unit"]
+    units = set()
+    for row in current_ledger_rows([dict(row) for row in ledger_rows]):
+        concept = (row.get("measure") or {}).get("concept")
+        if not isinstance(concept, str) or not _concept_names_series(
+            concept, stem, row.get("period")
+        ):
+            continue
+        row_entity = row.get("entity") or {}
+        geography = row.get("geography") or {}
+        row_identity = (
+            (row_entity.get("name"), row_entity.get("role")),
+            (geography.get("level"), geography.get("id"), geography.get("vintage")),
+        )
+        unit = (row.get("measure") or {}).get("unit")
+        if row_identity == identity and unit is not None and unit != stored:
+            units.add(str(unit))
+    if not units:
+        return None
+    emits = repr(spec["unit"])
+    if stored != spec["unit"]:
+        emits += f", which Chronicle stores as {stored!r}"
+    return (
+        f"Chronicle already holds {sorted(units)} observations of {stem}, and "
+        f"this spec emits {emits}: the catalog would refuse the "
+        "whole append with a unit conflict. Chronicle must curate the lineage "
+        "to one unit first"
+    )
+
+
+def _report_run_refusals(
+    unit_refusals: list[str],
+    claims_correction_refusals: list[str],
+    restore_refusals: Sequence[str],
+) -> int:
+    """Report every refusal list; ``EXIT_REFUSED_ROWS`` if any has an entry.
+
+    Every list is required: a call that dropped one would let that refusal
+    end the run green. A run that refused rows for other reasons exits
+    ``EXIT_REFUSED_ROWS`` on that path without this summary; each refusal
+    was printed as it happened.
+    """
+
+    status = _report_ledger_unit_refusals(unit_refusals)
+    if claims_correction_refusals:
+        print(
+            f"{len(claims_correction_refusals)} claims correction(s) refused; "
+            "fix CLAIMS_FIRST_PRINT_CORRECTIONS to match the ledger"
+        )
+        for line in claims_correction_refusals:
+            print(f"  refused: {line}")
+        status = EXIT_REFUSED_ROWS
+    if restore_refusals:
+        # Each fault printed once, on its RESTORE REFUSED line; an indented
+        # copy here would read as a verdict on a target (_refuse_restore).
+        print(
+            f"{len(restore_refusals)} RESTORE REFUSED fault(s) above kept the "
+            "run from rebuilding a restatement run's records; fix what each "
+            "names, and the next run with pending work rebuilds them"
+        )
+        status = EXIT_REFUSED_ROWS
+    return status
+
+
+def _refuse_restore(exc: Exception, refusals: list[str]) -> None:
+    """Print a restore fault on one line and keep it for the run's summary.
+
+    resolution_status reads two-space-indented lines as verdicts on targets,
+    and resolution_alert names each RESTORE REFUSED line. So a fault prints
+    once, at the start of its line, with its line breaks joined: one that
+    quotes a reference, or carries a newline and an indented "resolve" line,
+    cannot pass for a target's line.
+    """
+
+    fault = " ".join(str(exc).splitlines())
+    print(f"{RESTORE_REFUSED} {fault}")
+    refusals.append(fault)
+
+
+def _report_ledger_unit_refusals(refusals: list[str]) -> int:
+    """List references the unit guard refused; ``EXIT_REFUSED_ROWS`` if any.
+
+    A run that also refused rows for other reasons exits on that path
+    instead; the refusals below were already printed as they happened.
+    """
+
+    if not refusals:
+        return 0
+    print(
+        f"{len(refusals)} reference(s) refused for a Chronicle unit conflict; "
+        "curate the lineage in Chronicle before its first-print window closes"
+    )
+    for line in refusals:
+        print(f"  refused: {line}")
+    return EXIT_REFUSED_ROWS
+
+
+_MONTH_NAMES = (
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+)
+
+
+def _concept_names_series(concept: str, stem: str, period: Any) -> bool:
+    """Whether ``concept`` is ``stem``, or ``stem`` plus its own month token."""
+
+    if concept == stem:
+        return True
+    if not concept.startswith(stem + "."):
+        return False
+    token = concept[len(stem) + 1 :]
+    if not isinstance(period, Mapping) or period.get("type") != "month":
+        return False
+    match = re.fullmatch(r"(\d{4})-(\d{2})", str(period.get("value") or ""))
+    if not match or not 1 <= int(match.group(2)) <= 12:
+        return False
+    year, month = match.group(1), match.group(2)
+    name = _MONTH_NAMES[int(month) - 1]
+    return token in {
+        f"{year}_{month}",
+        f"{year}-{month}",
+        f"{name}_{year}",
+        f"{name[:3]}_{year}",
+    }
 
 
 FSA_CRP_BINDING_TEMPLATE_KEYS = {
@@ -8716,14 +11092,30 @@ def _irs_soi_normalized_text(value: Any) -> str:
     return text.strip().rstrip(":").strip()
 
 
-def irs_soi_pub1304_grid(raw: bytes, spec: Mapping[str, Any]):
+def irs_soi_pub1304_grid(
+    raw: bytes,
+    spec: Mapping[str, Any],
+    *,
+    max_rows: int | None = None,
+    max_columns: int | None = None,
+    max_sheets: int | None = None,
+    quiet: bool = False,
+):
     """Extract the Table 3.3 sheet as a row grid, failing closed.
 
     Returns ``(grid, refusal)``. The workbook boundary is xlrd (the only
     parser for IRS's legacy BIFF .xls prints); everything after the grid is
     pure logic so tests can arm both real workbooks and synthetic grids.
+    Optional limits let native evidence replay load only the selected sheet
+    and refuse large grids. Defaults preserve the resolver's existing loader.
     """
 
+    limits = (max_rows, max_columns, max_sheets)
+    if any(
+        limit is not None and (type(limit) is not int or limit < 1) for limit in limits
+    ):
+        return None, "invalid workbook resource limit"
+    bounded = any(limit is not None for limit in limits)
     try:
         import xlrd  # noqa: PLC0415 - optional resolver dependency
     except ImportError:
@@ -8732,21 +11124,45 @@ def irs_soi_pub1304_grid(raw: bytes, spec: Mapping[str, Any]):
             "(xlrd==2.0.1) to parse IRS SOI .xls prints"
         )
     try:
-        book = xlrd.open_workbook(file_contents=raw)
+        options: dict[str, Any] = {}
+        if bounded:
+            options["on_demand"] = True
+        if quiet:
+            # xlrd accepts a text writer for diagnostics. Discard them rather
+            # than accumulating untrusted text or corrupting MCP stdout.
+            class QuietWorkbookLog:
+                def write(self, text: str) -> int:
+                    return len(text)
+
+                def flush(self) -> None:
+                    pass
+
+            options["logfile"] = QuietWorkbookLog()
+        book = xlrd.open_workbook(file_contents=raw, **options)
     except Exception as exc:  # noqa: BLE001 - any parse failure fails closed
         return None, f"workbook parse failed: {exc}"
-    sheet_name = str(spec["sheet_name"])
-    if sheet_name not in book.sheet_names():
-        return None, (
-            f"sheet {sheet_name!r} not found (sheets: {book.sheet_names()!r}); "
-            "IRS changed the workbook layout — extend the adapter"
-        )
-    sheet = book.sheet_by_name(sheet_name)
-    grid = [
-        [sheet.cell_value(row, col) for col in range(sheet.ncols)]
-        for row in range(sheet.nrows)
-    ]
-    return grid, None
+    try:
+        if max_sheets is not None and book.nsheets > max_sheets:
+            return None, "workbook exceeds the sheet limit"
+        sheet_name = str(spec["sheet_name"])
+        if sheet_name not in book.sheet_names():
+            return None, (
+                f"sheet {sheet_name!r} not found (sheets: {book.sheet_names()!r}); "
+                "IRS changed the workbook layout — extend the adapter"
+            )
+        sheet = book.sheet_by_name(sheet_name)
+        if (max_rows is not None and sheet.nrows > max_rows) or (
+            max_columns is not None and sheet.ncols > max_columns
+        ):
+            return None, "workbook exceeds dimension limits"
+        grid = [
+            [sheet.cell_value(row, col) for col in range(sheet.ncols)]
+            for row in range(sheet.nrows)
+        ]
+        return grid, None
+    finally:
+        if bounded:
+            book.release_resources()
 
 
 def irs_soi_pub1304_count_from_grid(
@@ -10048,9 +12464,19 @@ def qcew_postfetch_window_refusal(
 
 
 def claims_fact(
-    ref: str, week: str, raw: float, kind: str, release_day: dt.date
+    ref: str,
+    week: str,
+    raw: float,
+    kind: str,
+    release_day: dt.date,
+    note: str | None = None,
 ) -> dict:
-    """Build a ledger fact row for a weekly claims first print."""
+    """Build a ledger fact row for a weekly claims first print.
+
+    ``release_day`` is the first ALFRED vintage that holds the week. ``note``
+    is appended to the row's evidence note, which the site shows on the
+    resolution.
+    """
     if kind == "initial":
         value, unit = round(raw / 1_000, 1), "thousands"
         concept = "us.dol.initial_claims.sa"
@@ -10085,6 +12511,7 @@ def claims_fact(
                 f"DOL ETA UI Weekly Claims news release, advance seasonally "
                 f"adjusted figure for the week ending {week}, read from FRED "
                 f"{fred_id} (advance vintage) as the cell's resolver names."
+                + (f" {note}" if note else "")
             ),
         },
         "aggregation": {"method": "level"},
@@ -10097,8 +12524,9 @@ def claims_fact(
             "vintage": "advance",
             "extracted_at": dt.date.today().isoformat(),
             "extraction_method": (
-                "Automated first-print capture via FRED series "
-                f"{fred_id} by scripts/resolve_pending.py"
+                "Automated first-print capture: the first ALFRED vintage of "
+                f"FRED series {fred_id} that holds the week, found by "
+                "scripts/resolve_pending.py"
             ),
         },
         "source_row_keys": [week],
@@ -10142,18 +12570,495 @@ def pending_claims_refs(log: dict) -> list[tuple[str, str, str, str]]:
     return out
 
 
+CLAIMS_SERIES_IDS = {"initial": "ICSA", "continued": "CCSA"}
+CLAIMS_SERIES_NAMES = {
+    "initial": "us.dol.initial_claims.sa",
+    "continued": "dol.eta.continued_claims.sa",
+}
+CLAIMS_REF = re.compile(
+    r"(?:us\.dol\.initial_claims\.sa\.week_(?P<initial>\d{4}-\d{2}-\d{2})"
+    r"|dol\.eta\.continued_claims\.sa\.week_(?P<continued>\d{4}-\d{2}-\d{2})"
+    r"(?:\.first_print)?)$"
+)
+CLAIMS_DRIFT_RECORD_URL = (
+    "https://github.com/ThesisInstitute/thesis/blob/main/docs/"
+    "weekly-claims-release-window-drift.md"
+)
+# Ledger rows the claims leg wrote from a later DOL release than the week's
+# first print, while the weekly claims windows drifted (2026-09-11 to
+# 2026-10-18; the last, continued claims week 2026-09-26, is Chronicle line
+# 239, appended by resolver run 39147142911 before the guard in #344 merged).
+# Each record id maps to the assertion version it supersedes.
+# No value comes from this table: every run re-derives the first vintage from
+# ALFRED and refuses an entry unless its row is still the active version and
+# was read from a later release than the first print. Once the superseding
+# row is in the ledger the entry is a no-op and costs no request.
+CLAIMS_FIRST_PRINT_CORRECTIONS: dict[str, str] = {
+    "us.dol.initial_claims.sa.week_2026-08-29": (
+        "av2:a2b5892be7698fdbb34d6f0b414e2693aed8117ee89b10fd172fc888dbea8e58"
+    ),
+    "us.dol.initial_claims.sa.week_2026-09-05": (
+        "av2:cbca175607bdda672245e73ba0956a7e323cc35fcd94018f6af4197f82a1f7b2"
+    ),
+    "us.dol.initial_claims.sa.week_2026-09-12": (
+        "av2:635144cd48b0cafaab61e4824d258376f7a1eb7d6d25bfe02ce216207f26836c"
+    ),
+    "us.dol.initial_claims.sa.week_2026-09-19": (
+        "av2:0bd8b7e84226b570fcb187b2a0ef0393212cf6766406a9ed7ef390546048d587"
+    ),
+    "dol.eta.continued_claims.sa.week_2026-09-19.first_print": (
+        "av2:1ef4c99a3c6aca000995a600728f3431d7c872442680337ce8748d837ea47922"
+    ),
+    "dol.eta.continued_claims.sa.week_2026-09-26.first_print": (
+        "av2:b1c9579624a6cf93d0a0f5343c4c861a03a0637048bf689012538c05c75ed2e9"
+    ),
+}
+
+ClaimsFetched = tuple[dict[str, Any], str, str, bytes, str, str]
+
+
+class ClaimsVintageError(ValueError):
+    """ALFRED answered, but not in a shape a first print can come from."""
+
+
+class ClaimsFirstPrintUncorroboratedError(ClaimsVintageError):
+    """DOL's release day has come; the next day, which corroborates it, has not."""
+
+
+class ClaimsVintageLabelError(ClaimsVintageError):
+    """ALFRED answered a read with an earlier day's vintage than its role allows.
+
+    The response is an honest vintage of another day, so the series is not
+    refused for the rest of the run; the week waits.
+    """
+
+
+# role, vintage date, raw response, retrieval instant
+ClaimsEvidence = tuple[str, dt.date, bytes, str]
+
+
+def fetch_claims_vintage(series_id: str, vintage: str) -> tuple[bytes | None, str]:
+    """Raw ALFRED CSV for one vintage date; None when ALFRED refuses it."""
+    url = FRED_CSV.format(series=series_id, vintage=vintage)
+    retrieved_at = utc_now()
+    try:
+        with urllib.request.urlopen(url, timeout=120) as response:
+            return response.read(), retrieved_at
+    except urllib.error.HTTPError:
+        return None, retrieved_at
+
+
+def parse_claims_vintage(raw: bytes, series_id: str, day: dt.date) -> dict[str, float]:
+    """{week: value} from one complete ALFRED claims vintage, or refuse.
+
+    The rules live in verify_custody.parse_alfred_claims_vintage, so custody
+    replays an archived run by the same rules the resolver read it with.
+    """
+
+    try:
+        return parse_alfred_claims_vintage(raw, series_id, day.isoformat())
+    except ValueError as exc:
+        raise ClaimsVintageError(str(exc)) from exc
+
+
+class ClaimsVintages:
+    """One run's ALFRED reads for the claims leg: one request per series-day.
+
+    A vintage date between two releases returns the earlier release, and a
+    week, once printed, stays in every later vintage. So the vintage dates on
+    which a week is present form one unbroken run, and its first day is the
+    week's first print.
+
+    No single response decides the answer. Every response must be a complete
+    vintage; the reads of a run must agree with each other; the absence the
+    answer rests on is read twice; and the first vintage's value must be
+    corroborated by the next day's vintage. Any disagreement refuses the
+    series for the rest of the run.
+    """
+
+    def __init__(self, fetch: Callable[..., Any] | None = None) -> None:
+        self._fetch = fetch or fetch_claims_vintage
+        self._reads: dict[
+            tuple[str, dt.date], tuple[dict[str, float], bytes | None, str]
+        ] = {}
+        self._refused: dict[str, str] = {}
+        self.requests = 0
+        # Supporting reads behind each record id's first print, archived with
+        # the run so its decision can be replayed.
+        self.evidence: dict[str, list[ClaimsEvidence]] = {}
+
+    def _request(self, series_id: str, day: dt.date) -> tuple[bytes | None, str]:
+        self.requests += 1
+        try:
+            return self._fetch(series_id, day.isoformat())
+        except (http.client.HTTPException, OSError):
+            return None, utc_now()
+
+    def _refuse(self, series_id: str, exc: ClaimsVintageError) -> None:
+        self._refused.setdefault(series_id, str(exc))
+        raise exc
+
+    def read(
+        self, series_id: str, day: dt.date, role: str | None = None
+    ) -> tuple[dict[str, float], bytes | None, str]:
+        """One vintage of the series, read once per run.
+
+        With a first-print ``role``, the response must be ALFRED's vintage of
+        a day that role allows (verify_custody.CLAIMS_LABEL_LAG). That is
+        checked before the read joins the run's consistency checks: a read
+        answered with too early a vintage raises ClaimsVintageLabelError and
+        is not kept, so it defers its week without refusing the series.
+        """
+
+        if series_id in self._refused:
+            raise ClaimsVintageError(
+                f"ALFRED {series_id} refused for the rest of this run: "
+                f"{self._refused[series_id]}"
+            )
+        key = (series_id, day)
+        if key not in self._reads:
+            raw, retrieved_at = self._request(series_id, day)
+            try:
+                rows = {} if raw is None else parse_claims_vintage(raw, series_id, day)
+            except ClaimsVintageError as exc:
+                self._refuse(series_id, exc)
+            if raw is not None and role is not None:
+                self._require_label(series_id, role, day, raw)
+            try:
+                self._reads[key] = (rows, raw, retrieved_at)
+                self._require_consistent(series_id)
+            except ClaimsVintageError as exc:
+                self._reads.pop(key, None)
+                self._refuse(series_id, exc)
+        elif role is not None and self._reads[key][1] is not None:
+            self._require_label(series_id, role, day, self._reads[key][1])
+        return self._reads[key]
+
+    def _require_consistent(self, series_id: str) -> None:
+        """Refuse reads that cannot all be honest vintages of one series.
+
+        The rules are verify_custody.claims_vintages_consistent, applied to
+        every vintage this run has read of the series.
+        """
+
+        reads = [
+            (day, rows)
+            for (series, day), (rows, raw, _) in self._reads.items()
+            if series == series_id and raw is not None
+        ]
+        try:
+            claims_vintages_consistent(series_id, reads)
+        except ValueError as exc:
+            raise ClaimsVintageError(str(exc)) from exc
+
+    def _require_label(
+        self, series_id: str, role: str, day: dt.date, raw: bytes
+    ) -> None:
+        """ClaimsVintageLabelError when ALFRED answers a read with an earlier
+        day's vintage than its role allows (verify_custody.CLAIMS_LABEL_LAG)."""
+
+        lag, shows = CLAIMS_LABEL_LAG[role]
+        label, _rows = read_alfred_claims_vintage(raw, series_id, day.isoformat())
+        try:
+            require_claims_vintage_label(
+                series_id, role, day, label, day - dt.timedelta(days=lag), shows
+            )
+        except ValueError as exc:
+            raise ClaimsVintageLabelError(str(exc)) from exc
+
+    def first_print(
+        self, kind: str, week: str, limit: dt.date
+    ) -> tuple[dt.date, float, bytes, str, list[ClaimsEvidence]] | None:
+        """The week's first print: ALFRED's vintage of DOL's scheduled release day.
+
+        The day comes from DOL's stated schedule and its listed exceptions
+        (register_targets.weekly_claims_release_day), never from ALFRED, so no
+        ALFRED response can move it. ALFRED must agree at four reads: the day
+        before holds no such week (read twice, byte-identical); the scheduled
+        day holds it; the day after prints the same value. The day before and
+        the scheduled day must each be ALFRED's vintage of that very day; the
+        day after may be its vintage of the scheduled day, as ALFRED's header
+        sometimes says (verify_custody.CLAIMS_LABEL_LAG). Returns that
+        value with the three supporting reads as evidence; None when the day
+        has not come or ALFRED does not answer. A week ALFRED did not print on
+        the scheduled day defers until DOL's day is listed as an exception.
+        """
+
+        series_id = CLAIMS_SERIES_IDS[kind]
+        try:
+            scheduled = weekly_claims_release_day(
+                CLAIMS_SERIES_NAMES[kind], f"week_{week}"
+            )
+        except RegistrationError as exc:
+            raise ClaimsVintageError(str(exc)) from exc
+        if limit < scheduled:
+            return None
+        following = scheduled + dt.timedelta(days=1)
+        if limit < following:
+            raise ClaimsFirstPrintUncorroboratedError(
+                f"DOL's scheduled release of week {week} is {scheduled}; "
+                f"ALFRED's vintage of {following} must corroborate it"
+            )
+        before = scheduled - dt.timedelta(days=1)
+        rows, before_raw, before_at = self.read(
+            series_id, before, "vintage_before_release"
+        )
+        if before_raw is None:
+            return None
+        if week in rows:
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} vintage {before} already holds week "
+                    f"{week}, before DOL's scheduled release day {scheduled}; "
+                    "an early release needs DOL's day in "
+                    "WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+                ),
+            )
+        reread, reread_at = self._request(series_id, before)
+        if reread is None:
+            return None
+        if reread != before_raw:
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} answered vintage {before}, the day "
+                    f"before DOL's release of week {week}, two different ways"
+                ),
+            )
+        rows, raw, retrieved_at = self.read(series_id, scheduled, "release_day")
+        if raw is None:
+            return None
+        if week not in rows:
+            raise ClaimsVintageError(
+                f"ALFRED {series_id} vintage {scheduled}, DOL's scheduled "
+                f"release day, does not hold week {week}; an off-schedule "
+                f"release needs DOL's day in WEEKLY_CLAIMS_RELEASE_EXCEPTIONS"
+            )
+        later, later_raw, later_at = self.read(
+            series_id, following, "vintage_after_release"
+        )
+        if later_raw is None:
+            return None
+        if later.get(week) != rows[week]:
+            self._refuse(
+                series_id,
+                ClaimsVintageError(
+                    f"ALFRED {series_id} vintage {scheduled} prints week {week} "
+                    f"as {rows[week]:g} but the next day's vintage {following} "
+                    f"prints {later.get(week)}"
+                ),
+            )
+        evidence: list[ClaimsEvidence] = [
+            ("vintage_before_release", before, before_raw, before_at),
+            ("vintage_before_release_reread", before, reread, reread_at),
+            ("vintage_after_release", following, later_raw, later_at),
+        ]
+        # The value is the one judge_claims_first_print decides from exactly
+        # the reads archived as evidence: custody replays the same function,
+        # so what the archive supports and what the ledger records agree.
+        reads = {role: (day, body) for role, day, body, _at in evidence}
+        reads["release_day"] = (scheduled, raw)
+        try:
+            judged_day, value = judge_claims_first_print(series_id, week, reads)
+        except ValueError as exc:
+            self._refuse(series_id, ClaimsVintageError(str(exc)))
+        return judged_day, value, raw, retrieved_at, evidence
+
+    def latest_week(self, series_id: str, day: dt.date) -> str | None:
+        rows, raw, _ = self.read(series_id, day)
+        return max(rows) if raw is not None and rows else None
+
+
+def resolve_claims_ref(
+    ref: str,
+    week: str,
+    kind: str,
+    source_vintage: str,
+    today: dt.date,
+    vintages: ClaimsVintages | None = None,
+) -> ClaimsFetched | None:
+    """One pending weekly claims cell -> its first-print ledger row, or None.
+
+    The registered releasePolicy is advance_vintage, so the value is the one
+    ALFRED holds as of DOL's scheduled release day, verified as its first
+    print (ClaimsVintages.first_print), wherever the forecast's
+    resolutionDate fell. The leg still waits for that date before acting.
+    The supporting reads are kept in ``vintages.evidence[ref]``.
+    """
+
+    release_day = dt.date.fromisoformat(source_vintage)
+    if release_day > today:
+        print(f"  release {release_day} not reached: {ref}")
+        return None
+    vintages = vintages or ClaimsVintages()
+    series_id = CLAIMS_SERIES_IDS[kind]
+    try:
+        first = vintages.first_print(kind, week, today)
+    except ClaimsFirstPrintUncorroboratedError as exc:
+        print(f"  FIRST PRINT AWAITS A SECOND VINTAGE DAY (deferring): {ref} — {exc}")
+        return None
+    except ClaimsVintageError as exc:
+        print(f"  ALFRED RESPONSE REFUSED (deferring): {ref} — {exc}")
+        return None
+    if first is None:
+        print(f"  not yet published: {ref}")
+        return None
+    first_day, raw_value, raw, retrieved_at, evidence = first
+    vintages.evidence[ref] = evidence
+    note = None
+    if first_day != release_day:
+        note = (
+            f"Resolved at the first ALFRED vintage that holds the week, "
+            f"{first_day}, DOL's release day; the forecast's resolutionDate "
+            f"is {release_day}. See {CLAIMS_DRIFT_RECORD_URL}."
+        )
+    row = claims_fact(ref, week, raw_value, kind, first_day, note=note)
+    print(
+        f"  resolve {ref} -> {row['value']} {row['measure']['unit']} "
+        f"(first vintage {first_day})"
+    )
+    return (row, series_id, first_day.isoformat(), raw, retrieved_at, "csv")
+
+
+def claims_corrections(
+    ledger_rows: list[dict[str, Any]],
+    vintages: ClaimsVintages | None = None,
+    corrections: Mapping[str, str] | None = None,
+) -> tuple[list[ClaimsFetched], dict[str, str], list[str]]:
+    """First-print rows that supersede the listed late-release claims rows.
+
+    Returns the fetched rows, the version each supersedes by record id, and
+    refusals. An entry is refused unless its listed version is the record's
+    active row (the latest row for that id, as Chronicle's append gate reads
+    it) and that row was read from a later DOL release than the first print.
+    An entry whose version is already superseded is done and is skipped, as
+    is one whose record the ledger does not hold. A base-unit restatement
+    supersedes a version without correcting it, so an entry that lists a
+    restated version is refused: it must list the restatement. Runs with
+    nothing pending exit before reading the ledger, so corrections ride on
+    runs that have pending work.
+    """
+
+    if corrections is None:
+        corrections = CLAIMS_FIRST_PRINT_CORRECTIONS
+    vintages = vintages or ClaimsVintages()
+    active: dict[str, dict[str, Any]] = {}
+    superseded: set[str] = set()
+    restated_by: dict[str, str] = {}
+    for row in ledger_rows:
+        version = row.get("assertionVersion")
+        if isinstance(version, Mapping) and version.get("supersedes"):
+            superseded.add(str(version["supersedes"]))
+            if version.get("relation") == UNIT_RESTATEMENT:
+                restated_by[str(version["supersedes"])] = str(version.get("id"))
+        active[str(row.get("source_record_id"))] = row
+    fetched: list[ClaimsFetched] = []
+    supersedes_by_ref: dict[str, str] = {}
+    refusals: list[str] = []
+    for ref, version_id in sorted(corrections.items()):
+        row = active.get(ref)
+        if version_id in restated_by:
+            refusals.append(
+                f"{ref} — listed version {version_id} was restated in base units "
+                f"by {restated_by[version_id]}; list that version instead"
+            )
+            continue
+        if version_id in superseded or row is None:
+            # Done, or a ledger that never held the record (a fixture).
+            continue
+        match = CLAIMS_REF.match(ref)
+        active_id = ((row or {}).get("assertionVersion") or {}).get("id")
+        if match is None or active_id != version_id:
+            refusals.append(
+                f"{ref} — listed version {version_id} is not the record's "
+                f"active row (active: {active_id})"
+            )
+            continue
+        kind = "initial" if match.group("initial") else "continued"
+        week = match.group(kind)
+        series_id = CLAIMS_SERIES_IDS[kind]
+        read_day = dt.date.fromisoformat(
+            str(row.get("sourceVintage") or row["observed_at"])
+        )
+        try:
+            first = vintages.first_print(kind, week, read_day)
+            if first is not None:
+                read_release = vintages.latest_week(series_id, read_day)
+                first_release = vintages.latest_week(series_id, first[0])
+        except ClaimsVintageLabelError as exc:
+            # An honest vintage of another day: the entry still matches the
+            # ledger, so the correction waits rather than being refused.
+            print(
+                "  correction waits, ALFRED answered another day's vintage: "
+                f"{ref} — {exc}"
+            )
+            continue
+        except ClaimsVintageError as exc:
+            refusals.append(f"{ref} — {exc}")
+            continue
+        if first is None:
+            print(f"  correction waits, ALFRED did not answer: {ref}")
+            continue
+        first_day, raw_value, raw, retrieved_at, evidence = first
+        if read_release is None or first_release is None:
+            print(f"  correction waits, ALFRED did not answer: {ref}")
+            continue
+        if read_release <= first_release:
+            refusals.append(
+                f"{ref} — the listed row was read from vintage {read_day}, the "
+                f"same DOL release as the first print ({first_day}); nothing "
+                "to correct"
+            )
+            continue
+        # The unit too: the superseded row may be in count while this row,
+        # until the writer converts it, is in thousands or millions.
+        recorded = f"{row.get('value')} {_json_object(row.get('measure')).get('unit')}"
+        note = (
+            f"Supersedes {version_id}, which was read from ALFRED vintage "
+            f"{read_day}, a later DOL release than the first print, and "
+            f"recorded {recorded}. Resolved at the first ALFRED vintage that "
+            f"holds the week, {first_day}, DOL's release day. "
+            f"See {CLAIMS_DRIFT_RECORD_URL}."
+        )
+        _rows, read_raw, read_at = vintages.read(series_id, read_day)
+        # The read that shows the superseded row came from a later release.
+        vintages.evidence[ref] = [
+            *evidence,
+            ("superseded_row_vintage", read_day, read_raw, read_at),
+        ]
+        corrected = claims_fact(ref, week, raw_value, kind, first_day, note=note)
+        print(
+            f"  correct: {ref} — {recorded} (vintage {read_day}) -> "
+            f"{corrected['value']} {corrected['measure']['unit']} "
+            f"(first vintage {first_day})"
+        )
+        fetched.append(
+            (corrected, series_id, first_day.isoformat(), raw, retrieved_at, "csv")
+        )
+        supersedes_by_ref[ref] = version_id
+    return fetched, supersedes_by_ref, refusals
+
+
 def pending_adapter_refs(
     log: dict,
+    registrations: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> list[tuple[str, str, dict[str, Any], str, str, str, dict[str, Any]]]:
     """(ref, kind, spec, period_type, period, release_date, forecast_entry)
-    for pending cells covered by the generic adapters."""
+    for pending cells covered by the generic adapters.
+
+    ``registrations`` replaces the on-disk registration lookup. The
+    registration-time execution-plan gate passes the one contract it is
+    judging, which is not on disk yet.
+    """
     forecasts = {
         entry["forecastSlug"]: entry
         for entry in log.get("entries", [])
         if entry.get("kind") == "prediction_recorded" and entry.get("forecastSlug")
     }
     out = []
-    sba_registrations: dict[str, dict[str, Any]] | None = None
+    sba_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
+    bls_registrations: Mapping[str, Mapping[str, Any]] | None = registrations
     for link in log["resolutionLinks"]:
         if link.get("status") != "pending":
             continue
@@ -10234,7 +13139,21 @@ def pending_adapter_refs(
                     )
                 )
             continue
-        if ref.startswith(A19_STEM + "."):
+        a19_binds_bls_api = False
+        a19_row_stem = f"{A19_STEM}.{ref[len(A19_STEM) + 1 :].split('.')[0]}"
+        if ref.startswith(A19_STEM + ".") and a19_row_stem in BLS_API_ADAPTERS:
+            # Each row also has a registrable BLS API spec. As for the stems
+            # the ALFRED and BLS API families both claim, the registered
+            # adapter decides: only a target that binds ``bls-api`` falls
+            # through to the BLS API leg below. The generic-url registrations
+            # and the cells that predate bindings keep the Archive leg.
+            if bls_registrations is None:
+                bls_registrations = registration_contracts()
+            registered = ((bls_registrations.get(ref) or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            a19_binds_bls_api = registered.get("adapter") == BLS_API_BINDING_ADAPTER
+        if ref.startswith(A19_STEM + ".") and not a19_binds_bls_api:
             occupation = ref[len(A19_STEM) + 1 :].split(".")[0]
             parsed = parse_ref_period(ref, f"{A19_STEM}.{occupation}")
             if occupation in A19_ROW_LABELS and parsed:
@@ -10246,15 +13165,70 @@ def pending_adapter_refs(
                     "concept_authority": "bls",
                     "source_concept": A19_ROW_LABELS[occupation],
                     "a19_row": occupation,
+                    "evidence_notes": (
+                        "Value for {period} read from {source_url}, an "
+                        "Internet Archive capture of BLS Table A-19 whose "
+                        "current-month column is {period}: BLS overwrites the "
+                        "table with each Employment Situation, so the capture "
+                        "was taken after {period} was published and before "
+                        "the next month replaced it. This does not claim the "
+                        "bytes BLS served at the moment of release."
+                    ),
                 }
                 out.append(
                     (ref, "a19", spec, parsed[0], parsed[1], release_date, forecast)
+                )
+            continue
+        va_mmwr_stem = longest_adapter_stem(ref, VA_MMWR_ADAPTERS)
+        if va_mmwr_stem:
+            report_date = parse_va_mmwr_ref(ref, va_mmwr_stem)
+            if report_date is not None:
+                out.append(
+                    (
+                        ref,
+                        "va_mmwr",
+                        VA_MMWR_ADAPTERS[va_mmwr_stem],
+                        "week",
+                        report_date,
+                        release_date,
+                        forecast,
+                    )
+                )
+            continue
+        ssa_stem = longest_adapter_stem(ref, SSA_OFFICIAL_ADAPTERS)
+        if ssa_stem:
+            parsed = parse_ref_period(ref, ssa_stem)
+            if parsed and parsed[0] == "month":
+                out.append(
+                    (
+                        ref,
+                        "ssa_official",
+                        SSA_OFFICIAL_ADAPTERS[ssa_stem],
+                        parsed[0],
+                        parsed[1],
+                        release_date,
+                        forecast,
+                    )
                 )
             continue
         bls_stem = next(
             (stem for stem in BLS_API_ADAPTERS if ref.startswith(stem + ".")),
             None,
         )
+        if bls_stem and bls_stem in ALFRED_ADAPTERS:
+            # Four docket stems are claimed by both families. The registered
+            # adapter decides (FAMILY_ADAPTERS): only a target that binds
+            # ``bls-api`` routes here. Every other reference for the stem, a
+            # generic-url registration or a cell that predates bindings, falls
+            # through to the ALFRED leg exactly as it did before this family
+            # became registrable.
+            if bls_registrations is None:
+                bls_registrations = registration_contracts()
+            registered = ((bls_registrations.get(ref) or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            if registered.get("adapter") != BLS_API_BINDING_ADAPTER:
+                bls_stem = None
         if bls_stem:
             parsed = parse_ref_period(ref, bls_stem)
             spec = BLS_API_ADAPTERS[bls_stem]
@@ -10551,11 +13525,276 @@ def _base_has_release_chain(tree: RepositoryTree) -> bool:
     return any(relative.startswith(prefix) for relative in tree.files)
 
 
+REGISTRY_FORBIDDEN_EVENT_FIELDS = ("reclaimed", "revived", "supersedes")
+
+
+def _identity_belongs_to_rows(concept: str, appended_row_ids: list[str]) -> bool:
+    """True when the concept's segments are an in-order subsequence of one
+    appended observation's dataPointId (the generator derives concepts from
+    row ids by dropping period segments, wherever they sit)."""
+    segments = concept.split(".")
+    if len(segments) < 2 or not all(segments):
+        return False
+    for row_id in appended_row_ids:
+        remaining = iter(str(row_id).split("."))
+        if all(segment in remaining for segment in segments):
+            return True
+    return False
+
+
+def _registry_geography_key(geography: Any) -> tuple[str, str]:
+    """A geography as Chronicle's registry keys it: (level, id, vintage), with
+    a missing vintage read as none (`_geo_key` in scripts/build_series_catalog.py).
+    Any other value keys as its canonical JSON, tagged so it never equals a
+    dict's key. Keys are hashable whatever a line holds."""
+    if type(geography) is dict:
+        return (
+            "dict",
+            json.dumps(
+                [geography.get("level"), geography.get("id"), geography.get("vintage")]
+            ),
+        )
+    return ("raw", json.dumps(geography, sort_keys=True))
+
+
+def _registry_entity_key(entity: Any) -> tuple[str, str]:
+    """An entity as Chronicle's registry keys it: (name, role)."""
+    if type(entity) is dict:
+        return ("dict", json.dumps([entity.get("name"), entity.get("role")]))
+    return ("raw", json.dumps(entity, sort_keys=True))
+
+
+def _registry_identity_key(entry: dict[str, Any]) -> tuple[Any, Any, Any]:
+    """The identity a registry line binds: (concept, geography, entity)."""
+    return (
+        entry.get("concept"),
+        _registry_geography_key(entry.get("geography")),
+        _registry_entity_key(entry.get("entity")),
+    )
+
+
+def _placeholder_geography_admits(placeholder: Any, observed: Any) -> bool:
+    """Whether a placeholder's geography lets the observed identity enrich it.
+
+    Chronicle's rule (scripts/build_series_catalog.py, `_plan_enrichment`,
+    since a93fa9d3 on 2026-08-02): the placeholder has no geography yet, or
+    it has the observed identity's level and id, with no vintage or the same
+    vintage.
+    """
+    if placeholder is None:
+        return True
+    if type(placeholder) is not dict or type(observed) is not dict:
+        return False
+    return (placeholder.get("level"), placeholder.get("id")) == (
+        observed.get("level"),
+        observed.get("id"),
+    ) and placeholder.get("vintage") in (None, observed.get("vintage"))
+
+
+def _docket_placeholder_uuids(base_catalog: bytes) -> set[tuple[Any, Any]] | None:
+    """(concept, uuid) of every docket-only catalog row without an entity, or
+    None when the catalog cannot be read as one."""
+    try:
+        catalog = json.loads(base_catalog)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    rows = catalog.get("series") if type(catalog) is dict else None
+    if type(rows) is not list:
+        return None
+    return {
+        (row["concept"], row["uuid"])
+        for row in rows
+        if type(row) is dict
+        and isinstance(row.get("concept"), str)
+        and isinstance(row.get("uuid"), str)
+        and row.get("status") == "docket-only"
+        and row.get("entity") is None
+    }
+
+
+def _registry_growth_refusal(
+    base_registry: bytes,
+    regenerated_registry: bytes,
+    appended_row_ids: list[str],
+    base_catalog: bytes | None = None,
+) -> str | None:
+    """Why the regenerated UUID registry exceeds this append's own lifecycle.
+
+    ``None`` when every registry change is the sanctioned first-observation
+    lifecycle for a row this proposal appends: append-only growth whose new
+    lines are plain mints of full identities with fresh UUIDs, or the
+    generator's documented docket-placeholder enrichment (a ``retired``
+    line for the committed placeholder followed by a ``succeeds`` mint that
+    keeps its UUID and concept). Anything else — rewritten committed lines,
+    supersedes/revive/reclaim events, identities that belong to no appended
+    row, placeholder mints, UUID reuse — is named and refused, preserving
+    the 2026-08-17 invariant that appends never rewrite series identities
+    while unblocking the lifecycle it overshot: without this allowance no
+    series could ever take its first observation (fresh identities cannot
+    be pre-minted in chronicle — its generator retires bindings that no
+    observation backs — and a seeded placeholder's first observation is
+    exactly the enrichment the byte-compare refused; resolve loop failures
+    2026-08-18 through 2026-08-22, issues #202-#206).
+
+    A committed placeholder is what Chronicle's generator enriches: a live
+    binding without an entity, whose catalog row is docket-only. Live means
+    the latest registry line for that identity is not a retire, which is how
+    Chronicle's registry binds each identity to its latest line; identities
+    are compared as Chronicle keys them, geography by (level, id, vintage)
+    and entity by (name, role). The placeholder's geography may be unknown
+    or already known. Until 2026-10-17 only placeholders with neither were
+    accepted. But the generator also enriches a docket-only row whose
+    geography is set, when the observation has the same level and id, so
+    26 of the 44 docket placeholders could never take a first observation.
+    The run of 2026-10-16 refused usaspending.cdfi.assistance_transaction_
+    obligations this way (resolve-and-rebuild run 38962977031). The
+    enrichment pair must be exactly what the generator writes: one retire of
+    the live placeholder, then one succeeds-mint that keeps its concept and
+    UUID, names that placeholder as its predecessor, and lands on a full
+    identity whose geography the placeholder admits.
+
+    ``base_catalog`` is the staged catalog as committed, before the
+    generator runs. With it, a retired placeholder must also be a docket-only
+    row there, as the generator itself requires; without it that check is
+    skipped and only the registry is consulted.
+    """
+
+    if not regenerated_registry.startswith(base_registry):
+        return "the regenerated registry rewrites committed lines"
+    latest: dict[tuple[Any, Any, Any], dict[str, Any]] = {}
+    base_uuids: set[Any] = set()
+    for line in base_registry.decode("utf-8", "replace").splitlines():
+        try:
+            entry = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        # A line whose concept or UUID is not a string can match no appended
+        # line (those are checked to be strings), so it is skipped.
+        if (
+            isinstance(entry, dict)
+            and isinstance(entry.get("concept"), str)
+            and isinstance(entry.get("uuid"), str)
+        ):
+            base_uuids.add(entry["uuid"])
+            latest[_registry_identity_key(entry)] = entry
+    committed_placeholders = {
+        (*_registry_identity_key(entry), entry.get("uuid"))
+        for entry in latest.values()
+        if entry.get("entity") is None and entry.get("retired") is not True
+    }
+    docket_placeholders = (
+        None if base_catalog is None else _docket_placeholder_uuids(base_catalog)
+    )
+    retired_here: dict[tuple[Any, Any], Any] = {}
+    succeeded_here: set[tuple[Any, Any]] = set()
+    minted_here: set[Any] = set()
+    tail = regenerated_registry[len(base_registry) :]
+    for line in tail.decode("utf-8", "replace").splitlines():
+        try:
+            entry = json.loads(line)
+        except json.JSONDecodeError:
+            return f"appended registry line is not JSON: {line[:120]!r}"
+        if not isinstance(entry, dict):
+            return f"appended registry line is not an object: {line[:120]!r}"
+        concept, uuid = entry.get("concept"), entry.get("uuid")
+        if not isinstance(concept, str) or not isinstance(uuid, str):
+            return f"appended registry line lacks concept/uuid: {line[:120]!r}"
+        if not _identity_belongs_to_rows(concept, appended_row_ids):
+            return (
+                f"appended identity {concept!r} belongs to no observation in "
+                "this append"
+            )
+        forbidden = [
+            marker for marker in REGISTRY_FORBIDDEN_EVENT_FIELDS if marker in entry
+        ]
+        if forbidden:
+            return f"appended registry line carries {forbidden} for {concept!r}"
+        if entry.get("retired") is True:
+            if entry.get("entity") is not None:
+                return f"append retires a non-placeholder identity {concept!r}"
+            if (*_registry_identity_key(entry), uuid) not in committed_placeholders:
+                return f"retire of {concept!r} matches no committed docket placeholder"
+            if base_catalog is not None and docket_placeholders is None:
+                return "the base catalog does not list its docket placeholders"
+            if (
+                docket_placeholders is not None
+                and (concept, uuid) not in docket_placeholders
+            ):
+                return (
+                    f"retire of {concept!r} matches no docket-only row in the "
+                    "base catalog"
+                )
+            if (concept, uuid) in retired_here:
+                return f"append retires the placeholder for {concept!r} twice"
+            retired_here[(concept, uuid)] = entry.get("geography")
+            continue
+        if "succeeds" in entry:
+            if (concept, uuid) not in retired_here:
+                if any(retired == concept for retired, _uuid in retired_here):
+                    return (
+                        f"succeeds-mint for {concept!r} keeps no retired "
+                        "placeholder's UUID"
+                    )
+                return (
+                    f"succeeds-mint for {concept!r} without its placeholder "
+                    "retire in this append"
+                )
+            if (concept, uuid) in succeeded_here:
+                return f"append enriches the placeholder for {concept!r} twice"
+            # The generator also writes a succeeds-mint without an entity, or
+            # without a geography, when the observation has none. Appends
+            # refused those identities before 2026-10-17 and still do: an
+            # append may not mint a placeholder, succeeding or not.
+            if entry.get("geography") is None or entry.get("entity") is None:
+                return (
+                    f"succeeds-mint for {concept!r} lands on an identity "
+                    "without a geography or entity"
+                )
+            placeholder_geography = retired_here[(concept, uuid)]
+            predecessor = entry["succeeds"]
+            if not (
+                type(predecessor) is dict
+                and set(predecessor) == {"concept", "geography", "entity"}
+                and predecessor["concept"] == concept
+                and _registry_geography_key(predecessor["geography"])
+                == _registry_geography_key(placeholder_geography)
+                and predecessor["entity"] is None
+            ):
+                return (
+                    f"succeeds-mint for {concept!r} names a predecessor other "
+                    "than the placeholder this append retires"
+                )
+            if not _placeholder_geography_admits(
+                placeholder_geography, entry.get("geography")
+            ):
+                return (
+                    f"succeeds-mint for {concept!r} lands on a geography its "
+                    "placeholder does not admit"
+                )
+            succeeded_here.add((concept, uuid))
+            continue
+        if entry.get("geography") is None or entry.get("entity") is None:
+            return f"append mints a placeholder identity for {concept!r}"
+        if uuid in base_uuids or uuid in minted_here:
+            return f"mint for {concept!r} reuses UUID {uuid}"
+        minted_here.add(uuid)
+    unpaired = sorted(
+        concept for concept, _uuid in retired_here.keys() - succeeded_here
+    )
+    if unpaired:
+        return (
+            f"append retires the placeholder for {unpaired[0]!r} without its "
+            "succeeds-mint"
+        )
+    return None
+
+
 def _regenerate_series_catalog(
     stage: pathlib.Path,
     *,
     candidate_ledger: bytes,
     base_registry: bytes,
+    appended_row_ids: list[str] | None = None,
 ) -> bytes:
     """Regenerate and validate the catalog using the staged base's generator."""
 
@@ -10565,6 +13804,14 @@ def _regenerate_series_catalog(
             "base commit is missing series-catalog generator "
             "scripts/build_series_catalog.py"
         )
+    # The committed catalog, read before the generator rewrites it: the guard
+    # below checks each retired placeholder is a docket-only row in it.
+    try:
+        base_catalog: bytes | None = (
+            stage / "ledger" / "series_catalog.json"
+        ).read_bytes()
+    except OSError:
+        base_catalog = None
     completed = subprocess.run(
         [sys.executable, str(generator)],
         cwd=stage,
@@ -10587,9 +13834,18 @@ def _regenerate_series_catalog(
             "staged series-catalog generator removed the UUID registry"
         ) from exc
     if regenerated_registry != base_registry:
-        raise LedgerProposalError(
-            "staged series-catalog generator minted or superseded series identities"
+        growth_refusal = _registry_growth_refusal(
+            base_registry,
+            regenerated_registry,
+            appended_row_ids or [],
+            base_catalog,
         )
+        if growth_refusal:
+            raise LedgerProposalError(
+                "staged series-catalog generator minted or superseded series "
+                f"identities beyond this append's own first observations: "
+                f"{growth_refusal}"
+            )
 
     catalog_path = stage / "ledger" / "series_catalog.json"
     try:
@@ -10687,10 +13943,21 @@ def _prepare_release_files(
                 f"base commit is missing UUID registry {registry_path}"
             )
         (stage / LEDGER_RELATIVE).write_bytes(candidate_ledger)
+        appended_row_ids: list[str] = []
+        for appended_line in candidate_ledger[len(base_ledger) :].splitlines():
+            if not appended_line.strip():
+                continue
+            try:
+                appended_row = json.loads(appended_line)
+            except json.JSONDecodeError:
+                appended_row = None
+            if isinstance(appended_row, dict):
+                appended_row_ids.append(str(appended_row.get("source_record_id", "")))
         catalog = _regenerate_series_catalog(
             stage,
             candidate_ledger=candidate_ledger,
             base_registry=base_registry,
+            appended_row_ids=appended_row_ids,
         )
         manifest, manifest_raw = _build_next_release_manifest(
             candidate_ledger,
@@ -10739,7 +14006,7 @@ def _prepare_release_files(
             enforce_production_pins=enforce_production_pins,
             clock_skew_seconds=clock_skew_seconds,
         )
-        return {
+        changes = {
             (stage_path.relative_to(stage).as_posix()): stage_path.read_bytes()
             for stage_path in (
                 manifest_path,
@@ -10747,6 +14014,13 @@ def _prepare_release_files(
                 producer_signature_path,
             )
         } | {"ledger/series_catalog.json": catalog}
+        regenerated_registry = (stage / registry_path).read_bytes()
+        if regenerated_registry != base_registry:
+            # The catalog binds the registry it was generated against; a
+            # first-observation mint the growth gate accepted must ship in
+            # the same proposal commit or the merged state is incoherent.
+            changes[registry_path] = regenerated_registry
+        return changes
 
 
 def ledger_state(repo: str, branch: str, path: str) -> tuple[str, str, str]:
@@ -10775,18 +14049,28 @@ def ledger_state(repo: str, branch: str, path: str) -> tuple[str, str, str]:
     return base64.b64decode(payload["content"]).decode(), payload["sha"], repo_sha
 
 
-def _gh_api(*args: str, input_body: dict[str, Any] | None = None) -> str:
+def _gh_api(
+    *args: str,
+    input_body: dict[str, Any] | None = None,
+    timeout: float | None = None,
+) -> str:
     # Without `--input -` gh ignores stdin and sends an empty request body
     # (GitHub answers 422 "nil is not an object"); the flag precedes the
     # endpoint so callers' path arguments stay the trailing tokens.
     body_flags = ["--input", "-"] if input_body is not None else []
     command = ["gh", "api", *body_flags, *args]
-    completed = subprocess.run(
-        command,
-        input=json.dumps(input_body) if input_body is not None else None,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            input=json.dumps(input_body) if input_body is not None else None,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(
+            f"gh api {' '.join(args)} timed out after {timeout:g} s"
+        ) from exc
     if completed.returncode != 0:
         raise RuntimeError(
             f"gh api {' '.join(args)} failed: {completed.stderr.strip()[:500]}"
@@ -10982,11 +14266,20 @@ def _collect_release_tree_files(
 
 
 # Same-commit inputs the staged catalog regeneration needs beyond the ledger
-# itself: the generator, the gate module it imports, and the generator's three
+# itself: the generator, the gate module it imports, and the generator's four
 # data inputs (prior catalog for identity carry-over, UUID registry, docket
-# seed). _prepare_release_files refuses the witnessed append when any of these
-# is absent from the base commit, so dropping one here fails closed rather
-# than silently skipping regeneration.
+# seed, curated entity folds). _prepare_release_files refuses the witnessed
+# append when any required one is absent from the base commit, so dropping
+# one here fails closed rather than silently skipping regeneration.
+#
+# The entity-fold seed is Chronicle's curated list of lineages whose rows
+# carry different entities but are one series (Max's ruling d353,
+# 2026-09-27). A base commit without it stages without it, which means no
+# folds. A base commit with it must stage it: regenerating without the seed
+# would split the folded lineages again, the generator would record revive
+# events for the absorbed identities, and _registry_growth_refusal would
+# refuse every append.
+_SERIES_UUID_REGISTRY = "ledger/series_uuid_registry.jsonl"
 CATALOG_REGENERATION_INPUTS = (
     "scripts/build_series_catalog.py",
     "scripts/check_thesis_facts_append.py",
@@ -10994,7 +14287,15 @@ CATALOG_REGENERATION_INPUTS = (
     "ledger/series_catalog.json",
     "ledger/series_uuid_registry.jsonl",
     "ledger/seeds/thesis_docket_series.json",
+    "ledger/seeds/entity_folds.json",
 )
+# The two curation fixtures Chronicle's catalog tests read (see
+# catalog_curation). Optional: a base without one gets no curation of it.
+CATALOG_REVIEWED_STRIPS = (
+    "tests/fixtures/series_catalog/reviewed_stripped_segments.json"
+)
+CATALOG_IDENTITY_ANCHOR = "tests/fixtures/series_catalog/identity_anchor.json"
+CATALOG_CURATION_INPUTS = (CATALOG_REVIEWED_STRIPS, CATALOG_IDENTITY_ANCHOR)
 
 
 def _fetch_repository_tree(
@@ -11026,10 +14327,18 @@ def _fetch_repository_tree(
         (ledger_path, True),
         (PREFIX_RELATIVE.as_posix(), False),
         *((path, False) for path in CATALOG_REGENERATION_INPUTS),
+        *((path, False) for path in CATALOG_CURATION_INPUTS),
     ):
-        blob = _repository_blob_at_path(
-            repo, root_entries, wanted, cache, required=required
-        )
+        try:
+            blob = _repository_blob_at_path(
+                repo, root_entries, wanted, cache, required=required
+            )
+        except LedgerProposalError:
+            # A curation fixture that is not a regular file only means no
+            # curation; it must not cost the append.
+            if wanted not in CATALOG_CURATION_INPUTS:
+                raise
+            blob = None
         if blob is not None:
             payload, mode, blob_sha = blob
             files[wanted] = payload
@@ -11316,6 +14625,1559 @@ def append_gate_verdict(gate_runs: list[dict]) -> bool:
     return "success" in conclusions
 
 
+def ledger_catalog_refusals(
+    repo: str,
+    base_sha: str,
+    path: str,
+    base_content: str,
+    rows: list[dict[str, Any]],
+) -> dict[str, str]:
+    """Rows the ledger's own series-catalog generator refuses on their own.
+
+    Chronicle regenerates its series catalog on every append, and the
+    generator fails the whole append when one series identity would carry
+    two units or two cadences. One such row would then hold every other
+    resolution in the run hostage (2026-09-25: the 18 registered A-19
+    contracts are in millions, while Chronicle's six A-19 lineages hold their
+    June 2026 observation in thousands). The candidate append is built once
+    on the staged base commit; only when that fails, and the base alone
+    passes, is each row tried alone, and a row that fails alone is refused
+    with the generator's reason. Rows that fail only together are not
+    separated: the append then fails as before.
+
+    "Fails" also covers a generator that exits cleanly but grows the UUID
+    registry beyond the append's own first observations, the check
+    _regenerate_series_catalog applies to the real append. Without it one
+    such row raised there and held every other row hostage (2026-10-16: the
+    FY2026 USAspending CDFI snapshot retired a non-placeholder identity, and
+    run 38962977031 appended nothing and never reached the ledger pin).
+    """
+
+    if not rows:
+        return {}
+    tree = _fetch_repository_tree(repo, base_sha, path)
+    lines = [json.dumps(row, separators=(",", ":")) for row in rows]
+    base_registry = tree.files.get(_SERIES_UUID_REGISTRY)
+
+    def row_ids(selected: list[str]) -> list[str]:
+        return [str(json.loads(line).get("source_record_id", "")) for line in selected]
+
+    def failure(selected: list[str]) -> str | None:
+        candidate = base_content.rstrip("\n") + "\n"
+        if selected:
+            candidate += "\n".join(selected) + "\n"
+        with tempfile.TemporaryDirectory(prefix="thesis-catalog-preflight-") as name:
+            stage = pathlib.Path(name)
+            _materialize_repository_tree(stage, tree)
+            generator = stage / "scripts" / "build_series_catalog.py"
+            if not generator.is_file():
+                return None
+            (stage / _validated_repository_path(path)).write_text(
+                candidate, encoding="utf-8"
+            )
+            completed = subprocess.run(
+                [sys.executable, str(generator)],
+                cwd=stage,
+                capture_output=True,
+                text=True,
+            )
+            growth = None
+            if completed.returncode == 0 and base_registry is not None:
+                try:
+                    regenerated = (stage / _SERIES_UUID_REGISTRY).read_bytes()
+                except OSError:
+                    growth = "the generator removed the UUID registry"
+                else:
+                    if regenerated != base_registry:
+                        growth = _registry_growth_refusal(
+                            base_registry, regenerated, row_ids(selected)
+                        )
+        if completed.returncode == 0:
+            if growth is None:
+                return None
+            return f"series-catalog registry growth refused: {growth}"
+        output = completed.stderr.strip() or completed.stdout.strip()
+        detail = " ".join(
+            line for line in output.splitlines() if not line.startswith("note:")
+        )[-500:]
+        return f"series-catalog generator exit {completed.returncode}: {detail}"
+
+    if failure(lines) is None or failure([]) is not None:
+        return {}
+    refusals: dict[str, str] = {}
+    for row, line in zip(rows, lines):
+        reason = failure([line])
+        if reason is not None:
+            refusals[str(row.get("source_record_id", "?"))] = reason
+    kept = [
+        line
+        for row, line in zip(rows, lines)
+        if str(row.get("source_record_id", "?")) not in refusals
+    ]
+    if kept:
+        together = failure(kept)
+        if together is not None:
+            # Rows that fail only together cannot be told apart here; stop
+            # before anything is written rather than inside the append.
+            raise LedgerProposalError(
+                "rows the series catalog accepts one by one fail it together: "
+                f"{together}"
+            )
+    return refusals
+
+
+def apply_catalog_refusals(
+    rows: list[dict[str, Any]],
+    refusals: dict[str, str],
+    refused: list[str],
+    evidence: dict[str, list[dict[str, Any]]] | None = None,
+) -> list[dict[str, Any]]:
+    """Report each catalog refusal, add it to ``refused``, return the rest."""
+
+    for ref, reason in refusals.items():
+        refused.append(f"{ref}: {reason}")
+        print(f"  CATALOG REFUSED (excluded from append): {ref} — {reason}")
+    return exclude_catalog_refusals(rows, refusals, evidence)
+
+
+def exclude_catalog_refusals(
+    rows: list[dict[str, Any]],
+    refusals: dict[str, str],
+    evidence: dict[str, list[dict[str, Any]]] | None = None,
+) -> list[dict[str, Any]]:
+    """The rows the catalog accepts; refused rows' archives are removed.
+
+    A refused row's response archive, and the archives of its first-print
+    evidence (``evidence`` by record id, whose refused entries are dropped),
+    are deleted unless a kept row's response or evidence shares the file, so
+    an excluded row leaves no orphan archive and takes none a kept row needs.
+    """
+
+    evidence = evidence if evidence is not None else {}
+
+    def archives(row: dict[str, Any]) -> set[str]:
+        record_id = str(row["source_record_id"])
+        return {
+            row["responseArchive"]["path"],
+            *(item["responseArchive"]["path"] for item in evidence.get(record_id, [])),
+        }
+
+    kept = [row for row in rows if str(row["source_record_id"]) not in refusals]
+    kept_archives = set().union(*(archives(row) for row in kept))
+    for row in rows:
+        record_id = str(row["source_record_id"])
+        if record_id not in refusals:
+            continue
+        for archive in archives(row) - kept_archives:
+            (ROOT / archive).unlink(missing_ok=True)
+        evidence.pop(record_id, None)
+    return kept
+
+
+# --- Catalog curation a proposal carries -----------------------------------
+#
+# Chronicle's "Arch checks" audits the regenerated series catalog against
+# two curated fixtures: reviewed period strips (a concept's first strip in a
+# new identifier shape needs a curator's decision that the stripped segment
+# is a period, not a statute, cohort or edition label) and the identity
+# anchor (every binding change must move a pinned digest). Neither can land
+# before the rows that need it: Chronicle reports a reviewed strip that is
+# not live, and the anchor pins the post-append digest. So the curation
+# either rides in the append's own proposal or follows it while the branch
+# is red. catalog_curation writes into the proposal exactly the curation the
+# resolver can prove, and nothing else:
+#
+# * a first strip whose only kind is "derived" (the builder found the
+#   segment spells the row's own declared period) and whose period slot is
+#   the dataPointId segment right after the series the row's registration
+#   names. That segment is the period by the resolver's own grammar
+#   (parse_ref_period), so the curator's question is answered by
+#   construction;
+# * an identity-anchor move made only of fresh-UUID mints and same-UUID
+#   placeholder enrichments of this append's own identities, recorded so that
+#   Chronicle re-derives it (build_series_catalog.identity_anchor_problems).
+#
+# The curated state is dry-run with the base's own audit before anything
+# visible happens, and a curation that does not clear what it claimed is
+# dropped, never shipped. What stays red is reported, not hidden.
+
+StripKey = tuple[str, str, str, str]
+IDENTITY_ANCHOR_MOVER = "thesis-resolver"
+# Credentials the staged base code never needs, so the curation probe is
+# not handed them in its environment. Hygiene, not isolation: the staged
+# code runs as the same user as the resolver, which is acceptable only
+# because it is the protected base branch's own code. thesis#337 replaces
+# this kind of denylist with an allowlist for the generator runs; the probe
+# should take that allowlist when it lands.
+_STAGED_SECRET_ENV = (
+    "GH_TOKEN",
+    "GITHUB_TOKEN",
+    "ARCH_DATA_TOKEN",
+    PRODUCER_SIGNING_KEY_ENV,
+    # Actions' OIDC and runtime credentials, and the files that feed later
+    # steps' environments.
+    "ACTIONS_ID_TOKEN_REQUEST_TOKEN",
+    "ACTIONS_ID_TOKEN_REQUEST_URL",
+    "ACTIONS_RUNTIME_TOKEN",
+    "ACTIONS_RUNTIME_URL",
+    "ACTIONS_RESULTS_URL",
+    "ACTIONS_CACHE_URL",
+    "GITHUB_ENV",
+    "GITHUB_PATH",
+    "GITHUB_OUTPUT",
+    "GITHUB_STATE",
+    "GITHUB_STEP_SUMMARY",
+)
+CATALOG_CURATION_TIMEOUT_SECONDS = 600
+
+# Run inside a staged base tree: reads the base's own catalog code and
+# fixtures and prints one JSON document. argv[1] is the committed base
+# catalog, argv[2] the base's identity anchor fixture (empty when it has
+# none) and argv[3] the base's UUID registry.
+_CATALOG_CURATION_PROBE = r"""
+import json
+import pathlib
+import sys
+
+stage = pathlib.Path.cwd()
+sys.path.insert(0, str(stage / "scripts"))
+import build_series_catalog as bsc
+
+base_catalog = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+committed = json.loads(bsc.CATALOG.read_text(encoding="utf-8"))
+
+
+def identities(catalog):
+    rows = []
+    for row in catalog["series"]:
+        geography, entity = row.get("geography"), row.get("entity")
+        rows.append({
+            "uuid": row["uuid"],
+            "concept": row["concept"],
+            "geography": None if geography is None else {
+                key: geography.get(key) for key in ("level", "id", "vintage")
+            },
+            "entity": None if entity is None else {
+                key: entity.get(key) for key in ("name", "role")
+            },
+            "line": json.dumps([
+                row["uuid"], row["concept"], bsc._geo_key(geography),
+                bsc._entity_key(entity),
+            ]),
+        })
+    return rows
+
+
+out = {
+    "identities": {
+        "base": identities(base_catalog),
+        "candidate": identities(committed),
+    },
+    "strips": None,
+    "anchor": None,
+}
+reviewed_path = stage / "tests/fixtures/series_catalog/reviewed_stripped_segments.json"
+if (
+    reviewed_path.is_file()
+    and hasattr(bsc, "stripped_segment_review_problems")
+    and hasattr(bsc, "strip_records")
+):
+    inputs = [
+        bsc.OBSERVATIONS,
+        bsc.DOCKET_SEED,
+        bsc.ExistingCatalog(bsc.CATALOG),
+        bsc.UuidRegistry.load(bsc.UUID_REGISTRY),
+    ]
+    if hasattr(bsc, "ENTITY_FOLDS"):
+        inputs.append(bsc.ENTITY_FOLDS)
+    _catalog, plan = bsc.build_catalog(*inputs)
+    reviewed = json.loads(reviewed_path.read_text(encoding="utf-8"))["strips"]
+    out["strips"] = {
+        "live": [
+            [*key, sorted(kinds)]
+            for key, kinds in sorted(bsc.strip_records(plan["strips"]).items())
+        ],
+        "reviewed": [
+            [*key, sorted(kinds)]
+            for key, kinds in sorted(bsc.strip_records(reviewed).items())
+        ],
+        "problems": bsc.stripped_segment_review_problems(
+            committed["stripped_segments"], plan["strips"], reviewed
+        ),
+    }
+anchor_path = stage / "tests/fixtures/series_catalog/identity_anchor.json"
+if anchor_path.is_file() and hasattr(bsc, "identity_anchor_problems"):
+    anchor = json.loads(anchor_path.read_text(encoding="utf-8"))
+    problems = bsc.identity_anchor_problems(committed["series"], anchor)
+    if hasattr(bsc, "identity_anchor_continuity_problems"):
+        # What CI's "Identity anchor move continues the base pin" checks.
+        base_raw = pathlib.Path(sys.argv[2]).read_text(encoding="utf-8")
+        base_anchor = json.loads(base_raw) if base_raw.strip() else None
+        base_uuids = set()
+        for line in pathlib.Path(sys.argv[3]).read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                entry = json.loads(line)
+                if isinstance(entry, dict) and isinstance(entry.get("uuid"), str):
+                    base_uuids.add(entry["uuid"])
+        problems += bsc.identity_anchor_continuity_problems(
+            base_anchor, anchor, base_uuids
+        )
+    out["anchor"] = {
+        "problems": problems,
+        "movers": list(getattr(bsc, "IDENTITY_ANCHOR_MOVERS", ())),
+    }
+print(json.dumps(out))
+"""
+
+
+class CatalogProbeError(RuntimeError):
+    """The staged base's catalog code could not be run or read."""
+
+
+@dataclass(frozen=True)
+class CatalogCuration:
+    """The curation one proposal carries, and what will still be red.
+
+    ``files`` maps fixture paths to the bytes the proposal commit sets.
+    ``residual`` lists what the dry run of the curated state still reports
+    (Arch checks will fail on it), and ``notes`` why something was left to
+    a curator.
+    """
+
+    files: dict[str, bytes]
+    strips: tuple[StripKey, ...] = ()
+    anchor_events: tuple[dict[str, Any], ...] = ()
+    residual: tuple[str, ...] = ()
+    notes: tuple[str, ...] = ()
+
+    def summary(self) -> list[str]:
+        lines = []
+        if self.strips:
+            lines.append(
+                f"{len(self.strips)} first period strip(s) recorded as reviewed in "
+                f"{CATALOG_REVIEWED_STRIPS}: "
+                + "; ".join(
+                    f"{spelling} in {concept} {field}"
+                    for concept, field, _shape, spelling in self.strips
+                )
+            )
+        if self.anchor_events:
+            lines.append(
+                f"identity anchor moved in {CATALOG_IDENTITY_ANCHOR} by "
+                f"{len(self.anchor_events)} event(s): "
+                + "; ".join(
+                    f"{event['event']} {event['uuid'][:8]} {event['concept']}"
+                    for event in self.anchor_events
+                )
+            )
+        return lines
+
+
+def _staged_subprocess_env() -> dict[str, str]:
+    return {
+        key: value
+        for key, value in os.environ.items()
+        if key not in _STAGED_SECRET_ENV
+    }
+
+
+def _run_staged_python(
+    stage: pathlib.Path, argv: list[str]
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, *argv],
+        cwd=stage,
+        capture_output=True,
+        text=True,
+        env=_staged_subprocess_env(),
+        timeout=CATALOG_CURATION_TIMEOUT_SECONDS,
+    )
+
+
+def _catalog_curation_probe(
+    stage: pathlib.Path, base_catalog: pathlib.Path
+) -> dict[str, Any]:
+    try:
+        completed = _run_staged_python(
+            stage,
+            [
+                "-c",
+                _CATALOG_CURATION_PROBE,
+                str(base_catalog),
+                str(base_catalog.parent / "base-identity-anchor.json"),
+                str(base_catalog.parent / "base-series-uuid-registry.jsonl"),
+            ],
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise CatalogProbeError(f"catalog probe did not run: {exc}") from exc
+    if completed.returncode != 0:
+        detail = (completed.stderr.strip() or completed.stdout.strip())[-500:]
+        raise CatalogProbeError(
+            f"catalog probe exit {completed.returncode}: {detail}"
+        )
+    lines = completed.stdout.strip().splitlines()
+    try:
+        payload = json.loads(lines[-1]) if lines else None
+    except json.JSONDecodeError as exc:
+        raise CatalogProbeError("catalog probe printed no JSON document") from exc
+    if type(payload) is not dict:
+        raise CatalogProbeError("catalog probe printed no JSON object")
+    return payload
+
+
+def _jsonl_objects(payload: bytes) -> list[dict[str, Any]]:
+    rows = []
+    for line in payload.decode("utf-8", "replace").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def _row_identifier(row: Mapping[str, Any], field: str) -> str | None:
+    """A row's value in one of Chronicle's identifier fields."""
+    if field == "source_record_id":
+        value = row.get("source_record_id")
+    elif field == "measure.concept":
+        measure = row.get("measure")
+        value = measure.get("concept") if isinstance(measure, Mapping) else None
+    else:
+        return None
+    return value if isinstance(value, str) else None
+
+
+def strip_slot_fill(shape: str, spelling: str) -> str | None:
+    """The identifier a one-slot strip shape spells with ``spelling``."""
+    segments = shape.split(".")
+    slots = [
+        index
+        for index, segment in enumerate(segments)
+        if segment.startswith("{P:") and segment.endswith("}")
+    ]
+    if len(slots) != 1:
+        return None
+    segments[slots[0]] = spelling
+    return ".".join(segments)
+
+
+def strip_review_refusal(
+    key: StripKey,
+    kinds: frozenset[str],
+    base_rows: list[Mapping[str, Any]],
+    appended_rows: list[Mapping[str, Any]],
+    contracts: Mapping[str, Mapping[str, Any]],
+) -> str | None:
+    """Why the resolver cannot record this first strip as reviewed, or None.
+
+    None only when the strip is "derived" alone, its shape has one period
+    slot, no row already in the ledger carries the identifier it spells,
+    some row in this append does, and every such row's registered contract
+    names the row's dataPointId and a series that both the shape and the
+    dataPointId continue with the stripped spelling. The stripped segment
+    is then the period segment of the dataPointId grammar
+    ``<series>.<period>[.<policy>...]``, in whichever identifier field the
+    strip was found.
+    """
+    _concept, field, shape, spelling = key
+    if set(kinds) != {"derived"}:
+        return (
+            f"strip kinds {sorted(kinds)}: the identifier does not spell the "
+            "row's declared period directly"
+        )
+    filled = strip_slot_fill(shape, spelling)
+    if filled is None:
+        return "the strip shape does not have exactly one period slot"
+    if any(_row_identifier(row, field) == filled for row in base_rows):
+        return f"a row already in the ledger carries {filled}"
+    rows = [row for row in appended_rows if _row_identifier(row, field) == filled]
+    if not rows:
+        return f"no row in this append carries {filled}"
+    for row in rows:
+        ref = row.get("source_record_id")
+        entry = contracts.get(ref) if isinstance(ref, str) else None
+        contract = entry.get("contract") if isinstance(entry, Mapping) else None
+        series = contract.get("series") if isinstance(contract, Mapping) else None
+        if (
+            not isinstance(series, str)
+            or not series
+            or "{" in series
+            or contract.get("dataPointId") != ref
+        ):
+            return f"{ref} has no registered contract naming its series"
+        series_depth = len(series.split("."))
+        ref_segments = ref.split(".")
+        if (
+            not shape.startswith(f"{series}.{{P:")
+            or not ref.startswith(f"{series}.")
+            or len(ref_segments) <= series_depth
+            or ref_segments[series_depth] != spelling
+        ):
+            return (
+                f"the period slot is not the segment after {ref}'s registered "
+                f"series {series}"
+            )
+    return None
+
+
+def provable_strip_reviews(
+    live: Mapping[StripKey, frozenset[str]],
+    reviewed: Mapping[StripKey, frozenset[str]],
+    base_rows: list[Mapping[str, Any]],
+    appended_rows: list[Mapping[str, Any]],
+    contracts: Mapping[str, Mapping[str, Any]],
+) -> tuple[dict[StripKey, tuple[str, ...]], dict[StripKey, str]]:
+    """First strips the resolver records as reviewed, and the rest's reasons.
+
+    Only a strip Chronicle's audit would report as a concept's first in a
+    field and shape is considered: one outside ``reviewed`` whose
+    (concept, field, shape) has no reviewed strip. Continuations of a
+    reviewed shape need no review, and the audit's other reports (a reviewed
+    strip gone or grown, an overlap strip) stay a curator's.
+    """
+    reviewed_shapes = {key[:3] for key in reviewed}
+    additions: dict[StripKey, tuple[str, ...]] = {}
+    refusals: dict[StripKey, str] = {}
+    for key in sorted(live):
+        if key in reviewed or key[:3] in reviewed_shapes:
+            continue
+        reason = strip_review_refusal(
+            key, live[key], base_rows, appended_rows, contracts
+        )
+        if reason is None:
+            additions[key] = ("derived",)
+        else:
+            refusals[key] = reason
+    # Chronicle reviews a (concept, field, shape) as one decision: recording
+    # one spelling turns every other spelling of that shape into a
+    # continuation. So a shape is recorded only when all of its first strips
+    # are provable; otherwise none is, and a curator decides the shape.
+    refused_shapes = {key[:3] for key in refusals}
+    for key in [key for key in additions if key[:3] in refused_shapes]:
+        del additions[key]
+        refusals[key] = (
+            "another spelling of its shape is left to a curator, and the shape "
+            "is reviewed as one"
+        )
+    return additions, refusals
+
+
+def _full_identity(identity: Mapping[str, Any]) -> bool:
+    geography, entity = identity.get("geography"), identity.get("entity")
+    return (
+        isinstance(geography, Mapping)
+        and set(geography) == {"level", "id", "vintage"}
+        and all(
+            isinstance(geography[key], str) and geography[key]
+            for key in ("level", "id")
+        )
+        and isinstance(entity, Mapping)
+        and set(entity) == {"name", "role"}
+        and all(
+            isinstance(entity[key], str) and entity[key] for key in ("name", "role")
+        )
+    )
+
+
+def identity_anchor_move(
+    base: list[Mapping[str, Any]],
+    candidate: list[Mapping[str, Any]],
+    appended_row_ids: list[str],
+    base_registry_uuids: frozenset[str] | set[str] = frozenset(),
+) -> tuple[list[dict[str, Any]] | None, str | None]:
+    """The anchor events of one append, or why it cannot record them.
+
+    ``base`` and ``candidate`` are the identity tuples of the catalog before
+    and after the append, as the staged probe reads them (``line`` is the
+    tuple the anchor digests). Every changed tuple must be explained: a new
+    full identity under a UUID the base does not hold (a mint), or a base
+    placeholder (no entity) re-keyed under the same UUID and concept to a
+    full identity its geography admits (an enrichment), each for a concept
+    one of this append's rows names. A mint may not repeat an identity
+    another row already holds, nor take a UUID the base registry holds (a
+    revive is a curator's call). Anything else returns None and a reason.
+    """
+    for side, identities in (("base", base), ("candidate", candidate)):
+        uuids = [identity["uuid"] for identity in identities]
+        if len(uuids) != len(set(uuids)):
+            # Chronicle digests the tuples as a list, so a repeated row moves
+            # the anchor without any identity changing.
+            return None, f"the {side} catalog holds a UUID on two rows"
+    base_lines = {identity["line"]: identity for identity in base}
+    candidate_lines = {identity["line"]: identity for identity in candidate}
+    removed = [i for line, i in base_lines.items() if line not in candidate_lines]
+    added = [i for line, i in candidate_lines.items() if line not in base_lines]
+    # UUIDs are unique on each side (checked above), so each removed
+    # identity has its own UUID.
+    removed_by_uuid = {identity["uuid"]: identity for identity in removed}
+    events: list[dict[str, Any]] = []
+    enriched: set[str] = set()
+
+    def identity_key(identity: Mapping[str, Any]) -> str:
+        # The anchor tuple without its UUID: concept, geography, entity.
+        return json.dumps(json.loads(identity["line"])[1:])
+
+    keys = [identity_key(identity) for identity in candidate]
+    if len(keys) != len(set(keys)):
+        return None, "the candidate catalog holds one identity under two UUIDs"
+    for identity in sorted(added, key=lambda i: (i["concept"], i["uuid"])):
+        uuid, concept = identity["uuid"], identity["concept"]
+        if not _full_identity(identity):
+            return None, f"{concept} ({uuid}) lands without a geography or entity"
+        if not _identity_belongs_to_rows(concept, appended_row_ids):
+            return None, f"{concept} ({uuid}) belongs to no row in this append"
+        before = removed_by_uuid.get(uuid)
+        if before is None:
+            # UUIDs are unique on each side, so a new UUID cannot be one the
+            # base catalog holds; the registry also remembers retired ones.
+            if uuid in base_registry_uuids:
+                return None, (
+                    f"{concept} mints UUID {uuid}, which the base registry "
+                    "already holds"
+                )
+            events.append(
+                {
+                    "event": "mint",
+                    "uuid": uuid,
+                    "concept": concept,
+                    "geography": dict(identity["geography"]),
+                    "entity": dict(identity["entity"]),
+                }
+            )
+            continue
+        if (
+            before["concept"] != concept
+            or before["entity"] is not None
+            or not _placeholder_geography_admits(
+                before["geography"], identity["geography"]
+            )
+            or uuid in enriched
+        ):
+            return None, (
+                f"{concept} ({uuid}) re-keys an identity that is not its own "
+                "docket placeholder"
+            )
+        enriched.add(uuid)
+        events.append(
+            {
+                "event": "enrich",
+                "uuid": uuid,
+                "concept": concept,
+                "geography": dict(identity["geography"]),
+                "entity": dict(identity["entity"]),
+                "placeholder_geography": (
+                    None
+                    if before["geography"] is None
+                    else dict(before["geography"])
+                ),
+            }
+        )
+    unexplained = sorted(set(removed_by_uuid) - enriched)
+    if unexplained:
+        return None, f"the append drops identities {unexplained} without re-keying them"
+    return events, None
+
+
+def _identity_anchor_digest(lines: list[str]) -> str:
+    # build_series_catalog.identity_anchor_digest, which the dry run re-checks.
+    return hashlib.sha256("\n".join(sorted(lines)).encode()).hexdigest()
+
+
+def _render_fixture_json(value: Any, depth: int = 0) -> str:
+    """JSON as Chronicle's catalog fixtures are written: two-space indent,
+    lists of scalars on one line."""
+    pad, inner = "  " * depth, "  " * (depth + 1)
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        items = [
+            f"{inner}{json.dumps(key, ensure_ascii=False)}: "
+            f"{_render_fixture_json(item, depth + 1)}"
+            for key, item in value.items()
+        ]
+        return "{\n" + ",\n".join(items) + "\n" + pad + "}"
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        if not any(isinstance(item, (dict, list)) for item in value):
+            inline = ", ".join(json.dumps(item, ensure_ascii=False) for item in value)
+            return f"[{inline}]"
+        items = [f"{inner}{_render_fixture_json(item, depth + 1)}" for item in value]
+        return "[\n" + ",\n".join(items) + "\n" + pad + "]"
+    return json.dumps(value, ensure_ascii=False)
+
+
+def render_catalog_fixture(value: Any) -> bytes:
+    return (_render_fixture_json(value) + "\n").encode("utf-8")
+
+
+def _sorted_strips(strips: Mapping[str, Any], depth: int = 4) -> dict[str, Any]:
+    if depth == 1:
+        return {key: strips[key] for key in sorted(strips)}
+    return {key: _sorted_strips(strips[key], depth - 1) for key in sorted(strips)}
+
+
+def curated_strips_fixture(
+    fixture: Mapping[str, Any],
+    additions: Mapping[StripKey, tuple[str, ...]],
+    note: str,
+) -> dict[str, Any]:
+    """``fixture`` with ``additions`` recorded and a note per spelling.
+
+    Existing decisions and notes are kept byte for byte; a spelling's note
+    gains ``note`` (formatted with the concepts recorded) as a new sentence.
+    """
+    updated = copy.deepcopy(dict(fixture))
+    strips = updated["strips"]
+    for (concept, field, shape, spelling), kinds in additions.items():
+        strips.setdefault(concept, {}).setdefault(field, {}).setdefault(shape, {})[
+            spelling
+        ] = sorted(kinds)
+    updated["strips"] = _sorted_strips(strips)
+    notes = dict(updated.get("notes") or {})
+    for spelling in sorted({key[3] for key in additions}):
+        concepts = ", ".join(
+            sorted({key[0] for key in additions if key[3] == spelling})
+        )
+        sentence = note.format(spelling=spelling, concepts=concepts)
+        notes[spelling] = (
+            f"{notes[spelling]} {sentence}" if spelling in notes else sentence
+        )
+    updated["notes"] = {key: notes[key] for key in sorted(notes)}
+    return updated
+
+
+def _workflow_run_url(environ: Mapping[str, str] | None = None) -> str | None:
+    environ = os.environ if environ is None else environ
+    server = environ.get("GITHUB_SERVER_URL", "")
+    repository = environ.get("GITHUB_REPOSITORY", "")
+    run_id = environ.get("GITHUB_RUN_ID", "")
+    if server != "https://github.com" or not repository or not run_id.isdigit():
+        return None
+    return f"{server}/{repository}/actions/runs/{run_id}"
+
+
+def catalog_curation(
+    tree: RepositoryTree,
+    *,
+    path: str,
+    candidate_ledger: bytes,
+    catalog: bytes | None,
+    registry: bytes | None,
+    target_contracts: Mapping[str, Mapping[str, Any]],
+    run_url: str | None = None,
+    today: dt.date | None = None,
+) -> CatalogCuration:
+    """The curation the proposal shipping ``catalog`` and ``registry`` needs.
+
+    ``catalog`` and ``registry`` are the exact bytes the proposal commit
+    sets (from _prepare_release_files; ``registry`` None when the base's
+    stays). They are staged as they are, never regenerated: Chronicle mints
+    fresh identities under random UUIDs, so a second generator run would
+    describe a different catalog. A probe over the base's own catalog code
+    reads the staged state, the provable curation is written into the stage,
+    and a second probe must confirm it. Never raises: anything unexpected
+    yields no curation and a note, which is the behaviour before curation
+    existed.
+    """
+    if catalog is None or not any(
+        relative in tree.files for relative in CATALOG_CURATION_INPUTS
+    ):
+        return CatalogCuration(files={})
+    try:
+        return _catalog_curation(
+            tree,
+            path=path,
+            candidate_ledger=candidate_ledger,
+            catalog=catalog,
+            registry=registry,
+            target_contracts=target_contracts,
+            run_url=run_url,
+            today=today,
+        )
+    except Exception as exc:  # noqa: BLE001 - curation must never cost an append
+        failure = f"catalog curation failed: {type(exc).__name__}: {exc}"
+        return CatalogCuration(files={}, notes=(failure,))
+
+
+def _problem_owner(problem: str, keys: tuple[StripKey, ...]) -> bool:
+    """Whether an audit report is about one of ``keys``.
+
+    Chronicle's audit starts every report "'<spelling>' on '<concept>': ".
+    A report that names a field and shape belongs to the key with that
+    field and shape; one that names none (a spelling that is no period
+    token, a strip in only the plan or the catalog) is taken to belong to
+    every key with its spelling and concept, so it can never be cleared or
+    left standing unnoticed.
+    """
+    return any(
+        problem.startswith(f"{spelling!r} on {concept!r}: ")
+        and (f"{field} shape {shape!r}" in problem or " shape '" not in problem)
+        for concept, field, shape, spelling in keys
+    )
+
+
+def _anchor_residual(anchor_problems: list[str], anchor_moves: bool) -> list[str]:
+    # Chronicle's own report already says the anchor moved when it checks it.
+    if anchor_moves and not any(
+        problem.startswith("identity anchor moved") for problem in anchor_problems
+    ):
+        return [*anchor_problems, "identity anchor moved and is not re-pinned"]
+    return list(anchor_problems)
+
+
+def _catalog_curation(
+    tree: RepositoryTree,
+    *,
+    path: str,
+    candidate_ledger: bytes,
+    catalog: bytes,
+    registry: bytes | None,
+    target_contracts: Mapping[str, Mapping[str, Any]],
+    run_url: str | None,
+    today: dt.date | None,
+) -> CatalogCuration:
+    base_ledger = tree.files.get(path)
+    base_catalog = tree.files.get("ledger/series_catalog.json")
+    if (
+        base_ledger is None
+        or base_catalog is None
+        or not candidate_ledger.startswith(base_ledger)
+    ):
+        return CatalogCuration(files={}, notes=("no staged catalog to curate",))
+    base_rows = _jsonl_objects(base_ledger)
+    appended_rows = _jsonl_objects(candidate_ledger[len(base_ledger) :])
+    appended_ids = [str(row.get("source_record_id", "")) for row in appended_rows]
+    day = (today or dt.datetime.now(dt.timezone.utc).date()).isoformat()
+    notes: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="thesis-catalog-curation-") as name:
+        root = pathlib.Path(name)
+        stage = root / "repo"
+        stage.mkdir()
+        _materialize_repository_tree(stage, tree)
+        (stage / _validated_repository_path(path)).write_bytes(candidate_ledger)
+        (stage / "ledger" / "series_catalog.json").write_bytes(catalog)
+        if registry is not None:
+            (stage / _SERIES_UUID_REGISTRY).write_bytes(registry)
+        base_catalog_path = root / "base-series-catalog.json"
+        base_catalog_path.write_bytes(base_catalog)
+        # The base's anchor and registry, for Chronicle's continuity check.
+        (root / "base-identity-anchor.json").write_bytes(
+            tree.files.get(CATALOG_IDENTITY_ANCHOR, b"")
+        )
+        (root / "base-series-uuid-registry.jsonl").write_bytes(
+            tree.files.get(_SERIES_UUID_REGISTRY, b"")
+        )
+
+        def probe() -> dict[str, Any]:
+            return _catalog_curation_probe(stage, base_catalog_path)
+
+        try:
+            before = probe()
+        except CatalogProbeError as exc:
+            return CatalogCuration(files={}, notes=(str(exc),))
+        before_problems = list((before.get("strips") or {}).get("problems") or [])
+
+        files: dict[str, bytes] = {}
+        strips: tuple[StripKey, ...] = ()
+        events: tuple[dict[str, Any], ...] = ()
+        strip_state = before.get("strips")
+        if strip_state is not None and CATALOG_REVIEWED_STRIPS in tree.files:
+            live = {
+                tuple(entry[:4]): frozenset(entry[4]) for entry in strip_state["live"]
+            }
+            reviewed = {
+                tuple(entry[:4]): frozenset(entry[4])
+                for entry in strip_state["reviewed"]
+            }
+            additions, refusals = provable_strip_reviews(
+                live, reviewed, base_rows, appended_rows, target_contracts
+            )
+            notes += [
+                f"strip {key[3]!r} on {key[0]!r} ({key[1]}) left to a curator: {reason}"
+                for key, reason in refusals.items()
+            ]
+            raw = tree.files[CATALOG_REVIEWED_STRIPS]
+            if additions:
+                fixture = json.loads(raw)
+                if render_catalog_fixture(fixture) != raw:
+                    notes.append(
+                        f"{CATALOG_REVIEWED_STRIPS} is not in the layout the "
+                        "resolver writes; its strips are left to a curator"
+                    )
+                else:
+                    by = f" (run {run_url})" if run_url else ""
+                    files[CATALOG_REVIEWED_STRIPS] = render_catalog_fixture(
+                        curated_strips_fixture(
+                            fixture,
+                            additions,
+                            f"Recorded {day} by the Thesis resolver{by} for "
+                            "{concepts}: {spelling} is the segment right after "
+                            "the series each row's registration names in its "
+                            "dataPointId, and it spells the row's own declared "
+                            "period (kind derived).",
+                        )
+                    )
+                    strips = tuple(sorted(additions))
+
+        identities = before["identities"]
+        base_lines = [identity["line"] for identity in identities["base"]]
+        candidate_lines = [identity["line"] for identity in identities["candidate"]]
+        anchor_moves = sorted(base_lines) != sorted(candidate_lines)
+        if anchor_moves:
+            anchor_state = before.get("anchor")
+            raw_anchor = tree.files.get(CATALOG_IDENTITY_ANCHOR)
+            anchor = json.loads(raw_anchor) if raw_anchor is not None else None
+            base_digest = _identity_anchor_digest(base_lines)
+            if anchor_state is None or not isinstance(anchor, dict):
+                notes.append(
+                    "the identity anchor moves, and this base pins it where the "
+                    "resolver does not write it"
+                )
+            elif anchor.get("sha256") != base_digest:
+                notes.append(
+                    "the identity anchor moves, and the base's pin is already "
+                    "stale, so the move cannot be derived from it"
+                )
+            elif IDENTITY_ANCHOR_MOVER not in anchor_state.get("movers", []):
+                notes.append("this base does not accept machine anchor moves")
+            else:
+                move, reason = identity_anchor_move(
+                    identities["base"],
+                    identities["candidate"],
+                    appended_ids,
+                    _registry_uuids(tree.files.get(_SERIES_UUID_REGISTRY, b"")),
+                )
+                if move is None:
+                    notes.append(f"identity anchor left to a curator: {reason}")
+                else:
+                    files[CATALOG_IDENTITY_ANCHOR] = render_catalog_fixture(
+                        {
+                            "comment": anchor.get("comment"),
+                            "sha256": _identity_anchor_digest(candidate_lines),
+                            "move": {
+                                "by": IDENTITY_ANCHOR_MOVER,
+                                "from_sha256": base_digest,
+                                "run_url": run_url,
+                                "events": move,
+                            },
+                        }
+                    )
+                    events = tuple(move)
+        anchor_before = list((before.get("anchor") or {}).get("problems") or [])
+        state = before
+        # Judge the strips and the anchor separately, dropping whichever the
+        # base's own audit does not accept, and re-probe until what is left
+        # is exactly what was dry-run (at most twice: parts only drop out).
+        while files:
+            for relative in CATALOG_CURATION_INPUTS:
+                payload = files.get(relative, tree.files.get(relative))
+                if payload is not None:
+                    (stage / _validated_repository_path(relative)).write_bytes(
+                        payload
+                    )
+            try:
+                state = probe()
+            except CatalogProbeError as exc:
+                notes.append(f"the curated state could not be dry-run: {exc}")
+                files, strips, events, state = {}, (), (), before
+                break
+            strip_problems = list((state.get("strips") or {}).get("problems") or [])
+            anchor_problems = list((state.get("anchor") or {}).get("problems") or [])
+            # Curation may only remove reports, and only its own: a report
+            # still standing on a recorded strip, a new report, or a report
+            # cleared without recording its strip (a sibling of a recorded
+            # shape) means the audit does not accept what was written.
+            strip_rejection = [
+                *(p for p in strip_problems if _problem_owner(p, strips)),
+                *(p for p in strip_problems if p not in before_problems),
+                *(
+                    p
+                    for p in before_problems
+                    if p not in strip_problems and not _problem_owner(p, strips)
+                ),
+            ]
+            anchor_rejection = anchor_problems if events else []
+            dropped = False
+            if strips and strip_rejection:
+                notes.append(
+                    "the dry run rejected the recorded strips: "
+                    + "; ".join(strip_rejection)[:500]
+                )
+                files.pop(CATALOG_REVIEWED_STRIPS, None)
+                strips, dropped = (), True
+            if events and anchor_rejection:
+                notes.append(
+                    "the dry run rejected the anchor move: "
+                    + "; ".join(anchor_rejection)[:500]
+                )
+                files.pop(CATALOG_IDENTITY_ANCHOR, None)
+                events, dropped = (), True
+            if not dropped:
+                break
+        strip_residual = (
+            list((state.get("strips") or {}).get("problems") or [])
+            if files
+            else before_problems
+        )
+        anchor_residual = (
+            list((state.get("anchor") or {}).get("problems") or [])
+            if CATALOG_IDENTITY_ANCHOR in files
+            else anchor_before
+        )
+        return CatalogCuration(
+            files=files,
+            strips=strips,
+            anchor_events=events,
+            residual=tuple(
+                [
+                    *strip_residual,
+                    *_anchor_residual(
+                        anchor_residual,
+                        anchor_moves and CATALOG_IDENTITY_ANCHOR not in files,
+                    ),
+                ]
+            ),
+            notes=tuple(notes),
+        )
+
+
+def _registry_uuids(registry: bytes) -> frozenset[str]:
+    uuids = set()
+    for row in _jsonl_objects(registry):
+        if isinstance(row.get("uuid"), str):
+            uuids.add(row["uuid"])
+    return frozenset(uuids)
+
+
+def append_gate_state(gate_runs: list[dict]) -> str:
+    """Classify one required gate's check runs: passed, failed or pending.
+
+    "failed" as soon as any run concluded against the proposal, even while
+    its twin is still queued, so a rejection never waits out the budget.
+    "passed" only when every run completed and append_gate_verdict accepts
+    them. Everything else is "pending", including a set of skipped twins
+    alone: the delivering event's real run belongs to a separate workflow
+    run, so the other event's twin can be the only run visible for a moment.
+    """
+    if any(
+        run.get("status") == "completed"
+        and run.get("conclusion") not in ("success", "skipped", "neutral")
+        for run in gate_runs
+    ):
+        return "failed"
+    if gate_runs and all(run.get("status") == "completed" for run in gate_runs):
+        if append_gate_verdict(gate_runs):
+            return "passed"
+    return "pending"
+
+
+def _describe_gate_runs(
+    gate: str, gate_runs: list[dict], min_runs: int = 0
+) -> str:
+    judging = [run for run in gate_runs if run.get("conclusion") != "skipped"]
+    if not gate_runs:
+        return f"{gate}: no check run yet"
+    if not judging:
+        return f"{gate}: only skipped twins so far"
+    described = "; ".join(
+        f"{gate}: "
+        + (
+            str(run.get("conclusion"))
+            if run.get("status") == "completed"
+            else str(run.get("status") or "unknown status")
+        )
+        + f" ({run.get('html_url') or 'no run URL'})"
+        for run in judging
+    )
+    completed = [run for run in judging if run.get("status") == "completed"]
+    if len(completed) < min_runs:
+        described += f" ({len(completed)} of {min_runs} runs completed)"
+    return described
+
+
+def append_gate_timeout_seconds(
+    cli_minutes: float | None, environ: Mapping[str, str]
+) -> float:
+    """The gate budget in seconds: CLI flag, else environment, else default."""
+
+    minutes: Any = cli_minutes
+    if minutes is None:
+        raw = environ.get(APPEND_GATE_TIMEOUT_ENV, "").strip()
+        try:
+            minutes = float(raw) if raw else DEFAULT_APPEND_GATE_TIMEOUT_MINUTES
+        except ValueError as exc:
+            raise LedgerProposalError(
+                f"{APPEND_GATE_TIMEOUT_ENV} is not a number: {raw!r}"
+            ) from exc
+    if isinstance(minutes, bool) or not isinstance(minutes, (int, float)):
+        raise LedgerProposalError("append gate timeout must be a number of minutes")
+    return _validate_gate_timeout(float(minutes) * 60)
+
+
+def _validate_gate_timeout(value: float) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise LedgerProposalError(
+            "gate_timeout_seconds must be a finite positive number"
+        )
+    result = float(value)
+    if not math.isfinite(result) or result <= 0:
+        raise LedgerProposalError(
+            "gate_timeout_seconds must be a finite positive number"
+        )
+    return result
+
+
+class CheckRunsIncompleteError(RuntimeError):
+    """A check-run listing that cannot be shown to be the whole set."""
+
+
+def read_check_runs(
+    repo: str,
+    commit_sha: str,
+    *,
+    deadline: float | None = None,
+    clock: Callable[[], float] = time.monotonic,
+) -> list[dict]:
+    """Every check run on ``commit_sha``, or an error; never a partial list.
+
+    GitHub pages this listing. Reading page one alone would let a rejecting
+    run on page two go unseen while both gates' successes sat on page one,
+    and the resolver's admin token would then merge past it. So every page
+    is read, ``total_count`` must be the same integer on each, every run
+    must carry an integer ``id`` seen once, no page may exceed the page
+    size, and the distinct runs must add up to ``total_count``. A listing
+    that reordered between page reads can repeat one run and skip another
+    while its length still adds up; counting distinct ids refuses that.
+    Anything else raises CheckRunsIncompleteError, which await_append_gates
+    treats as a failed read and retries; an incomplete listing is never
+    classified. With a ``deadline``, each page read is bounded by what the
+    budget has left, between the read floor and cap.
+    """
+
+    runs: list[dict] = []
+    seen: set[int] = set()
+    total: int | None = None
+    for page in range(1, APPEND_GATE_MAX_CHECK_RUN_PAGES + 1):
+        read_timeout = None
+        if deadline is not None:
+            read_timeout = min(
+                APPEND_GATE_MAX_READ_SECONDS,
+                max(APPEND_GATE_MIN_READ_SECONDS, deadline - clock()),
+            )
+        payload = json.loads(
+            _gh_api(
+                f"repos/{repo}/commits/{commit_sha}/check-runs"
+                f"?per_page={APPEND_GATE_CHECK_RUN_PAGE_SIZE}&page={page}",
+                timeout=read_timeout,
+            )
+        )
+        page_runs = payload.get("check_runs") if type(payload) is dict else None
+        page_total = payload.get("total_count") if type(payload) is dict else None
+        if type(page_runs) is not list or type(page_total) is not int:
+            raise CheckRunsIncompleteError(
+                f"check-runs page {page} lacks a list or an integer total_count"
+            )
+        if len(page_runs) > APPEND_GATE_CHECK_RUN_PAGE_SIZE:
+            raise CheckRunsIncompleteError(
+                f"check-runs page {page} holds {len(page_runs)} runs, more than "
+                f"the {APPEND_GATE_CHECK_RUN_PAGE_SIZE} requested"
+            )
+        if total is None:
+            total = page_total
+        elif page_total != total:
+            # Runs were added between pages; positions shifted, so a run can
+            # have been skipped. Read the whole listing again.
+            raise CheckRunsIncompleteError(
+                f"check-run total_count moved from {total} to {page_total} "
+                "between pages"
+            )
+        for run in page_runs:
+            run_id = run.get("id") if type(run) is dict else None
+            if type(run_id) is not int:
+                raise CheckRunsIncompleteError(
+                    f"check-runs page {page} has a run without an integer id"
+                )
+            if run_id in seen:
+                raise CheckRunsIncompleteError(
+                    f"check run {run_id} appears twice in one listing"
+                )
+            seen.add(run_id)
+            runs.append(run)
+        if len(runs) >= total or len(page_runs) < APPEND_GATE_CHECK_RUN_PAGE_SIZE:
+            break
+    if total is None or len(runs) != total:
+        raise CheckRunsIncompleteError(
+            f"check-run listing returned {len(runs)} of {total} runs"
+        )
+    return runs
+
+
+def await_append_gates(
+    repo: str,
+    commit_sha: str,
+    pr_number: int,
+    *,
+    timeout_seconds: float,
+    poll_seconds: float = 20,
+    max_poll_seconds: float = APPEND_GATE_MAX_POLL_SECONDS,
+    poll_attempts: int | None = None,
+    gates: tuple[str, ...] = REQUIRED_APPEND_GATES,
+    advisory: tuple[str, ...] = (),
+    advisory_grace_seconds: float = ARCH_CHECKS_GRACE_SECONDS,
+    min_runs: Mapping[str, int] | None = None,
+    clock: Callable[[], float] = time.monotonic,
+    sleep: Callable[[float], None] = time.sleep,
+) -> dict[str, tuple[str, str]]:
+    """Return once every required gate passed on the proposal head.
+
+    Raises LedgerProposalError naming the adverse run as soon as any gate
+    concludes against the proposal, and a differently worded error naming
+    the still-queued or running jobs when the wall-clock budget runs out.
+    A timeout is not a verdict; the old single message ("did not pass")
+    made a runner-queue delay read as a rejected append (thesis #286).
+    ``poll_attempts`` additionally caps the number of reads (tests use 1).
+
+    ``advisory`` gates are awaited but never refuse: once the required
+    gates have passed, the wait goes on until each advisory gate has a
+    verdict, for at most ``advisory_grace_seconds`` and never past the
+    budget. Returns each advisory gate's state ("passed", "failed" or
+    "pending") and a description of its runs, from the read that ended the
+    wait, for the caller to act on.
+
+    ``min_runs`` holds a gate's pass until that many of its runs (skipped
+    twins aside) have completed: Arch checks runs once for the proposal
+    branch's push and once for its pull request, and the push run can finish
+    before the pull request run is even listed.
+    """
+    timeout_seconds = _validate_gate_timeout(timeout_seconds)
+    overlap = set(gates) & set(advisory)
+    if overlap:
+        raise LedgerProposalError(
+            f"gates cannot be both required and advisory: {sorted(overlap)}"
+        )
+    started = clock()
+    deadline = started + timeout_seconds
+    delay = max(0.0, float(poll_seconds))
+    attempts = 0
+    read_failures = 0
+    last_read_error: BaseException | None = None
+    watched = (*gates, *advisory)
+    last_seen: dict[str, list[dict]] = {gate: [] for gate in watched}
+    min_runs = dict(min_runs or {})
+
+    def gate_state(gate: str) -> str:
+        state = append_gate_state(last_seen[gate])
+        if state == "passed" and gate in min_runs:
+            real = [
+                run
+                for run in last_seen[gate]
+                if run.get("status") == "completed"
+                and run.get("conclusion") != "skipped"
+            ]
+            if len(real) < min_runs[gate]:
+                return "pending"
+        return state
+    # The ids of the last multi-page listing that read as passed.
+    passed_ids: frozenset[int] | None = None
+    # Whether the latest successful read showed every required gate passed,
+    # whether the current unbroken run of passing reads holds a confirmed
+    # pass (one page, or the same runs as the previous passing read), and
+    # when that run was first confirmed (the advisory grace counts from
+    # there).
+    required_passed_now = False
+    confirmed_once = False
+    required_passed_at: float | None = None
+
+    def may_merge() -> bool:
+        # The current unbroken run of passing reads holds a confirmed pass
+        # (where the merge went ahead before advisory gates existed). Any
+        # read showing a required gate not passed ends that run and clears
+        # confirmed_once, so this also means the latest read passed.
+        return confirmed_once
+
+    def advisory_verdicts() -> dict[str, tuple[str, str]]:
+        return {
+            gate: (
+                gate_state(gate),
+                _describe_gate_runs(gate, last_seen[gate], min_runs.get(gate, 0)),
+            )
+            for gate in advisory
+        }
+
+    while True:
+        attempts += 1
+        try:
+            # Each page read is bounded by what the budget has left.
+            runs = read_check_runs(repo, commit_sha, deadline=deadline, clock=clock)
+        except (RuntimeError, json.JSONDecodeError) as exc:
+            # Reading check runs has no side effects, so a transient API
+            # error (5xx, secondary rate limit, a timeout, a listing that
+            # moved between pages) retries inside the budget rather than
+            # closing a proposal whose gate may be about to pass.
+            read_failures += 1
+            last_read_error = exc
+            if may_merge():
+                # The last good read allows the merge (see may_merge), so a
+                # failed read while waiting for an advisory verdict never
+                # turns into a refusal.
+                return advisory_verdicts()
+            if read_failures >= APPEND_GATE_MAX_READ_FAILURES:
+                raise LedgerProposalError(
+                    f"could not read append gate status for {repo}#{pr_number} "
+                    f"({read_failures} consecutive failures): {exc}"
+                ) from exc
+        else:
+            read_failures = 0
+            last_read_error = None
+            states: dict[str, str] = {}
+            for gate in watched:
+                last_seen[gate] = [
+                    run for run in runs if type(run) is dict and run.get("name") == gate
+                ]
+                states[gate] = gate_state(gate)
+            failed = [gate for gate in gates if states[gate] == "failed"]
+            if failed:
+                raise LedgerProposalError(
+                    f"append gate failed for {repo}#{pr_number}: "
+                    + "; ".join(
+                        _describe_gate_runs(gate, last_seen[gate]) for gate in failed
+                    )
+                    + "; refusing to merge"
+                )
+            required_passed_now = all(states[gate] == "passed" for gate in gates)
+            if not required_passed_now:
+                # A required gate re-run or still running: the next merge
+                # needs a fresh confirmed pass, and a fresh grace.
+                required_passed_at = None
+                confirmed_once = False
+            if required_passed_now:
+                ids = frozenset(run["id"] for run in runs)
+                # One page is one snapshot. Across pages, a run re-run
+                # between two page reads can swap a new attempt onto a page
+                # already read while the total holds, so a multi-page pass
+                # stands only when the next read returns the same runs.
+                if len(runs) <= APPEND_GATE_CHECK_RUN_PAGE_SIZE or ids == passed_ids:
+                    confirmed_once = True
+                    if required_passed_at is None:
+                        required_passed_at = clock()
+                passed_ids = ids
+            else:
+                passed_ids = None
+            # The budget bounds how long to wait, not which verdicts count:
+            # the required gates passed on this exact head, so a pass read
+            # just after the deadline still stands. The advisory verdict is
+            # this read's, confirmed or not: a torn multi-page listing can
+            # misread it, which at worst files a needless issue or misses one
+            # that report_red_ledger_base raises on the next append.
+            if may_merge() and (
+                all(states[gate] in ("passed", "failed") for gate in advisory)
+                or clock() - required_passed_at >= advisory_grace_seconds
+            ):
+                return advisory_verdicts()
+        now = clock()
+        if now >= deadline or (poll_attempts is not None and attempts >= poll_attempts):
+            if may_merge():
+                # Every required gate passed on this head; only an advisory
+                # verdict is missing, and it never holds a merge.
+                return advisory_verdicts()
+            waiting = [gate for gate in gates if gate_state(gate) != "passed"]
+            detail = "; ".join(
+                _describe_gate_runs(gate, last_seen[gate], min_runs.get(gate, 0))
+                for gate in waiting
+            )
+            if not waiting and passed_ids is not None:
+                detail = (
+                    "both gates passed on a multi-page listing that no second "
+                    "read has confirmed yet"
+                )
+            if last_read_error is not None:
+                detail += f"; last status read failed: {last_read_error}"
+            raise LedgerProposalError(
+                f"append gate did not complete for {repo}#{pr_number} after "
+                f"{(now - started) / 60:.1f} of {timeout_seconds / 60:g} allowed "
+                f"minutes; no verdict yet ({detail})"
+            )
+        sleep(max(0.0, min(delay, deadline - now)))
+        delay = min(delay * 2, max_poll_seconds)
+
+
+def _proposal_curation_body(curation: CatalogCuration, policy: str) -> str:
+    """The pull-request paragraphs on catalog curation and Arch checks."""
+    parts = []
+    if curation.files:
+        parts.append(
+            "It also carries the series-catalog curation this append needs, "
+            "which Chronicle's catalog tests re-check:\n"
+            + "\n".join(f"- {line}" for line in curation.summary())
+        )
+    if curation.residual:
+        parts.append(
+            "The resolver's dry run expects Arch checks to fail on curation "
+            "only a curator can do:\n"
+            + "\n".join(f"- {line}" for line in curation.residual)
+        )
+    if policy == ARCH_CHECKS_POLICY_REFUSE:
+        parts.append("It merges only if Arch checks passes too.")
+    else:
+        parts.append(
+            "Arch checks is awaited; a red verdict is filed as curation work "
+            f"(issue \"{LEDGER_CURATION_ISSUE_TITLE}\") and does not hold the "
+            "merge."
+        )
+    return "".join(f"\n\n{part}" for part in parts)
+
+
+LEDGER_CURATION_ISSUE_MAX_PAGES = 10
+
+
+def _open_ledger_curation_issue(repo: str) -> dict | None:
+    """The open curation issue, searching every page of open issues (the
+    listing also counts pull requests)."""
+    for page in range(1, LEDGER_CURATION_ISSUE_MAX_PAGES + 1):
+        issues = json.loads(
+            _gh_api(f"repos/{repo}/issues?state=open&per_page=100&page={page}")
+        )
+        if type(issues) is not list:
+            raise LedgerProposalError("GitHub issue listing is not a list")
+        for issue in issues:
+            if (
+                type(issue) is dict
+                and issue.get("title") == LEDGER_CURATION_ISSUE_TITLE
+                and "pull_request" not in issue
+                and type(issue.get("number")) is int
+            ):
+                return issue
+        if len(issues) < 100:
+            return None
+    raise LedgerProposalError(
+        f"more than {LEDGER_CURATION_ISSUE_MAX_PAGES * 100} open issues to search"
+    )
+
+
+def _file_ledger_curation_issue(repo: str, body: str) -> str:
+    """Comment on the open curation issue, or open one; returns its URL."""
+    issue = _open_ledger_curation_issue(repo)
+    if issue is not None:
+        _gh_api(
+            "-X",
+            "POST",
+            f"repos/{repo}/issues/{issue['number']}/comments",
+            input_body={"body": body},
+        )
+        return str(issue.get("html_url") or f"{repo}#{issue['number']}")
+    created = json.loads(
+        _gh_api(
+            "-X",
+            "POST",
+            f"repos/{repo}/issues",
+            input_body={"title": LEDGER_CURATION_ISSUE_TITLE, "body": body},
+        )
+    )
+    if type(created) is not dict:
+        raise LedgerProposalError("GitHub did not return the created issue")
+    return str(created.get("html_url") or created.get("number"))
+
+
+def report_arch_checks_at_merge(
+    repo: str,
+    pr_number: int,
+    merged_sha: str,
+    *,
+    state: str,
+    runs: str,
+    curation: CatalogCuration,
+    run_url: str | None,
+) -> None:
+    """Say loudly that an append merged without a green Arch checks.
+
+    Under the "land" policy the merge stands, as it did before Arch checks
+    was awaited, but a red verdict leaves the ledger branch red for every
+    other pull request until a curator acts, so it is filed as a Chronicle
+    issue naming what the dry run expects a curator to do; so is a missing
+    verdict when the dry run predicts red. Never raises: the rows are
+    already merged and must still be published.
+    """
+    print(
+        f"ARCH CHECKS {state.upper()} AT MERGE: {repo}#{pr_number} merged at "
+        f"{merged_sha} under the '{ARCH_CHECKS_POLICY_LAND}' policy ({runs})"
+    )
+    # Red, or no verdict yet where the dry run predicts red: either way the
+    # branch needs a curator.
+    if state != "failed" and not curation.residual:
+        return
+    verdict = (
+        "with Arch checks red"
+        if state == "failed"
+        else "before Arch checks reported, and the dry run predicts it red"
+    )
+    lines = [
+        f"Thesis resolver append {repo}#{pr_number} merged at {merged_sha} "
+        f"{verdict} ({runs}).",
+        "",
+        "Every pull request into this branch fails Arch checks until the "
+        "curation below lands (see chronicle#363 and #371 for the pattern).",
+    ]
+    if run_url:
+        lines.append(f"Resolver run: {run_url}")
+    if curation.residual:
+        lines += ["", "What the resolver's dry run expects a curator to do:"]
+        lines += [f"- {line}" for line in curation.residual]
+    if curation.notes:
+        lines += ["", "Why the resolver did not curate it itself:"]
+        lines += [f"- {line}" for line in curation.notes]
+    try:
+        where = _file_ledger_curation_issue(repo, "\n".join(lines))
+    except Exception as exc:  # noqa: BLE001 - reporting must not fail the run
+        print(f"  could not file the ledger curation issue: {exc}")
+    else:
+        print(f"  ledger curation filed: {where}")
+
+
+def report_red_ledger_base(repo: str, base_sha: str) -> str:
+    """Arch checks' state on the ledger branch head, filed if it is red.
+
+    The branch head a proposal builds on carries the push run of Arch
+    checks. A red one means curation is owed from an earlier change (an
+    append merged before Arch checks reported, a hand merge, a broken
+    base), so it is filed with the same issue as a red merge. Returns the
+    state; never raises, and never holds the append.
+    """
+    try:
+        runs = read_check_runs(
+            repo, base_sha, deadline=time.monotonic() + APPEND_GATE_MAX_READ_SECONDS
+        )
+        arch = [
+            run
+            for run in runs
+            if type(run) is dict and run.get("name") == ARCH_CHECKS_GATE
+        ]
+        state = append_gate_state(arch)
+    except Exception as exc:  # noqa: BLE001 - a report must not cost an append
+        print(f"  could not read Arch checks on the ledger branch head: {exc}")
+        return "unknown"
+    if state != "failed":
+        return state
+    detail = _describe_gate_runs(ARCH_CHECKS_GATE, arch)
+    print(f"LEDGER BRANCH RED BEFORE THIS APPEND: {repo}@{base_sha} ({detail})")
+    try:
+        where = _file_ledger_curation_issue(
+            repo,
+            f"The ledger branch head {base_sha} has Arch checks red ({detail}), "
+            "before the next resolver append was proposed. Every pull request "
+            "into the branch fails Arch checks until it is curated.",
+        )
+    except Exception as exc:  # noqa: BLE001 - reporting must not fail the run
+        print(f"  could not file the ledger curation issue: {exc}")
+    else:
+        print(f"  ledger curation filed: {where}")
+    return state
+
+
 def propose_ledger_append(
     repo: str,
     branch: str,
@@ -11325,20 +16187,50 @@ def propose_ledger_append(
     base_sha: str,
     added: int,
     *,
-    poll_seconds: int = 20,
-    poll_attempts: int = 30,
+    poll_seconds: float = 20,
+    poll_attempts: int | None = None,
+    gate_timeout_seconds: float = DEFAULT_APPEND_GATE_TIMEOUT_MINUTES * 60,
     timestamp_requester: TimestampRequester | None = None,
     timestamp_timeout_seconds: float = DEFAULT_TIMESTAMP_TIMEOUT_SECONDS,
     clock_skew_seconds: int = DEFAULT_CLOCK_SKEW_SECONDS,
     release_anchor_dir: pathlib.Path | None = None,
     release_now: dt.datetime | None = None,
     producer_signing_key: str | None = None,
+    target_contracts: Mapping[str, Mapping[str, Any]] | None = None,
+    arch_checks_policy: str = ARCH_CHECKS_POLICY,
+    run_url: str | None = None,
+    what: str = "first-print observation(s)",
 ) -> str:
-    """Publish one fully witnessed commit through the reviewed append gate."""
+    """Publish one fully witnessed commit through the reviewed append gate.
+
+    The commit also carries the catalog curation the resolver can prove
+    (catalog_curation), so Chronicle's Arch checks can pass on it, and the
+    merge awaits Arch checks under ``arch_checks_policy``: "refuse" treats
+    it as a required gate, "land" merges on the two append gates and files
+    a red verdict as curation work. ``what`` names the appended rows in the
+    commit and the pull request.
+    """
 
     environment_signing_key = os.environ.pop(PRODUCER_SIGNING_KEY_ENV, None)
     if producer_signing_key is None:
         producer_signing_key = environment_signing_key
+    # A malformed budget must refuse before the TSA or any remote mutation.
+    gate_timeout_seconds = _validate_gate_timeout(gate_timeout_seconds)
+    if arch_checks_policy not in ARCH_CHECKS_POLICIES:
+        raise LedgerProposalError(
+            f"unknown Arch checks policy {arch_checks_policy!r}; expected one "
+            f"of {ARCH_CHECKS_POLICIES}"
+        )
+    if arch_checks_policy == ARCH_CHECKS_POLICY_REFUSE:
+        required_gates = (*REQUIRED_APPEND_GATES, ARCH_CHECKS_GATE)
+        advisory_gates: tuple[str, ...] = ()
+    else:
+        required_gates = REQUIRED_APPEND_GATES
+        advisory_gates = (ARCH_CHECKS_GATE,)
+    # Arch checks has a verdict only once both its push run and its pull
+    # request run have completed: on a new proposal branch only the pull
+    # request run checks the anchor move against the base.
+    gate_min_runs = {ARCH_CHECKS_GATE: 2}
     candidate_ledger = content.encode("utf-8")
     base_tree = _fetch_repository_tree(repo, base_sha, path)
     if base_tree.blob_shas.get(path) != blob_sha:
@@ -11357,8 +16249,31 @@ def propose_ledger_append(
         now=release_now,
         producer_signing_key=producer_signing_key,
     )
-    message = f"Record {added} first-print observation(s) via resolve_pending.py"
-    changes = {path: candidate_ledger, **release_files}
+    # Derived from the exact catalog and registry this commit ships.
+    curation = catalog_curation(
+        base_tree,
+        path=path,
+        candidate_ledger=candidate_ledger,
+        catalog=release_files.get("ledger/series_catalog.json"),
+        registry=release_files.get(_SERIES_UUID_REGISTRY),
+        target_contracts=target_contracts or {},
+        run_url=run_url,
+    )
+    for line in curation.summary():
+        print(f"  CATALOG CURATION (in the proposal): {line}")
+    for line in curation.notes:
+        print(f"  catalog curation note: {line}")
+    for line in curation.residual:
+        print(f"  CATALOG CURATION NEEDED (Arch checks will fail): {line}")
+    title = f"Record {added} {what} via resolve_pending.py"
+    message = title
+    if curation.files:
+        message += (
+            "\n\nCatalog curation in this commit, re-checked by Chronicle's "
+            "series-catalog tests:\n"
+            + "\n".join(f"- {line}" for line in curation.summary())
+        )
+    changes = {path: candidate_ledger, **release_files, **curation.files}
     proposal_commit = _publish_proposal_commit(
         repo,
         base_sha=base_sha,
@@ -11372,6 +16287,7 @@ def propose_ledger_append(
             f"ledger branch moved while proposal was prepared: {base_sha} -> "
             f"{current_base}; retry against the new trusted state"
         )
+    report_red_ledger_base(repo, base_sha)
 
     stamp = utc_now().lower().replace(":", "-").replace("t", "-")
     proposal = f"thesis-facts-append/{stamp}-{time.time_ns():x}"
@@ -11399,16 +16315,17 @@ def propose_ledger_append(
                 "POST",
                 f"repos/{repo}/pulls",
                 input_body={
-                    "title": message,
+                    "title": title,
                     "head": proposal,
                     "base": branch,
                     "body": (
                         "Automated witnessed append proposal from "
-                        f"resolve_pending.py: {added} first-print observation(s) "
+                        f"resolve_pending.py: {added} {what} "
                         f"built against {base_sha}. The proposal commit contains "
                         "the ledger append and its complete four-sibling release, "
                         "and "
                         "merges only after the thesis-facts append gate passes."
+                        + _proposal_curation_body(curation, arch_checks_policy)
                     ),
                 },
             )
@@ -11417,21 +16334,19 @@ def propose_ledger_append(
             raise LedgerProposalError("GitHub did not return a pull-request number")
         pr_number = pr["number"]
 
-        gate_passed = False
-        for _ in range(poll_attempts):
-            runs = json.loads(
-                _gh_api(f"repos/{repo}/commits/{proposal_commit}/check-runs")
-            ).get("check_runs", [])
-            gate_runs = [run for run in runs if run.get("name") == "Append gate"]
-            if gate_runs and all(run.get("status") == "completed" for run in gate_runs):
-                gate_passed = append_gate_verdict(gate_runs)
-                break
-            time.sleep(poll_seconds)
-        if not gate_passed:
-            raise LedgerProposalError(
-                f"append gate did not pass for {repo}#{pr_number}; refusing to "
-                "leave a failed proposal branch or PR"
-            )
+        # Raises on a failed gate or an exhausted budget; the handler below
+        # closes the PR and deletes the branch either way.
+        advisory_verdicts = await_append_gates(
+            repo,
+            proposal_commit,
+            pr_number,
+            timeout_seconds=gate_timeout_seconds,
+            poll_seconds=poll_seconds,
+            poll_attempts=poll_attempts,
+            gates=required_gates,
+            advisory=advisory_gates,
+            min_runs=gate_min_runs,
+        )
 
         current_base = _branch_head(repo, branch)
         if current_base != base_sha:
@@ -11519,12 +16434,25 @@ def propose_ledger_append(
             merged_sha,
             path=path,
             candidate_ledger=candidate_ledger,
-            release_files=release_files,
+            release_files={**release_files, **curation.files},
             clock_skew_seconds=clock_skew_seconds,
             anchor_dir=release_anchor_dir,
         )
         _gh_api("-X", "DELETE", f"repos/{repo}/git/refs/heads/{proposal}")
         ref_created = False
+        arch_state, arch_runs = advisory_verdicts.get(
+            ARCH_CHECKS_GATE, ("passed", "")
+        )
+        if arch_state != "passed":
+            report_arch_checks_at_merge(
+                repo,
+                pr_number,
+                merged_sha,
+                state=arch_state,
+                runs=arch_runs,
+                curation=curation,
+                run_url=run_url,
+            )
         return merged_sha
     except BaseException as exc:
         cleanup_failures = _cleanup_proposal(
@@ -11814,6 +16742,31 @@ def source_binding_projection(
     }
 
 
+def response_archive_reference(
+    run_dir: pathlib.Path,
+    *,
+    series_id: str,
+    vintage: str,
+    raw: bytes,
+    extension: str = "csv",
+) -> tuple[dict[str, Any], bytes]:
+    """One deterministic gzip archive's hash reference and bytes, unwritten."""
+    raw_sha256 = hashlib.sha256(raw).hexdigest()
+    compressed = gzip.compress(raw, mtime=0)
+    gzip_sha256 = hashlib.sha256(compressed).hexdigest()
+    name = f"{series_id.lower()}-{vintage}-{raw_sha256[:16]}.{extension}.gz"
+    path = run_dir / "responses" / name
+    reference = {
+        "path": path.relative_to(ROOT).as_posix(),
+        "sha256": raw_sha256,
+        "bytes": len(raw),
+        "gzipSha256": gzip_sha256,
+        "gzipBytes": len(compressed),
+        "contentEncoding": "gzip",
+    }
+    return reference, compressed
+
+
 def archive_response(
     run_dir: pathlib.Path,
     *,
@@ -11823,21 +16776,13 @@ def archive_response(
     extension: str = "csv",
 ) -> dict[str, Any]:
     """Write one deterministic gzip archive and return its hash reference."""
-    raw_sha256 = hashlib.sha256(raw).hexdigest()
-    compressed = gzip.compress(raw, mtime=0)
-    gzip_sha256 = hashlib.sha256(compressed).hexdigest()
-    name = f"{series_id.lower()}-{vintage}-{raw_sha256[:16]}.{extension}.gz"
-    path = run_dir / "responses" / name
+    reference, compressed = response_archive_reference(
+        run_dir, series_id=series_id, vintage=vintage, raw=raw, extension=extension
+    )
+    path = ROOT / reference["path"]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(compressed)
-    return {
-        "path": path.relative_to(ROOT).as_posix(),
-        "sha256": raw_sha256,
-        "bytes": len(raw),
-        "gzipSha256": gzip_sha256,
-        "gzipBytes": len(compressed),
-        "contentEncoding": "gzip",
-    }
+    return reference
 
 
 def attach_resolution_provenance(
@@ -11858,6 +16803,10 @@ def attach_resolution_provenance(
         # Projection is a refusal gate. Run it before writing any response so
         # a rejected row cannot leave an orphan archive in a mixed run.
         projection = source_binding_projection(registration, row, raw)
+    # After the contract check, which reads the registered unit, and before
+    # the archive, so a value with no exact base form is refused as a contract
+    # mismatch is.
+    row = base_unit_row(row)
     response_archive = archive_response(
         run_dir,
         series_id=series_id,
@@ -11875,8 +16824,791 @@ def attach_resolution_provenance(
     output["assertionVersion"] = assertion_version(output)
     if registration:
         output["targetContentHash"] = registration["targetContentHash"]
-        output["sourceBindingProjection"] = projection
+        # The append gate holds a projection's unit to its row's, so a row
+        # stored in base units carries its base unit here too. The site reads
+        # the registered unit back from the recorded pair.
+        output["sourceBindingProjection"] = {
+            **projection,
+            "unit": (output.get("measure") or {}).get("unit"),
+        }
     return output
+
+
+# Chronicle stores plain numbers (Max, 2026-10-21): a row says 7716000 in
+# count, not 7.716 in millions, and keeps the pair it was recorded as in
+# source.recorded_value and source.recorded_unit. Registered contracts keep
+# their units, and so do the adapters, plausibility gates and the contract
+# check above; only the appended row converts. The resolver writes base units
+# and stops on a ledger with a current row in a scaled unit. The restatement run
+# (--restate-base-units) left none, so no series holds both vocabularies. The
+# site reads both shapes (site/src/data/ledger-restatements.ts) and this section
+# mirrors its checks.
+
+UNIT_RESTATEMENT = "unit_restatement"
+
+
+def _json_object(value: object) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def effective_assertion_id(row: Mapping[str, Any]) -> str:
+    """The id Chronicle's append gate gives a row (receipt 0.6.2).
+
+    The row's explicit ``assertionVersion.id``, else, for a row written before
+    assertion versioning, its av2 content address. A correction names this id.
+    """
+
+    version = row.get("assertionVersion")
+    if isinstance(version, dict) and version.get("id"):
+        return str(version["id"])
+    return assertion_version(dict(row))["id"]
+
+
+def current_ledger_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The rows no other row supersedes, as receipt's effective_current_rows."""
+
+    superseded = set()
+    for row in rows:
+        version = row.get("assertionVersion")
+        if isinstance(version, dict) and version.get("supersedes"):
+            superseded.add(str(version["supersedes"]))
+    return [row for row in rows if effective_assertion_id(row) not in superseded]
+
+
+def scaled_current_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The current rows whose unit carries a scale word, such as thousands."""
+
+    return [
+        row
+        for row in current_ledger_rows(rows)
+        if ledger_units.base_unit(_json_object(row.get("measure")).get("unit"))
+        is not None
+    ]
+
+
+# The clause a few rows' method notes use to name their scale ("expressed in
+# thousands", "billions of dollars"). A row stored in base units drops it,
+# because its value carries no scale, and refuses notes that still name one,
+# so a phrasing this misses is fixed here before it reaches the ledger.
+_SCALE_CLAUSE = re.compile(
+    r",? (?:expressed in (?:GBP |USD )?(?:thousands|millions|billions)"
+    r"|(?:millions|billions) of dollars)(?=\.|;|$)",
+    re.IGNORECASE,
+)
+_SCALE_WORD = re.compile(r"\b(?:thousands?|millions?|billions?)\b", re.IGNORECASE)
+
+
+def base_unit_notes(notes: object, sentence: str) -> str:
+    """Method notes for a row stored in base units, ending with ``sentence``.
+
+    A base value is only as precise as the figure it was recorded as: 3189.0
+    thousands becomes 3189000 though BLS printed 3,189,009. The recorded pair
+    implies that, and ``sentence`` says it, since a bare 3189000 reads as
+    exact.
+    """
+
+    text = _SCALE_CLAUSE.sub("", notes if isinstance(notes, str) else "").strip()
+    if _SCALE_WORD.search(text):
+        raise ledger_units.LedgerUnitError(
+            f"method notes still name a scale in base units: {text!r}"
+        )
+    if text and not text.endswith("."):
+        text += "."
+    return f"{text} {sentence}".strip()
+
+
+def base_unit_row(row: dict[str, Any]) -> dict[str, Any]:
+    """The row in its unit's base unit, with the pair it was recorded as.
+
+    A row in a unit with no scale word comes back unchanged. A value with no
+    exact form in the base unit raises ``ledger_units.LedgerUnitError``, a
+    ValueError, so the caller refuses that row alone, as it does notes that
+    name a scale ``_SCALE_CLAUSE`` cannot drop.
+    """
+
+    measure = _json_object(row.get("measure"))
+    unit = measure.get("unit")
+    base = ledger_units.base_unit(unit)
+    if base is None:
+        return row
+    source = _json_object(row.get("source"))
+    if "recorded_value" in source or "recorded_unit" in source:
+        raise ledger_units.LedgerUnitError(
+            f"{row.get('source_record_id')} already records a pair"
+        )
+    value = ledger_units.to_base(row.get("value"), unit)
+    notes = base_unit_notes(
+        source.get("method_notes"),
+        f"Stores {row['value']!r} {unit} in base units, at that figure's "
+        "precision, so the archived response may hold more digits.",
+    )
+    return {
+        **row,
+        "value": value,
+        "measure": {**measure, "unit": base},
+        "source": {
+            **source,
+            "recorded_value": row["value"],
+            "recorded_unit": unit,
+            "method_notes": notes,
+        },
+    }
+
+
+def check_recorded_pair(row: Mapping[str, Any]) -> None:
+    """Refuse a recorded pair that does not state the stored value exactly.
+
+    ledger-restatements.ts ``recordedPair``: a pair is a number in a scaled
+    unit, the row stores that unit's base unit, and the value converts to the
+    stored value exactly. A row with neither key passes.
+    """
+
+    source = _json_object(row.get("source"))
+    if "recorded_value" not in source and "recorded_unit" not in source:
+        return
+    name = row.get("source_record_id")
+    value = source.get("recorded_value")
+    unit = source.get("recorded_unit")
+    if type(value) not in (int, float) or ledger_units.base_unit(unit) is None:
+        raise ledger_units.LedgerUnitError(
+            f"{name} records {value!r} {unit!r}, which is not a number in a "
+            "scaled unit"
+        )
+    stored = _json_object(row.get("measure")).get("unit")
+    if stored != ledger_units.base_unit(unit):
+        raise ledger_units.LedgerUnitError(
+            f"{name} records {unit} but stores {stored!r}"
+        )
+    stored_value = row.get("value")
+    if (
+        type(stored_value) not in (int, float)
+        or ledger_units.to_base(value, unit) != stored_value
+    ):
+        raise ledger_units.LedgerUnitError(
+            f"{name} records {value!r} {unit} but stores {stored_value!r}"
+        )
+
+
+def _without(value: object, keys: tuple[str, ...]) -> dict[str, Any]:
+    return {key: item for key, item in _json_object(value).items() if key not in keys}
+
+
+def restated_content(row: Mapping[str, Any]) -> dict[str, Any]:
+    """The row with every field a restatement may change taken out.
+
+    ledger-restatements.ts ``restatedContent``: the stated value and unit, the
+    row's own provenance, and text that names the old scale.
+    """
+
+    content = _without(
+        row,
+        (
+            "value",
+            "assertionVersion",
+            "retrievedAt",
+            "ledgerRepoSha",
+            "sourceVintage",
+            "responseArchive",
+        ),
+    )
+    content["measure"] = _without(row.get("measure"), ("unit",))
+    content["source"] = _without(
+        row.get("source"), ("recorded_value", "recorded_unit", "method_notes")
+    )
+    if "sourceBindingProjection" in row:
+        content["sourceBindingProjection"] = _without(
+            row["sourceBindingProjection"], ("unit", "responseSha256")
+        )
+    return content
+
+
+def assert_restates(
+    prior: Mapping[str, Any], prior_line: str, restatement: Mapping[str, Any]
+) -> None:
+    """Refuse a restatement that says anything but its row, in base units.
+
+    ledger-restatements.ts ``assertRestates``, check for check. The site goes
+    on grading the row a restatement names, which is safe only because the
+    two state one quantity.
+    """
+
+    name = restatement.get("source_record_id")
+
+    def refuse(why: str) -> ledger_units.LedgerUnitError:
+        return ledger_units.LedgerUnitError(f"restatement of {name} {why}")
+
+    unit = _json_object(prior.get("measure")).get("unit")
+    base = ledger_units.base_unit(unit)
+    if base is None:
+        raise refuse(f"names a row in {unit!r}, which holds no scale")
+    stored = _json_object(restatement.get("measure")).get("unit")
+    if stored != base:
+        raise refuse(f"stores {stored!r}, not the base unit of {unit}")
+    source = _json_object(restatement.get("source"))
+    recorded = source.get("recorded_value")
+    if (
+        type(recorded) not in (int, float)
+        or recorded != prior.get("value")
+        or source.get("recorded_unit") != unit
+    ):
+        raise refuse(
+            f"records {recorded!r} {source.get('recorded_unit')!r} but the row "
+            f"says {prior.get('value')!r} {unit}"
+        )
+    expected = ledger_units.to_base(prior.get("value"), unit)
+    value = restatement.get("value")
+    if type(value) not in (int, float) or value != expected:
+        raise refuse(f"stores {value!r}, not {expected!r}")
+    line_sha256 = hashlib.sha256(prior_line.encode("utf-8")).hexdigest()
+    if _json_object(restatement.get("responseArchive")).get("sha256") != line_sha256:
+        raise refuse("does not archive the exact line it restates")
+    if canonical_bytes(restated_content(restatement)) != canonical_bytes(
+        restated_content(prior)
+    ):
+        raise refuse("changes more than the value and unit")
+
+
+def _restates(row: dict[str, Any], index: int) -> bool:
+    """Whether a row is a unit restatement; refuses any other ``relation``.
+
+    ledger-restatements.ts ``isUnitRestatement``: a row with no ``relation``
+    restates nothing, and ``null`` counts as a relation the site does not read.
+    """
+
+    version = _json_object(row.get("assertionVersion"))
+    if "relation" not in version:
+        return False
+    if version["relation"] != UNIT_RESTATEMENT:
+        raise ledger_units.LedgerUnitError(
+            f"line {index + 1} has assertionVersion.relation "
+            f"{version['relation']!r}, which the site does not read"
+        )
+    return True
+
+
+def _superseded_id(row: dict[str, Any], index: int) -> str | None:
+    """The id a row supersedes as the site reads it, or None for a falsy one.
+
+    ledger-current-view.ts ``supersededAssertionIdOf``: the site refuses a
+    truthy ``supersedes`` that is not a string rather than coerce it with
+    str(), as receipt would, and reads a falsy one as naming no row.
+    """
+
+    replaced = _json_object(row.get("assertionVersion")).get("supersedes")
+    if not replaced:
+        return None
+    if not isinstance(replaced, str):
+        raise ledger_units.LedgerUnitError(
+            f"line {index + 1} has assertionVersion.supersedes "
+            f"{replaced!r}, not a string, which the site refuses rather "
+            "than coerce"
+        )
+    return replaced
+
+
+def check_restatements(lines: list[str]) -> list[dict[str, Any]]:
+    """Check a ledger's restatements and recorded pairs as the site does.
+
+    In the site's order, so a ledger with more than one defect fails here for
+    the same first reason as there. thesis-log.ts
+    ``mapPolicyEngineLedgerRows`` reads every row first: its ``relation``
+    (any but ``unit_restatement`` is refused) and, on a row that restates
+    nothing, the version it supersedes (``supersededContentAddresses``); then
+    each such row's recorded pair, which must state its value
+    (``recordedPair``). ledger-restatements.ts ``foldLedgerRestatements``
+    then holds each restatement to an earlier row, named by its effective id,
+    and to ``assert_restates`` against that row's exact line. Returns the
+    restatements.
+    """
+
+    rows = [json.loads(line) for line in lines]
+    restating: list[bool] = []
+    for index, row in enumerate(rows):
+        restating.append(_restates(row, index))
+        if not restating[index]:
+            _superseded_id(row, index)
+    for index, row in enumerate(rows):
+        if not restating[index]:
+            check_recorded_pair(row)
+    line_of_id: dict[str, int] = {}
+    restatements: list[dict[str, Any]] = []
+    for index, row in enumerate(rows):
+        if restating[index]:
+            replaced = _superseded_id(row, index)
+            prior = None if replaced is None else line_of_id.get(replaced)
+            if prior is None:
+                named = _json_object(row.get("assertionVersion")).get("supersedes")
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} restates {named!r}, which no earlier "
+                    "row holds"
+                )
+            assert_restates(rows[prior], lines[prior], row)
+            restatements.append(row)
+        line_of_id[effective_assertion_id(row)] = index
+    return restatements
+
+
+def restated_method_notes(
+    notes: object, value: object, unit: str, prior_id: str
+) -> str:
+    """A restatement's method notes: the row's, then what the restatement did.
+
+    The row's other notes stay as they were (the site's restatement check,
+    and ``check_restatements`` here, hold them to the row's), so the sentence
+    warns that figures in them may be in the old unit.
+    """
+
+    return base_unit_notes(
+        notes,
+        f"Restates {value!r} {unit} (assertion {prior_id}) in base units, at "
+        "that figure's precision, so the source may print more digits; the "
+        "quantity does not change. The row's other notes predate this "
+        f"restatement and may give figures in {unit}.",
+    )
+
+
+def restatement_row(
+    prior: dict[str, Any],
+    prior_line: str,
+    *,
+    run_dir: pathlib.Path,
+    retrieved_at: str,
+    ledger_repo_sha: str,
+) -> tuple[dict[str, Any], bytes]:
+    """The row that states a scaled row in base units, and its archive's bytes.
+
+    A deep copy of the row with its value and unit in base units, the pair it
+    was recorded as, this run's provenance and an archive of the row's exact
+    line: a restatement rests on the row it restates, not on a new fetch. A
+    row written before provenance has no source vintage, so it takes the
+    row's ``observed_at``, which the gate requires to be a date.
+    """
+
+    unit = _json_object(prior.get("measure")).get("unit")
+    base = ledger_units.base_unit(unit)
+    if base is None:
+        raise ledger_units.LedgerUnitError(
+            f"{prior.get('source_record_id')} is in {unit!r}, which holds no scale"
+        )
+    prior_id = effective_assertion_id(prior)
+    vintage = str(prior.get("sourceVintage") or prior["observed_at"])
+    archive, compressed = response_archive_reference(
+        run_dir,
+        series_id=str(prior["source_record_id"]),
+        vintage=vintage,
+        raw=prior_line.encode("utf-8"),
+        extension="json",
+    )
+    row = copy.deepcopy(prior)
+    row["value"] = ledger_units.to_base(prior["value"], unit)
+    row["measure"]["unit"] = base
+    source = row.setdefault("source", {})
+    source["recorded_value"] = prior["value"]
+    source["recorded_unit"] = unit
+    source["method_notes"] = restated_method_notes(
+        source.get("method_notes"), prior["value"], unit, prior_id
+    )
+    row["ledgerRepoSha"] = ledger_repo_sha
+    row["sourceVintage"] = vintage
+    row["retrievedAt"] = retrieved_at
+    row["responseArchive"] = archive
+    if "sourceBindingProjection" in prior:
+        row["sourceBindingProjection"] = {
+            **prior["sourceBindingProjection"],
+            "unit": base,
+            "responseSha256": archive["sha256"],
+        }
+    row["assertionVersion"] = {
+        "id": assertion_version(row)["id"],
+        "supersedes": prior_id,
+        "relation": UNIT_RESTATEMENT,
+    }
+    return row, compressed
+
+
+def ledger_line(row: Mapping[str, Any]) -> str:
+    """The line the resolver appends for a row."""
+
+    return json.dumps(row, separators=(",", ":"))
+
+
+def restatement_rows(
+    lines: list[str], *, retrieved_at: str, ledger_repo_sha: str
+) -> list[tuple[dict[str, Any], bytes]]:
+    """The restatement of every current scaled row, in ledger order.
+
+    Each comes with its archive's bytes. ``lines`` are the ledger's exact
+    lines, which the archives hold.
+    """
+
+    rows = [json.loads(line) for line in lines]
+    scaled = {id(row) for row in scaled_current_rows(rows)}
+    run_dir = resolution_run_dir(retrieved_at)
+    return [
+        restatement_row(
+            row,
+            line,
+            run_dir=run_dir,
+            retrieved_at=retrieved_at,
+            ledger_repo_sha=ledger_repo_sha,
+        )
+        for row, line in zip(rows, lines)
+        if id(row) in scaled
+    ]
+
+
+def restatement_manifest(
+    rows: list[dict[str, Any]], *, ledger_repo: str, ledger_branch: str
+) -> dict[str, Any]:
+    """A restatement run's manifest: a function of its rows alone."""
+
+    return {
+        "schemaVersion": "thesis_resolution_run_v1",
+        "retrievedAt": rows[0]["retrievedAt"],
+        # A restatement records no first print: its response is the row it
+        # restates, which carries its own evidence.
+        "firstPrintEvidenceRequired": False,
+        "ledgerRepo": ledger_repo,
+        "ledgerBranch": ledger_branch,
+        "ledgerRepoSha": rows[0]["ledgerRepoSha"],
+        "facts": [
+            {
+                "dataPointId": row["source_record_id"],
+                "sourceVintage": row["sourceVintage"],
+                "retrievedAt": row["retrievedAt"],
+                "targetContentHash": row.get("targetContentHash"),
+                "responseArchive": row["responseArchive"],
+                "supersedes": row["assertionVersion"]["supersedes"],
+            }
+            for row in rows
+        ],
+    }
+
+
+# The UTC timestamp utc_now stamps, in ASCII digits: the only retrievedAt a
+# restatement's run directory may come from.
+_RUN_STAMP = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
+
+
+def restore_restatement_runs(
+    lines: list[str], *, ledger_repo: str, ledger_branch: str, write: bool = True
+) -> list[pathlib.Path]:
+    """Rebuild the records of restatement runs whose archives Thesis lacks.
+
+    A run's archives and manifest live only on its runner until the marker
+    commit, so a run that merged into Chronicle and then failed would leave
+    rows naming archives no record holds. A restatement's archive is its
+    row's exact line, gzipped with mtime 0, and its manifest is a function of
+    its rows, so the run rebuilds to the byte. Refuses an archive that would
+    differ from the one its row names, and a run directory that exists in
+    part. Returns the run directories it rebuilt, or would rebuild.
+    """
+
+    rows = [json.loads(line) for line in lines]
+    line_of_id: dict[str, int] = {}
+    missing: dict[pathlib.Path, list[tuple[dict[str, Any], str]]] = {}
+    for index, row in enumerate(rows):
+        version = _json_object(row.get("assertionVersion"))
+        if version.get("relation") == UNIT_RESTATEMENT:
+            retrieved_at = row.get("retrievedAt")
+            # The run directory comes from this timestamp, so only the shape
+            # utc_now stamps may name one: "/2026-11-04T00:00:00Z" would put
+            # it outside the repository.
+            if not isinstance(retrieved_at, str) or not _RUN_STAMP.fullmatch(
+                retrieved_at
+            ):
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} has retrievedAt {retrieved_at!r}, which "
+                    "names no run directory"
+                )
+            run_dir = resolution_run_dir(retrieved_at)
+            path = ROOT / str(_json_object(row.get("responseArchive")).get("path"))
+            if path.parent != run_dir / "responses":
+                raise ledger_units.LedgerUnitError(
+                    f"line {index + 1} archives "
+                    f"{_json_object(row.get('responseArchive')).get('path')!r} "
+                    f"outside its run, {run_dir.relative_to(ROOT).as_posix()}"
+                )
+            if not path.exists():
+                prior = line_of_id.get(str(version.get("supersedes")))
+                if prior is None:
+                    raise ledger_units.LedgerUnitError(
+                        f"line {index + 1} restates a row no earlier line holds"
+                    )
+                missing.setdefault(run_dir, []).append((row, lines[prior]))
+        line_of_id[effective_assertion_id(row)] = index
+    for run_dir, members in missing.items():
+        if run_dir.exists():
+            raise ledger_units.LedgerUnitError(
+                f"{run_dir.relative_to(ROOT).as_posix()} lacks {len(members)} "
+                "restatement archive(s); refusing to rebuild a run directory "
+                "in part"
+            )
+        if not write:
+            continue
+        try:
+            for row, prior_line in members:
+                record_id = row.get("source_record_id")
+                try:
+                    reference, compressed = response_archive_reference(
+                        run_dir,
+                        series_id=str(record_id),
+                        vintage=str(row.get("sourceVintage")),
+                        raw=prior_line.encode("utf-8"),
+                        extension="json",
+                    )
+                except ValueError as exc:
+                    # An absolute id resets the path's join, so the archive
+                    # would sit outside the repository.
+                    raise ledger_units.LedgerUnitError(
+                        f"the archive of {record_id!r} would sit outside the "
+                        "repository"
+                    ) from exc
+                if reference != row["responseArchive"]:
+                    raise ledger_units.LedgerUnitError(
+                        f"the rebuilt archive of {record_id} is {reference}, "
+                        f"not the {row['responseArchive']} its row names"
+                    )
+                path = ROOT / reference["path"]
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(compressed)
+            finalize_resolution_manifest(
+                run_dir,
+                restatement_manifest(
+                    [row for row, _ in members],
+                    ledger_repo=ledger_repo,
+                    ledger_branch=ledger_branch,
+                ),
+            )
+        except BaseException:
+            shutil.rmtree(run_dir, ignore_errors=True)
+            raise
+    return list(missing)
+
+
+def restatement_catalog_failure(
+    repo: str,
+    base_sha: str,
+    path: str,
+    base_content: str,
+    rows: list[dict[str, Any]],
+) -> str | None:
+    """Why Chronicle's series catalog would refuse these restatements, or None.
+
+    All or nothing, unlike ``ledger_catalog_refusals``: the generator must
+    exist at the base and pass on the base plus every restatement, the UUID
+    registry must not move, and each series must keep every field but its
+    unit, which moves to that unit's base unit.
+    """
+
+    tree = _fetch_repository_tree(repo, base_sha, path)
+    catalog_path = "ledger/series_catalog.json"
+    base_catalog = tree.files.get(catalog_path)
+    base_registry = tree.files.get(_SERIES_UUID_REGISTRY)
+    if base_catalog is None or base_registry is None:
+        return f"{repo}@{base_sha} holds no series catalog or UUID registry"
+    candidate = (
+        base_content.rstrip("\n")
+        + "\n"
+        + "\n".join(ledger_line(row) for row in rows)
+        + "\n"
+    )
+    with tempfile.TemporaryDirectory(prefix="thesis-restatement-preflight-") as name:
+        stage = pathlib.Path(name)
+        _materialize_repository_tree(stage, tree)
+        generator = stage / "scripts" / "build_series_catalog.py"
+        if not generator.is_file():
+            return f"{repo}@{base_sha} holds no series-catalog generator"
+        (stage / _validated_repository_path(path)).write_text(
+            candidate, encoding="utf-8"
+        )
+        completed = subprocess.run(
+            [sys.executable, str(generator)],
+            cwd=stage,
+            capture_output=True,
+            text=True,
+        )
+        if completed.returncode != 0:
+            output = completed.stderr.strip() or completed.stdout.strip()
+            return (
+                f"series-catalog generator exit {completed.returncode}: "
+                f"{' '.join(output.splitlines())[-500:]}"
+            )
+        registry = (stage / _SERIES_UUID_REGISTRY).read_bytes()
+        catalog = json.loads((stage / catalog_path).read_text(encoding="utf-8"))
+    if registry != base_registry:
+        return "restating would move the series UUID registry"
+    return restatement_catalog_drift(json.loads(base_catalog), catalog)
+
+
+def restatement_catalog_drift(
+    before: Mapping[str, Any], after: Mapping[str, Any]
+) -> str | None:
+    """How a restatement moved the catalog beyond units, or None."""
+
+    moving = {"observations_sha256", "observation_rows", "series"}
+    for key in sorted(set(before) | set(after)):
+        if key not in moving and before.get(key) != after.get(key):
+            return f"restating would change the catalog's {key}"
+    old = {series["uuid"]: series for series in before.get("series", [])}
+    new = {series["uuid"]: series for series in after.get("series", [])}
+    if set(old) != set(new):
+        return "restating would change which series the catalog holds"
+    for uuid in sorted(old):
+        for key in sorted(set(old[uuid]) | set(new[uuid])):
+            was, now = old[uuid].get(key), new[uuid].get(key)
+            if was == now or (key == "unit" and now == ledger_units.base_unit(was)):
+                continue
+            return (
+                f"restating would change {key} of series {uuid} "
+                f"({old[uuid].get('concept')}): {was!r} -> {now!r}"
+            )
+    return None
+
+
+def report_restored_runs(lines: list[str], args: argparse.Namespace) -> None:
+    """Rebuild the records of restatement runs that never reached Thesis.
+
+    Prints ``restored <run directory>`` for each, which the workflow reads to
+    commit and publish them even when the ledger has not moved. Both modes
+    call it, so a daily run with pending work heals a restatement run whose
+    marker commit failed, as the next dispatch would.
+    """
+
+    for run_dir in restore_restatement_runs(
+        lines,
+        ledger_repo=args.ledger_repo,
+        ledger_branch=args.ledger_branch,
+        write=not args.dry_run,
+    ):
+        print(
+            f"{'dry-run: would restore' if args.dry_run else 'restored'} "
+            f"{run_dir.relative_to(ROOT).as_posix()}, the records of a "
+            "restatement run that never reached Thesis"
+        )
+
+
+def refuse_a_scaled_ledger(ledger_rows: list[dict[str, Any]]) -> None:
+    """Stop the run when a current ledger row carries a scale word.
+
+    The restatement run left none, so such a row is a defect this resolver must
+    not build on: a new row in base units would give that row's series a second
+    unit.
+    """
+
+    scaled = scaled_current_rows(ledger_rows)
+    if scaled:
+        raise ledger_units.LedgerUnitError(
+            f"{len(scaled)} current ledger row(s) carry a scale word, starting "
+            f"with {scaled[0].get('source_record_id')}. --restate-base-units "
+            "restates them"
+        )
+
+
+def restate_base_units(
+    args: argparse.Namespace,
+    *,
+    producer_signing_key: str | None,
+    gate_timeout_seconds: float,
+) -> int:
+    """``--restate-base-units``: one release that restates every scaled row.
+
+    First rebuilds any restatement run whose records Thesis lacks, then
+    restates every current row in a scaled unit, all or none. The site's
+    checks run on the exact lines Chronicle will hold, the catalog preflight
+    must pass for the whole set, and the proposal merges only once
+    Chronicle's Arch checks pass too. With nothing left to restate it appends
+    nothing. It never returns EXIT_REFUSED_ROWS, so the workflow commits
+    records only after an append or a rebuild.
+    """
+
+    content, blob_sha, ledger_repo_sha = ledger_state(
+        args.ledger_repo, args.ledger_branch, args.ledger_path
+    )
+    retrieved_at = utc_now()
+    lines = [line for line in content.split("\n") if line.strip()]
+    for index, line in enumerate(lines):
+        if line != line.strip():
+            raise ledger_units.LedgerUnitError(
+                f"ledger line {index + 1} carries surrounding whitespace, which "
+                "the site trims, so no archive of it would match"
+            )
+    rows = [json.loads(line) for line in lines]
+    check_restatements(lines)
+    report_restored_runs(lines, args)
+
+    built = restatement_rows(
+        lines, retrieved_at=retrieved_at, ledger_repo_sha=ledger_repo_sha
+    )
+    if not built:
+        print("restate: no current row carries a scale word; nothing to restate")
+        return 0
+    run_dir = resolution_run_dir(retrieved_at)
+    candidates = [row for row, _ in built]
+    candidate_lines = [ledger_line(row) for row in candidates]
+    # The site's checks, on the exact bytes Chronicle will hold.
+    check_restatements(lines + candidate_lines)
+    left = scaled_current_rows(rows + [json.loads(line) for line in candidate_lines])
+    if left:
+        raise ledger_units.LedgerUnitError(
+            f"restating would leave {len(left)} current row(s) in a scaled unit"
+        )
+    moves: dict[str, int] = {}
+    for row in candidates:
+        move = f"{row['source']['recorded_unit']} -> {row['measure']['unit']}"
+        moves[move] = moves.get(move, 0) + 1
+    print(
+        f"restate: {len(candidates)} current row(s) carry a scale word ("
+        + ", ".join(f"{count} {move}" for move, count in sorted(moves.items()))
+        + ")"
+    )
+    failure = restatement_catalog_failure(
+        args.ledger_repo, ledger_repo_sha, args.ledger_path, content, candidates
+    )
+    if failure is not None:
+        print(f"RESTATEMENT REFUSED (nothing appended): {failure}")
+        return 1
+    if args.dry_run:
+        print(f"dry-run: would restate {len(candidates)} row(s)")
+        for line in candidate_lines:
+            print(f"candidate {line}")
+        return 0
+
+    run_dir.mkdir(parents=True, exist_ok=False)
+    for row, compressed in built:
+        path = ROOT / row["responseArchive"]["path"]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(compressed)
+    finalize_resolution_manifest(
+        run_dir,
+        restatement_manifest(
+            candidates, ledger_repo=args.ledger_repo, ledger_branch=args.ledger_branch
+        ),
+    )
+    updated = content.rstrip("\n") + "\n" + "\n".join(candidate_lines) + "\n"
+    merged_sha = propose_ledger_append(
+        args.ledger_repo,
+        args.ledger_branch,
+        args.ledger_path,
+        updated,
+        blob_sha,
+        ledger_repo_sha,
+        len(candidates),
+        producer_signing_key=producer_signing_key,
+        gate_timeout_seconds=gate_timeout_seconds,
+        target_contracts=registration_contracts(),
+        # Chronicle's own tests read every row; a red verdict on this one
+        # would leave its branch red for every other pull request into it.
+        arch_checks_policy=ARCH_CHECKS_POLICY_REFUSE,
+        run_url=_workflow_run_url(),
+        what="base-unit restatement(s)",
+    )
+    print(
+        f"appended {len(candidates)} observation(s) to "
+        f"{args.ledger_repo}@{args.ledger_branch}:{args.ledger_path} "
+        f"via reviewed proposal (merged at {merged_sha})"
+    )
+    return 0
 
 
 FAMILY_ADAPTERS = {
@@ -11887,6 +17619,9 @@ FAMILY_ADAPTERS = {
     # must never be resolved by a series-stem family that happens to share
     # the series name — the 2026-07-25 new-home-sales collision, where a
     # 2026-07-10 generic-url registration met a newly added ALFRED stem.
+    # A-19 has no adapter of its own: its registrations are generic-url
+    # contracts that a19_execution_spec pins field by field.
+    "a19": {"generic-url"},
     "alfred": {"alfred-fred"},
     "bea_release": {"bea-release", "bea-ita-itable"},
     "bls_api": {"bls-api"},
@@ -11896,7 +17631,9 @@ FAMILY_ADAPTERS = {
     "irs_soi_pub1304": {"irs-soi-pub1304"},
     "qcew": {"bls-qcew"},
     "sba_pdf": {SBA_BINDING_ADAPTER},
+    "ssa_official": {"ssa-official-page"},
     "usaspending": {"usaspending-api"},
+    "va_mmwr": {"va-mmwr-workbook"},
 }
 
 
@@ -11915,6 +17652,375 @@ def binding_adapter_mismatch(
     if allowed is None:
         return None
     return None if adapter in allowed else str(adapter)
+
+
+# ---------------------------------------------------------------------------
+# Registration-time execution plan
+#
+# ``register_targets.py`` used to accept any target whose binding it could
+# construct, and a seed with no adapter defaults to ``generic-url``: a page
+# address, which no adapter-routed leg of the main loop accepts
+# (docs/lanes/2026-08-03-series-ingestion-wave1.md). ``roll_docket.py`` steps
+# from the latest PUBLISHED period, so such a series kept minting targets that
+# could never resolve: 67 of the 116 forecasts overdue on 2026-09-19.
+#
+# ``execution_plan_refusal`` asks, before a NEW registration is written, the
+# question the main loop asks after the forecast is already public: would
+# this exact contract reach an admitted executor? It routes the contract's
+# dataPointId through the same router and then applies the main loop's
+# date-independent refusals in its order: resolution-date basis, emitted unit,
+# registered adapter, then the family's own predicates. It never touches the
+# network and never reads ``records/`` (the QCEW predicate reads the committed
+# docket calendar): whether the print exists yet, or the window is open, is a
+# runtime question. Whether any code could ever read it is not.
+# ---------------------------------------------------------------------------
+
+NO_EXECUTOR_ADAPTER = "generic-url"
+
+
+def _plan_binding_refusal(matches: bool, family: str) -> str | None:
+    if matches:
+        return None
+    return (
+        f"the registered sourceBinding is not the reviewed {family} template "
+        "the executor authenticates before it reads anything"
+    )
+
+
+def _plan_alfred(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    # Stricter than the main loop: the ALFRED leg keys its fetch on the
+    # stem's spec and never reads the binding, so it would resolve a contract
+    # that names another series. A new contract must name the series it will
+    # be scored against. Every ALFRED docket template already does.
+    binding = registration["contract"]["sourceBinding"]
+    if binding.get("sourceSeriesId") != spec["fred"]:
+        return (
+            f"sourceBinding.sourceSeriesId {binding.get('sourceSeriesId')!r} is "
+            f"not the ALFRED series {spec['fred']!r} this stem's executor reads"
+        )
+    return None
+
+
+def _plan_bea_release(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        bea_release_binding_matches_spec(binding, spec), "BEA release"
+    )
+    if refusal:
+        return refusal
+    window = binding.get("expectedReleaseWindow") or {}
+    if not window.get("start") or window.get("start") != window.get("end"):
+        return (
+            "the BEA executor captures only on one registered release day; "
+            f"expectedReleaseWindow {window!r} is not a one-day window"
+        )
+    return None
+
+
+def _plan_bls_api(
+    registration: Mapping[str, Any],
+    spec: Mapping[str, Any],
+    period: str,
+    *_: Any,
+) -> str | None:
+    if bls_api_binding_template(spec) is None:
+        return (
+            "this BLS API stem has no reviewed registrable binding: it resolves "
+            "only the cells that predate bindings"
+        )
+    if bls_api_verified_anchors(spec) is None:
+        return "the BLS API adapter has fewer than three verified anchors"
+    # The executor reads the month the dataPointId routes to; the calendar
+    # authenticates the month the contract names. They must be one month.
+    contract_period = registration["contract"].get("period")
+    if contract_period != period:
+        return (
+            f"the dataPointId routes to {period} but the contract's period is "
+            f"{contract_period!r}"
+        )
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        bls_api_binding_matches_spec(binding, spec), "BLS API"
+    )
+    if refusal:
+        return refusal
+    # main() refuses a resolve-by-bound target the day after its registered
+    # window closes. This executor's window is one day and its capture is
+    # bounded by the first-print gate instead: JOLTS publishes at 10:00 ET,
+    # after the daily 13:40 UTC run, so a bounded contract could never resolve.
+    basis = registration["contract"].get(
+        "resolutionDateBasis", DEFAULT_RESOLUTION_DATE_BASIS
+    )
+    if basis != DEFAULT_RESOLUTION_DATE_BASIS:
+        return (
+            f"the BLS API executor resolves only the {DEFAULT_RESOLUTION_DATE_BASIS!r} "
+            f"basis; a {basis!r} contract closes with its one-day window, before "
+            "the API can be relied on to serve the print"
+        )
+    # The API serves current estimates only, so the capture has to start on
+    # the day BLS's own schedule names; a cadence-inferred span could open
+    # before the print exists or after the next release has replaced it.
+    window = binding.get("expectedReleaseWindow") or {}
+    if not window.get("start") or window.get("start") != window.get("end"):
+        return (
+            "the BLS API executor starts capturing on one official release "
+            f"day; expectedReleaseWindow {window!r} is not a one-day window"
+        )
+    return None
+
+
+def _plan_census_spm(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if census_spm_verified_anchors(spec) is None:
+        return (
+            "the Census SPM adapter is deliberately unarmed until the six "
+            "revised-methodology anchors are verified "
+            "(docs/anchor-verifications.md)"
+        )
+    return _plan_binding_refusal(
+        census_spm_binding_matches_spec(
+            registration["contract"]["sourceBinding"], spec
+        ),
+        "Census SPM",
+    )
+
+
+def _plan_eia_dnav(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if eia_dnav_verified_anchors(spec) is None:
+        return "the EIA dnav adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        eia_dnav_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "EIA dnav",
+    )
+
+
+def _plan_fsa_crp(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if fsa_crp_verified_anchors(spec) is None:
+        return "the FSA CRP adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        fsa_crp_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "FSA CRP",
+    )
+
+
+def _plan_intl(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    # The router hands out a copy carrying two routing keys; the admission
+    # check is defined on the canonical adapter object, so judge that.
+    canonical = INTL_ADAPTERS.get(str(spec.get("target_series")))
+    if canonical is None or intl_execution_spec(dict(registration), canonical) is None:
+        mismatches = intl_binding_mismatches(
+            spec, registration["contract"]["sourceBinding"]
+        )
+        return (
+            "the registered contract is not the admitted international "
+            "adapter's exact registry template"
+            + (f" (differs in {', '.join(mismatches)})" if mismatches else "")
+        )
+    return None
+
+
+def _plan_irs_soi_pub1304(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    if irs_soi_pub1304_verified_anchors(spec) is None:
+        return "the IRS SOI adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        irs_soi_pub1304_binding_matches_spec(
+            registration["contract"]["sourceBinding"], spec
+        ),
+        "IRS SOI Publication 1304",
+    )
+
+
+def _plan_qcew(
+    registration: Mapping[str, Any],
+    spec: Mapping[str, Any],
+    period: str,
+    release_day: dt.date,
+) -> str | None:
+    if not qcew_adapter_verified(dict(spec)):
+        return "the QCEW adapter has fewer than three verified anchors"
+    return _plan_binding_refusal(
+        qcew_registration_matches_spec(
+            registration["contract"]["sourceBinding"], spec, period, release_day
+        ),
+        "QCEW",
+    )
+
+
+def _plan_sba_pdf(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], *_: Any
+) -> str | None:
+    return _plan_binding_refusal(
+        sba_pdf_binding_matches_spec(registration["contract"]["sourceBinding"], spec),
+        "SBA PDF",
+    )
+
+
+def _plan_usaspending(
+    registration: Mapping[str, Any], spec: Mapping[str, Any], period: str, *_: Any
+) -> str | None:
+    binding = registration["contract"]["sourceBinding"]
+    refusal = _plan_binding_refusal(
+        usaspending_binding_matches_spec(binding, spec), "USAspending"
+    )
+    if refusal:
+        return refusal
+    host = urllib.parse.urlparse(
+        spec["url_template"].format(fiscal_year=period)
+    ).hostname
+    if host not in (binding.get("allowedHosts") or []):
+        return f"the USAspending executor's host {host!r} is not in allowedHosts"
+    return None
+
+
+# One entry per family the router can name AND a registration can bind. A
+# family missing here refuses every new registration, so adding a family to
+# the router without deciding its admission predicate fails closed.
+EXECUTION_PLAN_FAMILY_CHECKS: dict[str, Callable[..., str | None]] = {
+    "alfred": _plan_alfred,
+    "bea_release": _plan_bea_release,
+    "bls_api": _plan_bls_api,
+    "census_spm": _plan_census_spm,
+    "eia_dnav": _plan_eia_dnav,
+    "fsa_crp": _plan_fsa_crp,
+    "intl": _plan_intl,
+    "irs_soi_pub1304": _plan_irs_soi_pub1304,
+    "qcew": _plan_qcew,
+    "sba_pdf": _plan_sba_pdf,
+    "usaspending": _plan_usaspending,
+}
+# Families that resolve only cells that predate bindings. SSA and VA MMWR
+# name adapters ``register_targets.SOURCE_ADAPTERS`` does not offer; the
+# Archive-capture A-19 leg and CMS provider data have no binding adapter at
+# all, so a target for them could only be registered as ``generic-url``.
+# Moving a family out of this set means giving it a registrable adapter, a
+# full-binding predicate above, and a first-print acquisition that needs no
+# per-period hand pin. BLS API left it on 2026-09-20, and only for the specs
+# that declare a ``binding_transform``: ``_plan_bls_api`` still refuses every
+# other stem. The six A-19 rows register through that family: a contract that
+# binds ``bls-api`` routes to it, and every other A-19 contract still routes
+# here and is refused.
+EXECUTION_PLAN_UNREGISTRABLE_FAMILIES = frozenset(
+    {"a19", "cms_provider_data", "ssa_official", "va_mmwr"}
+)
+_CLAIMS_PLAN = {
+    "initial": ("ICSA", "thousands"),
+    "continued": ("CCSA", "millions"),
+}
+
+
+def execution_plan_refusal(registration: Mapping[str, Any]) -> str | None:
+    """Why the resolver could never execute this contract, or None if it can.
+
+    ``registration`` is ``{"contract": ..., "targetContentHash": ...}``, the
+    shape ``registration_contracts`` returns. The answer is about the code
+    in this file as committed: it is offline and independent of the date.
+    """
+
+    contract = registration.get("contract")
+    binding = contract.get("sourceBinding") if isinstance(contract, dict) else None
+    if not isinstance(contract, dict) or not isinstance(binding, dict):
+        return "registration has no contract sourceBinding"
+    ref = contract.get("dataPointId")
+    window = binding.get("expectedReleaseWindow")
+    if not isinstance(ref, str) or not ref:
+        return "contract has no dataPointId"
+    if not isinstance(window, dict):
+        return "contract has no dated expectedReleaseWindow"
+    # Stricter than the main loop for the ALFRED and claims legs, which never
+    # read allowedHosts: registration always writes a sorted host list, and a
+    # contract without one is malformed whichever leg would take it.
+    hosts = binding.get("allowedHosts")
+    if not isinstance(hosts, list) or not all(isinstance(h, str) for h in hosts):
+        return "sourceBinding.allowedHosts is not a list of hosts"
+    try:
+        release_day = dt.date.fromisoformat(
+            str(contract.get("resolutionDate") or window.get("end"))
+        )
+    except ValueError:
+        return "contract has no dated expectedReleaseWindow"
+    adapter = binding.get("adapter")
+    if adapter == NO_EXECUTOR_ADAPTER:
+        # Stricter than the main loop in one place, on purpose: the weekly
+        # claims leg routes by reference id and never reads the binding, so
+        # it would resolve a generic-url claims target. Registration cannot
+        # produce one (SERIES_BINDINGS forces alfred-fred), and a contract
+        # that names no executor is refused whatever would happen to it.
+        return (
+            f"sourceBinding.adapter is {NO_EXECUTOR_ADAPTER!r}: it names a page, "
+            "not an executor, and no adapter-routed resolver leg accepts it"
+        )
+
+    # One pending link, routed by the routers the main loop uses, so this
+    # gate cannot drift from them.
+    slug = str(contract.get("catalogSlug") or ref)
+    log = {
+        "entries": [
+            {
+                "kind": "prediction_recorded",
+                "forecastSlug": slug,
+                "resolutionDate": release_day.isoformat(),
+                "unit": contract.get("unit"),
+            }
+        ],
+        "resolutionLinks": [
+            {"status": "pending", "targetFactRef": ref, "forecastSlug": slug}
+        ],
+    }
+    claims = pending_claims_refs(log)
+    if claims:
+        fred_id, unit = _CLAIMS_PLAN[claims[0][2]]
+        if adapter != "alfred-fred" or binding.get("sourceSeriesId") != fred_id:
+            return (
+                f"the weekly claims executor reads ALFRED {fred_id}; the binding "
+                f"names adapter {adapter!r}, series "
+                f"{binding.get('sourceSeriesId')!r}"
+            )
+        if contract.get("unit") != unit:
+            return (
+                f"the weekly claims executor emits {unit!r}; the contract "
+                f"registers {contract.get('unit')!r}"
+            )
+        return None
+    routes = pending_adapter_refs(log, registrations={ref: registration})
+    if not routes:
+        return f"no resolver family routes dataPointId {ref!r}"
+    _, kind, spec, _, period, _, forecast = routes[0]
+    # The main loop's first refusal: a bounded family executes only a
+    # contract that registers its resolve-by-bound basis, and the reverse.
+    _, basis_refusal = effective_resolution_date_basis(ref, registration, spec)
+    if basis_refusal:
+        return f"resolution-date basis mismatch: {basis_refusal}"
+    if not adapter_unit_matches(spec, forecast):
+        return (
+            f"the {kind} executor emits {spec['unit']!r}; the contract registers "
+            f"{contract.get('unit')!r}"
+        )
+    mismatched = binding_adapter_mismatch(kind, dict(registration))
+    if mismatched:
+        return (
+            f"registered adapter {mismatched!r} is not one the {kind} family "
+            f"resolves ({sorted(FAMILY_ADAPTERS[kind])})"
+        )
+    check = EXECUTION_PLAN_FAMILY_CHECKS.get(kind)
+    if check is None:
+        return (
+            f"the {kind} family has no registration-time admission predicate, "
+            "so it cannot accept new registrations"
+        )
+    return check(registration, spec, period, release_day)
 
 
 def resolution_run_dir(retrieved_at: str) -> pathlib.Path:
@@ -11938,8 +18044,15 @@ def finalize_resolution_manifest(
     refs: list[dict[str, Any]] = []
     rooted: list[dict[str, Any]] = []
     seen_paths: set[str] = set()
-    for fact in manifest["facts"]:
-        archive = fact["responseArchive"]
+    archives = [
+        archive
+        for fact in manifest["facts"]
+        for archive in (
+            fact["responseArchive"],
+            *(item["responseArchive"] for item in fact.get("firstPrintEvidence", [])),
+        )
+    ]
+    for archive in archives:
         path = repository / archive["path"]
         relative = path.resolve().relative_to(run_dir.resolve()).as_posix()
         ref = {
@@ -11951,7 +18064,8 @@ def finalize_resolution_manifest(
         }
         # Several facts can legitimately share one archived response (two
         # dataPointId dialects of the same series resolve from the same
-        # vintage bytes); the inventory lists each archive exactly once.
+        # vintage bytes, and a claims evidence read can be another fact's
+        # response); the inventory lists each archive exactly once.
         if ref["path"] in seen_paths:
             continue
         seen_paths.add(ref["path"])
@@ -12006,7 +18120,29 @@ def finalize_resolution_manifest(
     return manifest
 
 
+# resolution_status.py reads both lines. Without the first, the run stopped
+# (a timeout, a cancellation, a crash) before every routed reference had its
+# verdict line, so a reference with no line was not reached rather than
+# passed over. Without the second, main() never returned.
+RESOLUTION_LOOP_COMPLETE = "resolution loop complete:"
+RESOLVER_FINISHED = "resolver finished with exit code"
+# resolution_alert.py names the faults behind this line in the issue a
+# refused-rows run opens: a daily run that cannot rebuild the records of a
+# restatement run resolves the rest and exits EXIT_REFUSED_ROWS.
+RESTORE_REFUSED = "RESTORE REFUSED (resolving the rest):"
+
+
 def main() -> int:
+    """Run the resolver, then say it returned (resolution_status.py reads it).
+
+    A run that crashes prints its traceback instead, and one that is
+    cancelled prints nothing more, so neither can be read as finished."""
+    code = _main()
+    print(f"{RESOLVER_FINISHED} {code}")
+    return code
+
+
+def _main() -> int:
     # Remove the secret before any network client or subprocess can inherit it.
     # The value remains only as an in-memory string until proposal signing.
     producer_signing_key = os.environ.pop(PRODUCER_SIGNING_KEY_ENV, None)
@@ -12015,46 +18151,92 @@ def main() -> int:
     parser.add_argument("--ledger-repo", default="PolicyEngine/chronicle")
     parser.add_argument("--ledger-branch", default="codex/thesis-ledger-facts")
     parser.add_argument("--ledger-path", default="ledger/official_observations.jsonl")
+    parser.add_argument(
+        "--append-gate-timeout-minutes",
+        type=float,
+        default=None,
+        help=(
+            "wall-clock minutes to wait for the chronicle append gates "
+            f"(default: ${APPEND_GATE_TIMEOUT_ENV}, else "
+            f"{DEFAULT_APPEND_GATE_TIMEOUT_MINUTES:g})"
+        ),
+    )
+    parser.add_argument(
+        "--restate-base-units",
+        action="store_true",
+        help=(
+            "restate every current ledger row in a scaled unit in base units, "
+            "in one release, or rebuild a restatement run's missing records; "
+            "resolve nothing"
+        ),
+    )
     args = parser.parse_args()
+    # Resolve and validate the budget before any fetch, so a bad value fails
+    # the run at startup instead of after the TSA round trip.
+    gate_timeout_seconds = append_gate_timeout_seconds(
+        args.append_gate_timeout_minutes, os.environ
+    )
+    if args.restate_base_units:
+        return restate_base_units(
+            args,
+            producer_signing_key=producer_signing_key,
+            gate_timeout_seconds=gate_timeout_seconds,
+        )
 
     log = load_thesis_log(LOG_URL)
     todo = pending_claims_refs(log)
     adapter_todo = pending_adapter_refs(log)
     if not todo and not adapter_todo:
         print("no pending adapter-covered cells")
+        print(f"{RESOLUTION_LOOP_COMPLETE} 0 reference(s) examined")
         return 0
 
     content, sha, ledger_repo_sha = ledger_state(
         args.ledger_repo, args.ledger_branch, args.ledger_path
     )
-    existing_ids = {
-        json.loads(line)["source_record_id"]
-        for line in content.splitlines()
-        if line.strip()
-    }
+    ledger_rows = [json.loads(line) for line in content.splitlines() if line.strip()]
+    existing_ids = {row["source_record_id"] for row in ledger_rows}
+    # Like corrections, this rides on runs with pending work: a run with
+    # none exits above, before reading the ledger. A records, ledger or
+    # custody fault costs no resolutions: the run reports it, resolves the
+    # rest, and exits EXIT_REFUSED_ROWS, so the workflow publishes what it
+    # appended and then fails the job. The restore removes a run directory
+    # it built in part, so the next run starts clean. Anything else (a full
+    # disk, a bug) still stops the run.
+    restore_refusals: list[str] = []
+    try:
+        report_restored_runs(
+            [line for line in content.split("\n") if line.strip()], args
+        )
+    except (ledger_units.LedgerUnitError, CustodyError) as exc:
+        _refuse_restore(exc, restore_refusals)
+    refuse_a_scaled_ledger(ledger_rows)
+    # References refused because their fact would give a Chronicle lineage a
+    # second unit. The rest of the run still appends; the run then exits
+    # EXIT_REFUSED_ROWS, the refused-rows status the workflow publishes past.
+    ledger_unit_refusals: list[str] = []
 
     fetched_rows: list[tuple[dict[str, Any], str, str, bytes, str, str]] = []
     today = dt.date.today()
+    claims_vintages = ClaimsVintages()
     for ref, week, kind, source_vintage in todo:
         if ref in existing_ids:
             print(f"  already recorded: {ref}")
             continue
-        release_day = dt.date.fromisoformat(source_vintage)
-        if release_day > today:
-            print(f"  release {release_day} not reached: {ref}")
-            continue
-        series_id = "ICSA" if kind == "initial" else "CCSA"
-        value, raw, _source_url, retrieved_at = fred_advance_value(
-            series_id, week, release_day.isoformat()
+        fetched = resolve_claims_ref(
+            ref, week, kind, source_vintage, today, claims_vintages
         )
-        if value is None or raw is None:
-            print(f"  not yet published: {ref}")
-            continue
-        row = claims_fact(ref, week, value, kind, release_day)
-        fetched_rows.append(
-            (row, series_id, release_day.isoformat(), raw, retrieved_at, "csv")
-        )
-        print(f"  resolve {ref} -> {row['value']} {row['measure']['unit']}")
+        if fetched is not None:
+            fetched_rows.append(fetched)
+    # Superseding first-print rows for claims rows read from a later release.
+    correction_rows, claims_supersedes, claims_correction_refusals = claims_corrections(
+        ledger_rows, claims_vintages
+    )
+    fetched_rows.extend(correction_rows)
+    for line in claims_correction_refusals:
+        print(f"  CLAIMS CORRECTION REFUSED (refusing): {line}")
+    # A refused correction is a reviewed table that no longer matches the
+    # ledger: the rest of the run still appends, then exits EXIT_REFUSED_ROWS.
 
     # Generic adapters: official BEA current releases, ALFRED vintage series,
     # BLS API series, A-19 snapshot rows, international native sources, and
@@ -12093,6 +18275,19 @@ def main() -> int:
     ] = {}
     qcew_contracts: dict[str, dict[str, Any]] | None = None
     a19_cache: dict[str, tuple[dict[str, float], bytes | None, str, str]] = {}
+    a19_discovered: dict[str, tuple[str | None, bytes | None, str]] = {}
+    a19_capture_requested = False
+    a19_reads: dict[str, tuple[bytes, str]] = {}
+
+    def a19_wayback_read(url: str) -> tuple[bytes, str]:
+        # One read per stored capture per run, whether a pin or discovery
+        # asks; index queries and capture requests are never memoised.
+        if "id_/" not in url:
+            return _wayback_read(url)
+        if url not in a19_reads:
+            a19_reads[url] = _wayback_read(url)
+        return a19_reads[url]
+
     intl_cache: dict[Any, tuple] = {}
     # International requests are checked against the immutable registered
     # contract before any network call. Existing registrations whose source
@@ -12103,9 +18298,15 @@ def main() -> int:
     # download per distribution URL, shared across cells on the same file.
     cms_metastore_cache: dict[str, tuple[str, str, str] | None] = {}
     cms_csv_cache: dict[str, bytes | None] = {}
-    sba_timeline_cache: Mapping[str, Any] | None = None
-    sba_timeline_error: str | None = None
-    sba_timeline_loaded = False
+    # VA MMWR: one landing-page read per run; workbooks cached per URL so
+    # anchors and targets that share a week download once.
+    va_landing: tuple[bytes, str] | None = None
+    va_landing_failed = False
+    va_workbook_cache: dict[str, tuple[bytes, dict[str, str], str, str]] = {}
+    # SSA official pages: one headless-browser capture per URL per run.
+    ssa_capture_cache: dict[str, Any] = {}
+    ssa_browser_unavailable: str | None = None
+    sba_timeline = _MemoizedTimeline(ROOT / "records")
     loop_contracts = registration_contracts()
     for ref, kind, spec, period_type, period, source_vintage, forecast in adapter_todo:
         qcew_row: dict[str, Any] | None = None
@@ -12133,13 +18334,36 @@ def main() -> int:
         # A registered-query snapshot likewise uses resolutionDate as the
         # window's conservative end; its USAspending leg must be allowed to
         # capture the first snapshot from the registered window's start.
+        # SSA editions are per-period pages: the edition's existence is the
+        # release evidence and the cells' resolutionDate is a declared
+        # outer by-date, so the family may capture as soon as the edition
+        # is posted (a missing edition defers on HTTP 404).
+        is_edition_page = (
+            kind == "ssa_official" and spec.get("release_evidence") == "edition_page"
+        )
+        # A registered A-19 cell's custody must be captured while its window
+        # is open, and its resolutionDate is the window's END: gating on that
+        # date would leave one attempt, on the last day. The leg defers on its
+        # own until the window opens.
+        is_a19_window = kind == "a19" and registration is not None
         if (
             release_day > today
             and resolution_date_basis == DEFAULT_RESOLUTION_DATE_BASIS
             and not is_registered_query_snapshot
+            and not is_edition_page
+            and not is_a19_window
         ):
             print(f"  release {release_day} not reached: {ref}")
             continue
+        if kind == "a19":
+            a19_spec, a19_refusal = a19_execution_spec(spec, registration)
+            if a19_spec is None:
+                print(
+                    "  BINDING/ADAPTER MISMATCH (refusing, registered A-19 "
+                    f"contract differs in {a19_refusal}): {ref}"
+                )
+                continue
+            spec = a19_spec
         unit = (forecast or {}).get("unit")
         if not adapter_unit_matches(spec, forecast):
             print(
@@ -12230,24 +18454,11 @@ def main() -> int:
         sba_resolution: SbaPdfResolution | None = None
         archive_vintage = release_day.isoformat()
         if kind == "sba_pdf":
-            if not sba_timeline_loaded:
-                try:
-                    sba_timeline_cache = extract_timeline(ROOT / "records")
-                except (OSError, TimelineError, ValueError) as exc:
-                    sba_timeline_error = str(exc)
-                sba_timeline_loaded = True
-            if sba_timeline_error is not None:
-                print(
-                    f"  {SBA_CUSTODY_INVALID} witnessed record timeline does "
-                    f"not verify: {sba_timeline_error}"
-                )
-                continue
-            assert sba_timeline_cache is not None
             sba_resolution, refusal = resolve_sba_pdf_first_print(
                 ROOT / "records",
                 series=spec["series_id"],
                 fiscal_year=int(period),
-                timeline=sba_timeline_cache,
+                timeline_loader=sba_timeline,
             )
             if refusal:
                 if refusal.startswith(SBA_PARSER_REFUSAL):
@@ -12579,6 +18790,32 @@ def main() -> int:
             extension = "csv"
         elif kind == "bls_api":
             series_id = spec["series_id"]
+            registered_binding = ((registration or {}).get("contract") or {}).get(
+                "sourceBinding"
+            ) or {}
+            registrable = bls_api_binding_template(spec) is not None
+            if registrable or registered_binding.get("adapter") == (
+                BLS_API_BINDING_ADAPTER
+            ):
+                # The specs that predate bindings keep resolving cells that
+                # have no registration. A registrable spec does not: it
+                # resolves only a target that registers the reviewed template,
+                # so a reference with no contract is never fetched for.
+                if not bls_api_binding_matches_spec(registered_binding, spec):
+                    print(
+                        "  BINDING/ADAPTER MISMATCH (refusing, no registered "
+                        f"bls-api binding or seven-key registry drift): {ref}"
+                    )
+                    continue
+                # Refused before the keyless request is spent, and only this
+                # reference: every other row in the run still appends.
+                unit_conflict = bls_ledger_unit_conflict(
+                    ledger_rows, spec["series_stem"], spec
+                )
+                if unit_conflict:
+                    print(f"  LEDGER UNIT CONFLICT (refusing): {ref} — {unit_conflict}")
+                    ledger_unit_refusals.append(f"{ref}: {unit_conflict}")
+                    continue
             bls_key = (
                 series_id,
                 spec["anchor_start_year"],
@@ -12593,7 +18830,7 @@ def main() -> int:
             if period_type == "year":
                 mismatches = bls_annual_anchor_mismatches(rows, spec["anchors"])
             else:
-                mismatches = bls_anchor_mismatches(rows, spec["anchors"])
+                mismatches = bls_spec_anchor_mismatches(rows, spec)
             if mismatches:
                 print(
                     f"  ANCHOR MISMATCH (refusing, wrong series?): {ref} "
@@ -12603,10 +18840,31 @@ def main() -> int:
             if period_type == "year":
                 value, refusal = bls_annual_first_print(rows, period)
             else:
-                value, refusal = bls_first_print(rows, period)
+                value, refusal = bls_first_print(
+                    rows,
+                    period,
+                    spec.get("first_print_gate", "latest_preliminary"),
+                )
             if refusal:
                 print(f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — {refusal}")
                 continue
+            if period_type == "year":
+                if value is not None and ("scale" in spec or "round" in spec):
+                    value = (
+                        round(value * spec.get("scale", 1), spec.get("round", 4)) + 0.0
+                    )
+            elif value is not None:
+                # The gate above judged the target month's own row. Scaling,
+                # rounding and any one-month change are applied only now: LAUS
+                # serves persons for a catalog in thousands, and a derived
+                # change also needs the preceding month.
+                value, transform_refusal = bls_transformed_value(rows, spec, period)
+                if transform_refusal:
+                    print(
+                        f"  BLS TRANSFORM REFUSAL (refusing): {ref} — "
+                        f"{transform_refusal}"
+                    )
+                    continue
             # The API has no vintage archive, so the capture day IS the
             # source vintage; the latest+preliminary gate above bounds it
             # inside the first-print window.
@@ -12948,6 +19206,404 @@ def main() -> int:
             source_file = fetched_url
             series_id = spec["series_id"]
             extension = "json"
+        elif kind == "va_mmwr":
+            report_date = dt.date.fromisoformat(period)
+            if va_landing is None and not va_landing_failed:
+                try:
+                    landing_raw, _headers, landing_retrieved_at, _final = (
+                        va_mmwr_http_get(va_mmwr.LANDING_URL)
+                    )
+                    va_landing = (landing_raw, landing_retrieved_at)
+                except Exception as exc:  # noqa: BLE001 - defer, don't crash
+                    print(
+                        "  VA MMWR landing page fetch failed (deferring): "
+                        f"{ref} — {exc}"
+                    )
+                    va_landing_failed = True
+            if va_landing is None:
+                continue
+            landing_raw, landing_retrieved_at = va_landing
+            anchor_captures: list[VaMmwrCapture] = []
+            anchor_problem: str | None = None
+            for anchor_date, expected in sorted(spec["anchors"].items()):
+                try:
+                    anchor_capture, anchor_refusal = va_mmwr_capture_report(
+                        landing_raw,
+                        dt.date.fromisoformat(anchor_date),
+                        va_workbook_cache,
+                    )
+                except Exception as exc:  # noqa: BLE001 - defer, don't crash
+                    anchor_problem = f"anchor {anchor_date} fetch failed: {exc}"
+                    break
+                if anchor_refusal or anchor_capture is None:
+                    anchor_problem = f"anchor {anchor_date}: {anchor_refusal}"
+                    break
+                if anchor_capture.reading.pending != expected:
+                    anchor_problem = (
+                        f"anchor {anchor_date}={anchor_capture.reading.pending} "
+                        f"(recorded {expected})"
+                    )
+                    break
+                anchor_captures.append(anchor_capture)
+            if anchor_problem:
+                print(
+                    f"  ANCHOR MISMATCH (refusing, wrong VA workbook cell?): {ref} — "
+                    f"{anchor_problem}"
+                )
+                continue
+            try:
+                target_capture, target_refusal = va_mmwr_capture_report(
+                    landing_raw, report_date, va_workbook_cache
+                )
+            except Exception as exc:  # noqa: BLE001 - defer, don't crash
+                print(f"  VA MMWR workbook fetch failed (deferring): {ref} — {exc}")
+                continue
+            if target_refusal or target_capture is None:
+                if (
+                    target_refusal
+                    and "expected exactly one report link" in target_refusal
+                ):
+                    print(f"  not yet published (deferring): {ref} — {target_refusal}")
+                elif target_refusal and "re-post" in target_refusal:
+                    print(
+                        "  FIRST-PRINT WINDOW MISSED (refusing): "
+                        f"{ref} — {target_refusal}"
+                    )
+                else:
+                    print(
+                        f"  VA MMWR PARSE REFUSAL (refusing): {ref} — {target_refusal}"
+                    )
+                continue
+            low, high = spec["sanity_range"]
+            if not low <= target_capture.reading.pending <= high:
+                print(
+                    f"  VA MMWR PARSE REFUSAL (refusing): {ref} — pending "
+                    f"{target_capture.reading.pending} outside sanity range "
+                    f"[{low}, {high}]"
+                )
+                continue
+            value = (
+                round(target_capture.reading.pending * spec["scale"], spec["round"])
+                + 0.0
+            )
+            raw = va_mmwr_capture_envelope(
+                spec=spec,
+                landing_raw=landing_raw,
+                landing_retrieved_at=landing_retrieved_at,
+                target=target_capture,
+                anchors=anchor_captures,
+                value=value,
+            )
+            # The workbook's Last-Modified (UTC day) is the posting vintage
+            # the gate just authenticated as first; the capture stamp is the
+            # fetch time.
+            release_day = target_capture.last_modified.astimezone(
+                dt.timezone.utc
+            ).date()
+            source_url = target_capture.workbook_url
+            source_file = posixpath.basename(target_capture.href)
+            series_id = spec["series_id"]
+            retrieved_at = target_capture.retrieved_at
+            extension = "json"
+            period_type, period = "week_ending", target_capture.file_date.isoformat()
+            spec = {
+                **spec,
+                "evidence_notes": spec["evidence_notes"].replace(
+                    "{period}", report_date.isoformat()
+                ),
+            }
+        elif kind == "ssa_official":
+            if ssa_browser_unavailable:
+                print(
+                    "  SSA BROWSER ENVIRONMENT FAILURE (fatal): "
+                    f"{ref} — {ssa_browser_unavailable}"
+                )
+                environment_failures.append(f"{ref}: {ssa_browser_unavailable}")
+                continue
+            try:
+                from official_browser_fetch import (
+                    BrowserFetchError,
+                    BrowserFetchUnavailableError,
+                    browser_fetch,
+                )
+            except ImportError as exc:  # pragma: no cover - module ships with the repo
+                ssa_browser_unavailable = f"official_browser_fetch import failed: {exc}"
+                print(
+                    "  SSA BROWSER ENVIRONMENT FAILURE (fatal): "
+                    f"{ref} — {ssa_browser_unavailable}"
+                )
+                environment_failures.append(f"{ref}: {ssa_browser_unavailable}")
+                continue
+
+            def ssa_capture(url: str) -> tuple[Any | None, str | None]:
+                """(capture, refusal) from the per-run browser cache."""
+                nonlocal ssa_browser_unavailable
+                if url in ssa_capture_cache:
+                    return ssa_capture_cache[url], None
+                try:
+                    capture = browser_fetch(url, allowed_hosts=SSA_ALLOWED_HOSTS)
+                except BrowserFetchUnavailableError as exc:
+                    ssa_browser_unavailable = str(exc)
+                    return None, f"environment: {exc}"
+                except BrowserFetchError as exc:
+                    return None, f"fetch failed: {exc}"
+                ssa_capture_cache[url] = capture
+                return capture, None
+
+            if spec["reader"] == "oho_workload_xml":
+                # Rolling URL: authenticate the reporting period from the
+                # file itself, falling back to the earliest Wayback capture
+                # that carries the target period once the live file rolled.
+                url = ssa_period_url(spec, period)
+                capture, capture_refusal = ssa_capture(url)
+                if capture is None:
+                    if capture_refusal and capture_refusal.startswith("environment"):
+                        print(
+                            "  SSA BROWSER ENVIRONMENT FAILURE (fatal): "
+                            f"{ref} — {capture_refusal}"
+                        )
+                        environment_failures.append(f"{ref}: {capture_refusal}")
+                    else:
+                        print(
+                            "  SSA OHO fetch failed (deferring): "
+                            f"{ref} — {capture_refusal}"
+                        )
+                    continue
+                try:
+                    workload = ssa_official_pages.oho_workload_file(capture.body)
+                except ssa_official_pages.SsaPageError as exc:
+                    print(f"  SSA OHO PARSE REFUSAL (refusing): {ref} — {exc}")
+                    continue
+                period_end = workload.reporting_period_end
+                witnessed: dict[str, Any] = {"status": "live", "captures": []}
+                if period_end.strftime("%Y-%m") != period:
+                    if period_end.strftime("%Y-%m") < period:
+                        print(
+                            f"  not yet published (deferring): {ref} — live workload "
+                            f"file still reports through {period_end}"
+                        )
+                        continue
+
+                    # Rolled past the target: the first print survives only
+                    # as an external capture.
+                    def _period_capture(body: bytes) -> int:
+                        candidate = ssa_official_pages.oho_workload_file(body)
+                        if candidate.reporting_period_end.strftime("%Y-%m") != period:
+                            raise ssa_official_pages.SsaPageError(
+                                "capture reports through "
+                                f"{candidate.reporting_period_end}"
+                            )
+                        return int(candidate.reporting_period_end.strftime("%Y%m%d"))
+
+                    witnessed = ssa_wayback_corroboration(url, _period_capture)
+                    corroborating = witnessed.get("corroboratingCapture")
+                    if not corroborating:
+                        print(
+                            f"  FIRST-PRINT WINDOW MISSED (refusing): {ref} — the live "
+                            f"workload file now reports through {period_end} and no "
+                            f"Wayback capture carries the {period} reporting period "
+                            f"(status {witnessed.get('status')})"
+                        )
+                        continue
+                    # The corroboration above already fetched this capture
+                    # inside its own best-effort guard. This second fetch had
+                    # none, so one refused connection to web.archive.org
+                    # ended the whole run before anything it had resolved
+                    # was appended (2026-09-01, 09-02 and 09-06). Transport
+                    # failures defer this target; the run goes on.
+                    try:
+                        body = ssa_official_pages.wayback_capture_body(
+                            corroborating["timestamp"], url, ssa_wayback_fetch
+                        )
+                    except (OSError, EOFError, http.client.HTTPException) as exc:
+                        print(
+                            f"  WAYBACK FETCH FAILED (deferring): {ref} — capture "
+                            f"{corroborating['timestamp']} could not be re-read: "
+                            f"{type(exc).__name__}: {str(exc)[:200]}"
+                        )
+                        print(
+                            "::warning title=Resolver source unreachable::"
+                            f"{ref} deferred: web.archive.org capture "
+                            f"{corroborating['timestamp']} could not be re-read"
+                        )
+                        continue
+                    workload = ssa_official_pages.oho_workload_file(body)
+                    witnessed["resolvedFrom"] = {
+                        "timestamp": corroborating["timestamp"],
+                        "url": corroborating["url"],
+                        "sha256": hashlib.sha256(body).hexdigest(),
+                        "bodyBase64": base64.b64encode(body).decode(),
+                    }
+                national, national_note = (
+                    ssa_official_pages.oho_national_average_processing_time(workload)
+                )
+                if national is None:
+                    print(
+                        f"  SOURCE PUBLISHES NO NATIONAL AGGREGATE (refusing): {ref} — "
+                        f"{national_note}; the cell's resolver names a figure its "
+                        "bound "
+                        "source does not print, so it cannot resolve mechanically"
+                    )
+                    continue
+                low, high = spec["sanity_range"]
+                if not low <= national <= high:
+                    print(
+                        f"  SSA OHO PARSE REFUSAL (refusing): {ref} — national APT "
+                        f"{national} outside sanity range [{low}, {high}]"
+                    )
+                    continue
+                value = float(national)
+                raw = ssa_capture_envelope(
+                    spec=spec,
+                    period=period,
+                    capture=capture,
+                    reading=None,
+                    raw_value=national,
+                    value=value,
+                    anchors=[],
+                    wayback=witnessed,
+                    extra={
+                        "reportingPeriodEnd": period_end.isoformat(),
+                        "created": workload.created,
+                        "rows": len(workload.rows),
+                    },
+                )
+                release_day = dt.date.fromisoformat(capture.retrieved_at[:10])
+                source_url = url
+                source_file = posixpath.basename(urlparse(url).path)
+                series_id = spec["series_id"]
+                retrieved_at = capture.retrieved_at
+                extension = "json"
+            else:
+                anchor_records: list[dict[str, Any]] = []
+                anchor_problem = None
+                for anchor_period, expected in sorted(spec["anchors"].items()):
+                    anchor_url = ssa_period_url(spec, anchor_period)
+                    anchor_capture, anchor_refusal = ssa_capture(anchor_url)
+                    if anchor_capture is None:
+                        anchor_problem = f"anchor {anchor_period}: {anchor_refusal}"
+                        break
+                    try:
+                        anchor_reading = ssa_read_value(
+                            spec, anchor_capture.body, anchor_period
+                        )
+                    except ssa_official_pages.SsaPageError as exc:
+                        anchor_problem = f"anchor {anchor_period} unreadable: {exc}"
+                        break
+                    if anchor_reading.value != expected:
+                        anchor_problem = (
+                            f"anchor {anchor_period}={anchor_reading.value} "
+                            f"(recorded {expected})"
+                        )
+                        break
+                    anchor_records.append(
+                        {
+                            "period": anchor_period,
+                            **anchor_capture.response_record(),
+                            "expected": expected,
+                            "observed": anchor_reading.value,
+                            "identities": list(anchor_reading.identities),
+                        }
+                    )
+                if anchor_problem:
+                    if "environment" in anchor_problem:
+                        print(
+                            "  SSA BROWSER ENVIRONMENT FAILURE (fatal): "
+                            f"{ref} — {anchor_problem}"
+                        )
+                        environment_failures.append(f"{ref}: {anchor_problem}")
+                    elif "fetch failed" in anchor_problem:
+                        print(
+                            "  SSA anchor fetch failed (deferring): "
+                            f"{ref} — {anchor_problem}"
+                        )
+                    else:
+                        print(
+                            "  ANCHOR MISMATCH (refusing, wrong SSA table cell?): "
+                            f"{ref} — "
+                            f"{anchor_problem}"
+                        )
+                    continue
+                url = ssa_period_url(spec, period)
+                capture, capture_refusal = ssa_capture(url)
+                if capture is None:
+                    if capture_refusal and capture_refusal.startswith("environment"):
+                        print(
+                            "  SSA BROWSER ENVIRONMENT FAILURE (fatal): "
+                            f"{ref} — {capture_refusal}"
+                        )
+                        environment_failures.append(f"{ref}: {capture_refusal}")
+                    elif capture_refusal and "HTTP 404" in capture_refusal:
+                        print(
+                            "  not yet published (deferring): "
+                            f"{ref} — {capture_refusal}"
+                        )
+                    else:
+                        print(
+                            "  SSA page fetch failed (deferring): "
+                            f"{ref} — {capture_refusal}"
+                        )
+                    continue
+                try:
+                    reading = ssa_read_value(spec, capture.body, period)
+                except ssa_official_pages.SsaPageError as exc:
+                    print(f"  SSA PAGE PARSE REFUSAL (refusing): {ref} — {exc}")
+                    continue
+                low, high = spec["sanity_range"]
+                if not low <= reading.value <= high:
+                    print(
+                        f"  SSA PAGE PARSE REFUSAL (refusing): {ref} — {reading.value} "
+                        f"outside sanity range [{low}, {high}]"
+                    )
+                    continue
+                wayback = ssa_wayback_corroboration(
+                    url, lambda body: ssa_read_value(spec, body, period).value
+                )
+                corroborating = wayback.get("corroboratingCapture")
+                if corroborating and corroborating["value"] != reading.value:
+                    print(
+                        "  WAYBACK CAPTURE DISAGREES (refusing, page revised in "
+                        "place?): "
+                        f"{ref} — live {reading.value} vs capture "
+                        f"{corroborating['timestamp']} {corroborating['value']}"
+                    )
+                    continue
+                value = ssa_scaled_value(spec, reading.value)
+                raw = ssa_capture_envelope(
+                    spec=spec,
+                    period=period,
+                    capture=capture,
+                    reading=reading,
+                    raw_value=reading.value,
+                    value=value,
+                    anchors=anchor_records,
+                    wayback=wayback,
+                )
+                release_day = dt.date.fromisoformat(capture.retrieved_at[:10])
+                source_url = url
+                source_file = posixpath.basename(urlparse(url).path)
+                series_id = spec["series_id"]
+                retrieved_at = capture.retrieved_at
+                extension = "json"
+                corroboration_note = (
+                    f"the earliest Wayback Machine capture of the same page "
+                    f"({corroborating['capturedAt']}) reads the same value"
+                    if corroborating
+                    else "no Wayback Machine capture of the page exists to corroborate"
+                )
+                spec = {
+                    **spec,
+                    "evidence_notes": (
+                        "First print for {period} captured from the edition's own "
+                        "page {source_url} through a declared headless-browser "
+                        "transport (ssa.gov refuses non-browser clients); the page "
+                        "title and table caption name the edition, the parsed row "
+                        "and column are label-anchored, the table's own row/column "
+                        "sums reproduce the published totals, and the prior "
+                        "edition's anchor value was re-read from its page at capture "
+                        f"time; {corroboration_note}."
+                    ),
+                }
         elif kind == "cms_provider_data":
             metastore_key = spec["metastore_url"]
             if metastore_key not in cms_metastore_cache:
@@ -13230,28 +19886,97 @@ def main() -> int:
             source_file = "registered query snapshot (USAspending API v2)"
             extension = "json"
         else:
-            snapshot_url = A19_SNAPSHOT_URLS.get(period)
+            utc_today = dt.date.fromisoformat(utc_now()[:10])
+            window = source_binding.get("expectedReleaseWindow")
+            if registration:
+                # A registered cell's custody is the EARLIEST capture dated
+                # inside the window its contract registered, so it always
+                # comes from the Archive's index, walked in order; a hand pin
+                # could name a later capture, or one outside the window.
+                # Nothing is requested before the window opens. Cells of one
+                # month can register different windows, so discovery is per
+                # (month, window). One capture request per run.
+                discovery_key = f"{period}@{canonical_sha256(window)}"
+                if discovery_key not in a19_discovered:
+                    a19_discovered[discovery_key] = a19_registered_capture(
+                        period,
+                        window,
+                        utc_today,
+                        a19_wayback_read,
+                        request_capture=not a19_capture_requested,
+                    )
+                    if A19_CAPTURE_REQUESTED in a19_discovered[discovery_key].verdict:
+                        a19_capture_requested = True
+                discovery = a19_discovered[discovery_key]
+                snapshot_url, discovered_raw = discovery.url, discovery.raw
+                if not snapshot_url or discovered_raw is None:
+                    print(f"  A-19 {discovery.verdict}: {ref}")
+                    continue
+                if a19_cache.get(snapshot_url, (None, None))[1] is None:
+                    # Also replaces a failed fetch of the same capture by an
+                    # unregistered cell earlier in this run.
+                    a19_cache[snapshot_url] = (
+                        a19_values_from_html(discovered_raw.decode(errors="replace")),
+                        discovered_raw,
+                        snapshot_url,
+                        utc_now(),
+                    )
+            else:
+                # Cells that predate registration have no window; they keep
+                # the reviewed per-month pins.
+                snapshot_url = A19_SNAPSHOT_URLS.get(period)
             if not snapshot_url:
                 print(f"  no A-19 snapshot registered for {period}: {ref}")
                 continue
-            if period not in a19_cache:
+            capture = a19_capture(snapshot_url)
+            if capture is None or capture[1] != A19_SOURCE_URL:
+                print(f"  A-19 SNAPSHOT PIN INVALID (refusing): {ref} — {snapshot_url}")
+                continue
+            if snapshot_url not in a19_cache:
                 retrieved_at = utc_now()
                 try:
-                    with urllib.request.urlopen(snapshot_url, timeout=120) as r:
-                        raw_html = r.read()
-                    a19_cache[period] = (
-                        a19_values_from_html(raw_html.decode()),
+                    raw_html = a19_read_capture(snapshot_url, a19_wayback_read)
+                    a19_cache[snapshot_url] = (
+                        a19_values_from_html(raw_html.decode(errors="replace")),
                         raw_html,
                         snapshot_url,
                         retrieved_at,
                     )
-                except urllib.error.HTTPError as exc:
-                    print(f"  A-19 snapshot fetch failed ({exc}): {ref}")
-                    a19_cache[period] = ({}, None, snapshot_url, retrieved_at)
-            values, raw, source_url, retrieved_at = a19_cache[period]
+                except (*_WAYBACK_READ_ERRORS, A19CaptureError) as exc:
+                    print(
+                        f"  A-19 snapshot fetch failed (deferring): {ref} — "
+                        f"{type(exc).__name__}: {str(exc)[:200]}"
+                    )
+                    a19_cache[snapshot_url] = ({}, None, snapshot_url, retrieved_at)
+            values, raw, source_url, retrieved_at = a19_cache[snapshot_url]
+            if raw is None:
+                continue
+            printed = a19_snapshot_period(raw.decode(errors="replace"))
+            if printed != period:
+                print(
+                    f"  A-19 SNAPSHOT PERIOD MISMATCH (refusing): {ref} — "
+                    f"the capture prints {printed}, not {period}"
+                )
+                continue
             value = values.get(spec["a19_row"])
+            if value is not None and "scale" in spec:
+                value = round(value * spec["scale"], spec["round"]) + 0.0
+            if registration:
+                # The publisher's date this row can vouch for is the day the
+                # Archive saw the page, not the forecast's resolutionDate,
+                # which for these contracts is the window's end.
+                release_day = capture[0].date()
             series_id = f"cpseea19-{spec['a19_row']}"
-            source_file = "cpseea19.htm (Wayback snapshot)"
+            source_file = f"cpseea19.htm (Wayback capture {capture[0]:%Y%m%d%H%M%S}"
+            if registration and discovery.witness:
+                # The earliest print is a row the Archive lists with the
+                # same digest that was not read and identified at its own
+                # timestamp; the capture named first supplied the bytes.
+                source_file += (
+                    f"; the Archive's index lists the same digest at "
+                    f"{discovery.witness}, {discovery.witness_reason}"
+                )
+            source_file += ")"
             extension = "html"
         if value is None or raw is None:
             print(f"  not yet published: {ref}")
@@ -13272,6 +19997,17 @@ def main() -> int:
         elif kind == "qcew":
             assert qcew_row is not None
             row = qcew_row
+        elif kind == "a19":
+            row = a19_fact(
+                ref,
+                spec,
+                period_type,
+                period,
+                value,
+                release_day,
+                source_url,
+                source_file,
+            )
         else:
             row = generic_fact(
                 ref,
@@ -13283,6 +20019,14 @@ def main() -> int:
                 source_url,
                 source_file,
             )
+            if kind == "va_mmwr":
+                # The cell is keyed by the Monday report date; the workbook
+                # by its Saturday data-through date. Name both.
+                row["label"] = (
+                    f"{spec['label']}, report {report_date.isoformat()} "
+                    f"(data through {period})"
+                )
+                row["source_row_keys"] = [report_date.isoformat(), period]
         fetched_rows.append(
             (
                 row,
@@ -13295,6 +20039,10 @@ def main() -> int:
         )
         print(f"  resolve {ref} -> {row['value']} {row['measure']['unit']}")
 
+    print(
+        f"{RESOLUTION_LOOP_COMPLETE} {len(todo) + len(adapter_todo)} "
+        "reference(s) examined"
+    )
     if environment_failures:
         print(
             "environment failures left admitted references unresolvable "
@@ -13305,12 +20053,20 @@ def main() -> int:
         return 1
     if not fetched_rows:
         print("nothing new to record")
-        return 0
+        return _report_run_refusals(
+            ledger_unit_refusals, claims_correction_refusals, restore_refusals
+        )
     if args.dry_run:
         print(f"dry-run: would append {len(fetched_rows)} row(s)")
+        print(
+            "dry-run: each row below shows what its adapter parsed; the writer "
+            "stores it in its unit's base unit"
+        )
         for row, *_ in fetched_rows:
             print(json.dumps(row)[:200])
-        return 0
+        return _report_run_refusals(
+            ledger_unit_refusals, claims_correction_refusals, restore_refusals
+        )
 
     run_retrieved_at = min(item[4] for item in fetched_rows)
     run_dir = resolution_run_dir(run_retrieved_at)
@@ -13318,21 +20074,48 @@ def main() -> int:
     target_contracts = registration_contracts()
     new_rows = []
     provenance_refusals: list[str] = []
+    claims_evidence_archives: dict[str, list[dict[str, Any]]] = {}
     for row, series_id, vintage, raw, retrieved_at, extension in fetched_rows:
         try:
-            new_rows.append(
-                attach_resolution_provenance(
-                    row,
-                    run_dir=run_dir,
-                    series_id=series_id,
-                    vintage=vintage,
-                    raw=raw,
-                    retrieved_at=retrieved_at,
-                    ledger_repo_sha=ledger_repo_sha,
-                    target_contracts=target_contracts,
-                    extension=extension,
-                )
+            attached = attach_resolution_provenance(
+                row,
+                run_dir=run_dir,
+                series_id=series_id,
+                vintage=vintage,
+                raw=raw,
+                retrieved_at=retrieved_at,
+                ledger_repo_sha=ledger_repo_sha,
+                target_contracts=target_contracts,
+                extension=extension,
             )
+            record_id = str(row.get("source_record_id"))
+            evidence = claims_vintages.evidence.get(record_id)
+            if evidence:
+                # The reads behind a claims first print: the day before DOL's
+                # release (twice) and the day after it.
+                claims_evidence_archives[record_id] = [
+                    {
+                        "role": role,
+                        "vintageDate": day.isoformat(),
+                        "retrievedAt": evidence_retrieved_at,
+                        "responseArchive": archive_response(
+                            run_dir,
+                            series_id=series_id,
+                            vintage=day.isoformat(),
+                            raw=evidence_raw,
+                        ),
+                    }
+                    for role, day, evidence_raw, evidence_retrieved_at in evidence
+                ]
+            supersedes = claims_supersedes.get(record_id)
+            if supersedes:
+                # The version id is a content address that excludes this
+                # link, so setting it after provenance keeps the id valid.
+                attached["assertionVersion"] = {
+                    **attached["assertionVersion"],
+                    "supersedes": supersedes,
+                }
+            new_rows.append(attached)
         except ValueError as exc:
             # One target's contract refusal must not hold every other
             # resolution hostage (the 2026-07-23/25 outages): append the
@@ -13341,11 +20124,22 @@ def main() -> int:
             ref = str(row.get("source_record_id", "?"))
             provenance_refusals.append(f"{ref}: {exc}")
             print(f"  PROVENANCE REFUSED (excluded from append): {ref} — {exc}")
+    # The same rule for the ledger's catalog: a row Chronicle's generator
+    # refuses on its own (a unit conflict with its lineage) is excluded and
+    # reported, and the rest are appended.
+    new_rows = apply_catalog_refusals(
+        new_rows,
+        ledger_catalog_refusals(
+            args.ledger_repo, ledger_repo_sha, args.ledger_path, content, new_rows
+        ),
+        provenance_refusals,
+        claims_evidence_archives,
+    )
     if not new_rows:
         print("every fetched row was refused; nothing to append")
         for line in provenance_refusals:
             print(f"  refused: {line}")
-        return 1
+        return EXIT_REFUSED_ROWS
 
     updated = (
         content.rstrip("\n")
@@ -13358,6 +20152,15 @@ def main() -> int:
         {
             "schemaVersion": "thesis_resolution_run_v1",
             "retrievedAt": run_retrieved_at,
+            # Every weekly claims fact carries the ALFRED reads its first
+            # print rests on; verify_custody refuses one without them.
+            "firstPrintEvidenceRequired": True,
+            # Provenance only: the DOL schedule the run decided with.
+            # Custody re-derives release days from the reviewed table.
+            "weeklyClaimsSchedule": {
+                "source": WEEKLY_CLAIMS_SCHEDULE_URL,
+                "releaseExceptions": dict(WEEKLY_CLAIMS_RELEASE_EXCEPTIONS),
+            },
             "ledgerRepo": args.ledger_repo,
             "ledgerBranch": args.ledger_branch,
             "ledgerRepoSha": ledger_repo_sha,
@@ -13368,6 +20171,20 @@ def main() -> int:
                     "retrievedAt": row["retrievedAt"],
                     "targetContentHash": row.get("targetContentHash"),
                     "responseArchive": row["responseArchive"],
+                    **(
+                        {"supersedes": row["assertionVersion"]["supersedes"]}
+                        if row["assertionVersion"].get("supersedes")
+                        else {}
+                    ),
+                    **(
+                        {
+                            "firstPrintEvidence": claims_evidence_archives[
+                                row["source_record_id"]
+                            ]
+                        }
+                        if row["source_record_id"] in claims_evidence_archives
+                        else {}
+                    ),
                 }
                 for row in new_rows
             ],
@@ -13382,6 +20199,9 @@ def main() -> int:
         ledger_repo_sha,
         len(new_rows),
         producer_signing_key=producer_signing_key,
+        gate_timeout_seconds=gate_timeout_seconds,
+        target_contracts=target_contracts,
+        run_url=_workflow_run_url(),
     )
     print(
         f"appended {len(new_rows)} observation(s) to "
@@ -13390,11 +20210,14 @@ def main() -> int:
     )
     if provenance_refusals:
         print(
-            f"{len(provenance_refusals)} row(s) refused contract binding; "
-            "appended the rest — fix the registrations above"
+            f"{len(provenance_refusals)} row(s) refused contract binding or the "
+            "ledger's series catalog; appended the rest — fix the registrations "
+            "or curate the ledger's lineages named above"
         )
-        return 1
-    return 0
+        return EXIT_REFUSED_ROWS
+    return _report_run_refusals(
+        ledger_unit_refusals, claims_correction_refusals, restore_refusals
+    )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,393 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-02T18:35:37Z",
+  "runStartedAt": "2026-09-02T18:35:37Z",
+  "sealedAt": "2026-09-02T18:38:12Z",
+  "series": "ons.production.total_index",
+  "period": "2026-07",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "uk-production-output-index-july-2026",
+    "country": "UK",
+    "dataPointId": "ons.production.total_index.2026_07.first_print",
+    "expectedReleaseDate": "2026-09-11",
+    "expectedReleaseWindow": {
+      "end": "2026-09-11",
+      "start": "2026-09-11"
+    },
+    "period": "2026-07",
+    "registeredAt": "2026-09-02T18:31:06Z",
+    "registeredAtUtc": "2026-09-02T18:31:06Z",
+    "registrationCommit": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+    "registrationState": "preregistered",
+    "resolutionSourceUrl": "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/indexofproduction",
+    "series": "ons.production.total_index",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.ons.gov.uk"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-09-11",
+        "start": "2026-09-11"
+      },
+      "field": "Total Production : Sections B, C, D and E (Index):CVM",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "L2KQ",
+      "sourceUrl": "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/indexofproduction",
+      "table": "Index of Production time series (DIOP)",
+      "transform": {
+        "factor": 1,
+        "operation": "identity"
+      }
+    },
+    "sourceField": "Total Production : Sections B, C, D and E (Index):CVM",
+    "sourceSeriesId": "L2KQ",
+    "sourceTable": "Index of Production time series (DIOP)",
+    "targetContentHash": "ac5b9a119c865fcf52c49a16a8e8598a8318cdd6bf67a9446158dbb5a666e37a",
+    "targetRegistrationPath": "records/targets/2026-09-02-ac5b9a119c865fcf52c49a16a8e8598a8318cdd6bf67a9446158dbb5a666e37a.json",
+    "targetUnit": "index_points",
+    "transform": {
+      "factor": 1,
+      "operation": "identity"
+    },
+    "valueScale": 1
+  },
+  "registrationCommit": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+  "targetContentHash": "ac5b9a119c865fcf52c49a16a8e8598a8318cdd6bf67a9446158dbb5a666e37a",
+  "targetRegistrationPath": "records/targets/2026-09-02-ac5b9a119c865fcf52c49a16a8e8598a8318cdd6bf67a9446158dbb5a666e37a.json",
+  "registeredAtUtc": "2026-09-02T18:31:06Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-02T18:35:37Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "c3b41504a6bbe5f14d4934facb9ec6c67b43064989e6981b5a5c36d4cdc1c0d2"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "The draft sets resolutionSourceUrl to the K222 time-series page, while the ledger contract requires https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/indexofproduction.",
+        "actionRequested": "Set resolutionSourceUrl to the ledger resolutionSourceUrl exactly; keep the K222/L2KQ discrepancy explanation in reasoning or sourceContext rather than changing the target resolver field."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Make the resolver text explicitly name the ledger dataset/table field alongside the K222 evidence page to reduce ambiguity."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Keep the L2KQ-vs-K222 discrepancy visible, but avoid implying the cell has changed the registered target."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking resolver fix by restoring resolutionSourceUrl to the registered ONS Index of Production dataset URL and making the resolver text explicitly name the DIOP table field; kept the K222/L2KQ discrepancy visible as source-grounding context without changing the registered target.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver fix by restoring resolutionSourceUrl to the registered ONS Index of Production dataset URL and making the resolver text explicitly name the DIOP table field; kept the K222/L2KQ discrepancy visible as source-grounding context without changing the registered target.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver fix by restoring resolutionSourceUrl to the registered ONS Index of Production dataset URL and making the resolver text explicitly name the DIOP table field; kept the K222/L2KQ discrepancy visible as source-grounding context without changing the registered target.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is mostly publication-ready, but its JSON resolver URL conflicts with the canonical ledger target contract."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/prompt.md",
+      "sha256": "685c4d6f3e63de380936feb0d485972ee3834cab4e7acee0f60c4fefbb182f23",
+      "bytes": 10665,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_command.json",
+      "sha256": "f6e9677655bffd5e4076794a6b0bf7a02d0b958bba382070bf4cfba629036ec5",
+      "bytes": 756,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_stdout.jsonl",
+      "sha256": "ca2a8efc7acfec6d46de96c47bc262077d4a7e897917c7b02ec966b9a801f5d1",
+      "bytes": 26658,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_stderr.log",
+      "sha256": "0d7297e19fa6485c967f31ebd6e2af236e7de669bcf8ddcdb63c43efe5a106ed",
+      "bytes": 233,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_events.jsonl",
+      "sha256": "c495493c7eb8750030cf89c95ba050c7a1c4a56b8dda0053f63df85280cb45e2",
+      "bytes": 26736,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_last_message.txt",
+      "sha256": "ef08947c9c3d2baffb664bbd93c9ee7e9e04f5727152b41c15b70a505f638384",
+      "bytes": 6747,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_codex_trace.json",
+      "sha256": "dde1a16836cb184dc17a08ad379aa78ea439bdea6c26984179acebac01d54c92",
+      "bytes": 560,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_stdout.txt",
+      "sha256": "ef08947c9c3d2baffb664bbd93c9ee7e9e04f5727152b41c15b70a505f638384",
+      "bytes": 6747,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/draft_stderr.txt",
+      "sha256": "f3dbf0c90081face1cd346be8066e7c685855879601380f6ae06b68b50ff0787",
+      "bytes": 248,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_prompt.md",
+      "sha256": "85084feac60689884765d768df295e4d552c6f9f8b00a643f07568814385935e",
+      "bytes": 10148,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_command.json",
+      "sha256": "0543e29af12592b2229268be69ec7e772929fd2a6315e3b9b2908dd950a9bff3",
+      "bytes": 752,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "d6473a1d3adef127619a06f0466fc704429bd94990165b3f4c7450d8e612f6ff",
+      "bytes": 1209,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_stderr.log",
+      "sha256": "51e4a644ddcab2fc15ccd00a8ae50d415ab3dcd8d8734aa720c108c7ccd90885",
+      "bytes": 233,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_events.jsonl",
+      "sha256": "b8f6fc88664a33b28fb668c244dfc5b93d819539a11d8b53a165e019cd669739",
+      "bytes": 1231,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_last_message.txt",
+      "sha256": "c70494a71d91d4ae3e672d1ee60daffe92c4d7490419fce83915056ba42ad4c2",
+      "bytes": 867,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_codex_trace.json",
+      "sha256": "f87c0fe841a582b5ca1149dc74b2f8c8b050932521f2b371e570e06a5051e8a3",
+      "bytes": 552,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_stdout.txt",
+      "sha256": "c70494a71d91d4ae3e672d1ee60daffe92c4d7490419fce83915056ba42ad4c2",
+      "bytes": 867,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/pre_submit_review_stderr.txt",
+      "sha256": "4e2674a07b81d4197fa479f1b2606f4dd9634d87aabe3e6b2617e284e1f54ee4",
+      "bytes": 248,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/revision_prompt.md",
+      "sha256": "f16021ab4ab5e3bceccb72b0a67b0c8295dbb7c28545ecf7c3713894332b0b78",
+      "bytes": 19215,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/command.json",
+      "sha256": "2c31ed03cea7d509bc3f5554c149ae4aeaac7772584e285b145cc7463a5ddc6d",
+      "bytes": 750,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_stdout.jsonl",
+      "sha256": "07fc9e1e1d5857834b042b3b5341adbae7f507d17e1dbb2390f233d31efbe1e7",
+      "bytes": 8075,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_stderr.log",
+      "sha256": "92d8f63a66b40e40761ee91bfb15ed5aad36b0f8f2817b092f0ec963cbdc5143",
+      "bytes": 233,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_events.jsonl",
+      "sha256": "990d3e41777e4fa76a52e0a3d9c9914f5191cf6946c954a938baae5719ca6f82",
+      "bytes": 8097,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_last_message.txt",
+      "sha256": "533b6acb49bfadfa24b5ab6c858a575a7fd7a7d66ca29f422195c9285564f684",
+      "bytes": 7355,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/codex_trace.json",
+      "sha256": "ac15100986a368b6c61c3f0016181694ab08dc57a8c5c75f8f99e6dea7978493",
+      "bytes": 551,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/stdout.txt",
+      "sha256": "533b6acb49bfadfa24b5ab6c858a575a7fd7a7d66ca29f422195c9285564f684",
+      "bytes": 7355,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/stderr.txt",
+      "sha256": "0921f5d8e2d502ead3561f12436df6105207515c647e594b5a8cecb7cf72f188",
+      "bytes": 248,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/raw_response.txt",
+      "sha256": "533b6acb49bfadfa24b5ab6c858a575a7fd7a7d66ca29f422195c9285564f684",
+      "bytes": 7355,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/parsed_cells.json",
+      "sha256": "b1100ec6519ebc8b6fd7e8058921b648ad0e31e4278ab45ab6eb952794a4fb1b",
+      "bytes": 9006,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/normalized_cells.json",
+      "sha256": "193bae9aa999bf3a46c5180a4325bcd6fb08dd8621bdf56cfde3811338d07f93",
+      "bytes": 26525,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/distribution.json",
+      "sha256": "64afaf4b78f5ede47be4ce494d74ac29c4cdf79b80e698dea7d7a1b64cbf15d8",
+      "bytes": 13735,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/validation.json",
+      "sha256": "0d11465a36dfcd1d885f7f431e19bb84568d55354a5f61b3198586bc3437d859",
+      "bytes": 137,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/cells.with_activity.json",
+      "sha256": "6929f9ab688449c7401c9472a050058a4e6a3beac600475960afae11a6f4f882",
+      "bytes": 41150,
+      "createdAt": "2026-09-02T18:35:37Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/manifest.json",
+      "sha256": "59c44d93219f453056578095ff813591edc3010fdc93de7c0277539f6ddc6ec1",
+      "bytes": 15251,
+      "createdAt": "2026-09-02T18:35:37Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "uk-production-output-index-july-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "269fd2f8ce2b2c77fc31d7cacf25a3b8813b117cb424c91bbf886d03dfc0af91"
+}

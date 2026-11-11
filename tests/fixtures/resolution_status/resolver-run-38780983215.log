@@ -1,0 +1,51 @@
+  release 2026-10-18 not reached: dol.eta.continued_claims.sa.week_2026-09-26.first_print
+  release 2026-11-06 not reached: bls.ces.nonfarm_payrolls.change.2026_10.first_print
+  release 2026-11-16 not reached: statcan.cpi.allitems.yoy.2026_10.first_print
+  release 2026-12-01 not reached: bls.jolts.job_openings.2026_10.first_print
+  release 2026-12-01 not reached: bls.jolts.quits_rate.2026_10.first_print
+  release 2026-12-23 not reached: statcan.gdp_by_industry.monthly_growth.2026_10.first_print
+  resolve bls.cps.employed_people_by_occupation.transportation_material_moving.september_2026.first_print -> 12.318 millions
+  A-19 CAPTURE READ FAILED (deferring): https://web.archive.org/web/20261002184214/https://www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError: <urlopen error [Errno 111] Connection refused>), and an unread earlier capture cannot be skipped: bls.cps.employed_people_by_occupation.computer_mathematical.september_2026.first_print
+  A-19 CAPTURE READ FAILED (deferring): https://web.archive.org/web/20261002184214/https://www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError: <urlopen error [Errno 111] Connection refused>), and an unread earlier capture cannot be skipped: bls.cps.employed_people_by_occupation.healthcare_support.september_2026.first_print
+  resolve bls.cps.employed_people_by_occupation.production.september_2026.first_print -> 7.775 millions
+  A-19 WAYBACK INDEX FETCH FAILED (deferring): URLError: <urlopen error [Errno 111] Connection refused>: bls.cps.employed_people_by_occupation.business_financial_operations.september_2026.first_print
+  A-19 WAYBACK INDEX FETCH FAILED (deferring): URLError: <urlopen error [Errno 111] Connection refused>: bls.cps.employed_people_by_occupation.office_administrative_support.september_2026.first_print
+  release 2026-10-19 not reached: statcan.cpi.allitems.yoy.2026_09.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a ssa_official family): ssa.ssi.total_recipients.2026-09.first_print
+  release 2026-11-30 not reached: statcan.gdp_by_industry.monthly_growth.2026_09.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cps.unemployment_rate.september_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cpi.u.headline_mom.september_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cpi.u.core_mom.september_2026.first_print
+  release 2026-10-29 not reached: us.bea.core_pce.mom_sa.2026-09
+  release 2026-11-02 not reached: bls.jolts.quits_rate.2026-09.first_print
+  release 2026-11-03 not reached: bls.jolts.job_openings.september_2026.first_print
+  release 2026-10-29 not reached: bea.private_nonresidential_fixed_investment.2026_q3.first_print
+  release 2026-10-29 not reached: bea.research_and_development_fixed_investment.2026_q3.first_print
+  RELEASE WINDOW NOT OPEN (deferring): usda.fsa.crp.enrolled_acres_total.2027_09.first_print.ceiling_27_million_source_recovered_2026_08_13 — opens 2027-12-01
+  RELEASE WINDOW NOT OPEN (deferring): usda.fsa.crp.enrolled_acres_total.2027_09.first_print.no_fy2027_31_ceiling_source_recovered_2026_08_13 — opens 2027-12-01
+  not yet published: eia.ng.vented_flared.us.annual.2025.first_print
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted — opens 2027-10-15
+  A-19 CAPTURE READ FAILED (deferring): https://web.archive.org/web/20260904170006/https://www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError: <urlopen error [Errno 111] Connection refused>), and an unread earlier capture cannot be skipped: bls.cps.employed_people_by_occupation.computer_mathematical.august_2026.first_print
+  A-19 CAPTURE READ FAILED (deferring): https://web.archive.org/web/20260904170006/https://www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError: <urlopen error [Errno 111] Connection refused>), and an unread earlier capture cannot be skipped: bls.cps.employed_people_by_occupation.office_administrative_support.august_2026.first_print
+  SNAPSHOT WINDOW NOT OPEN (deferring): usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa — opens 2027-10-15
+  A-19 CAPTURE READ FAILED (deferring): https://web.archive.org/web/20260904170006/https://www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError: <urlopen error [Errno 111] Connection refused>), and an unread earlier capture cannot be skipped: bls.cps.employed_people_by_occupation.healthcare_support.august_2026.first_print
+  A-19 WAYBACK INDEX FETCH FAILED (deferring): URLError: <urlopen error [Errno 111] Connection refused>: bls.cps.employed_people_by_occupation.production.august_2026.first_print
+  A-19 WAYBACK INDEX FETCH FAILED (deferring): URLError: <urlopen error [Errno 111] Connection refused>: bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026.first_print
+  A-19 CAPTURE READ FAILED (deferring): https://web.archive.org/web/20260904170006/https://www.bls.gov/web/empsit/cpseea19.htm could not be read (URLError: <urlopen error [Errno 111] Connection refused>), and an unread earlier capture cannot be skipped: bls.cps.employed_people_by_occupation.business_financial_operations.august_2026.first_print
+  FIRST-PRINT WINDOW MISSED (refusing): bea.ita.personal_transfer_payments.2026_q2.first_print — registered release day was 2026-09-24
+  FIRST-PRINT WINDOW MISSED (refusing): statcan.cpi.allitems.yoy.2026_08.first_print
+  FIRST-PRINT WINDOW MISSED (refusing): abs.labour.unemployment_rate.2026_08.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a ssa_official family): ssa.ssi.total_recipients.2026-08.first_print
+  release 2026-10-30 not reached: statcan.gdp_by_industry.monthly_growth.2026_08.first_print
+  resolve usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot -> -7.91746189 usd_millions
+  IMPLAUSIBLE VALUE (refusing, wrong series/transform?): usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot -> 0.26486353
+  resolve usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot -> 54.56300403 usd_millions
+  resolve usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot -> -30.07719821 usd_millions
+  resolve usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot -> 400.1 billions USD
+  resolve usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot -> 390.4 billions USD
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cps.unemployment_rate.august_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cpi.u.headline_mom.august_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.cpi.u.core_mom.august_2026.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a bls_api family): bls.jolts.quits_rate.2026-08.first_print
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): us.bea.core_pce.mom_sa.2026-08
+  BINDING/ADAPTER MISMATCH (skipping, registered adapter='generic-url' is not a alfred family): bls.jolts.job_openings.august_2026.first_print

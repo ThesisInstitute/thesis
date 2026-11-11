@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-09-30T18:35:13Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "598f394d797728f298cdd405099419a00ce94e18",
+  "facts": [
+    {
+      "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-12.first_print",
+      "sourceVintage": "2026-09-30",
+      "retrievedAt": "2026-09-30T18:35:13Z",
+      "targetContentHash": "a9fff83718fdc4ddf079ad54fafe085940047485c1554591da145d1399d98f4e",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-30/2026-09-30t18-35-13z-resolve-pending/responses/ccsa-2026-09-30-cac813a91196edeb.csv.gz",
+        "sha256": "cac813a91196edebb2a4120c022d8bad4deb6f51bddaae0b04f49ff7c1da7725",
+        "bytes": 59239,
+        "gzipSha256": "84046d3c8ad62ba88c5a5a46f37368314cc56cc24b1f069cacdc9b5ee344687f",
+        "gzipBytes": 15674,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "abs.cpi.all_groups.yoy.2026_08.first_print",
+      "sourceVintage": "2026-09-30",
+      "retrievedAt": "2026-09-30T18:37:59Z",
+      "targetContentHash": "650c901b54d028abbe844a2bbf05bb06f0c149744ffc369a6d6e96214936ac3b",
+      "responseArchive": {
+        "path": "records/resolutions/2026-09-30/2026-09-30t18-35-13z-resolve-pending/responses/abs-cpi-allgroups-yoy-2026-09-30-f92e56ba79a66b04.json.gz",
+        "sha256": "f92e56ba79a66b04bc888fba7449b8fd63c21ea4c352a04e668b49f688ebb7cc",
+        "bytes": 7276,
+        "gzipSha256": "e57c61bc2ffeeb73cd612b83b0ce2f95811dcff193e9cc9b8422f203d06cef53",
+        "gzipBytes": 2013,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-30/2026-09-30t18-35-13z-resolve-pending/responses/ccsa-2026-09-30-cac813a91196edeb.csv.gz",
+      "sha256": "84046d3c8ad62ba88c5a5a46f37368314cc56cc24b1f069cacdc9b5ee344687f",
+      "bytes": 15674,
+      "createdAt": "2026-09-30T18:35:13Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-09-30/2026-09-30t18-35-13z-resolve-pending/responses/abs-cpi-allgroups-yoy-2026-09-30-f92e56ba79a66b04.json.gz",
+      "sha256": "e57c61bc2ffeeb73cd612b83b0ce2f95811dcff193e9cc9b8422f203d06cef53",
+      "bytes": 2013,
+      "createdAt": "2026-09-30T18:35:13Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-09-30/2026-09-30t18-35-13z-resolve-pending/manifest.json",
+      "sha256": "90d8a3ac5552831914fdee32a4aa1d67a2e16389b0c31dc8564feb413dbc6358",
+      "bytes": 2197,
+      "createdAt": "2026-09-30T18:35:13Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "b236cc2bfa4c6ba6b3fc7a0d615a2cb65f03ce9b3c1e4c627ef7a488431bf9fe"
+}

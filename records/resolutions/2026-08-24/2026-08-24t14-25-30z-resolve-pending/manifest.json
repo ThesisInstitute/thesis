@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-08-24T14:25:30Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "c2aa68deb17f72977a4fd0e96089b28be44a24c2",
+  "facts": [
+    {
+      "dataPointId": "us.dol.initial_claims.sa.week_2026-08-15",
+      "sourceVintage": "2026-08-24",
+      "retrievedAt": "2026-08-24T14:25:30Z",
+      "targetContentHash": "ba7909136ce260dfbd43442621dd88fdef9abd8d2b02c81dfcb114251a76b8bd",
+      "responseArchive": {
+        "path": "records/resolutions/2026-08-24/2026-08-24t14-25-30z-resolve-pending/responses/icsa-2026-08-24-cd3bc37094c9fce3.csv.gz",
+        "sha256": "cd3bc37094c9fce3ab215d7f3f932e2fb4867e4586d0cf85e0d961ee35ac95a0",
+        "bytes": 56049,
+        "gzipSha256": "55d8b9f7ca19736b3bb55a364708e45064c8cfa83b028a51ccc4ca91b7c72430",
+        "gzipBytes": 13666,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-08-24/2026-08-24t14-25-30z-resolve-pending/responses/icsa-2026-08-24-cd3bc37094c9fce3.csv.gz",
+      "sha256": "55d8b9f7ca19736b3bb55a364708e45064c8cfa83b028a51ccc4ca91b7c72430",
+      "bytes": 13666,
+      "createdAt": "2026-08-24T14:25:30Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-08-24/2026-08-24t14-25-30z-resolve-pending/manifest.json",
+      "sha256": "9b0a7cb5a196bcd29d9bef074442b487de10f67fa66d73a6800b40c893029abf",
+      "bytes": 1286,
+      "createdAt": "2026-08-24T14:25:30Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "d3a4d508ee66e30b184c2143c467a0fec0700edfb399d20e5d5a8f3ab93bf9e7"
+}

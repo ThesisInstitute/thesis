@@ -1,0 +1,4 @@
+{"type": "thread.started", "thread_id": "01a06dd5-1ae5-7351-b3ba-1af63a369e96"}
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "{\"summary\":\"The draft is publication-ready on resolver, prior/update logic, interval construction, tails, and field coherence; I found no blocking fixes.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Clarify the phrase about August payroll revisions: the August Employment Situation first print revises prior months, not August itself.\",\"Consider adding the exact BLS Table A-1 label to sourceContext or reasoning for easier auditability.\"]}"}}
+{"type": "turn.completed", "usage": {"input_tokens": 19365, "cached_input_tokens": 9600, "output_tokens": 607, "reasoning_output_tokens": 516}}

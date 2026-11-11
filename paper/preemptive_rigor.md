@@ -1573,7 +1573,7 @@ difference — is listed as future work.
 ## Code availability
 
 All code for running stability-under-probing experiments is available at
-<https://github.com/ThesisInstitute/thesis> under an open-source license. The
+<https://github.com/ThesisInstitute/thesis> under the MIT license. The
 repository includes the complete experiment infrastructure, analysis
 pipeline, and raw results. To reproduce the experiments, install the
 package with `pip install -e ".[dev]"` and run

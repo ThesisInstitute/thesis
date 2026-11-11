@@ -1,0 +1,1242 @@
+[
+  {
+    "slug": "canada-monthly-gdp-growth-september-2026",
+    "country": "CA",
+    "type": "data",
+    "title": "Canada monthly GDP growth, September 2026",
+    "question": "Statistics Canada Table 36-10-0434-01, all industries real GDP by industry, seasonally adjusted at annual rates, September 2026 first-print month-over-month percent growth computed from vector v65201210 levels.",
+    "unit": "percent_growth",
+    "pointEstimate": 0.2,
+    "ciLow": -0.1,
+    "ciHigh": 0.5,
+    "confidence": 0.8,
+    "resolutionDate": "2026-11-30",
+    "resolutionSource": "Statistics Canada Table 36-10-0434-01, vector v65201210",
+    "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+    "resolutionRule": "Resolve to the first Statistics Canada print for September 2026 using vector v65201210 in Table 36-10-0434-01, all industries, Canada, chained 2017 dollars, seasonally adjusted at annual rates. Compute the month-over-month percent change from the August 2026 and September 2026 levels at that release vintage, round to one decimal percentage point, and ignore later revisions or later table updates.",
+    "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_09.first_print",
+    "historicalContext": [
+      {
+        "label": "January 2026",
+        "value": 0.1,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "February 2026",
+        "value": 0.2,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "March 2026",
+        "value": -0.1,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 0.5,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 0.3,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 0.3,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      }
+    ],
+    "drivers": [
+      "Recent first-print monthly GDP growth averaged about 0.22%.",
+      "June 2026 was a third consecutive monthly gain, but July advance information was essentially unchanged.",
+      "Goods-sector volatility and resource-sector maintenance argue for a wide interval.",
+      "Services and public-sector activity provide a modest positive baseline."
+    ],
+    "sourceContext": [
+      "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+      "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+      "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm?HPA=1",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm"
+    ],
+    "runAt": "2026-09-07T20:22:46Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast for Canada September 2026 monthly GDP by industry growth"
+      },
+      {
+        "kind": "text",
+        "text": "Resolver: Statistics Canada Table 36-10-0434-01, all industries, chained 2017 dollars, seasonally adjusted at annual rates, vector v65201210. The target is the September 2026 first print, computed as the percent change from the August level to the September level at the first release vintage. Statistics Canada's 2026 release dates and the registered source binding put this release on 2026-11-30."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read Statistics Canada The Daily releases for January, February, and March 2026 GDP by industry.",
+        "result": "Fetched first-print monthly changes from Table 36-10-0434-01 releases: January 2026 0.1%, February 2026 0.2%, March 2026 -0.1%; the March release also said first-quarter GDP by industry edged up 0.1%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read Statistics Canada The Daily releases for April, May, and June 2026 GDP by industry.",
+        "result": "Fetched first-print monthly changes from Table 36-10-0434-01 releases: April 2026 0.5%, May 2026 0.3%, June 2026 0.3%; the June release said 13 of 20 sectors grew and services-producing industries rose 0.4% while goods-producing industries edged down 0.1%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Read the latest Statistics Canada June 2026 release for advance and sector context, using the same GDP by industry variant.",
+        "result": "Fetched advance information: real GDP was essentially unchanged in July 2026, after June 2026 official monthly growth of 0.3%; May 2026 had an advance estimate of 0.2% for June before the official June print came in at 0.3%; second-quarter 2026 GDP by industry rose 0.9%."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate/reference class: the six latest official first-print monthly changes available before this forecast are 0.1%, 0.2%, -0.1%, 0.5%, 0.3%, and 0.3%, all from the same seasonally adjusted real GDP by industry variant. Their mean is 0.2167%, so the outside-view base rate is a low-positive monthly gain near 0.2%."
+      },
+      {
+        "kind": "text",
+        "text": "Level, momentum, one-off, and policy-mechanism effects: the level path through June was improving after March weakness; momentum is positive but likely fading because StatCan's July advance was essentially unchanged; one-off boosts from census-related public administration and deferred resource maintenance may not persist into September; policy and rate effects should lean mildly restrictive rather than recessionary."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence/base-rate prior uses the six official first-print monthly growth values [0.1, 0.2, -0.1, 0.5, 0.3, 0.3], mean = 0.2167; no separate AR/model prior is used because the available same-series first-print pre-forecast sample is short. Adjustments are -0.05 for July advance stagnation, +0.02 for services/public-sector resilience, and -0.01 for one-off Q2 resource/public boosts fading, giving 0.1767, rounded to a 0.2 point forecast. For a change/flow series, compute dispersion from the values themselves: sample sigma = sqrt(sum((x - 0.2167)^2) / 5) = 0.204. The 80% half-width is about 1.28*sigma = 1.28*0.204 = 0.261; centered on 0.1767 gives [-0.084, 0.438], rounded to one-decimal target precision and slightly padded to [-0.1, 0.5]."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-consideration: upside risk would come from a broad September rebound in manufacturing, wholesale, and resource extraction after a flat July; downside risk would come from renewed resource-sector outages, weaker housing-linked services, or tariff-sensitive manufacturing weakness. Treating the 80% interval as inclusive at the rounded endpoints, a monthly print above 0.5% or below -0.1% would land outside the interval."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted both optional reviewer suggestions by explicitly naming the six-month same-series first-print mean as the time-series prior with no separate AR/model prior, and by clarifying that outside-the-interval language treats the rounded endpoints as inclusive."
+      },
+      {
+        "kind": "forecast",
+        "point": 0.2,
+        "ciLow": -0.1,
+        "ciHigh": 0.5
+      }
+    ],
+    "agentReportedRunAt": "2026-09-07T20:20:40Z",
+    "runStartedAt": "2026-09-07T20:20:29Z",
+    "promptMode": "fast",
+    "registrationCommit": "f1baea413714fe099f71118840f6363977fcdb5c",
+    "targetContentHash": "5e66b8f80f1cc6a1847b0462471dc202581372c8d08b343f174d5679b35c89ba",
+    "targetRegistrationPath": "records/targets/2026-09-07-5e66b8f80f1cc6a1847b0462471dc202581372c8d08b343f174d5679b35c89ba.json",
+    "registeredAtUtc": "2026-09-07T20:04:45Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": -0.55,
+        "upper": 0.95
+      },
+      "points": [
+        {
+          "value": -0.55,
+          "probability": 0.0
+        },
+        {
+          "value": -0.5425,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": -0.535,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": -0.5275,
+          "probability": 0.005
+        },
+        {
+          "value": -0.52,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": -0.5125,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": -0.505,
+          "probability": 0.01
+        },
+        {
+          "value": -0.4975,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": -0.49,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": -0.4825,
+          "probability": 0.015
+        },
+        {
+          "value": -0.475,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": -0.4675,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": -0.46,
+          "probability": 0.02
+        },
+        {
+          "value": -0.4525,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": -0.445,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": -0.4375,
+          "probability": 0.025
+        },
+        {
+          "value": -0.43,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": -0.4225,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": -0.415,
+          "probability": 0.03
+        },
+        {
+          "value": -0.4075,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": -0.4,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": -0.3925,
+          "probability": 0.035
+        },
+        {
+          "value": -0.385,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": -0.3775,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": -0.37,
+          "probability": 0.04
+        },
+        {
+          "value": -0.3625,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": -0.355,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": -0.3475,
+          "probability": 0.045
+        },
+        {
+          "value": -0.34,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": -0.3325,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": -0.325,
+          "probability": 0.05
+        },
+        {
+          "value": -0.3175,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": -0.31,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": -0.3025,
+          "probability": 0.055
+        },
+        {
+          "value": -0.295,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": -0.2875,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": -0.28,
+          "probability": 0.06
+        },
+        {
+          "value": -0.2725,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": -0.265,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": -0.2575,
+          "probability": 0.065
+        },
+        {
+          "value": -0.25,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": -0.2425,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": -0.235,
+          "probability": 0.07
+        },
+        {
+          "value": -0.2275,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": -0.22,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": -0.2125,
+          "probability": 0.075
+        },
+        {
+          "value": -0.205,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": -0.1975,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": -0.19,
+          "probability": 0.08
+        },
+        {
+          "value": -0.1825,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": -0.175,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": -0.1675,
+          "probability": 0.085
+        },
+        {
+          "value": -0.16,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": -0.1525,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": -0.145,
+          "probability": 0.09
+        },
+        {
+          "value": -0.1375,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": -0.13,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": -0.1225,
+          "probability": 0.095
+        },
+        {
+          "value": -0.115,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": -0.1075,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": -0.1,
+          "probability": 0.1
+        },
+        {
+          "value": -0.0925,
+          "probability": 0.11
+        },
+        {
+          "value": -0.085,
+          "probability": 0.12
+        },
+        {
+          "value": -0.0775,
+          "probability": 0.13
+        },
+        {
+          "value": -0.07,
+          "probability": 0.14
+        },
+        {
+          "value": -0.0625,
+          "probability": 0.15
+        },
+        {
+          "value": -0.055,
+          "probability": 0.16
+        },
+        {
+          "value": -0.0475,
+          "probability": 0.17
+        },
+        {
+          "value": -0.04,
+          "probability": 0.18
+        },
+        {
+          "value": -0.0325,
+          "probability": 0.19
+        },
+        {
+          "value": -0.025,
+          "probability": 0.2
+        },
+        {
+          "value": -0.0175,
+          "probability": 0.21
+        },
+        {
+          "value": -0.01,
+          "probability": 0.22
+        },
+        {
+          "value": -0.0025,
+          "probability": 0.23
+        },
+        {
+          "value": 0.005,
+          "probability": 0.24
+        },
+        {
+          "value": 0.0125,
+          "probability": 0.25
+        },
+        {
+          "value": 0.02,
+          "probability": 0.26
+        },
+        {
+          "value": 0.0275,
+          "probability": 0.27
+        },
+        {
+          "value": 0.035,
+          "probability": 0.28
+        },
+        {
+          "value": 0.0425,
+          "probability": 0.29
+        },
+        {
+          "value": 0.05,
+          "probability": 0.3
+        },
+        {
+          "value": 0.0575,
+          "probability": 0.31
+        },
+        {
+          "value": 0.065,
+          "probability": 0.32
+        },
+        {
+          "value": 0.0725,
+          "probability": 0.33
+        },
+        {
+          "value": 0.08,
+          "probability": 0.34
+        },
+        {
+          "value": 0.0875,
+          "probability": 0.35
+        },
+        {
+          "value": 0.095,
+          "probability": 0.36
+        },
+        {
+          "value": 0.1025,
+          "probability": 0.37
+        },
+        {
+          "value": 0.11,
+          "probability": 0.38
+        },
+        {
+          "value": 0.1175,
+          "probability": 0.39
+        },
+        {
+          "value": 0.125,
+          "probability": 0.4
+        },
+        {
+          "value": 0.1325,
+          "probability": 0.41
+        },
+        {
+          "value": 0.14,
+          "probability": 0.42
+        },
+        {
+          "value": 0.1475,
+          "probability": 0.43
+        },
+        {
+          "value": 0.155,
+          "probability": 0.44
+        },
+        {
+          "value": 0.1625,
+          "probability": 0.45
+        },
+        {
+          "value": 0.17,
+          "probability": 0.46
+        },
+        {
+          "value": 0.1775,
+          "probability": 0.47
+        },
+        {
+          "value": 0.185,
+          "probability": 0.48
+        },
+        {
+          "value": 0.1925,
+          "probability": 0.49
+        },
+        {
+          "value": 0.2,
+          "probability": 0.5
+        },
+        {
+          "value": 0.2075,
+          "probability": 0.51
+        },
+        {
+          "value": 0.215,
+          "probability": 0.52
+        },
+        {
+          "value": 0.2225,
+          "probability": 0.53
+        },
+        {
+          "value": 0.23,
+          "probability": 0.54
+        },
+        {
+          "value": 0.2375,
+          "probability": 0.55
+        },
+        {
+          "value": 0.245,
+          "probability": 0.56
+        },
+        {
+          "value": 0.2525,
+          "probability": 0.57
+        },
+        {
+          "value": 0.26,
+          "probability": 0.58
+        },
+        {
+          "value": 0.2675,
+          "probability": 0.59
+        },
+        {
+          "value": 0.275,
+          "probability": 0.6
+        },
+        {
+          "value": 0.2825,
+          "probability": 0.61
+        },
+        {
+          "value": 0.29,
+          "probability": 0.62
+        },
+        {
+          "value": 0.2975,
+          "probability": 0.63
+        },
+        {
+          "value": 0.305,
+          "probability": 0.64
+        },
+        {
+          "value": 0.3125,
+          "probability": 0.65
+        },
+        {
+          "value": 0.32,
+          "probability": 0.66
+        },
+        {
+          "value": 0.3275,
+          "probability": 0.67
+        },
+        {
+          "value": 0.335,
+          "probability": 0.68
+        },
+        {
+          "value": 0.3425,
+          "probability": 0.69
+        },
+        {
+          "value": 0.35,
+          "probability": 0.7
+        },
+        {
+          "value": 0.3575,
+          "probability": 0.71
+        },
+        {
+          "value": 0.365,
+          "probability": 0.72
+        },
+        {
+          "value": 0.3725,
+          "probability": 0.73
+        },
+        {
+          "value": 0.38,
+          "probability": 0.74
+        },
+        {
+          "value": 0.3875,
+          "probability": 0.75
+        },
+        {
+          "value": 0.395,
+          "probability": 0.76
+        },
+        {
+          "value": 0.4025,
+          "probability": 0.77
+        },
+        {
+          "value": 0.41,
+          "probability": 0.78
+        },
+        {
+          "value": 0.4175,
+          "probability": 0.79
+        },
+        {
+          "value": 0.425,
+          "probability": 0.8
+        },
+        {
+          "value": 0.4325,
+          "probability": 0.81
+        },
+        {
+          "value": 0.44,
+          "probability": 0.82
+        },
+        {
+          "value": 0.4475,
+          "probability": 0.83
+        },
+        {
+          "value": 0.455,
+          "probability": 0.84
+        },
+        {
+          "value": 0.4625,
+          "probability": 0.85
+        },
+        {
+          "value": 0.47,
+          "probability": 0.86
+        },
+        {
+          "value": 0.4775,
+          "probability": 0.87
+        },
+        {
+          "value": 0.485,
+          "probability": 0.88
+        },
+        {
+          "value": 0.4925,
+          "probability": 0.89
+        },
+        {
+          "value": 0.5,
+          "probability": 0.9
+        },
+        {
+          "value": 0.5075,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 0.515,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 0.5225,
+          "probability": 0.905
+        },
+        {
+          "value": 0.53,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 0.5375,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 0.545,
+          "probability": 0.91
+        },
+        {
+          "value": 0.5525,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 0.56,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 0.5675,
+          "probability": 0.915
+        },
+        {
+          "value": 0.575,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 0.5825,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 0.59,
+          "probability": 0.92
+        },
+        {
+          "value": 0.5975,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 0.605,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 0.6125,
+          "probability": 0.925
+        },
+        {
+          "value": 0.62,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 0.6275,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 0.635,
+          "probability": 0.93
+        },
+        {
+          "value": 0.6425,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 0.65,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 0.6575,
+          "probability": 0.935
+        },
+        {
+          "value": 0.665,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 0.6725,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 0.68,
+          "probability": 0.94
+        },
+        {
+          "value": 0.6875,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 0.695,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 0.7025,
+          "probability": 0.945
+        },
+        {
+          "value": 0.71,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 0.7175,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 0.725,
+          "probability": 0.95
+        },
+        {
+          "value": 0.7325,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 0.74,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 0.7475,
+          "probability": 0.955
+        },
+        {
+          "value": 0.755,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 0.7625,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 0.77,
+          "probability": 0.96
+        },
+        {
+          "value": 0.7775,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 0.785,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 0.7925,
+          "probability": 0.965
+        },
+        {
+          "value": 0.8,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 0.8075,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 0.815,
+          "probability": 0.97
+        },
+        {
+          "value": 0.8225,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 0.83,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 0.8375,
+          "probability": 0.975
+        },
+        {
+          "value": 0.845,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 0.8525,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 0.86,
+          "probability": 0.98
+        },
+        {
+          "value": 0.8675,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 0.875,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 0.8825,
+          "probability": 0.985
+        },
+        {
+          "value": 0.89,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 0.8975,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 0.905,
+          "probability": 0.99
+        },
+        {
+          "value": 0.9125,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 0.92,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 0.9275,
+          "probability": 0.995
+        },
+        {
+          "value": 0.935,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 0.9425,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 0.95,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 0.2,
+        "median": 0.2,
+        "interval80": {
+          "lower": -0.1,
+          "upper": 0.5
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/prompt.md",
+        "sha256": "6a29f59a2bfcb9d699b2ea6dc8f8dc11ca6a2e108b76dea8e11eb582ee8a801b",
+        "bytes": 10555,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_command.json",
+        "sha256": "5219144aed06270759ff00266288300a42db362cdd28aaa93db46f144c8db96c",
+        "bytes": 768,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_codex_stdout.jsonl",
+        "sha256": "499d03233b32ad3a8a48ca0015a484c849082f1667785393143f27b7aa2211ae",
+        "bytes": 1353498,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_codex_stderr.log",
+        "sha256": "64d280811c1dea7766fbe7bfe5c94d4742eecde3736658561f8bbf2680fa28ae",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_codex_events.jsonl",
+        "sha256": "bd1a58872d21e6e67894843d17419cfddfc88433804f00036bcf397a387eb6ad",
+        "bytes": 1353848,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_codex_last_message.txt",
+        "sha256": "992224fa034419046c85b6b10ba9b104e11fae4a886fe01c1658477be74d9492",
+        "bytes": 6375,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_codex_trace.json",
+        "sha256": "69b5bbcc1ae9d596b0eeb79efbd7eca76524320e6c01fe00fe44c05c2ec5be06",
+        "bytes": 560,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_stdout.txt",
+        "sha256": "992224fa034419046c85b6b10ba9b104e11fae4a886fe01c1658477be74d9492",
+        "bytes": 6375,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_stderr.txt",
+        "sha256": "da7187700308986ba2e586c34713e098796aa59aa17284bb329da6b8392a9035",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_prompt.md",
+        "sha256": "6bf6aff3817994f1172507f770d8f142e67a578c71a5e3992f7ef75c121a0fc5",
+        "bytes": 9714,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_command.json",
+        "sha256": "9848e1e077b43385b17b86bcc9f6bdc1d4c0daec1cb4631b0e9261ca27899597",
+        "bytes": 764,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "d2b220b674077ca512dc2e0671b6186b91e6168473483edff1e8563a62dd73b6",
+        "bytes": 898,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_codex_stderr.log",
+        "sha256": "eb0eb1222ecbb381ccea71bd13f680722abe4f3ce472e41817822d769eca11f0",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_codex_events.jsonl",
+        "sha256": "c0fe7ba5c553af0b305892e7d4a4f72212099bd1a972647e24a4a9d6013c7b36",
+        "bytes": 920,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_codex_last_message.txt",
+        "sha256": "70a8a995249b56549446f2449c7732ab2ab677d748b725210f00fcbe1f20d9f2",
+        "bytes": 569,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_codex_trace.json",
+        "sha256": "910d466e002139e9858a268515062e4c251416913bfde3e9cb1b4f8286140a8f",
+        "bytes": 555,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_stdout.txt",
+        "sha256": "70a8a995249b56549446f2449c7732ab2ab677d748b725210f00fcbe1f20d9f2",
+        "bytes": 569,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_stderr.txt",
+        "sha256": "ea86e6dfdf1a51e7ea3cb73dc1d58414d816b5dc74175b9fb5ec583fc7ec6b58",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/revision_prompt.md",
+        "sha256": "24d284bb70216158372f69505c275feb6a4d03786bb6970c1245e3549703fb21",
+        "bytes": 18435,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/command.json",
+        "sha256": "278d3cbc1a2e40c728dadd645819f6a2eaab99a468014f084ef8fd35792df123",
+        "bytes": 762,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/codex_stdout.jsonl",
+        "sha256": "3fedf6a478aa645313fc28911054dc5451ef4b5af41e34820ae6d1839e772885",
+        "bytes": 7472,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/codex_stderr.log",
+        "sha256": "293caeeaf87805f9c3014c74e2137ed6a05bf7edf2cc0d7ad2084b3b6656fc6c",
+        "bytes": 233,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/codex_events.jsonl",
+        "sha256": "5dc7f78127561fd39ac02da9bb0e468df0b596a579c191c74ded18f108650083",
+        "bytes": 7494,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/codex_last_message.txt",
+        "sha256": "0faccd1fc9ecd4322cf4a87d0458f11b675b97926610981487eabd719eb2373a",
+        "bytes": 6858,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/codex_trace.json",
+        "sha256": "c7ea7a0127e4ff2714dcbbbacad1e0f5cbc6443c2efd5e2c2df41937f209e3c5",
+        "bytes": 551,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/stdout.txt",
+        "sha256": "0faccd1fc9ecd4322cf4a87d0458f11b675b97926610981487eabd719eb2373a",
+        "bytes": 6858,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/stderr.txt",
+        "sha256": "9ef344d21ab22f4244b7ef7ffca05d17bc18e48894964198ef5d66fbb11ce96c",
+        "bytes": 248,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/raw_response.txt",
+        "sha256": "0faccd1fc9ecd4322cf4a87d0458f11b675b97926610981487eabd719eb2373a",
+        "bytes": 6858,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/parsed_cells.json",
+        "sha256": "76f53ac25c33e54978fc5ea30afd76b427df4d6950c0b390c9ffe9d4ff3b6e5b",
+        "bytes": 8014,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/normalized_cells.json",
+        "sha256": "5bfa0154391a80ca5bcf92b564a530863892757a87593a32753f10e62722698f",
+        "bytes": 25370,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/distribution.json",
+        "sha256": "dfb1ba36a6e85fa78b150c2f6e7d77c7ea64a5ea6692d18a022733516f54fcb0",
+        "bytes": 13572,
+        "createdAt": "2026-09-07T20:20:29Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/validation.json",
+        "sha256": "4d93fabfae5859d983d01e567cc80da45ef567cc65f657aaaee3e400799a568b",
+        "bytes": 141,
+        "createdAt": "2026-09-07T20:20:29Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-07T20:20:29Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "1e7b427e2b04e97828912a442d4c23f6e9f35102378e422fbe9c93e7c6505cc6"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-07/2026-09-07t20-20-29z-statcan-gdp-by-industry-monthly-growth-2026-09/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "State explicitly that the six-month same-series first-print mean is the time-series prior, or that no separate AR/model prior is used because the available pre-forecast first-print sample is short."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Clarify whether interval endpoints are inclusive when saying prints above 0.5% or below -0.1% fall outside the interval."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted both optional reviewer suggestions by explicitly naming the six-month same-series first-print mean as the time-series prior with no separate AR/model prior, and by clarifying that outside-the-interval language treats the rounded endpoints as inclusive.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted both optional reviewer suggestions by explicitly naming the six-month same-series first-print mean as the time-series prior with no separate AR/model prior, and by clarifying that outside-the-interval language treats the rounded endpoints as inclusive.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "Draft is publishable with only minor clarity improvements; resolver, unit, first-print rule, date, prior/update math, interval, tails, and JSON fields are coherent with the target contract."
+    }
+  }
+]

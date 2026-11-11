@@ -1,0 +1,1256 @@
+[
+  {
+    "slug": "us-cpi-u-mom-september-2026",
+    "country": "US",
+    "type": "data",
+    "title": "US CPI-U MoM Sep 2026",
+    "question": "What will the U.S. Bureau of Labor Statistics first print report for CPI-U all items, U.S. city average, seasonally adjusted month-over-month percent change for September 2026?",
+    "unit": "percent_growth",
+    "pointEstimate": 0.25,
+    "ciLow": -0.28,
+    "ciHigh": 0.78,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-14",
+    "resolutionSource": "U.S. Bureau of Labor Statistics Consumer Price Index news release",
+    "resolutionSourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
+    "resolutionRule": "Resolve to the first official BLS Consumer Price Index news release for September 2026, Table A, CPI-U U.S. city average, All items, seasonally adjusted change from preceding month, using the one-decimal percent value as initially printed. Do not revise for later seasonal-adjustment revisions or subsequent releases.",
+    "dataPointId": "bls.cpi.u.headline_mom.september_2026.first_print",
+    "historicalContext": [
+      {
+        "label": "January 2026",
+        "value": 0.2,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "February 2026",
+        "value": 0.3,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "March 2026",
+        "value": 0.9,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "April 2026",
+        "value": 0.6,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 0.5,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": -0.4,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": 0.1,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      }
+    ],
+    "drivers": [
+      "Recent headline CPI has averaged 0.31 percent over seven 2026 prints but includes large energy-driven swings.",
+      "Core CPI was steadier than headline in July, with all items less food and energy up 0.2 percent.",
+      "Energy was a downside one-off in June and July, so September headline risk is wider than core momentum alone.",
+      "Shelter is still positive but slower, with July shelter up 0.1 percent."
+    ],
+    "sourceContext": [
+      "https://www.bls.gov/schedule/news_release/cpi.htm",
+      "https://www.bls.gov/news.release/cpi.nr0.htm"
+    ],
+    "runAt": "2026-09-04T19:07:10Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "US CPI-U headline month-over-month forecast for September 2026"
+      },
+      {
+        "kind": "text",
+        "text": "The resolver is BLS CPI-U all items, U.S. city average, seasonally adjusted change from preceding month, Table A in the first Consumer Price Index news release for September 2026. The registered source window ends 2026-10-15, but the official BLS CPI release schedule fetched this run lists September 2026 CPI for 2026-10-14 at 08:30 AM, so I use 2026-10-14 as the verified release date while keeping the same registered target identity."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched BLS CPI release schedule page for September 2026 CPI release date.",
+        "result": "BLS schedule lists September 2026 Consumer Price Index release on Oct. 14, 2026 at 08:30 AM; adjacent CPI dates include August 2026 on Sep. 11, 2026 and October 2026 on Nov. 10, 2026."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched current BLS CPI news release Table A for CPI-U all items seasonally adjusted monthly changes.",
+        "result": "Table A All items seasonally adjusted changes from preceding month: Jan. 2026 0.2, Feb. 2026 0.3, Mar. 2026 0.9, Apr. 2026 0.6, May 2026 0.5, Jun. 2026 -0.4, Jul. 2026 0.1 percent."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Fetched current BLS CPI news release component detail for the latest print.",
+        "result": "July 2026 details: all items 0.1 percent, energy -1.5 percent, all items less food and energy 0.2 percent, shelter 0.1 percent, food 0.1 percent, 12-month all items 3.4 percent."
+      },
+      {
+        "kind": "text",
+        "text": "The reference class is the seven available 2026 BLS Table A headline CPI-U seasonally adjusted monthly percent changes through July: 0.2, 0.3, 0.9, 0.6, 0.5, -0.4, and 0.1. The base rate mean is 0.314 percent, but the high March-May prints and negative June print show energy and other one-off volatility, not a clean trend to project mechanically."
+      },
+      {
+        "kind": "text",
+        "text": "Level, momentum, one-off, and policy-mechanism effects: the level of 12-month CPI is still elevated at 3.4 percent, recent core momentum is closer to 0.2 percent, the latest headline downside came from energy at -1.5 percent in July, and monetary policy works slowly through demand-sensitive services rather than forcing a single-month September headline print."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior uses the 2026 BLS headline CPI-U monthly-change reference class, values 0.2, 0.3, 0.9, 0.6, 0.5, -0.4, 0.1; mean = 0.314. I adjust -0.06 for fading March-May energy surge and July's softer core/shelter signal, giving point = 0.25. For the 80% interval, sample sigma = 0.414 from those seven monthly change values, so 1.28*sigma = 0.530; point 0.25 +/- 0.53 gives -0.28 to 0.78 after rounding. The seven-print sample is thin, so the interval is best read as a recent-volatility band rather than a long-cycle inflation distribution."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk is a renewed gasoline or energy-services jump plus sticky shelter, which would land above the interval if September headline CPI prints above about 0.78 percent. Downside risk is another broad energy decline or goods deflation month, which would land below the interval if the headline print is below about -0.28 percent. Outside the interval would most likely require an energy shock or a broad repricing month rather than normal core persistence."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: I rejected the requested change to 2026-10-15 because the public registered target artifact contains an expectedReleaseWindow but no committed resolutionDate, while the official BLS release calendar gives the exact September 2026 CPI release date as 2026-10-14. I accepted the uncertainty-calibration suggestion by explicitly noting the thin seven-print volatility sample in the interval step."
+      },
+      {
+        "kind": "forecast",
+        "point": 0.25,
+        "ciLow": -0.28,
+        "ciHigh": 0.78
+      }
+    ],
+    "agentReportedRunAt": "2026-09-04T19:05:31Z",
+    "runStartedAt": "2026-09-04T19:05:22Z",
+    "promptMode": "fast",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "targetContentHash": "c5c7ee4179242c4b5e0dbac49e81072b8f6c4db8b77f7caab6da662e8f65255f",
+    "targetRegistrationPath": "records/targets/2026-09-04-c5c7ee4179242c4b5e0dbac49e81072b8f6c4db8b77f7caab6da662e8f65255f.json",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": -1.075,
+        "upper": 1.575
+      },
+      "points": [
+        {
+          "value": -1.075,
+          "probability": 0.0
+        },
+        {
+          "value": -1.06175,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": -1.0485,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": -1.03525,
+          "probability": 0.005
+        },
+        {
+          "value": -1.022,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": -1.00875,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": -0.9955,
+          "probability": 0.01
+        },
+        {
+          "value": -0.98225,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": -0.969,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": -0.95575,
+          "probability": 0.015
+        },
+        {
+          "value": -0.9425,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": -0.92925,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": -0.916,
+          "probability": 0.02
+        },
+        {
+          "value": -0.90275,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": -0.8895,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": -0.87625,
+          "probability": 0.025
+        },
+        {
+          "value": -0.863,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": -0.84975,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": -0.8365,
+          "probability": 0.03
+        },
+        {
+          "value": -0.82325,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": -0.81,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": -0.79675,
+          "probability": 0.035
+        },
+        {
+          "value": -0.7835,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": -0.77025,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": -0.757,
+          "probability": 0.04
+        },
+        {
+          "value": -0.74375,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": -0.7305,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": -0.71725,
+          "probability": 0.045
+        },
+        {
+          "value": -0.704,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": -0.69075,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": -0.6775,
+          "probability": 0.05
+        },
+        {
+          "value": -0.66425,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": -0.651,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": -0.63775,
+          "probability": 0.055
+        },
+        {
+          "value": -0.6245,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": -0.61125,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": -0.598,
+          "probability": 0.06
+        },
+        {
+          "value": -0.58475,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": -0.5715,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": -0.55825,
+          "probability": 0.065
+        },
+        {
+          "value": -0.545,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": -0.53175,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": -0.5185,
+          "probability": 0.07
+        },
+        {
+          "value": -0.50525,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": -0.492,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": -0.47875,
+          "probability": 0.075
+        },
+        {
+          "value": -0.4655,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": -0.45225,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": -0.439,
+          "probability": 0.08
+        },
+        {
+          "value": -0.42575,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": -0.4125,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": -0.39925,
+          "probability": 0.085
+        },
+        {
+          "value": -0.386,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": -0.37275,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": -0.3595,
+          "probability": 0.09
+        },
+        {
+          "value": -0.34625,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": -0.333,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": -0.31975,
+          "probability": 0.095
+        },
+        {
+          "value": -0.3065,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": -0.29325,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": -0.28,
+          "probability": 0.1
+        },
+        {
+          "value": -0.26675,
+          "probability": 0.11
+        },
+        {
+          "value": -0.2535,
+          "probability": 0.12
+        },
+        {
+          "value": -0.24025,
+          "probability": 0.13
+        },
+        {
+          "value": -0.227,
+          "probability": 0.14
+        },
+        {
+          "value": -0.21375,
+          "probability": 0.15
+        },
+        {
+          "value": -0.2005,
+          "probability": 0.16
+        },
+        {
+          "value": -0.18725,
+          "probability": 0.17
+        },
+        {
+          "value": -0.174,
+          "probability": 0.18
+        },
+        {
+          "value": -0.16075,
+          "probability": 0.19
+        },
+        {
+          "value": -0.1475,
+          "probability": 0.2
+        },
+        {
+          "value": -0.13425,
+          "probability": 0.21
+        },
+        {
+          "value": -0.121,
+          "probability": 0.22
+        },
+        {
+          "value": -0.10775,
+          "probability": 0.23
+        },
+        {
+          "value": -0.0945,
+          "probability": 0.24
+        },
+        {
+          "value": -0.08125,
+          "probability": 0.25
+        },
+        {
+          "value": -0.068,
+          "probability": 0.26
+        },
+        {
+          "value": -0.05475,
+          "probability": 0.27
+        },
+        {
+          "value": -0.0415,
+          "probability": 0.28
+        },
+        {
+          "value": -0.02825,
+          "probability": 0.29
+        },
+        {
+          "value": -0.015,
+          "probability": 0.3
+        },
+        {
+          "value": -0.00175,
+          "probability": 0.31
+        },
+        {
+          "value": 0.0115,
+          "probability": 0.32
+        },
+        {
+          "value": 0.02475,
+          "probability": 0.33
+        },
+        {
+          "value": 0.038,
+          "probability": 0.34
+        },
+        {
+          "value": 0.05125,
+          "probability": 0.35
+        },
+        {
+          "value": 0.0645,
+          "probability": 0.36
+        },
+        {
+          "value": 0.07775,
+          "probability": 0.37
+        },
+        {
+          "value": 0.091,
+          "probability": 0.38
+        },
+        {
+          "value": 0.10425,
+          "probability": 0.39
+        },
+        {
+          "value": 0.1175,
+          "probability": 0.4
+        },
+        {
+          "value": 0.13075,
+          "probability": 0.41
+        },
+        {
+          "value": 0.144,
+          "probability": 0.42
+        },
+        {
+          "value": 0.15725,
+          "probability": 0.43
+        },
+        {
+          "value": 0.1705,
+          "probability": 0.44
+        },
+        {
+          "value": 0.18375,
+          "probability": 0.45
+        },
+        {
+          "value": 0.197,
+          "probability": 0.46
+        },
+        {
+          "value": 0.21025,
+          "probability": 0.47
+        },
+        {
+          "value": 0.2235,
+          "probability": 0.48
+        },
+        {
+          "value": 0.23675,
+          "probability": 0.49
+        },
+        {
+          "value": 0.25,
+          "probability": 0.5
+        },
+        {
+          "value": 0.26325,
+          "probability": 0.51
+        },
+        {
+          "value": 0.2765,
+          "probability": 0.52
+        },
+        {
+          "value": 0.28975,
+          "probability": 0.53
+        },
+        {
+          "value": 0.303,
+          "probability": 0.54
+        },
+        {
+          "value": 0.31625,
+          "probability": 0.55
+        },
+        {
+          "value": 0.3295,
+          "probability": 0.56
+        },
+        {
+          "value": 0.34275,
+          "probability": 0.57
+        },
+        {
+          "value": 0.356,
+          "probability": 0.58
+        },
+        {
+          "value": 0.36925,
+          "probability": 0.59
+        },
+        {
+          "value": 0.3825,
+          "probability": 0.6
+        },
+        {
+          "value": 0.39575,
+          "probability": 0.61
+        },
+        {
+          "value": 0.409,
+          "probability": 0.62
+        },
+        {
+          "value": 0.42225,
+          "probability": 0.63
+        },
+        {
+          "value": 0.4355,
+          "probability": 0.64
+        },
+        {
+          "value": 0.44875,
+          "probability": 0.65
+        },
+        {
+          "value": 0.462,
+          "probability": 0.66
+        },
+        {
+          "value": 0.47525,
+          "probability": 0.67
+        },
+        {
+          "value": 0.4885,
+          "probability": 0.68
+        },
+        {
+          "value": 0.50175,
+          "probability": 0.69
+        },
+        {
+          "value": 0.515,
+          "probability": 0.7
+        },
+        {
+          "value": 0.52825,
+          "probability": 0.71
+        },
+        {
+          "value": 0.5415,
+          "probability": 0.72
+        },
+        {
+          "value": 0.55475,
+          "probability": 0.73
+        },
+        {
+          "value": 0.568,
+          "probability": 0.74
+        },
+        {
+          "value": 0.58125,
+          "probability": 0.75
+        },
+        {
+          "value": 0.5945,
+          "probability": 0.76
+        },
+        {
+          "value": 0.60775,
+          "probability": 0.77
+        },
+        {
+          "value": 0.621,
+          "probability": 0.78
+        },
+        {
+          "value": 0.63425,
+          "probability": 0.79
+        },
+        {
+          "value": 0.6475,
+          "probability": 0.8
+        },
+        {
+          "value": 0.66075,
+          "probability": 0.81
+        },
+        {
+          "value": 0.674,
+          "probability": 0.82
+        },
+        {
+          "value": 0.68725,
+          "probability": 0.83
+        },
+        {
+          "value": 0.7005,
+          "probability": 0.84
+        },
+        {
+          "value": 0.71375,
+          "probability": 0.85
+        },
+        {
+          "value": 0.727,
+          "probability": 0.86
+        },
+        {
+          "value": 0.74025,
+          "probability": 0.87
+        },
+        {
+          "value": 0.7535,
+          "probability": 0.88
+        },
+        {
+          "value": 0.76675,
+          "probability": 0.89
+        },
+        {
+          "value": 0.78,
+          "probability": 0.9
+        },
+        {
+          "value": 0.79325,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 0.8065,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 0.81975,
+          "probability": 0.905
+        },
+        {
+          "value": 0.833,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 0.84625,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 0.8595,
+          "probability": 0.91
+        },
+        {
+          "value": 0.87275,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 0.886,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 0.89925,
+          "probability": 0.915
+        },
+        {
+          "value": 0.9125,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 0.92575,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 0.939,
+          "probability": 0.92
+        },
+        {
+          "value": 0.95225,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 0.9655,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 0.97875,
+          "probability": 0.925
+        },
+        {
+          "value": 0.992,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 1.00525,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 1.0185,
+          "probability": 0.93
+        },
+        {
+          "value": 1.03175,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 1.045,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 1.05825,
+          "probability": 0.935
+        },
+        {
+          "value": 1.0715,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 1.08475,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 1.098,
+          "probability": 0.94
+        },
+        {
+          "value": 1.11125,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 1.1245,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 1.13775,
+          "probability": 0.945
+        },
+        {
+          "value": 1.151,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 1.16425,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 1.1775,
+          "probability": 0.95
+        },
+        {
+          "value": 1.19075,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 1.204,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 1.21725,
+          "probability": 0.955
+        },
+        {
+          "value": 1.2305,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 1.24375,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 1.257,
+          "probability": 0.96
+        },
+        {
+          "value": 1.27025,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 1.2835,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 1.29675,
+          "probability": 0.965
+        },
+        {
+          "value": 1.31,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 1.32325,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 1.3365,
+          "probability": 0.97
+        },
+        {
+          "value": 1.34975,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 1.363,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 1.37625,
+          "probability": 0.975
+        },
+        {
+          "value": 1.3895,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 1.40275,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 1.416,
+          "probability": 0.98
+        },
+        {
+          "value": 1.42925,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 1.4425,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 1.45575,
+          "probability": 0.985
+        },
+        {
+          "value": 1.469,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 1.48225,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 1.4955,
+          "probability": 0.99
+        },
+        {
+          "value": 1.50875,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 1.522,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 1.53525,
+          "probability": 0.995
+        },
+        {
+          "value": 1.5485,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 1.56175,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 1.575,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 0.25,
+        "median": 0.25,
+        "interval80": {
+          "lower": -0.28,
+          "upper": 0.78
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/prompt.md",
+        "sha256": "c22543facd5dfd08fcad50fc492a6be6fb7fa36f5c0d7b5757ccac1f1ed3803e",
+        "bytes": 10573,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_command.json",
+        "sha256": "4170b490415dd0b39c2938d8b8ce817cf8a9970b73709546371be7bf67344486",
+        "bytes": 752,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_stdout.jsonl",
+        "sha256": "dbf195ae75f8a133dc903c6231d15c2f6f94c35ed1012bd3fdb7428405ee1dfd",
+        "bytes": 14116,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_stderr.log",
+        "sha256": "d9d7c498d084f86a3dbb6e811a4b974f42950c9ee032ca8cb8639817cd963176",
+        "bytes": 233,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_events.jsonl",
+        "sha256": "ef9522bb9fc63d0d1c81548cf5913b155969edec3d7cad2dff1082d212bc9fe2",
+        "bytes": 14315,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_last_message.txt",
+        "sha256": "1074b05775fa507d5d6b201ec09eb5a5cf6f586207be7e85fbbb16ffede0bc32",
+        "bytes": 5416,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_trace.json",
+        "sha256": "47ae1e4467b05bc881aa40901b6a78f8e6ea5ee846d9071a2867a9180838c73e",
+        "bytes": 559,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_stdout.txt",
+        "sha256": "1074b05775fa507d5d6b201ec09eb5a5cf6f586207be7e85fbbb16ffede0bc32",
+        "bytes": 5416,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_stderr.txt",
+        "sha256": "2dc27acb19e54b7df03ae9ccf950de6fce5f52b145878730b994ae0f7aba0714",
+        "bytes": 248,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_prompt.md",
+        "sha256": "87913b52b8608ee018277cfd5f30e3c83ec170caefaf3494217d43a06459ce2a",
+        "bytes": 8650,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_command.json",
+        "sha256": "5cbb81e4d3963c6c0e5f19684c3a733525ef52bb259a04a4a34cf4d40c615937",
+        "bytes": 748,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "4e98365b18554cb35af9fd9767c5f24ff1e8a3b30c2463230d7824faea5f2359",
+        "bytes": 1438,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_stderr.log",
+        "sha256": "049394f74d680fe6776e5fde7121b48b7545fc8942457e4f5e26b101c3a0048b",
+        "bytes": 233,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_events.jsonl",
+        "sha256": "b877c0ec6dc76e53c821f21544e41506aeefc4292967475ed1843b330bfbaf6d",
+        "bytes": 1460,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_last_message.txt",
+        "sha256": "23a0c4036be5d4bdb62f559e2c0da02e6f3a4290ff0c89731be9cdacdb434dc1",
+        "bytes": 1082,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_trace.json",
+        "sha256": "6ebdfc6527f2bb1c1f3c79e2d597612dbcf0e87aeaf5335de7002b7bc251bf34",
+        "bytes": 552,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_stdout.txt",
+        "sha256": "23a0c4036be5d4bdb62f559e2c0da02e6f3a4290ff0c89731be9cdacdb434dc1",
+        "bytes": 1082,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_stderr.txt",
+        "sha256": "6f01a3f8dca6628249dd4252e10879711e585b7de9d825a0302618db3c552f2c",
+        "bytes": 248,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/revision_prompt.md",
+        "sha256": "e40f303f1c6d5d734ca13d5b2687d5cd402a8d3235d722476db6a129a82f3e88",
+        "bytes": 18007,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/command.json",
+        "sha256": "bf43e028390a2c353a295264845b36cfa6206222786a4a769c18ce85f844aec8",
+        "bytes": 746,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_stdout.jsonl",
+        "sha256": "707f7bf29b351f5afd96529efef39436db9acf336552d92f8e0195e748c80637",
+        "bytes": 9030,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_stderr.log",
+        "sha256": "0e24768c4c2357bd1216353bd9490285b97e508a1d57852f0ad6c07c1c9129cb",
+        "bytes": 233,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_events.jsonl",
+        "sha256": "4ed6e658c796a93bdbdef715509ff91e88be8549cda55402681935aa8210928b",
+        "bytes": 9108,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_last_message.txt",
+        "sha256": "2c888633a3d72182c27d7d590db97b769017e1bb044a5802efa8d9ab93575a63",
+        "bytes": 5993,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_trace.json",
+        "sha256": "a7a36973ac50c952417d4aadc121abd418b1899040ed69aae4f9dd96e9f212f6",
+        "bytes": 556,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/stdout.txt",
+        "sha256": "2c888633a3d72182c27d7d590db97b769017e1bb044a5802efa8d9ab93575a63",
+        "bytes": 5993,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/stderr.txt",
+        "sha256": "a91cab913d7e703f6707c0675d68d9995476fb80007db08b72c615a54d245e07",
+        "bytes": 248,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/raw_response.txt",
+        "sha256": "2c888633a3d72182c27d7d590db97b769017e1bb044a5802efa8d9ab93575a63",
+        "bytes": 5993,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/parsed_cells.json",
+        "sha256": "34b18cc5a0d2c4aa359ec18d89dd10edfdf7d63d923bfbafbce73634d93f72a7",
+        "bytes": 7177,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/normalized_cells.json",
+        "sha256": "cf9ad55e732108587cef9f1a3a11701e6f27fd7323f973491ec0d385ecdbc067",
+        "bytes": 24748,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/distribution.json",
+        "sha256": "7a7696fd0aa0eba7aeca2589f1d491d6ab422bc0055ced7d5475813f54e6b5f7",
+        "bytes": 13787,
+        "createdAt": "2026-09-04T19:05:22Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/validation.json",
+        "sha256": "5ff4e8912df6e30fdcf33257d1ff26dd54f996dd026b3485ec040d57186c8f96",
+        "bytes": 128,
+        "createdAt": "2026-09-04T19:05:22Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-09-04T19:05:22Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "f41fdb9bc54d60a7d9b73b3199d25678b1596aa0e105301bf92b593fd029c60c"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.finding.1",
+          "severity": "blocking",
+          "rubricItem": "resolver",
+          "summary": "The draft sets resolutionDate to 2026-10-14 based on a fetched BLS schedule, but the supplied canonical ledger context frames the registered target around an expectedReleaseWindow ending 2026-10-15 and says these ledger fields are the target contract for resolutionDate.",
+          "actionRequested": "Make the cell's resolutionDate match the registered ledger target exactly, or explicitly confirm from the target registration that 2026-10-14 is the committed resolutionDate before publication."
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Keep the reasoning note about the BLS schedule discrepancy if the ledger still uses the conservative window end."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "The interval method is compact and coherent, but the seven-month volatility sample is thin; noting that limitation would make the uncertainty claim stronger."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.finding.1",
+          "decision": "accepted",
+          "rationale": "Review disposition: I rejected the requested change to 2026-10-15 because the public registered target artifact contains an expectedReleaseWindow but no committed resolutionDate, while the official BLS release calendar gives the exact September 2026 CPI release date as 2026-10-14. I accepted the uncertainty-calibration suggestion by explicitly noting the thin seven-print volatility sample in the interval step.",
+          "forecastChanged": true
+        },
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: I rejected the requested change to 2026-10-15 because the public registered target artifact contains an expectedReleaseWindow but no committed resolutionDate, while the official BLS release calendar gives the exact September 2026 CPI release date as 2026-10-14. I accepted the uncertainty-calibration suggestion by explicitly noting the thin seven-print volatility sample in the interval step.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: I rejected the requested change to 2026-10-15 because the public registered target artifact contains an expectedReleaseWindow but no committed resolutionDate, while the official BLS release calendar gives the exact September 2026 CPI release date as 2026-10-14. I accepted the uncertainty-calibration suggestion by explicitly noting the thin seven-print volatility sample in the interval step.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "The draft is mostly publication-ready, with one blocking resolution-date mismatch risk against the canonical registered target context."
+    }
+  }
+]

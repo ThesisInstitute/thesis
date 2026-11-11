@@ -1,0 +1,368 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-08-26T16:25:30Z",
+  "runStartedAt": "2026-08-26T16:25:30Z",
+  "sealedAt": "2026-08-26T16:27:31Z",
+  "series": "ons.ppi.input_prices_yoy",
+  "period": "2026-08",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "uk-ppi-input-prices-annual-rate-august-2026",
+    "country": "UK",
+    "dataPointId": "ons.ppi.input_prices_yoy.2026_08.first_print",
+    "expectedReleaseDate": "2026-09-16",
+    "expectedReleaseWindow": {
+      "end": "2026-09-16",
+      "start": "2026-09-16"
+    },
+    "period": "2026-08",
+    "registeredAt": "2026-08-26T16:23:02Z",
+    "registeredAtUtc": "2026-08-26T16:23:02Z",
+    "registrationCommit": "b4f1d890f91c9ece5fc1e068a92fbe28ea25be43",
+    "registrationState": "preregistered",
+    "resolutionSourceUrl": "https://www.ons.gov.uk/releases/producerpriceinflationukaugust2026timeseries",
+    "series": "ons.ppi.input_prices_yoy",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.ons.gov.uk"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-09-16",
+        "start": "2026-09-16"
+      },
+      "field": "Total input producer prices, 12-month percentage change",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "PPI:GHIP",
+      "sourceUrl": "https://www.ons.gov.uk/releases/producerpriceinflationukaugust2026timeseries",
+      "table": "Producer price inflation time series",
+      "transform": {
+        "factor": 1,
+        "operation": "identity"
+      }
+    },
+    "sourceField": "Total input producer prices, 12-month percentage change",
+    "sourceSeriesId": "PPI:GHIP",
+    "sourceTable": "Producer price inflation time series",
+    "targetContentHash": "2c4797e85af3bb173fcc595dd241efba3eea6d9f2c854085b8195f60588ba1b6",
+    "targetRegistrationPath": "records/targets/2026-08-26-2c4797e85af3bb173fcc595dd241efba3eea6d9f2c854085b8195f60588ba1b6.json",
+    "targetUnit": "percent_growth",
+    "transform": {
+      "factor": 1,
+      "operation": "identity"
+    },
+    "valueScale": 1
+  },
+  "registrationCommit": "b4f1d890f91c9ece5fc1e068a92fbe28ea25be43",
+  "targetContentHash": "2c4797e85af3bb173fcc595dd241efba3eea6d9f2c854085b8195f60588ba1b6",
+  "targetRegistrationPath": "records/targets/2026-08-26-2c4797e85af3bb173fcc595dd241efba3eea6d9f2c854085b8195f60588ba1b6.json",
+  "registeredAtUtc": "2026-08-26T16:23:02Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-08-26T16:25:30Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "aacef16f0755ea956aa95fabf11a654aafb2eb4e37b21c622050c8cc22177081"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Consider making the base-rate sentence appear before the current-evidence bullets in the final trace, even though the compact math step already separates prior and update clearly."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the reviewer suggestion to place the base-rate/reference-class step before the current-evidence tool evidence; no required fixes were raised, and the resolver, unit, source grounding, interval arithmetic, and forecast numbers are unchanged.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "The draft is publishable: resolver fields match the ledger target, the first-print rule and unit are clear, and the prior/update/interval logic is coherent."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/prompt.md",
+      "sha256": "7da8467a337a5d5a3d50903bccb82fb05185a39e431782dc1fe55c644ab39018",
+      "bytes": 10638,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_command.json",
+      "sha256": "e3615c683e50980c4d71478c3422ab5e75784c55d87805bad554edfe04b7b365",
+      "bytes": 754,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_codex_stdout.jsonl",
+      "sha256": "dcfcd230e3ad735af39ad116feb24ed0c7208d5f0151e85296a64f4bdffb4afb",
+      "bytes": 1266716,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_codex_stderr.log",
+      "sha256": "d01f09892813c8f605fb0440cd69a8972549127f122d9134e55e77415028240f",
+      "bytes": 233,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_codex_events.jsonl",
+      "sha256": "f2caf646ed09e11e0c72ccbf6b94ab85896505ca7ec0eaa1f288698773a58cca",
+      "bytes": 1266777,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_codex_last_message.txt",
+      "sha256": "95fb3e07b90146b5befc9d85ca16ae9ac97ac5bb66003b21be04db0b340ff929",
+      "bytes": 6813,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_codex_trace.json",
+      "sha256": "15ff8572d40defbcb328f7f67d12e9d61304b46bcc989cfbb816b940ba44e37b",
+      "bytes": 559,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_stdout.txt",
+      "sha256": "95fb3e07b90146b5befc9d85ca16ae9ac97ac5bb66003b21be04db0b340ff929",
+      "bytes": 6813,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/draft_stderr.txt",
+      "sha256": "5bd44ca148121f3da9006ee44d90637d49ab6f23f3d468462a284a71024635b1",
+      "bytes": 248,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_prompt.md",
+      "sha256": "001faebb22a48353e4f48ac00625d81b2a61dd1a4b3e5740b85db921725877c7",
+      "bytes": 10187,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_command.json",
+      "sha256": "7ad6df05c9a7c17f545d4155abd02cd1e68f94976bd22bdeb903fd432fee2a52",
+      "bytes": 750,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "28c7511ff09f35b39044bebd16c5dfc2aba7f30eec8d4d7919e7e5cfeb7fa691",
+      "bytes": 719,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_codex_stderr.log",
+      "sha256": "eda792823b8d335a625f4a2172efdae7bb9207157b69fbc316c4252b120897fa",
+      "bytes": 233,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_codex_events.jsonl",
+      "sha256": "d27b1d908e2c536d6dbf55f69eb367aad4ea311026571c5f8f60fb7bf4be6a33",
+      "bytes": 741,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_codex_last_message.txt",
+      "sha256": "aca8b133ca58527ef5a62a6812f7c0eea7501dbbc7d27df2b1a8f3935d9f84d5",
+      "bytes": 395,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_codex_trace.json",
+      "sha256": "bbfc8bdbbefd38542c80b2ad162af32bb21ab22961d5af7b9fd8b86daa7b0e0b",
+      "bytes": 552,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_stdout.txt",
+      "sha256": "aca8b133ca58527ef5a62a6812f7c0eea7501dbbc7d27df2b1a8f3935d9f84d5",
+      "bytes": 395,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/pre_submit_review_stderr.txt",
+      "sha256": "511a230501fb9c8754a881dfa0a0345ac759adfdb93ddd09261b1247a33b7986",
+      "bytes": 248,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/revision_prompt.md",
+      "sha256": "152f4eb60d14b00e992073bb691b47b6af3042e620d43fd21b65f2d934fd32ea",
+      "bytes": 18782,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/command.json",
+      "sha256": "b55b515b6762bcf65a6a36e2cdd6145d99c767bb2e964b3c2e25e69adfb1f0f1",
+      "bytes": 748,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/codex_stdout.jsonl",
+      "sha256": "5823744ccc8bbbf95c147afc006fe17d3737f1609d0fe73ecd7a4a29a21f1c44",
+      "bytes": 7816,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/codex_stderr.log",
+      "sha256": "cf7b018bea272cfac25058d3d54606e827ccaca488316ffa8b79fbd917af40f8",
+      "bytes": 233,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/codex_events.jsonl",
+      "sha256": "991867534e6be2dccef9cbdac6bc761aa8f6e1f85f00f0c470a5dd7e85021407",
+      "bytes": 7838,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/codex_last_message.txt",
+      "sha256": "ec8eefc86a550e0859c06be347d11f0071b76e6ed2b98af76e3a4a2106d1ccc9",
+      "bytes": 7108,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/codex_trace.json",
+      "sha256": "b335db8ea4f336da00986ba664c946462b180b09d20c96e0cb17d37409383946",
+      "bytes": 551,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/stdout.txt",
+      "sha256": "ec8eefc86a550e0859c06be347d11f0071b76e6ed2b98af76e3a4a2106d1ccc9",
+      "bytes": 7108,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/stderr.txt",
+      "sha256": "6d14dea270a3b955058067b53455d6f0c3e3637046d2e398697d4396a28212dc",
+      "bytes": 248,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/raw_response.txt",
+      "sha256": "ec8eefc86a550e0859c06be347d11f0071b76e6ed2b98af76e3a4a2106d1ccc9",
+      "bytes": 7108,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/parsed_cells.json",
+      "sha256": "da810b72084040ed59adf5e4a5bb7ffe2a3588a44830be68542fbfa743f215c0",
+      "bytes": 8711,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/normalized_cells.json",
+      "sha256": "4e3f2b24271c75ca857775e759d41cca65d9b3c206e36f2dd236922c1186d1ba",
+      "bytes": 26085,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/distribution.json",
+      "sha256": "bb8ebec0edb253da8632ed371a855c1364c7adad3f1a0a6e2955d214314413f9",
+      "bytes": 13590,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/validation.json",
+      "sha256": "6e96c5a4f4a430ecc72b4369485fee62d4d20de22efe2e3a6a6c40234a90486d",
+      "bytes": 144,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/cells.with_activity.json",
+      "sha256": "a46f37905f405a118acbd9621797091114a7c394ee108cd1484b8ab8cc7b7b42",
+      "bytes": 38891,
+      "createdAt": "2026-08-26T16:25:30Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-25-30z-ons-ppi-input-prices-yoy-2026-08/manifest.json",
+      "sha256": "bb4594ab92873949cad18864ae028f9c1bb4dda2019368b2421237f81a477f40",
+      "bytes": 13686,
+      "createdAt": "2026-08-26T16:25:30Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "uk-ppi-input-prices-annual-rate-august-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "b4f1d890f91c9ece5fc1e068a92fbe28ea25be43",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "1a1cd27998ad87e9c80dfb09604c76b80df1b83d79b4338438f7bfa26d0f3807"
+}

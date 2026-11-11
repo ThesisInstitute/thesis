@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a091f4-5da0-7012-8f5a-713eadabdaad"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"summary\":\"Draft is publishable: it preserves the registered target contract, states a persistence prior, uses recent first-print history for a modest update, and gives coherent point, interval, tails, and JSON fields.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Consider shortening the resolutionRule discrepancy note so the operative resolver remains visually dominant.\",\"Clarify whether the July 2026 public-record lookup label is intentionally named august_2026.first_print to avoid reviewer confusion.\"]}"}}
+{"type":"turn.completed","usage":{"input_tokens":20046,"cached_input_tokens":9600,"output_tokens":616,"reasoning_output_tokens":516}}

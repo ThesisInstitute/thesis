@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-10-17T13:29:34Z",
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "8c4a0f86ff2b87cd076158b3899465f0cb838030",
+  "facts": [
+    {
+      "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-10-17T13:30:28Z",
+      "targetContentHash": "8b3a9c297b91e44b81cdda9bca2c64337b021348fba63395c4b5879b6e3e94be",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.agency.097.obligations_by_award_category.contracts-2026-10-17-43f483f9a81057e1.json.gz",
+        "sha256": "43f483f9a81057e17f5e4442a3f6e86ea7e3f9a3bfcc247ab23999dd4a5686d3",
+        "bytes": 375,
+        "gzipSha256": "750f85030356f7488065d7f11f35dd1a8d19f57b82f892ee2ba71c1bfd437433",
+        "gzipBytes": 178,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-10-17T13:32:15Z",
+      "targetContentHash": "e6964d48e8a09276874f5990a6155deca11583fde07f94e731a8355b70cb4f47",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.agency.097.awards.new_award_count-2026-10-17-b203ae989270c7a2.json.gz",
+        "sha256": "b203ae989270c7a25910dad8798358b58c1c332e01b1a119f38b7dd5d88a2a35",
+        "bytes": 116,
+        "gzipSha256": "c542b5bd6246bc978d3f00cbb31abafeeaf7262cf6855dfb670fa1be8053845b",
+        "gzipBytes": 113,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-10-17T13:30:28Z",
+      "targetContentHash": "41dd79f388ca4e5be3ffe71c6c375afc0cc75e0393ae1cb4d6347241b5637d8c",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.agency.097.awards.transaction_count-2026-10-17-6a8c1b007ee9e9d2.json.gz",
+        "sha256": "6a8c1b007ee9e9d2acb0e8fd32ea3c8248ec2484ce7190c014c5bed8530c6271",
+        "bytes": 156,
+        "gzipSha256": "7b03fa012c71b939395142c6ea0048800d0bb7dfaf8dec46559bbbe4ca0563bc",
+        "gzipBytes": 145,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-10-17T13:32:15Z",
+      "targetContentHash": "41650d52985f5a06fb5d4757aff12dff8b07f6451c3e7add3159b0791b50a391",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.search.spending_by_category.recipient.dod.contracts.distinct-2026-10-17-ada3c88388e7dcea.json.gz",
+        "sha256": "ada3c88388e7dceaf14a801dfbc34210383432311a570bf8b544f226d7891983",
+        "bytes": 7535814,
+        "gzipSha256": "86a918186c1106d689403acb11317543ae2e1e45fd79cad2476afea35ff150ab",
+        "gzipBytes": 2250126,
+        "contentEncoding": "gzip"
+      }
+    },
+    {
+      "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+      "sourceVintage": "2026-10-17",
+      "retrievedAt": "2026-10-17T13:39:51Z",
+      "targetContentHash": "b7ebec1228518b70de1c1c2f93d0b0084f260ea989d72d0b12968b776082e8cf",
+      "responseArchive": {
+        "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.search.spending_over_time.dod.contracts.small_business_obligation_share-2026-10-17-f7a20125e05ed9fa.json.gz",
+        "sha256": "f7a20125e05ed9fa842953b9286cd81a60be7aeb8008d5ca645348630bd9b258",
+        "bytes": 3594,
+        "gzipSha256": "eebd77dfe7a81407dfccc07b1d15bab723e85da4e0695d55b4723eb85b9c8e5b",
+        "gzipBytes": 1113,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.agency.097.obligations_by_award_category.contracts-2026-10-17-43f483f9a81057e1.json.gz",
+      "sha256": "750f85030356f7488065d7f11f35dd1a8d19f57b82f892ee2ba71c1bfd437433",
+      "bytes": 178,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.agency.097.awards.new_award_count-2026-10-17-b203ae989270c7a2.json.gz",
+      "sha256": "c542b5bd6246bc978d3f00cbb31abafeeaf7262cf6855dfb670fa1be8053845b",
+      "bytes": 113,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.agency.097.awards.transaction_count-2026-10-17-6a8c1b007ee9e9d2.json.gz",
+      "sha256": "7b03fa012c71b939395142c6ea0048800d0bb7dfaf8dec46559bbbe4ca0563bc",
+      "bytes": 145,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.search.spending_by_category.recipient.dod.contracts.distinct-2026-10-17-ada3c88388e7dcea.json.gz",
+      "sha256": "86a918186c1106d689403acb11317543ae2e1e45fd79cad2476afea35ff150ab",
+      "bytes": 2250126,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/responses/usaspending.search.spending_over_time.dod.contracts.small_business_obligation_share-2026-10-17-f7a20125e05ed9fa.json.gz",
+      "sha256": "eebd77dfe7a81407dfccc07b1d15bab723e85da4e0695d55b4723eb85b9c8e5b",
+      "bytes": 1113,
+      "createdAt": "2026-10-17T13:29:34Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-10-17/2026-10-17t13-29-34z-resolve-pending/manifest.json",
+      "sha256": "36ee3b3a3b537179e8d00b3fdf955597c06a6f648adde5ff0e75ac856a65f803",
+      "bytes": 5486,
+      "createdAt": "2026-10-17T13:29:34Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "580f4968fea5f486e62305104848f6c18d0c58d338d51af1d5b0cdbe50fbfbf5"
+}

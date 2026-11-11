@@ -1,14 +1,23 @@
+import { getPublishedForecasts } from "@/lib/forecast-publication";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CalibrationPlot } from "@/components/CalibrationPlot";
 import { EXPIRED_UNFORECAST_REGISTRATIONS } from "@/data/expired-unforecast-registrations";
 import { Header } from "@/components/Header";
-import { FORECAST_CELLS, formatValue } from "@/data/forecast-cells";
+import { formatValue } from "@/data/forecast-cells";
+import {
+  OVERDUE_TARGET_COUNT,
+  RESOLUTION_STATUS_META,
+} from "@/data/resolution-status";
 import {
   buildPredictionSpecs,
   buildRecordedPredictionRunRecords,
 } from "@/data/prediction-specs";
-import { buildBrierRewardExport } from "@/data/brier-lab";
+import {
+  buildBrierRewardExport,
+  isNormalizedScoreAggregateEligible,
+  summarizeNormalizedScores,
+} from "@/data/brier-lab";
 import {
   hasVerifiedClaimedChronology,
   loadPolicyEngineLedger,
@@ -34,7 +43,7 @@ function formatCoverage(value: number | null): string {
 
 export default async function CalibrationPage() {
   const ledger = await loadPolicyEngineLedger();
-  const forecasts = withResolvedOutcomes(FORECAST_CELLS, ledger);
+  const forecasts = withResolvedOutcomes(getPublishedForecasts(), ledger);
   const specs = buildPredictionSpecs(forecasts);
   const runs = buildRecordedPredictionRunRecords(forecasts, specs);
   const rewardExport = buildBrierRewardExport({
@@ -84,41 +93,28 @@ export default async function CalibrationPage() {
     const key = `${row.agent ?? ""}\u0000${row.model ?? ""}`;
     claimedByAgent.set(key, (claimedByAgent.get(key) ?? 0) + 1);
   }
-  const normalizedScores = scores.filter(
-    (score) => score.normalizedCrps !== null && score.sharpness !== null,
+  const normalizedSummary = summarizeNormalizedScores(scores);
+  const normalizedScores = normalizedSummary.eligibleScores;
+  const meanNormalizedCrps = normalizedSummary.meanNormalizedCrps;
+  const meanSharpness = normalizedSummary.meanSharpness;
+  const claimedNormalizedSummary = summarizeNormalizedScores(
+    publishedScores.filter(
+      (score) => score.chronology === "claimed_time_verified",
+    ),
   );
-  const meanNormalizedCrps =
-    normalizedScores.length > 0
-      ? normalizedScores.reduce(
-          (total, score) => total + (score.normalizedCrps ?? 0),
-          0,
-        ) / normalizedScores.length
-      : null;
-  const meanSharpness =
-    normalizedScores.length > 0
-      ? normalizedScores.reduce(
-          (total, score) => total + (score.sharpness ?? 0),
-          0,
-        ) / normalizedScores.length
-      : null;
-  const claimedNormalizedScores = publishedScores.filter(
-    (score) =>
-      score.chronology === "claimed_time_verified" &&
-      score.normalizedCrps !== null,
-  );
-  const claimedMeanNormalizedCrps =
-    claimedNormalizedScores.length > 0
-      ? claimedNormalizedScores.reduce(
-          (total, score) => total + (score.normalizedCrps ?? 0),
-          0,
-        ) / claimedNormalizedScores.length
-      : null;
+  const claimedNormalizedScores = claimedNormalizedSummary.eligibleScores;
+  const claimedMeanNormalizedCrps = claimedNormalizedSummary.meanNormalizedCrps;
   // Until the first custody-v2 cells resolve, the witnessed tier is empty
   // by construction. The cards stay honest but never lead with a wall of
   // zeros: each shows its best PUBLISHED tier as the primary number with
   // the tier named right on the card, and flips to witnessed automatically
   // once witnessed scores exist.
   const witnessedLive = scores.length > 0;
+  // `unresolvedRuns` counts forecast RUNS, several per target (agents,
+  // prompt modes, strategies), so it is larger than the number of pending
+  // forecasts on the home page. Say the unit, and say how many targets
+  // are past their date: each of those explains itself on its own page.
+  const awaitingResolution = `${rewardExport.counts.unresolvedRuns.toLocaleString()} forecast runs awaiting resolution (${OVERDUE_TARGET_COUNT.toLocaleString()} targets are past their resolution date as of ${RESOLUTION_STATUS_META.asOf}; each says why on its page)`;
 
   const leaderboard = [...rewardExport.leaderboard].sort((left, right) => {
     if (left.pairedCrpsRatioGeomean === null) return 1;
@@ -174,26 +170,24 @@ export default async function CalibrationPage() {
         >
           Scoring methodology v5 (2026-07-10): headline numbers count only
           witness-verified scores. A run enters the headline when its sealed
-          custody root was externally witnessed — an RFC 3161 timestamp in
-          the{" "}
+          custody root was externally witnessed — an RFC 3161 timestamp in the{" "}
           <a href="https://github.com/ThesisInstitute/thesis/blob/main/records/witnessed-timeline.json">
             witnessed chronology
           </a>{" "}
-          extracted from the public record chain — before the observation,
-          its custody inventory is complete and headline-eligible, and its
-          recorded run time precedes the observation (sub-day ordering
-          trusted only for explicit UTC-offset timestamps). A claimed
-          timestamp alone never enters the headline: scores whose chronology
-          rests on claimed times stay published in{" "}
-          <a href="/log.json">log.json</a>, flagged claimed-time-verified,
-          outside the official numbers, alongside unverified and violated
-          legacy runs. CRPS is normalized only by same-series ledger
-          dispersion frozen at target registration; scores without three
-          pre-cutoff ledger observations publish raw CRPS and stay out of
-          normalized means and rewards. The agent-versus-persistence headline
-          is a per-target RAW CRPS ratio against the paired ledger baseline,
-          which needs no scale at all — nothing a forecast authors can move
-          its denominator.
+          extracted from the public record chain — before the observation, its
+          custody inventory is complete and headline-eligible, and its recorded
+          run time precedes the observation (sub-day ordering trusted only for
+          explicit UTC-offset timestamps). A claimed timestamp alone never
+          enters the headline: scores whose chronology rests on claimed times
+          stay published in <a href="/log.json">log.json</a>, flagged
+          claimed-time-verified, outside the official numbers, alongside
+          unverified and violated legacy runs. CRPS is normalized only by
+          same-series ledger dispersion frozen at target registration; scores
+          without three pre-cutoff ledger observations publish raw CRPS and stay
+          out of normalized means and rewards. The agent-versus-persistence
+          headline is a per-target RAW CRPS ratio against the paired ledger
+          baseline, which needs no scale at all — nothing a forecast authors can
+          move its denominator.
         </p>
 
         <section className="mt-10 grid grid-cols-4 gap-4 max-md:grid-cols-2">
@@ -207,10 +201,10 @@ export default async function CalibrationPage() {
               detail: witnessedLive
                 ? `witness-verified; ${claimedOnlyCount.toLocaleString()} claimed-time-only and ${(
                     provisionalCount + violatedCount
-                  ).toLocaleString()} unverified or violated excluded, ${rewardExport.counts.unresolvedRuns.toLocaleString()} awaiting resolution`
+                  ).toLocaleString()} unverified or violated excluded, ${awaitingResolution}`
                 : `witness-verified: 0 — the official headline fills as custody-v2 cells resolve (first eligible prints land July 23). ${(
                     provisionalCount + violatedCount
-                  ).toLocaleString()} unverified or violated excluded, ${rewardExport.counts.unresolvedRuns.toLocaleString()} awaiting resolution, ${EXPIRED_UNFORECAST_REGISTRATIONS.length} registrations expired unforecast.`,
+                  ).toLocaleString()} unverified or violated excluded, ${awaitingResolution}, ${EXPIRED_UNFORECAST_REGISTRATIONS.length} registrations expired unforecast.`,
             },
             {
               label: "80% interval coverage",
@@ -229,10 +223,10 @@ export default async function CalibrationPage() {
                 ? formatCrps(meanNormalizedCrps)
                 : formatCrps(claimedMeanNormalizedCrps),
               detail: witnessedLive
-                ? `Lower is better; ${normalizedScores.length} of ${scores.length} witness-verified scores have a ledger scale. Mean sharpness ${
+                ? `Lower is better; ${normalizedScores.length} of ${scores.length} witness-verified scores have a usable ledger scale. Mean sharpness ${
                     meanSharpness === null ? "—" : meanSharpness.toFixed(2)
                   }× target scale.`
-                : `Lower is better; ${claimedNormalizedScores.length} of ${publishedScores.length} claimed-time scores have a pre-registered ledger scale.`,
+                : `Lower is better; ${claimedNormalizedScores.length} of ${publishedScores.length} claimed-time scores have a usable pre-registered ledger scale.`,
             },
             {
               label: "CRPS ratio vs persistence",
@@ -337,10 +331,9 @@ export default async function CalibrationPage() {
             Scores whose runs predate the witnessed custody chain: their
             recorded timestamps order them before their outcomes, but no
             independent timestamp proves it, so they sit one tier below the
-            headline — published and flagged in{" "}
-            <a href="/log.json">log.json</a>, never deleted. The headline
-            starts at zero by construction and fills as custody-v2 runs
-            resolve against official prints.
+            headline — published and flagged in <a href="/log.json">log.json</a>
+            , never deleted. The headline starts at zero by construction and
+            fills as custody-v2 runs resolve against official prints.
           </p>
         </section>
 
@@ -356,16 +349,15 @@ export default async function CalibrationPage() {
             style={{ color: "var(--theme-text-muted)" }}
           >
             Each score records the forecast distribution evaluated at the
-            official print (its probability integral transform), so coverage
-            is checkable at every stated interval, not just the elicited 80%.
-            A calibrated forecaster tracks the diagonal: above it means
-            intervals are too wide, below it too narrow. The PIT histograms
-            show the same thing distributionally — a calibrated forecaster
-            fills each bin equally; a U shape is overconfidence, a central
-            hump underconfidence. The curve reads coverage off each
-            forecast&apos;s materialized distribution, while the headline 80%
-            stat counts stated interval endpoints directly, so the two can
-            differ by a few scores.
+            official print (its probability integral transform), so coverage is
+            checkable at every stated interval, not just the elicited 80%. A
+            calibrated forecaster tracks the diagonal: above it means intervals
+            are too wide, below it too narrow. The PIT histograms show the same
+            thing distributionally — a calibrated forecaster fills each bin
+            equally; a U shape is overconfidence, a central hump
+            underconfidence. The curve reads coverage off each forecast&apos;s
+            materialized distribution, while the headline 80% stat counts stated
+            interval endpoints directly, so the two can differ by a few scores.
           </p>
           <div
             className="mt-5 rounded-[14px] border p-6"
@@ -379,9 +371,7 @@ export default async function CalibrationPage() {
                 (score) => score.probabilityIntegralTransform,
               )}
               claimedPits={allScores
-                .filter(
-                  (score) => score.chronology === "claimed_time_verified",
-                )
+                .filter((score) => score.chronology === "claimed_time_verified")
                 .map((score) => score.probabilityIntegralTransform)}
             />
           </div>
@@ -404,9 +394,9 @@ export default async function CalibrationPage() {
             forecasts every target as its last official print with a
             realized-volatility interval — an agent earns its place by beating
             it. Forecaster rows score here only when witness-verified; the
-            deterministic baseline is a replayable function of pre-cutoff
-            ledger data and needs no witness of its own. Rows with few scored
-            runs are noisy; read them accordingly.
+            deterministic baseline is a replayable function of pre-cutoff ledger
+            data and needs no witness of its own. Rows with few scored runs are
+            noisy; read them accordingly.
           </p>
           <div
             className="mt-5 overflow-x-auto rounded-[14px] border"
@@ -418,7 +408,9 @@ export default async function CalibrationPage() {
                   className="[font-family:var(--font-mono)] text-[0.6rem] uppercase tracking-[0.1em]"
                   style={{ color: "var(--theme-text-muted)" }}
                 >
-                  <th className="px-4 py-3 text-left font-normal">Forecaster</th>
+                  <th className="px-4 py-3 text-left font-normal">
+                    Forecaster
+                  </th>
                   <th className="px-4 py-3 text-right font-normal">
                     Scored / total runs
                   </th>
@@ -609,9 +601,9 @@ export default async function CalibrationPage() {
             style={{ color: "var(--theme-text-muted)" }}
           >
             Both published chronology tiers appear here. Only rows marked
-            witnessed — custody root externally witnessed before the
-            observation — count toward the headline numbers above; claimed
-            rows rest on recorded timestamps alone.
+            witnessed — custody root externally witnessed before the observation
+            — count toward the headline numbers above; claimed rows rest on
+            recorded timestamps alone.
           </p>
           <div
             className="mt-5 overflow-x-auto rounded-[14px] border"
@@ -637,9 +629,7 @@ export default async function CalibrationPage() {
                   <th className="px-4 py-3 text-right font-normal">
                     Chronology
                   </th>
-                  <th className="px-4 py-3 text-right font-normal">
-                    Normalized CRPS
-                  </th>
+                  <th className="px-4 py-3 text-right font-normal">Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -708,7 +698,9 @@ export default async function CalibrationPage() {
                         className="px-4 py-3 text-right [font-family:var(--font-mono)]"
                         style={{ color: "var(--theme-text)" }}
                       >
-                        {formatCrps(score.normalizedCrps)}
+                        {isNormalizedScoreAggregateEligible(score)
+                          ? `nCRPS ${formatCrps(score.normalizedCrps)}`
+                          : `raw CRPS ${formatCrps(score.crps)}`}
                       </td>
                     </tr>
                   );

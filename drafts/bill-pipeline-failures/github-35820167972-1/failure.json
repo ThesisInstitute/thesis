@@ -1,0 +1,40 @@
+{
+  "workflowRunId": 35820167972,
+  "runAttempt": 1,
+  "sourceCommit": "69d9ae2e500e77460016b37effc4cb52c7683854",
+  "operationalConclusion": "success",
+  "pairedProofSucceeded": false,
+  "publicationCommit": "b77c068b316b071e08838a8cecf54f70592613d2",
+  "newComparisonPublished": false,
+  "attestationId": 49430017,
+  "recorderRunId": 35821748292,
+  "retainedDiagnosticFiles": 84,
+  "omittedDiagnosticFiles": 0,
+  "sourceAuditIsFreshDiagnosticNotHistoricalReconstruction": true,
+  "files": {
+    "generate.log": {
+      "sha256": "5efedae7d5890bd1b28b4f2bc8a7a5af3d5ba61b67bf5c9ec423bc0e44adea32",
+      "bytes": 66631
+    },
+    "publication.log": {
+      "sha256": "db43f5c24b71fdc31c89b54b0e702bb01fa8ec9e67539fa95bcaf445e424d939",
+      "bytes": 397034
+    },
+    "selected-metadata-audit.json": {
+      "sha256": "b712cc5e219e3c1ab22f74ce97947223e91eda91733ddd8878f3aa8c8498c9ee",
+      "bytes": 13643
+    },
+    "selected-hashes.json": {
+      "sha256": "d6a5aba64624070d209b56da73bca9998819aa1b4f44a9eff919f9bdc88f3eb6",
+      "bytes": 5188
+    },
+    "fresh-adapter-comparison.json": {
+      "sha256": "f6c3f59fdc0d0e14b19c25c900618bed1370515af37806ca47438a201837b308",
+      "bytes": 5731
+    },
+    "strategy-targets.json": {
+      "sha256": "f5382610f479e276431b6479384b69a306241776227bc787c8380acc13ff1b03",
+      "bytes": 13128
+    }
+  }
+}

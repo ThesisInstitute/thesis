@@ -1,0 +1,26 @@
+{
+  "classification": "NEW public-source diagnostic; not reconstructed historical evidence",
+  "path": "/tmp/thesis-actc-35808962969-new-public-source-ard7cwpb/22in33ar.xls",
+  "sourceUrl": "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+  "fetchedAt": "2026-09-23T02:21:07.292130+00:00",
+  "status": 200,
+  "sameFinalUrl": true,
+  "contentType": "application/vnd.ms-excel",
+  "bytes": 104960,
+  "sha256": "f04012c527c5bf40e412e112597038d70fd79c017d9476c07eebc3b59e3766a4",
+  "matchesRetainedNativeResponseHash": true,
+  "decodedAwsShapeMatches": 0,
+  "base64AwsShapeMatches": 1,
+  "base64MatchMetadata": [
+    {
+      "encodedOffset": 109016,
+      "encodedLength": 20,
+      "matchedValueSha256": "56229638e7a001ea850e7ae300dc84b166d3b27f96233d844b0c21a948378206",
+      "decodedSpanStart": 81762,
+      "decodedSpanEnd": 81777,
+      "decodedSpanBytes": 15,
+      "decodedSpanZeroBytes": 10,
+      "decodedSpanAsciiPrintableBytes": 1
+    }
+  ]
+}

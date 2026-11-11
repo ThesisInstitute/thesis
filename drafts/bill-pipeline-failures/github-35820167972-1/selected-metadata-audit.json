@@ -1,0 +1,298 @@
+{
+  "workflowRunId": 35820167972,
+  "sourceSha": "69d9ae2e500e77460016b37effc4cb52c7683854",
+  "selectionSha256": "f5382610f479e276431b6479384b69a306241776227bc787c8380acc13ff1b03",
+  "selectionSetHash": "dcc92b43b04cd770d2094e5b218121555931ad406a7eae97bf236705990d82f6",
+  "bundleFiles": 84,
+  "diagnosticFiles": 84,
+  "diagnosticOmitted": [],
+  "diagnosticPublishable": false,
+  "inventoriesMatchByPathBytesSha256": true,
+  "runs": [
+    {
+      "runId": "2026-09-23t04-57-05z-irs-actc-total-claims-2027",
+      "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+      "ok": false,
+      "promptMode": "ladder",
+      "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+      "targetContentHash": "b92e9752beaf38a9e2e735c5066e7c741e29436546e7fab2c8d0568f05355909",
+      "historyCount": 4,
+      "periods": [
+        "2020",
+        "2021",
+        "2022",
+        "2023"
+      ],
+      "historyAvailability": {
+        "status": "official_source_exposes_fewer_than_six_prints",
+        "availablePrintCount": 4,
+        "detail": "The sealed registered irs-soi-pub1304 adapter exposes four verified canonical Table 3.3 ACTC claimant-return anchors for TY2020-TY2023. TY2018 and TY2019 IRS workbooks/pages were checked as public context, but the rounded Table A values are not counted as canonical resolver-series history."
+      },
+      "validation": {
+        "ok": false,
+        "cells": [
+          {
+            "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+            "ok": false,
+            "errors": [
+              "historicalContext has 4 distinct canonical prints; at least 6 are mandatory unless the sealed checkout's reviewed docket authorizes this exact series and target period"
+            ]
+          }
+        ]
+      },
+      "manifestRawSha256": "5055f928789a80d7d8559f9b5ad214b17105affc87242fcfe6feb4394834386a",
+      "custodyRootRawSha256": "b541029637c0c74a03b7557c258811d34015b8869fa76476976e96897da31fa4",
+      "declaredCustodyRootCanonicalSha256": "1eb80a38d2b21d5e6f84aa2ca129338fcf1dd7b093d9672418c8c858264dcc5c",
+      "custodyInventoryVersion": 2,
+      "custodyArtifactCount": 39,
+      "stages": [
+        {
+          "stage": "draft",
+          "valid": true,
+          "calls": 14,
+          "succeeded": 14,
+          "failed": 0,
+          "capturedFetches": 8,
+          "replayedCalculations": 6,
+          "replayedJsonExtractions": 0,
+          "evidenceSha256": "68c9ba9687cfb2d991ce35d4f9a8ad84cb318f4d6c5e23665e6380a925564cad",
+          "nativeHashCommitments": {
+            "codex_stdout.jsonl": "f7cc388a5c54a7b1d242a56ce969052ec00ac68098b452770336d5507fa17614",
+            "codex_events.jsonl": "05509d92b70dcd54039914b0d9d577d8edc0b6e830d52474a06b052072d1a8c4",
+            "codex_trace.json": "490bc85f6f3389ca2d8fd1523708f479baf1f99114f5a9b8672db83686c9eac6"
+          }
+        },
+        {
+          "stage": "review",
+          "valid": true,
+          "calls": 0,
+          "succeeded": 0,
+          "failed": 0,
+          "capturedFetches": 0,
+          "replayedCalculations": 0,
+          "replayedJsonExtractions": 0,
+          "evidenceSha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+          "nativeHashCommitments": {
+            "codex_stdout.jsonl": "205eec710b2cda6a876169aa40e3f311609710777d12c06b57fe50874602d7e5",
+            "codex_events.jsonl": "14fc7067379e7f7b95d2d9e2d7bd06a6d1c42ce28f84cafb760d721b0618d6f6",
+            "codex_trace.json": "f72a2d4fddec0d9c15996abfa01c916343d2ddd4def1b6a46aa744f1718993ed"
+          }
+        },
+        {
+          "stage": "final",
+          "valid": true,
+          "calls": 15,
+          "succeeded": 15,
+          "failed": 0,
+          "capturedFetches": 7,
+          "replayedCalculations": 8,
+          "replayedJsonExtractions": 0,
+          "evidenceSha256": "af43d99cd4dc61fa76240f1a791bfe5ba048ef97622166f78d913703aea96a99",
+          "nativeHashCommitments": {
+            "codex_stdout.jsonl": "c502bc9990cde1a73460c14aad3891d6b2856b3b9f956459e7d48d8034df46a2",
+            "codex_events.jsonl": "da21aa74cb99c64cca57b33a01e88db9da64acad933c7b9964156b1bd7cb0c5a",
+            "codex_trace.json": "0ec9711a218b8866e2a1ac88ac576b783cdfcdda84b21db71d99381881c73785"
+          }
+        }
+      ]
+    },
+    {
+      "runId": "2026-09-23t05-01-35z-irs-actc-total-claims-2027",
+      "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+      "ok": true,
+      "promptMode": "ladder",
+      "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+      "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+      "historyCount": 6,
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023"
+      ],
+      "historyAvailability": null,
+      "validation": {
+        "ok": true,
+        "cells": [
+          {
+            "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+            "ok": true,
+            "errors": []
+          }
+        ]
+      },
+      "manifestRawSha256": "91adf8a9a955757eac274042fde6a9f0412cdfe2d0f90284450b3d962990f958",
+      "custodyRootRawSha256": "685e870d256046b2c8139509d9e98060cc5e32a6b3b3a6f227c301b9d597fbac",
+      "declaredCustodyRootCanonicalSha256": "0945936223aab77c416e7f6ee3e379a8252884e7f280bd2a60a9db193d25eef5",
+      "custodyInventoryVersion": 2,
+      "custodyArtifactCount": 39,
+      "stages": [
+        {
+          "stage": "draft",
+          "valid": true,
+          "calls": 15,
+          "succeeded": 14,
+          "failed": 1,
+          "capturedFetches": 7,
+          "replayedCalculations": 7,
+          "replayedJsonExtractions": 0,
+          "evidenceSha256": "5d398c6575846fec3e2174baa2e4d617dcbd4681f2a427aa2163b5785213b077",
+          "nativeHashCommitments": {
+            "codex_stdout.jsonl": "d67baa3612671abcf2b409d86d33ae6c9f377fa2390d6e529e91683b02492d68",
+            "codex_events.jsonl": "af89eb7b67f5f07ee4f93f4620997b7094e2c309d54e13fd187ebd13c78f15fa",
+            "codex_trace.json": "17f04c9e742ff6c5cae9c30fc12c727e935e080585ad8f2cb2cebce57c641db4"
+          }
+        },
+        {
+          "stage": "review",
+          "valid": true,
+          "calls": 0,
+          "succeeded": 0,
+          "failed": 0,
+          "capturedFetches": 0,
+          "replayedCalculations": 0,
+          "replayedJsonExtractions": 0,
+          "evidenceSha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+          "nativeHashCommitments": {
+            "codex_stdout.jsonl": "b7294ed10bf08593663a8cf02122c3d9652e3bb2c275a8b429a7edab30935311",
+            "codex_events.jsonl": "1d0b88632b81b52751d301cafda5a03706d92f1309eca9607bb954e70fe560c4",
+            "codex_trace.json": "64631781e2d12717c5ca6cc57b5aa904cc2e122e2683a7885d6141c9679b45a0"
+          }
+        },
+        {
+          "stage": "final",
+          "valid": true,
+          "calls": 0,
+          "succeeded": 0,
+          "failed": 0,
+          "capturedFetches": 0,
+          "replayedCalculations": 0,
+          "replayedJsonExtractions": 0,
+          "evidenceSha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+          "nativeHashCommitments": {
+            "codex_stdout.jsonl": "21bbfa6ad26ce5711ac42a7fcddd3689557cfdf8b9a8ba1e0b8098a1ca7b0bc3",
+            "codex_events.jsonl": "1611a72ff7913994245c5d4518484077ea93938ed7419246eaae7c250b1bad23",
+            "codex_trace.json": "134acba0a523787f0f227857d26b73ccc464a353c5819d2b29dcb31cde77c993"
+          }
+        }
+      ]
+    }
+  ],
+  "selectedFiles": [
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/codex_trace.json",
+      "bytes": 560,
+      "sha256": "0ec9711a218b8866e2a1ac88ac576b783cdfcdda84b21db71d99381881c73785"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/custody_root.json",
+      "bytes": 9863,
+      "sha256": "b541029637c0c74a03b7557c258811d34015b8869fa76476976e96897da31fa4"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/draft_codex_trace.json",
+      "bytes": 562,
+      "sha256": "490bc85f6f3389ca2d8fd1523708f479baf1f99114f5a9b8672db83686c9eac6"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/draft_stdout.txt",
+      "bytes": 9276,
+      "sha256": "2eb3f8ef7bc65c56400ed6e6839583c560a603b922438b07683b4d57460a2834"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/draft_tool_evidence_verification.json",
+      "bytes": 2530,
+      "sha256": "28508ff7fecf9a510219a8716b483d99fff2a8c5f3db2182a304cdf791150644"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/manifest.json",
+      "bytes": 24635,
+      "sha256": "5055f928789a80d7d8559f9b5ad214b17105affc87242fcfe6feb4394834386a"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/normalized_cells.json",
+      "bytes": 30593,
+      "sha256": "e091e885780046898514e725acf4b05c1178cac8cad2567feac6f3653910677c"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/pre_submit_review_codex_trace.json",
+      "bytes": 559,
+      "sha256": "f72a2d4fddec0d9c15996abfa01c916343d2ddd4def1b6a46aa744f1718993ed"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/pre_submit_review_tool_evidence_verification.json",
+      "bytes": 406,
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t04-57-05z-irs-actc-total-claims-2027/tool_evidence_verification.json",
+      "bytes": 2606,
+      "sha256": "829320913c3bbf97530caf99e86f4fcbb19bd32edfda8493826551f7b7b76db2"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/codex_trace.json",
+      "bytes": 557,
+      "sha256": "134acba0a523787f0f227857d26b73ccc464a353c5819d2b29dcb31cde77c993"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/custody_root.json",
+      "bytes": 9858,
+      "sha256": "685e870d256046b2c8139509d9e98060cc5e32a6b3b3a6f227c301b9d597fbac"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_codex_trace.json",
+      "bytes": 562,
+      "sha256": "17f04c9e742ff6c5cae9c30fc12c727e935e080585ad8f2cb2cebce57c641db4"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_stdout.txt",
+      "bytes": 8497,
+      "sha256": "b41ade2dd98db330d0104a404e625d426eb58065381f855fa563a98b5e119275"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/draft_tool_evidence_verification.json",
+      "bytes": 2569,
+      "sha256": "a37ad4bd871726a328f97187d793d0f89388e71c83d9f1201354566aa5c709df"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/manifest.json",
+      "bytes": 24479,
+      "sha256": "91adf8a9a955757eac274042fde6a9f0412cdfe2d0f90284450b3d962990f958"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/normalized_cells.json",
+      "bytes": 29705,
+      "sha256": "7588ca5677187c2f39d183df6035bdd318c527f12a5d2dda1d746792e8703afb"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_codex_trace.json",
+      "bytes": 561,
+      "sha256": "64631781e2d12717c5ca6cc57b5aa904cc2e122e2683a7885d6141c9679b45a0"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/pre_submit_review_tool_evidence_verification.json",
+      "bytes": 406,
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/2026-09-23/2026-09-23t05-01-35z-irs-actc-total-claims-2027/tool_evidence_verification.json",
+      "bytes": 406,
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968"
+    },
+    {
+      "path": "bundle-selected/records/thesis-analyst/strategy-suites/2026-09-23/strategy-35820167972-a1.json",
+      "bytes": 665,
+      "sha256": "8b7e20c845b932f0743425db8f4d9c35f74182f061ee6538dcee222ad1b5f878"
+    }
+  ],
+  "selectedFileCount": 21,
+  "selectedFileBytes": 159855,
+  "limitations": [
+    "Only selected small metadata and forecast text were extracted; raw captured body blobs and native JSONL were not read.",
+    "Tool validity is reported by archived verification reports and cross-checked against custody hash metadata, not replayed locally.",
+    "No local tests, builds, forecast execution, full archive verification, or source workbook parsing occurred.",
+    "Operational workflow success and run custody are distinct from a complete valid conditional pair."
+  ]
+}

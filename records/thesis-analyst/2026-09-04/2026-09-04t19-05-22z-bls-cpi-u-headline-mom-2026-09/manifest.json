@@ -1,0 +1,384 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-04T19:05:22Z",
+  "runStartedAt": "2026-09-04T19:05:22Z",
+  "sealedAt": "2026-09-04T19:07:10Z",
+  "series": "bls.cpi.u.headline_mom",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-cpi-u-mom-september-2026",
+    "country": "US",
+    "dataPointId": "bls.cpi.u.headline_mom.september_2026.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-15",
+      "start": "2026-10-07"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-04T19:02:52Z",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "registrationState": "preregistered",
+    "series": "bls.cpi.u.headline_mom",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-15",
+        "start": "2026-10-07"
+      },
+      "field": "bls.cpi.u.headline_mom",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "bls.cpi.u.headline_mom",
+      "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
+      "table": "U.S. Bureau of Labor Statistics Consumer Price Index news release",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "c5c7ee4179242c4b5e0dbac49e81072b8f6c4db8b77f7caab6da662e8f65255f",
+    "targetRegistrationPath": "records/targets/2026-09-04-c5c7ee4179242c4b5e0dbac49e81072b8f6c4db8b77f7caab6da662e8f65255f.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "targetContentHash": "c5c7ee4179242c4b5e0dbac49e81072b8f6c4db8b77f7caab6da662e8f65255f",
+  "targetRegistrationPath": "records/targets/2026-09-04-c5c7ee4179242c4b5e0dbac49e81072b8f6c4db8b77f7caab6da662e8f65255f.json",
+  "registeredAtUtc": "2026-09-04T19:02:52Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-04T19:05:22Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "f41fdb9bc54d60a7d9b73b3199d25678b1596aa0e105301bf92b593fd029c60c"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "The draft sets resolutionDate to 2026-10-14 based on a fetched BLS schedule, but the supplied canonical ledger context frames the registered target around an expectedReleaseWindow ending 2026-10-15 and says these ledger fields are the target contract for resolutionDate.",
+        "actionRequested": "Make the cell's resolutionDate match the registered ledger target exactly, or explicitly confirm from the target registration that 2026-10-14 is the committed resolutionDate before publication."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Keep the reasoning note about the BLS schedule discrepancy if the ledger still uses the conservative window end."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The interval method is compact and coherent, but the seven-month volatility sample is thin; noting that limitation would make the uncertainty claim stronger."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: I rejected the requested change to 2026-10-15 because the public registered target artifact contains an expectedReleaseWindow but no committed resolutionDate, while the official BLS release calendar gives the exact September 2026 CPI release date as 2026-10-14. I accepted the uncertainty-calibration suggestion by explicitly noting the thin seven-print volatility sample in the interval step.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: I rejected the requested change to 2026-10-15 because the public registered target artifact contains an expectedReleaseWindow but no committed resolutionDate, while the official BLS release calendar gives the exact September 2026 CPI release date as 2026-10-14. I accepted the uncertainty-calibration suggestion by explicitly noting the thin seven-print volatility sample in the interval step.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: I rejected the requested change to 2026-10-15 because the public registered target artifact contains an expectedReleaseWindow but no committed resolutionDate, while the official BLS release calendar gives the exact September 2026 CPI release date as 2026-10-14. I accepted the uncertainty-calibration suggestion by explicitly noting the thin seven-print volatility sample in the interval step.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "The draft is mostly publication-ready, with one blocking resolution-date mismatch risk against the canonical registered target context."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/prompt.md",
+      "sha256": "c22543facd5dfd08fcad50fc492a6be6fb7fa36f5c0d7b5757ccac1f1ed3803e",
+      "bytes": 10573,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_command.json",
+      "sha256": "4170b490415dd0b39c2938d8b8ce817cf8a9970b73709546371be7bf67344486",
+      "bytes": 752,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "dbf195ae75f8a133dc903c6231d15c2f6f94c35ed1012bd3fdb7428405ee1dfd",
+      "bytes": 14116,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_stderr.log",
+      "sha256": "d9d7c498d084f86a3dbb6e811a4b974f42950c9ee032ca8cb8639817cd963176",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_events.jsonl",
+      "sha256": "ef9522bb9fc63d0d1c81548cf5913b155969edec3d7cad2dff1082d212bc9fe2",
+      "bytes": 14315,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_last_message.txt",
+      "sha256": "1074b05775fa507d5d6b201ec09eb5a5cf6f586207be7e85fbbb16ffede0bc32",
+      "bytes": 5416,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_codex_trace.json",
+      "sha256": "47ae1e4467b05bc881aa40901b6a78f8e6ea5ee846d9071a2867a9180838c73e",
+      "bytes": 559,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_stdout.txt",
+      "sha256": "1074b05775fa507d5d6b201ec09eb5a5cf6f586207be7e85fbbb16ffede0bc32",
+      "bytes": 5416,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/draft_stderr.txt",
+      "sha256": "2dc27acb19e54b7df03ae9ccf950de6fce5f52b145878730b994ae0f7aba0714",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_prompt.md",
+      "sha256": "87913b52b8608ee018277cfd5f30e3c83ec170caefaf3494217d43a06459ce2a",
+      "bytes": 8650,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_command.json",
+      "sha256": "5cbb81e4d3963c6c0e5f19684c3a733525ef52bb259a04a4a34cf4d40c615937",
+      "bytes": 748,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "4e98365b18554cb35af9fd9767c5f24ff1e8a3b30c2463230d7824faea5f2359",
+      "bytes": 1438,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "049394f74d680fe6776e5fde7121b48b7545fc8942457e4f5e26b101c3a0048b",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "b877c0ec6dc76e53c821f21544e41506aeefc4292967475ed1843b330bfbaf6d",
+      "bytes": 1460,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "23a0c4036be5d4bdb62f559e2c0da02e6f3a4290ff0c89731be9cdacdb434dc1",
+      "bytes": 1082,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "6ebdfc6527f2bb1c1f3c79e2d597612dbcf0e87aeaf5335de7002b7bc251bf34",
+      "bytes": 552,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "23a0c4036be5d4bdb62f559e2c0da02e6f3a4290ff0c89731be9cdacdb434dc1",
+      "bytes": 1082,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "6f01a3f8dca6628249dd4252e10879711e585b7de9d825a0302618db3c552f2c",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/revision_prompt.md",
+      "sha256": "e40f303f1c6d5d734ca13d5b2687d5cd402a8d3235d722476db6a129a82f3e88",
+      "bytes": 18007,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/command.json",
+      "sha256": "bf43e028390a2c353a295264845b36cfa6206222786a4a769c18ce85f844aec8",
+      "bytes": 746,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_stdout.jsonl",
+      "sha256": "707f7bf29b351f5afd96529efef39436db9acf336552d92f8e0195e748c80637",
+      "bytes": 9030,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_stderr.log",
+      "sha256": "0e24768c4c2357bd1216353bd9490285b97e508a1d57852f0ad6c07c1c9129cb",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_events.jsonl",
+      "sha256": "4ed6e658c796a93bdbdef715509ff91e88be8549cda55402681935aa8210928b",
+      "bytes": 9108,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_last_message.txt",
+      "sha256": "2c888633a3d72182c27d7d590db97b769017e1bb044a5802efa8d9ab93575a63",
+      "bytes": 5993,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/codex_trace.json",
+      "sha256": "a7a36973ac50c952417d4aadc121abd418b1899040ed69aae4f9dd96e9f212f6",
+      "bytes": 556,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/stdout.txt",
+      "sha256": "2c888633a3d72182c27d7d590db97b769017e1bb044a5802efa8d9ab93575a63",
+      "bytes": 5993,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/stderr.txt",
+      "sha256": "a91cab913d7e703f6707c0675d68d9995476fb80007db08b72c615a54d245e07",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/raw_response.txt",
+      "sha256": "2c888633a3d72182c27d7d590db97b769017e1bb044a5802efa8d9ab93575a63",
+      "bytes": 5993,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/parsed_cells.json",
+      "sha256": "34b18cc5a0d2c4aa359ec18d89dd10edfdf7d63d923bfbafbce73634d93f72a7",
+      "bytes": 7177,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/normalized_cells.json",
+      "sha256": "cf9ad55e732108587cef9f1a3a11701e6f27fd7323f973491ec0d385ecdbc067",
+      "bytes": 24748,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/distribution.json",
+      "sha256": "7a7696fd0aa0eba7aeca2589f1d491d6ab422bc0055ced7d5475813f54e6b5f7",
+      "bytes": 13787,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/validation.json",
+      "sha256": "5ff4e8912df6e30fdcf33257d1ff26dd54f996dd026b3485ec040d57186c8f96",
+      "bytes": 128,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/cells.with_activity.json",
+      "sha256": "b1290fcc8c328ebccdc0d2b8728047d25b88f9f2b1db753a7f5d025a7aa190d0",
+      "bytes": 39672,
+      "createdAt": "2026-09-04T19:05:22Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-05-22z-bls-cpi-u-headline-mom-2026-09/manifest.json",
+      "sha256": "76e7e9875052126ce1b57210ea71816055ffee8c2d6ebe5a6bdd686f5c8c8c93",
+      "bytes": 15131,
+      "createdAt": "2026-09-04T19:05:22Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "us-cpi-u-mom-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "c72417fad782dfde4d9067bcae3b209ceb9e84a81f04038f0a23de6a24bde3cb"
+}

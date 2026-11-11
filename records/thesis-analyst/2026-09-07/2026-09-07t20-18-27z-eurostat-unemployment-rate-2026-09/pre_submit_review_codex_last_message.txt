@@ -1,0 +1,9 @@
+{
+  "summary": "Draft is publishable with no blocking issues; it matches the ledger target and gives a coherent persistence-based forecast with an explicit volatility interval.",
+  "requiredFixes": [],
+  "optionalSuggestions": [
+    "Clarify that the April-July values read from the September Eurostat table may be revised current table values, while the separate January-July sequence is the intended first-print history.",
+    "Consider removing or shortening the prior Thesis August-run sentence, since it is not needed for the forecast and can invite catalog-circularity concerns even though it says it was not used as evidence.",
+    "Make the downside tail a little more concrete by naming the kind of labor-market improvement or denominator shift that would produce 6.1 percent or lower."
+  ]
+}

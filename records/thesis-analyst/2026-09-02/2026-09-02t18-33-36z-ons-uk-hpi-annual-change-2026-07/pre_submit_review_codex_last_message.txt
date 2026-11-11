@@ -1,0 +1,15 @@
+{
+  "summary": "Draft is publishable with no blocking issues; it states the resolver, prior, update, interval math, and JSON fields coherently.",
+  "requiredFixes": [
+    {
+      "rubricItem": "interval",
+      "severity": "warning",
+      "summary": "The interval uses dispersion of recent annual-change levels, not realized forecast error or month-to-month annual-rate volatility.",
+      "actionRequested": "Either relabel this as an explicit uncertainty choice or briefly justify why recent level dispersion is the intended proxy for 80% forecast uncertainty."
+    }
+  ],
+  "optionalSuggestions": [
+    "Clarify that the 0.4% July 2026 monthly assumption is a forecast assumption, not an observed value.",
+    "Keep the first-print wording tightly aligned to the ledger rule if same-day corrections have a defined treatment elsewhere."
+  ]
+}

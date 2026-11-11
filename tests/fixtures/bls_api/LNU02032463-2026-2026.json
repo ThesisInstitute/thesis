@@ -1,0 +1,4 @@
+{"status":"REQUEST_SUCCEEDED","responseTime":72,"message":[],"Results":{
+"series":
+[{"seriesID":"LNU02032463","data":[{"year":"2026","period":"M08","periodName":"August","latest":"true","value":"5709","footnotes":[{}]},{"year":"2026","period":"M07","periodName":"July","value":"5797","footnotes":[{}]},{"year":"2026","period":"M06","periodName":"June","value":"5691","footnotes":[{}]},{"year":"2026","period":"M05","periodName":"May","value":"5786","footnotes":[{}]},{"year":"2026","period":"M04","periodName":"April","value":"5692","footnotes":[{}]},{"year":"2026","period":"M03","periodName":"March","value":"5935","footnotes":[{}]},{"year":"2026","period":"M02","periodName":"February","value":"5796","footnotes":[{}]},{"year":"2026","period":"M01","periodName":"January","value":"5788","footnotes":[{"code":"12","text":"January 2026 estimates were revised to incorporate updated population controls. For more information, see www.bls.gov/cps/documentation.htm#pop."}]}]}]
+}}

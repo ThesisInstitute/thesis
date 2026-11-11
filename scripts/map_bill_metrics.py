@@ -35,11 +35,18 @@ class MappingError(ValueError):
 
 def load_registered_series(docket_path: pathlib.Path) -> list[str]:
     """Load registered series concept IDs, preserving docket order."""
+    return list(
+        dict.fromkeys(entry["series"] for entry in load_docket_entries(docket_path))
+    )
+
+
+def load_docket_entries(docket_path: pathlib.Path) -> list[dict]:
+    """Keep reviewed Chronicle identities, including conflicting period rows."""
     docket = json.loads(docket_path.read_text(encoding="utf-8"))
     if not isinstance(docket, dict) or not isinstance(docket.get("series"), list):
         raise MappingError("docket must be an object with a series array")
 
-    registered: list[str] = []
+    entries: list[dict] = []
     for index, entry in enumerate(docket["series"]):
         if not isinstance(entry, dict):
             raise MappingError(f"docket series entry {index} must be an object")
@@ -48,8 +55,19 @@ def load_registered_series(docket_path: pathlib.Path) -> list[str]:
             raise MappingError(
                 f"docket series entry {index} must have a nonempty series"
             )
-        registered.append(concept.strip())
-    return registered
+        ledger = entry.get("ledger")
+        if ledger is not None and (
+            not isinstance(ledger, dict)
+            or not all(
+                isinstance(ledger.get(key), str) and ledger[key].strip()
+                for key in ("uuid", "concept")
+            )
+        ):
+            raise MappingError(
+                f"docket series entry {index} has invalid ledger identity"
+            )
+        entries.append({"series": concept.strip(), "ledger": ledger})
+    return entries
 
 
 def load_catalog_series(catalog_path: pathlib.Path) -> list[dict]:
@@ -112,16 +130,17 @@ def load_catalog_series(catalog_path: pathlib.Path) -> list[dict]:
     return series
 
 
+def registered_match_candidates(hint: str, registered: Sequence[str]) -> list[str]:
+    """Exact identity wins; preserve every distinct descendant for review."""
+    if hint in registered:
+        return [hint]
+    return sorted({concept for concept in registered if concept.startswith(f"{hint}.")})
+
+
 def match_registered_series(hint: str, registered: Sequence[str]) -> str | None:
-    """Return the exact or first dot-descendant registry match for ``hint``."""
-    for concept in registered:
-        if concept == hint:
-            return concept
-    prefix = f"{hint}."
-    for concept in registered:
-        if concept.startswith(prefix):
-            return concept
-    return None
+    """Return only an exact or unambiguous dot-descendant registry match."""
+    candidates = registered_match_candidates(hint, registered)
+    return candidates[0] if len(candidates) == 1 else None
 
 
 def catalog_match_candidates(hint: str, catalog: Sequence[dict]) -> list[dict]:
@@ -164,7 +183,7 @@ def resolve_catalog_series(
         and entry["geography"].get("level") == "country"
         and entry["geography"].get("id") == "0100000US"
     ]
-    if len(national) == 1:
+    if len(national) == 1 and len({entry["concept"] for entry in candidates}) == 1:
         return national[0], candidates
     return None, candidates
 
@@ -220,6 +239,7 @@ def map_artifact(
     catalog: Sequence[dict],
     *,
     proposed_from: str,
+    docket_entries: Sequence[dict] = (),
 ) -> tuple[dict, list[dict]]:
     """Annotate an artifact in place and return unique ingestion requests."""
     provisions = artifact.get("provisions")
@@ -252,8 +272,44 @@ def map_artifact(
                 )
             hint = raw_hint.strip() if isinstance(raw_hint, str) else ""
             match = match_registered_series(hint, registered) if hint else None
+            registered_candidates = (
+                registered_match_candidates(hint, registered) if hint else []
+            )
             catalog_match, catalog_candidates = (
                 resolve_catalog_series(hint, catalog) if hint else (None, [])
+            )
+            canonical_candidates = (
+                registered_match_candidates(catalog_match["concept"], registered)
+                if catalog_match is not None
+                else []
+            )
+            canonical_rows = (
+                [
+                    entry
+                    for entry in docket_entries
+                    if entry["series"] == catalog_match["concept"]
+                ]
+                if catalog_match is not None
+                else []
+            )
+            # A concept match alone cannot translate a catalog alias into docket
+            # admission: a state row and a national row share concept strings.
+            # The exact concept AND Chronicle UUID must match every docket row.
+            catalog_registered_match = None
+            if (
+                catalog_match is not None
+                and catalog_match["concept"] in registered
+                and canonical_rows
+                and all(
+                    isinstance(entry.get("ledger"), dict)
+                    and entry["ledger"].get("uuid") == catalog_match["uuid"]
+                    and entry["ledger"].get("concept") == catalog_match["concept"]
+                    for entry in canonical_rows
+                )
+            ):
+                catalog_registered_match = catalog_match["concept"]
+            identity_conflict = (
+                bool(canonical_candidates) and catalog_registered_match is None
             )
 
             metric.pop("matched_series", None)
@@ -262,7 +318,18 @@ def map_artifact(
                 metric["registry"] = "reachable"
                 metric["matched_series"] = match
                 summary["reachable"] += 1
-            elif catalog_match is not None:
+            elif (
+                catalog_registered_match is not None and len(registered_candidates) <= 1
+            ):
+                metric["registry"] = "reachable"
+                metric["matched_series"] = catalog_registered_match
+                metric["ledger_uuid"] = catalog_match["uuid"]
+                summary["reachable"] += 1
+            elif (
+                catalog_match is not None
+                and len(registered_candidates) <= 1
+                and not identity_conflict
+            ):
                 metric["registry"] = "ledger"
                 metric["matched_series"] = catalog_match["concept"]
                 metric["ledger_uuid"] = catalog_match["uuid"]
@@ -270,7 +337,19 @@ def map_artifact(
             elif hint:
                 metric["registry"] = "not-yet"
                 summary["notYet"] += 1
-                if catalog_candidates:
+                if len(registered_candidates) > 1:
+                    note = (
+                        f"Ambiguous docket match for {hint!r}; candidates: "
+                        + ", ".join(registered_candidates)
+                        + ". A curator must select the exact outcome series."
+                    )
+                elif identity_conflict:
+                    note = (
+                        "Catalog identity does not exactly match the reviewed docket "
+                        "concept and Chronicle UUID. Review geography/entity and "
+                        "parent/child scope before mapping this metric to admission."
+                    )
+                elif catalog_candidates:
                     candidate_uuids = ", ".join(
                         entry["uuid"] for entry in catalog_candidates
                     )
@@ -338,7 +417,11 @@ def map_bill_metrics(
     registered = load_registered_series(docket_path)
     catalog = load_catalog_series(catalog_path)
     mapped, proposals = map_artifact(
-        artifact, registered, catalog, proposed_from=proposed_from
+        artifact,
+        registered,
+        catalog,
+        proposed_from=proposed_from,
+        docket_entries=load_docket_entries(docket_path),
     )
 
     output_path = mapped_output_path(input_path)

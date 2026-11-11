@@ -1,0 +1,149 @@
+[
+  {
+    "slug": "us-core-pce-mom-september-2026",
+    "country": "US",
+    "type": "data",
+    "title": "US core PCE MoM September 2026",
+    "question": "What will the U.S. Bureau of Economic Analysis report as the first-print seasonally adjusted monthly percent change in the PCE price index excluding food and energy for September 2026?",
+    "unit": "percent_growth",
+    "pointEstimate": 0.24,
+    "ciLow": 0.1,
+    "ciHigh": 0.38,
+    "confidence": 0.8,
+    "resolutionDate": "2026-10-29",
+    "resolutionSource": "U.S. Bureau of Economic Analysis, Personal Income and Outlays, September 2026",
+    "resolutionSourceUrl": "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+    "resolutionRule": "Resolve to the first BEA Personal Income and Outlays September 2026 release value for the seasonally adjusted PCE price index excluding food and energy, percent change from the preceding month, as shown in the release text or NIPA Table 2.8.7. Use the first public print only; do not use later revisions, annual updates after first publication, or same-day correction exceptions unless BEA explicitly replaces the release before public posting. Record in percent_growth, using BEA's reported rounding.",
+    "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        },
+        "label": "January 2026",
+        "value": 0.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        },
+        "label": "February 2026",
+        "value": 0.4
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "March 2026",
+        "value": 0.3
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "April 2026",
+        "value": 0.2
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "May 2026",
+        "value": 0.3
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "June 2026",
+        "value": 0.1
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        },
+        "label": "July 2026",
+        "value": 0.2
+      }
+    ],
+    "drivers": [
+      "Recent first-print core PCE monthly values averaged 0.27 percent",
+      "June and July cooled to 0.1 and 0.2 percent after firmer first-quarter prints",
+      "A small judgmental residual keeps the point estimate above a clean 0.2 percent recent-persistence forecast",
+      "No August or September PCE release information is public yet, so the forecast leans on BEA first-print history"
+    ],
+    "sourceContext": [
+      "https://www.bea.gov/news/schedule",
+      "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+      "https://www.bea.gov/news/2026/personal-income-and-outlays-january-2026",
+      "https://www.bea.gov/news/2026/personal-income-and-outlays-february-2026",
+      "https://www.bea.gov/news/2026/personal-income-and-outlays-march-2026",
+      "https://www.bea.gov/news/2026/personal-income-and-outlays-april-2026",
+      "https://www.bea.gov/news/2026/personal-income-and-outlays-may-2026",
+      "https://www.bea.gov/news/2026/personal-income-and-outlays-june-2026",
+      "https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026"
+    ],
+    "runAt": "2026-09-04T19:19:44Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "US core PCE MoM September 2026 forecast"
+      },
+      {
+        "kind": "text",
+        "text": "Framing and exact resolver: this targets BEA's first-print seasonally adjusted monthly percent change for the PCE price index excluding food and energy for September 2026, the same variant as BEA NIPA Table 2.8.7, Percent Change From Preceding Period in Prices for PCE by Major Type of Product. The registered ledger sourceBinding table text says August 2026, but the target period and dataPointId are September 2026 and the BEA schedule verifies the September 2026 Personal Income and Outlays release on 2026-10-29; I keep the forecast tied to the registered September target and treat the August table label as a ledger-label discrepancy."
+      },
+      {
+        "kind": "text",
+        "text": "Official calendar check: BEA's release schedule lists Personal Income and Outlays, September 2026 for October 29, 2026 at 8:30 AM, and lists the prior August 2026 release for September 30, 2026 at 8:30 AM; the resolution date is therefore the scheduled September 2026 first-print date, not an inferred cadence date."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "BEA January-March 2026 Personal Income and Outlays releases, core PCE price index excluding food and energy, percent change from preceding month",
+        "result": "Fetched first-print same-variant values: January 2026 = 0.4 percent, February 2026 = 0.4 percent, March 2026 = 0.3 percent."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "BEA April-June 2026 Personal Income and Outlays releases, core PCE price index excluding food and energy, percent change from preceding month",
+        "result": "Fetched first-print same-variant values: April 2026 = 0.2 percent, May 2026 = 0.3 percent, June 2026 = 0.1 percent."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "BEA July 2026 Personal Income and Outlays release and core PCE series page",
+        "result": "Fetched latest first-print same-variant value: July 2026 core PCE price index excluding food and energy = 0.2 percent month over month; BEA's core PCE series page shows July 2026 year-over-year = 3.3 percent and next release = September 30, 2026."
+      },
+      {
+        "kind": "text",
+        "text": "Base rate / reference class: the recent official first-print reference class is January through July 2026, with values 0.4, 0.4, 0.3, 0.2, 0.3, 0.1, and 0.2 percent. The simple base rate mean is 1.9 / 7 = 0.271 percent, while the most recent three prints average (0.3 + 0.1 + 0.2) / 3 = 0.200 percent."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior is the recent first-print mean, historical sample is seven BEA same-variant monthly core PCE prints from 2026-01 through 2026-07, intentionally short because it uses same-year first prints available before the target resolves. Adjustment components are -0.04 percentage point for cooling June-July momentum, +0.01 as a judgmental residual for core inflation persistence rather than a separately cited component estimate, and about 0.00 for one-off release mechanics because no September CPI/PPI bridge data are yet available. Point = 0.271 - 0.04 + 0.01 = 0.241, rounded to 0.24. For a change/flow series, use the values themselves for dispersion: sample sigma = 0.111 from [0.4, 0.4, 0.3, 0.2, 0.3, 0.1, 0.2]. The 80 percent half-width is roughly 1.28*sigma = 1.28*0.111 = 0.142, so bounds are 0.24 - 0.142 = 0.098 and 0.24 + 0.142 = 0.382, rounded to 0.10 and 0.38."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk: a renewed firming in core services, medical services, portfolio-management fees, or September source-data surprises would land above the interval if BEA prints about 0.4 percent or higher. Downside risk: weaker goods prices, softer shelter-related imputations, or broad disinflation in services would land below the interval if the first print is about 0.1 percent or lower. Outside the interval would most likely require a source-data shock rather than ordinary month-to-month noise."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the resolver cleanup by using the registered BEA core PCE series page as the stable resolutionSourceUrl while retaining the verified 2026-10-29 BEA schedule date and the ledger August-label discrepancy note; accepted the update critique by describing the +0.01 persistence term as a judgmental residual, and accepted the optional clarity point by repeating the rounded 0.10 to 0.38 interval in the calculation."
+      },
+      {
+        "kind": "forecast",
+        "point": 0.24,
+        "ciLow": 0.1,
+        "ciHigh": 0.38
+      }
+    ]
+  }
+]

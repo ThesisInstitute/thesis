@@ -1,0 +1,21 @@
+{
+  "summary": "Draft is mostly coherent, but it needs a structured official-announcement fetch event and a clearer quantitative bridge from the persistence prior to the point estimate.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "blocking",
+      "summary": "The reasoning says the official announcement page was fetched, but the draft does not show the required structured `thesis_announcement_fetch.fetch_official_announcement` event for the exact `resolutionSourceUrl`.",
+      "actionRequested": "Add or preserve the structured announcement-fetch tool event using `https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304` exactly; do not rely on prose, sourceContext, or same-host workbook fetches."
+    },
+    {
+      "rubricItem": "update",
+      "severity": "warning",
+      "summary": "The move from the latest normal-law value of 17.626084 million to a 22.142857 million point estimate is directionally explained but only loosely quantified.",
+      "actionRequested": "State a compact numeric update bridge, for example current-law/post-ARPA baseline plus estimated low-earnings eligibility/take-up increment, and tie that bridge to the final median."
+    }
+  ],
+  "optionalSuggestions": [
+    "Keep the six exact extracted IRS values and year labels as written; they satisfy the canonical-history requirement if the extraction call IDs are preserved.",
+    "Clarify that the 2024 workbook fetch failure was an official captured fetch failure, not evidence that no TY2024 publication exists."
+  ]
+}

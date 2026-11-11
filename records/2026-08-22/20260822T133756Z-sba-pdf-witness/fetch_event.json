@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "thesis_sba_pdf_fetch_event_v1",
+  "attemptedAt": "2026-08-22T13:37:56Z",
+  "outcome": "unchanged",
+  "landing": {
+    "requestedUrl": "https://www.sba.gov/document/report-small-business-administration-loan-program-performance",
+    "redirects": [
+      {
+        "sourceUrl": "https://www.sba.gov/document/report-small-business-administration-loan-program-performance",
+        "status": 302,
+        "location": "https://legacy.sba.gov/document/report-small-business-administration-loan-program-performance",
+        "targetUrl": "https://legacy.sba.gov/document/report-small-business-administration-loan-program-performance",
+        "headers": {
+          "Content-Type": "text/html; charset=UTF-8",
+          "Content-Length": "0",
+          "Date": "Sat, 22 Aug 2026 13:37:58 GMT",
+          "Location": "https://legacy.sba.gov/document/report-small-business-administration-loan-program-performance"
+        }
+      }
+    ],
+    "finalUrl": "https://legacy.sba.gov/document/report-small-business-administration-loan-program-performance",
+    "status": 200,
+    "contentType": "text/html; charset=utf-8",
+    "headers": {
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Length": "37099",
+      "Date": "Sat, 22 Aug 2026 13:37:58 GMT",
+      "Last-Modified": "Sat, 22 Aug 2026 13:37:58 GMT",
+      "ETag": "\"1787405878\""
+    },
+    "outcome": "success",
+    "bodySha256": "e949a7e0da405dcbed1a3a9dd05cee946986e08708d980d76d8274b97247031f",
+    "bodyBytes": 37099,
+    "error": null
+  },
+  "asset": {
+    "requestedUrl": "https://legacy.sba.gov/sites/default/files/2025-09/WebsiteReports_FY25Q3.zip",
+    "redirects": [],
+    "finalUrl": "https://legacy.sba.gov/sites/default/files/2025-09/WebsiteReports_FY25Q3.zip",
+    "status": 200,
+    "contentType": "application/zip",
+    "headers": {
+      "Content-Type": "application/zip",
+      "Content-Length": "1296419",
+      "Date": "Sat, 22 Aug 2026 13:37:58 GMT",
+      "Last-Modified": "Mon, 15 Sep 2025 18:14:59 GMT",
+      "ETag": "\"13c823-63edafb473b30\""
+    },
+    "outcome": "success",
+    "bodySha256": "51d5571d03d028d5efd4b8b9c8d7984f55285d36202eb8f67afe8a3476bb1242",
+    "bodyBytes": 1296419,
+    "error": null
+  },
+  "failure": null
+}

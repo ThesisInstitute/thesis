@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-09-02T18:33:35Z",
+  "finishedAt": "2026-09-02T18:38:12Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 2,
+  "ok": 2,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "uk-house-price-index-annual-rate-july-2026",
+        "country": "UK",
+        "dataPointId": "ons.uk_hpi.annual_change.2026_07.first_print",
+        "expectedReleaseDate": "2026-09-16",
+        "expectedReleaseWindow": {
+          "end": "2026-09-16",
+          "start": "2026-09-16"
+        },
+        "period": "2026-07",
+        "registeredAt": "2026-09-02T18:31:06Z",
+        "registeredAtUtc": "2026-09-02T18:31:06Z",
+        "registrationCommit": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+        "registrationState": "preregistered",
+        "resolutionSourceUrl": "https://www.gov.uk/government/collections/uk-house-price-index-reports",
+        "series": "ons.uk_hpi.annual_change",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.gov.uk"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-09-16",
+            "start": "2026-09-16"
+          },
+          "field": "Annual Change",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "UKHPI:K02000001:all-property-types:annual-change",
+          "sourceUrl": "https://www.gov.uk/government/collections/uk-house-price-index-reports",
+          "table": "UK House Price Index full file, United Kingdom row",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "sourceField": "Annual Change",
+        "sourceSeriesId": "UKHPI:K02000001:all-property-types:annual-change",
+        "sourceTable": "UK House Price Index full file, United Kingdom row",
+        "targetContentHash": "07be653389c2ef5984ed0ae11abda329a931f1585747e491ec5bbe0cc22d6670",
+        "targetRegistrationPath": "records/targets/2026-09-02-07be653389c2ef5984ed0ae11abda329a931f1585747e491ec5bbe0cc22d6670.json",
+        "targetUnit": "percent",
+        "transform": {
+          "factor": 1,
+          "operation": "identity"
+        },
+        "valueScale": 1
+      },
+      "startedAt": "2026-09-02T18:33:35Z",
+      "finishedAt": "2026-09-02T18:35:37Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/cells.with_activity.json",
+      "stdoutTail": "   \"bytes\": 25949,\n      \"createdAt\": \"2026-09-02T18:33:36Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/distribution.json\",\n      \"sha256\": \"1b1e47ca10164601c03cf88fcf2a91cd2e4481a868d8aaa856a5b3940edfe9db\",\n      \"bytes\": 13548,\n      \"createdAt\": \"2026-09-02T18:33:36Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/validation.json\",\n      \"sha256\": \"d787614ad8bea39601cacf120c495788c043d041e9b8b73c9409e2411eec7976\",\n      \"bytes\": 143,\n      \"createdAt\": \"2026-09-02T18:33:36Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/cells.with_activity.json\",\n      \"sha256\": \"83cb6f3a713511f9fb09e09fc26e615fb5be47b6f31b78e71ff50b2bf34ce16d\",\n      \"bytes\": 40518,\n      \"createdAt\": \"2026-09-02T18:33:36Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-02/2026-09-02t18-33-36z-ons-uk-hpi-annual-change-2026-07/manifest.json\",\n      \"sha256\": \"d3cb5985a31c47f45c6e9cabfa19afd0cf568aa1edb28124533c455e8f65d08a\",\n      \"bytes\": 15176,\n      \"createdAt\": \"2026-09-02T18:33:36Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"uk-house-price-index-annual-rate-july-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"e915c43aeba83b903f1c01b7fd2df8ed8e2c8391\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"14aa15210a3803be2ac6fea2ab51ffa41a34e4efa22450c85f59726e68b1968d\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "uk-production-output-index-july-2026",
+        "country": "UK",
+        "dataPointId": "ons.production.total_index.2026_07.first_print",
+        "expectedReleaseDate": "2026-09-11",
+        "expectedReleaseWindow": {
+          "end": "2026-09-11",
+          "start": "2026-09-11"
+        },
+        "period": "2026-07",
+        "registeredAt": "2026-09-02T18:31:06Z",
+        "registeredAtUtc": "2026-09-02T18:31:06Z",
+        "registrationCommit": "e915c43aeba83b903f1c01b7fd2df8ed8e2c8391",
+        "registrationState": "preregistered",
+        "resolutionSourceUrl": "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/indexofproduction",
+        "series": "ons.production.total_index",
+        "sourceBinding": {
+          "adapter": "generic-url",
+          "allowedHosts": [
+            "www.ons.gov.uk"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-09-11",
+            "start": "2026-09-11"
+          },
+          "field": "Total Production : Sections B, C, D and E (Index):CVM",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "L2KQ",
+          "sourceUrl": "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/indexofproduction",
+          "table": "Index of Production time series (DIOP)",
+          "transform": {
+            "factor": 1,
+            "operation": "identity"
+          }
+        },
+        "sourceField": "Total Production : Sections B, C, D and E (Index):CVM",
+        "sourceSeriesId": "L2KQ",
+        "sourceTable": "Index of Production time series (DIOP)",
+        "targetContentHash": "ac5b9a119c865fcf52c49a16a8e8598a8318cdd6bf67a9446158dbb5a666e37a",
+        "targetRegistrationPath": "records/targets/2026-09-02-ac5b9a119c865fcf52c49a16a8e8598a8318cdd6bf67a9446158dbb5a666e37a.json",
+        "targetUnit": "index_points",
+        "transform": {
+          "factor": 1,
+          "operation": "identity"
+        },
+        "valueScale": 1
+      },
+      "startedAt": "2026-09-02T18:35:37Z",
+      "finishedAt": "2026-09-02T18:38:12Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/cells.with_activity.json",
+      "stdoutTail": " \"bytes\": 26525,\n      \"createdAt\": \"2026-09-02T18:35:37Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/distribution.json\",\n      \"sha256\": \"64afaf4b78f5ede47be4ce494d74ac29c4cdf79b80e698dea7d7a1b64cbf15d8\",\n      \"bytes\": 13735,\n      \"createdAt\": \"2026-09-02T18:35:37Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/validation.json\",\n      \"sha256\": \"0d11465a36dfcd1d885f7f431e19bb84568d55354a5f61b3198586bc3437d859\",\n      \"bytes\": 137,\n      \"createdAt\": \"2026-09-02T18:35:37Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/cells.with_activity.json\",\n      \"sha256\": \"6929f9ab688449c7401c9472a050058a4e6a3beac600475960afae11a6f4f882\",\n      \"bytes\": 41150,\n      \"createdAt\": \"2026-09-02T18:35:37Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-09-02/2026-09-02t18-35-37z-ons-production-total-index-2026-07/manifest.json\",\n      \"sha256\": \"59c44d93219f453056578095ff813591edc3010fdc93de7c0277539f6ddc6ec1\",\n      \"bytes\": 15251,\n      \"createdAt\": \"2026-09-02T18:35:37Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"uk-production-output-index-july-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"e915c43aeba83b903f1c01b7fd2df8ed8e2c8391\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"269fd2f8ce2b2c77fc31d7cacf25a3b8813b117cb424c91bbf886d03dfc0af91\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "summary": "The forecast is mostly coherent, but it needs source URL cleanup and better support for the policy-tightening adjustment before publication.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "warning",
+      "summary": "The main resolutionSourceUrl is correct, but sourceContext and reasoning repeatedly cite `fna.usda.gov` instead of the registered FNS host `www.fns.usda.gov`.",
+      "actionRequested": "Replace the typo URLs and text references with the registered USDA FNS SNAP page URL and host."
+    },
+    {
+      "rubricItem": "update",
+      "severity": "warning",
+      "summary": "The -0.150 million policy/administrative tightening adjustment is not tied to a concrete cited policy, administrative change, or observed evidence beyond the recent trend.",
+      "actionRequested": "Either cite and describe the specific current evidence supporting the additional -0.150 million adjustment, or remove/reduce it and leave the point driven by the stated persistence model."
+    }
+  ],
+  "optionalSuggestions": [
+    "State explicitly that 2027-02-15 is the registered resolve-by-bound date at the end of the expected release window, not an official FNS announced release date.",
+    "Clarify whether the interval only reflects monthly residual volatility, since it does not separately widen for uncertainty in the trend choice or policy adjustment."
+  ]
+}

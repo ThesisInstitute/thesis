@@ -13,7 +13,10 @@ re-verifies forever after:
    rows survive; an entry's ``extras.country`` further requires the matching
    country id (US uses the Census id ``0100000US``).
 2. cadence: the row's cadence must equal the docket cadence's ledger period
-   type.
+   type. A registered-query snapshot of a fiscal year (an annual entry whose
+   period is ``YYYY``, ``FYYYYY`` or ``fy_YYYY``) is written with period type
+   ``fiscal_year``, so it requires a ``fiscal_year`` row
+   (see ``observed_period_type``).
 3. unit: the row's unit must agree with the docket ``targetUnit`` modulo the
    entry's declared ``valueScale`` transform (see ``units_agree``).
 4. source binding: when the entry declares
@@ -37,6 +40,7 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import re
 import sys
 from typing import Any
 
@@ -65,10 +69,49 @@ COUNTRY_IDS = {
 # deliberately by duplication, with tests/test_docket_ledger_containment.py:
 # the containment gate must not import the tool it audits.
 UNIT_SCALE = {"units": 1.0, "thousands": 1e3, "millions": 1e6, "billions": 1e9}
+# The base unit Chronicle stores each scaled target unit in. A copy for the same
+# reason; tests/test_ledger_units.py holds it to scripts/ledger_units.py.
+BASE_UNIT = {
+    "thousands": "count",
+    "millions": "count",
+    "usd_millions": "usd",
+    "usd_billions": "usd",
+    "billions USD": "usd",
+    "gbp_billions": "gbp",
+    "million_cubic_feet": "cubic_feet",
+}
 
 
 class StampError(ValueError):
     """The docket cannot be mapped uniquely into the ledger catalog."""
+
+
+def observed_period_type(entry: dict[str, Any]) -> str | None:
+    """The period type an observed Ledger row for this entry must carry.
+
+    The USAspending leg writes a registered-query snapshot of a fiscal year
+    with period type ``fiscal_year`` although the docket calls the entry
+    annual, and the catalog derives an observed row's cadence from its rows.
+    Kept in sync, deliberately by duplication, with ``_observed_cadence`` in
+    tests/test_docket_ledger_containment.py.
+    """
+
+    cadence = entry.get("cadence")
+    expected = (
+        CADENCE_TO_PERIOD_TYPE.get(cadence) if isinstance(cadence, str) else None
+    )
+    extras = entry.get("extras")
+    binding = extras.get("sourceBinding") if isinstance(extras, dict) else None
+    period = entry.get("period")
+    if (
+        expected == "year"
+        and isinstance(binding, dict)
+        and binding.get("releasePolicy") == "registered_query_snapshot"
+        and isinstance(period, str)
+        and re.fullmatch(r"(?:fy_?)?(\d{4})", period, re.IGNORECASE)
+    ):
+        return "fiscal_year"
+    return expected
 
 
 def units_agree(
@@ -77,15 +120,18 @@ def units_agree(
     """Whether a docket targetUnit is the catalog unit modulo valueScale.
 
     Identical units always agree (``valueScale`` describes the transform
-    from the publisher's raw feed, whose frame varies by entry). Differing
-    units agree only when both are pure magnitude units and the declared
-    ``valueScale`` converts catalog-unit values into target-unit values:
-    value_in_target = value_in_catalog * valueScale, i.e.
+    from the publisher's raw feed, whose frame varies by entry), and so does a
+    scaled target unit with the base unit Chronicle stores it in. Other
+    differing units agree only when both are pure magnitude units and the
+    declared ``valueScale`` converts catalog-unit values into target-unit
+    values: value_in_target = value_in_catalog * valueScale, i.e.
     scale(target) == scale(catalog) / valueScale.
     """
     if target_unit is None or catalog_unit is None:
         return True
     if target_unit == catalog_unit:
+        return True
+    if isinstance(target_unit, str) and BASE_UNIT.get(target_unit) == catalog_unit:
         return True
     if type(value_scale) not in (int, float) or not value_scale:
         return False
@@ -165,7 +211,7 @@ def _resolve_concept_candidates(
             for row in national
             if (row.get("geography") or {}).get("id") == expected_id
         ]
-    expected_cadence = CADENCE_TO_PERIOD_TYPE.get(entry.get("cadence"))
+    expected_cadence = observed_period_type(entry)
     if expected_cadence is not None:
         national = [
             row for row in national if row.get("cadence") == expected_cadence

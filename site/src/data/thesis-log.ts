@@ -11,6 +11,8 @@ import type {
   Unit,
 } from "./forecast-cells";
 import { getForecastRunEntries } from "./forecast-cells";
+import { isUnit } from "./units";
+import { verifyForecastRun } from "@/lib/forecast-publication";
 import {
   conditionForCell,
   conditionStatusFor,
@@ -48,6 +50,21 @@ import {
 } from "./ledger-targets";
 import { createHash } from "node:crypto";
 import { canonicalStringify, sha256Hex } from "./canonical-json";
+import {
+  assertAppendGateAssertionVersions,
+  currentLedgerView,
+  firstAcceptedSequence,
+  firstObservedAt,
+  observationAssertionId,
+  observationSupersedes,
+  supersededContentAddresses,
+} from "./ledger-current-view";
+import {
+  foldLedgerRestatements,
+  isUnitRestatement,
+  recordedPair,
+  type LedgerRestatement,
+} from "./ledger-restatements";
 import ledgerPinJson from "./ledger-pin.json";
 import {
   LEDGER_AVAILABILITY,
@@ -57,6 +74,7 @@ import {
 import {
   buildLedgerPersistenceBaseline,
   ledgerHistoryAtCutoff,
+  PERSISTENCE_BASELINE_AGENT,
   TIME_SERIES_PRIOR_VARIANT_ID,
 } from "./time-series-priors";
 import {
@@ -134,6 +152,18 @@ export interface ObservationRecordedLedgerEntry extends ResolvedOutcome {
   // publisher's observedAt, which a backfill can predate.
   resolutionRecordedAt?: string;
   assertionVersion?: { id: string; supersedes: string | null };
+  // Set only on a pre-versioning row that a later correction supersedes: its
+  // av2 content address, which is the id that correction names. Every other
+  // row is addressed by its explicit assertionVersion.id or cannot be
+  // superseded at all (ledger-current-view.ts).
+  supersededContentAddress?: string;
+  // Set only on a correction of a restated row: the id of the row it replaces
+  // on the site, where the restatement it names is no entry.
+  gradedSupersedes?: string;
+  // What Chronicle stores for a row the resolver wrote in base units. value and
+  // unit above read the pair it recorded in the registered unit.
+  ledgerValue?: number;
+  ledgerUnit?: Unit;
   sourceBindingProjection?: SourceBindingProjection;
   responseArchive?: {
     path: string;
@@ -288,6 +318,9 @@ export interface PolicyEngineLedgerExport {
     observations: number;
   };
   entries: PolicyEngineLedgerEntry[];
+  // Rows Chronicle holds that say an entry's value in base units. They sit
+  // apart from the entries because nothing grades on them.
+  restatements?: LedgerRestatement[];
 }
 
 export const THESIS_LOG_CHUNK_SIZE = 100;
@@ -447,13 +480,25 @@ interface PolicyEngineAggregateFactRow {
   };
 }
 
-let policyEngineLedgerPromise: Promise<PolicyEngineLedgerEntry[]> | null = null;
+interface PinnedPolicyEngineLedger {
+  entries: PolicyEngineLedgerEntry[];
+  restatements: LedgerRestatement[];
+}
+
+let policyEngineLedgerPromise: Promise<PinnedPolicyEngineLedger> | null = null;
 
 export async function loadPolicyEngineLedger(): Promise<
   PolicyEngineLedgerEntry[]
 > {
   policyEngineLedgerPromise ??= fetchPolicyEngineLedger();
-  return policyEngineLedgerPromise;
+  return (await policyEngineLedgerPromise).entries;
+}
+
+export async function loadPolicyEngineLedgerRestatements(): Promise<
+  LedgerRestatement[]
+> {
+  policyEngineLedgerPromise ??= fetchPolicyEngineLedger();
+  return (await policyEngineLedgerPromise).restatements;
 }
 
 export function resetPolicyEngineLedgerCache() {
@@ -463,11 +508,32 @@ export function resetPolicyEngineLedgerCache() {
 export function parsePolicyEngineLedgerFacts(
   jsonl: string,
 ): PolicyEngineLedgerEntry[] {
-  return jsonl
+  const lines = jsonl
     .split("\n")
     .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => mapPolicyEngineAggregateFactToObservation(JSON.parse(line)));
+    .filter(Boolean);
+  const rows = lines.map((line) => JSON.parse(line) as unknown);
+  assertAppendGateAssertionVersions(rows);
+  return foldLedgerRestatements(mapPolicyEngineLedgerRows(rows), rows, lines)
+    .entries;
+}
+
+// Maps parsed Chronicle rows in ledger order, one entry per line. A
+// pre-versioning row that a correction supersedes also gets the content address
+// that correction names, so the current view can drop it after the raw row is
+// gone. Callers verify the append gate's assertion-version invariants first and
+// fold restatements afterwards.
+export function mapPolicyEngineLedgerRows(
+  rows: readonly unknown[],
+): ObservationRecordedLedgerEntry[] {
+  const addresses = supersededContentAddresses(rows, isUnitRestatement);
+  return rows.map((row, index) => {
+    const entry = mapPolicyEngineAggregateFactToObservation(
+      row as PolicyEngineAggregateFactRow,
+    );
+    const address = addresses[index];
+    return address ? { ...entry, supersededContentAddress: address } : entry;
+  });
 }
 
 function assertPinnedLedgerBytes(raw: Buffer, pin: PolicyEngineLedgerPin) {
@@ -583,7 +649,10 @@ function enrichWithAcceptance(
     );
   }
   const lineSha256 = createHash("sha256").update(line, "utf8").digest("hex");
-  if (row.lineSha256 !== lineSha256 || row.sourceRecordId !== entry.dataPointId) {
+  if (
+    row.lineSha256 !== lineSha256 ||
+    row.sourceRecordId !== entry.dataPointId
+  ) {
     throw new Error(
       `ledger line ${index + 1} (${entry.dataPointId}) does not match its ` +
         `availability record (${row.sourceRecordId})`,
@@ -606,7 +675,7 @@ function mapPolicyEngineAggregateFactToObservation(
 ): ObservationRecordedLedgerEntry {
   assertPolicyEngineFactShape(fact);
 
-  return {
+  const entry: ObservationRecordedLedgerEntry = {
     kind: "observation_recorded",
     observationId: `obs.${fact.source_record_id}`,
     dataPointId: fact.source_record_id,
@@ -630,6 +699,19 @@ function mapPolicyEngineAggregateFactToObservation(
     sourceBindingProjection: fact.sourceBindingProjection,
     responseArchive: fact.responseArchive,
   };
+  const recorded = recordedPair(fact);
+  if (!recorded) return entry;
+  return {
+    ...entry,
+    value: recorded.value,
+    unit: recorded.unit,
+    sourceBindingProjection: fact.sourceBindingProjection && {
+      ...fact.sourceBindingProjection,
+      unit: recorded.unit,
+    },
+    ledgerValue: fact.value,
+    ledgerUnit: fact.measure.unit,
+  };
 }
 
 // The committed pin also closes a freshness hole the branch URL had:
@@ -638,7 +720,7 @@ function mapPolicyEngineAggregateFactToObservation(
 // was rebuilt for (live-caught 2026-07-10: 21 fresh resolutions, unchanged
 // scoreboard). A commit-pinned raw URL is content-addressed by path, and
 // the byte-hash check below fails closed on any anomaly.
-async function fetchPolicyEngineLedger(): Promise<PolicyEngineLedgerEntry[]> {
+async function fetchPolicyEngineLedger(): Promise<PinnedPolicyEngineLedger> {
   const pin = POLICYENGINE_LEDGER_PIN;
   if (LEDGER_AVAILABILITY_HEAD_SHA !== pin.sha) {
     throw new Error(
@@ -653,18 +735,25 @@ async function fetchPolicyEngineLedger(): Promise<PolicyEngineLedgerEntry[]> {
     );
   }
   const raw = await fetchPinnedPolicyEngineLedgerBytes(pin);
-  const facts = raw
+  const lines = raw
     .toString("utf-8")
     .split("\n")
-    .filter((line) => line.trim())
-    .map((line, index) =>
-      enrichWithAcceptance(
-        mapPolicyEngineAggregateFactToObservation(JSON.parse(line)),
-        line,
-        index,
-      ),
-    );
-  return [...THESIS_TARGET_LEDGER, ...facts];
+    .filter((line) => line.trim());
+  const rows = lines.map((line) => JSON.parse(line) as unknown);
+  // Grading reads the supersede-aware current view, so the site holds the
+  // pinned rows to the append gate's assertion-version invariants: a port
+  // that drifted from receipt fails the build here instead of letting a
+  // superseded row grade.
+  assertAppendGateAssertionVersions(rows);
+  // Every line needs its acceptance record, so restatements fold in afterwards.
+  const { entries, restatements } = foldLedgerRestatements(
+    mapPolicyEngineLedgerRows(rows).map((entry, index) =>
+      enrichWithAcceptance(entry, lines[index], index),
+    ),
+    rows,
+    lines,
+  );
+  return { entries: [...THESIS_TARGET_LEDGER, ...entries], restatements };
 }
 
 function assertPolicyEngineFactShape(
@@ -690,24 +779,6 @@ function assertPolicyEngineFactShape(
       `Ledger fact ${fact.source_record_id} has unsupported unit ${fact.measure.unit}`,
     );
   }
-}
-
-function isUnit(unit: string): unit is Unit {
-  return [
-    "percent",
-    "count",
-    "gbp_billions",
-    "usd",
-    "usd_millions",
-    "usd_billions",
-    "usd_monthly",
-    "thousands",
-    "millions",
-    "million_cubic_feet",
-    "per_1000_live_births",
-    "ratio",
-    "percent_growth",
-  ].includes(unit);
 }
 
 function formatLedgerSource(source: PolicyEngineAggregateFactRow["source"]) {
@@ -925,10 +996,10 @@ function buildPredictionResolvedLogEntry(
   return {
     kind: "prediction_resolved",
     resolutionRef: buildResolutionRef(forecast.slug),
-    resolutionEventId: buildResolutionEventId({
-      forecastSlug: forecast.slug,
-      observationId: observation.observationId,
-    }),
+    resolutionEventId: buildObservationResolutionEventId(
+      forecast.slug,
+      observation,
+    ),
     forecastSlug: forecast.slug,
     recordedAt: observation.resolvedAt,
     dataPointId: observation.dataPointId,
@@ -1128,9 +1199,22 @@ export function buildPredictionResolutionEvents(
 
 export function buildPolicyEngineLedgerExport(
   entries: PolicyEngineLedgerEntry[],
+  restatements: LedgerRestatement[] = [],
 ): PolicyEngineLedgerExport {
   const targets = entries.filter(isTargetRegisteredLedgerEntry);
   const observations = entries.filter(isObservationRecordedLedgerEntry);
+  // supersededContentAddress and gradedSupersedes index the current view inside
+  // the site. Both are recomputable from the rows, so a correction does not
+  // change what the export says about the row it replaces.
+  const published = entries.map((entry) => {
+    if (!isObservationRecordedLedgerEntry(entry)) return entry;
+    const {
+      supersededContentAddress: _address,
+      gradedSupersedes: _graded,
+      ...row
+    } = entry;
+    return row;
+  });
 
   return {
     schemaVersion: "policyengine_ledger_v1",
@@ -1145,7 +1229,8 @@ export function buildPolicyEngineLedgerExport(
       targets: targets.length,
       observations: observations.length,
     },
-    entries,
+    entries: published,
+    ...(restatements.length > 0 ? { restatements } : {}),
   };
 }
 
@@ -1222,9 +1307,8 @@ export function buildThesisLogData(
       // external witness proves it), unverified (no trustworthy run time),
       // and violated (run time at/after the observation) scores stay in
       // `scores` for transparency but are outside the official track record.
-      scored: scores.filter(
-        (score) => score.chronology === "witness_verified",
-      ).length,
+      scored: scores.filter((score) => score.chronology === "witness_verified")
+        .length,
       scoredClaimedTimeChronology: scores.filter(
         (score) => score.chronology === "claimed_time_verified",
       ).length,
@@ -1341,11 +1425,14 @@ export function buildForecastJudgeLogSummary(
   };
 }
 
+// Both lookups read the ledger's current view. An original and its
+// correction share observationId and dataPointId, so without it the
+// first-print sort ties them and keeps the superseded original.
 export function getObservationForId(
   observationId: string,
   ledger: PolicyEngineLedgerEntry[],
 ): ObservationRecordedLedgerEntry | undefined {
-  return ledger
+  return currentLedgerView(ledger)
     .filter(isObservationRecordedLedgerEntry)
     .filter((entry) => entry.observationId === observationId)
     .sort(compareFirstPrintObservations)[0];
@@ -1355,7 +1442,7 @@ export function getObservationsForDataPoint(
   dataPointId: string,
   ledger: PolicyEngineLedgerEntry[],
 ): ObservationRecordedLedgerEntry[] {
-  return ledger
+  return currentLedgerView(ledger)
     .filter(isObservationRecordedLedgerEntry)
     .filter((entry) => entry.dataPointId === dataPointId);
 }
@@ -1444,9 +1531,7 @@ export function classifyScoreChronology(
   }
   const observedInstant = explicitInstantOf(observedAt);
   if (runInstant !== null && observedInstant !== null) {
-    return runInstant < observedInstant
-      ? "claimed_time_verified"
-      : "violated";
+    return runInstant < observedInstant ? "claimed_time_verified" : "violated";
   }
   // Day granularity: strictly earlier written UTC dates verify, strictly
   // later violate, and same-day ordering is unknowable in either
@@ -1518,9 +1603,11 @@ export function targetNormalizationScale(
       entry.dataPointId === forecast.dataPointId,
   );
   const registeredAt = target?.registeredAt;
-  const primaryRunAt = getForecastRunEntries(forecast).find(
-    (run) => run.isPrimary,
-  )?.predictionRun?.runAt;
+  const primaryRunAt =
+    forecast.normalizationCutoffRunAt !== undefined
+      ? forecast.normalizationCutoffRunAt
+      : getForecastRunEntries(forecast).find((run) => run.isPrimary)
+          ?.predictionRun?.runAt;
   const cutoff =
     registeredAt && Number.isFinite(Date.parse(registeredAt))
       ? registeredAt
@@ -1559,6 +1646,7 @@ export function targetNormalizationScale(
 // way rather than folding it into "unresolved" (re-audit X9).
 export type ScoreExclusionReason =
   | "unresolved"
+  | "unverified_run"
   | "condition_not_satisfied"
   | "missing_distribution"
   | "contract_violation";
@@ -1729,14 +1817,17 @@ export function getResolutionContractViolation(
   // Registration pinned a ledger state; a resolving print that was already
   // a member of that state is a backfill grading a pre-registered target
   // (finding N5: availability means membership, not publisher dates).
+  // A correction is judged on its chain's first acceptance, so correcting a
+  // print the pinned state already held cannot make it grade.
   if (typeof target.ledgerPinLineCount === "number") {
-    if (typeof observation.acceptedSequence !== "number") {
+    const acceptedSequence = firstAcceptedSequence(observation, ledger);
+    if (acceptedSequence === null) {
       return "post-quarantine observation has no ledger acceptance record";
     }
-    if (observation.acceptedSequence < target.ledgerPinLineCount) {
+    if (acceptedSequence < target.ledgerPinLineCount) {
       return (
         `observation was already inside the pinned ledger state at ` +
-        `registration (sequence ${observation.acceptedSequence} < pinned ` +
+        `registration (sequence ${acceptedSequence} < pinned ` +
         `count ${target.ledgerPinLineCount})`
       );
     }
@@ -1754,12 +1845,60 @@ export function scoreResolvedForecastRun(
     .score;
 }
 
+/**
+ * Artifact-backed analyst runs can be scored. The only generated exception is
+ * the paired ledger baseline, whose entire run must equal a fresh replay from
+ * the supplied ledger and whose primary run must independently verify.
+ */
+export function isScoreEligibleForecastRun(
+  forecast: ForecastCell,
+  run: ForecastRunEntry,
+  ledger: PolicyEngineLedgerEntry[],
+): boolean {
+  if (run.variantId !== TIME_SERIES_PRIOR_VARIANT_ID) {
+    return verifyForecastRun(forecast, run).eligible;
+  }
+  if (
+    run.isPrimary ||
+    run.predictionRun?.agent !== PERSISTENCE_BASELINE_AGENT
+  ) {
+    return false;
+  }
+  const primary = getForecastRunEntries(forecast).find(
+    (entry) => entry.isPrimary,
+  );
+  if (!primary || !verifyForecastRun(forecast, primary).eligible) return false;
+  const reconstructed = buildLedgerPersistenceBaseline(
+    forecast,
+    ledger,
+  ).comparisonRun;
+  if (!reconstructed) return false;
+  const expected = getForecastRunEntries({
+    ...forecast,
+    comparisonRuns: [reconstructed],
+  }).find((entry) => entry.variantId === TIME_SERIES_PRIOR_VARIANT_ID);
+  try {
+    return canonicalStringify(run) === canonicalStringify(expected);
+  } catch {
+    return false;
+  }
+}
+
 export function evaluateResolvedForecastRun(
   forecast: ForecastCell,
   run: ForecastRunEntry,
   ledger: PolicyEngineLedgerEntry[],
   conditionOverrides?: Map<string, ConditionStatus>,
 ): ForecastRunScoreEvaluation {
+  if (!isScoreEligibleForecastRun(forecast, run, ledger)) {
+    return {
+      exclusion: {
+        reason: "unverified_run",
+        detail:
+          "Run lacks verified execution artifacts or a matching ledger baseline reconstruction",
+      },
+    };
+  }
   // A conditional branch is graded only when its registered condition
   // actually occurred. Both branches share the same official-print contract,
   // but an open, failed, or counterfactual branch is excluded before resolution
@@ -1813,7 +1952,7 @@ export function evaluateResolvedForecastRun(
     run.variantId,
     run,
   );
-  const resolutionEventId = buildResolutionEventId(resolution);
+  const resolutionEventId = resolution.resolutionEventId;
   const scoringRule = "numeric_cdf_crps_v3_ledger_scale";
   const distributionProvenance = run.predictionDistribution.provenance;
   const transformVersion = getDistributionTransformVersion(
@@ -1821,12 +1960,15 @@ export function evaluateResolvedForecastRun(
   );
   const interval80Width = Math.abs(run.ciHigh - run.ciLow);
   const normalization = targetNormalizationScale(forecast, ledger);
+  // The outcome was public from its first print: a correction grades with
+  // its own value, but a run must precede the earliest print in its chain.
+  const observedAt = firstObservedAt(observation, ledger);
   const chronologyProof = classifyPublicationProof(
     run.predictionRun?.custodyRootSha256,
-    observation.observedAt,
+    observedAt,
   );
   const chronology = composeScoreChronology(
-    classifyScoreChronology(run.predictionRun?.runAt, observation.observedAt),
+    classifyScoreChronology(run.predictionRun?.runAt, observedAt),
     chronologyProof,
   );
 
@@ -1850,7 +1992,7 @@ export function evaluateResolvedForecastRun(
       normalizationScaleSource: normalization.source,
       normalizationScaleCutoff: normalization.cutoff,
       normalizationScaleObservationCount: normalization.observationCount,
-      observedAt: observation.observedAt,
+      observedAt,
       chronology,
       chronologyPolicy: CHRONOLOGY_POLICY_VERSION,
       // Whether the resolving observation was contract-bound is part of
@@ -1878,7 +2020,7 @@ export function evaluateResolvedForecastRun(
     chronology,
     chronologyProof,
     contractBinding,
-    observedAt: observation.observedAt,
+    observedAt,
     conditionId: condition?.conditionId ?? null,
     conditionStatus,
     ledgerFactRef: observation.dataPointId,
@@ -1953,10 +2095,7 @@ export function withResolvedOutcome(
   // itself a deterministic reconstruction: pairs only reach the HEADLINE
   // statistic when the agent side is witness-verified (brier-lab attaches
   // score components to witness-verified rows only).
-  if (
-    !primaryScore ||
-    !hasVerifiedClaimedChronology(primaryScore.chronology)
-  ) {
+  if (!primaryScore || !hasVerifiedClaimedChronology(primaryScore.chronology)) {
     return resolvedForecast;
   }
 
@@ -1987,6 +2126,28 @@ function buildResolutionEventId({
   return `resolution_event.${forecastSlug}.${observationId
     .replace(/^obs\./, "")
     .replace(/[^A-Za-z0-9]+/g, "-")}`;
+}
+
+// One resolution event per forecast and grading assertion. A row that
+// supersedes nothing keeps the id it always had. A correction shares its
+// original's observationId, so its event appends the correction's own
+// assertion version, and an event id never names two different outcomes.
+export function buildObservationResolutionEventId(
+  forecastSlug: string,
+  observation: ObservationRecordedLedgerEntry,
+): string {
+  const eventId = buildResolutionEventId({
+    forecastSlug,
+    observationId: observation.observationId,
+  });
+  if (observationSupersedes(observation) === null) return eventId;
+  const assertionId = observationAssertionId(observation);
+  if (!assertionId) {
+    throw new Error(
+      `correction ${observation.observationId} carries no assertion version id`,
+    );
+  }
+  return `${eventId}.${assertionId.replace(/[^A-Za-z0-9]+/g, "-")}`;
 }
 
 export function buildScoreId(payload: {

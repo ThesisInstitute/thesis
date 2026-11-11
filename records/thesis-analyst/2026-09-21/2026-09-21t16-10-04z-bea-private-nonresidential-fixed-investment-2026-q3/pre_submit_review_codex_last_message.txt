@@ -1,0 +1,15 @@
+{
+  "summary": "The draft is mostly publication-ready, but it should remove or clearly quarantine the published-control forecast reference to avoid catalog forecast circularity.",
+  "requiredFixes": [
+    {
+      "rubricItem": "leakage",
+      "severity": "warning",
+      "summary": "The reasoning cites the already published 2026-08-17 control forecast point and interval, then says this run keeps the same median; that creates avoidable catalog point/interval circularity risk for a strategy comparison.",
+      "actionRequested": "Remove the prior-run point/interval sentence, or rephrase it as a post-hoc comparison only after the final forecast is independently justified from public BEA history and stated updates."
+    }
+  ],
+  "optionalSuggestions": [
+    "In the Prior/update/interval step, make the +20 adjustment slightly more explicit by tying it to the latest two observed quarterly changes and the BEA Q2 investment components.",
+    "The interval explanation is solid; consider saying directly that the wider-than-realized-volatility ladder reflects advance-source and annual-update uncertainty."
+  ]
+}

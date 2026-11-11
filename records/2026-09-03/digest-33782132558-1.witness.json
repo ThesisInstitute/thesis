@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "thesis_rfc3161_witness_v2",
+  "status": "available",
+  "digestSha256": "569b14f4274d7e418fb424719b47911929848acdbbe44fc46fd995d254dc201e",
+  "trustBundleId": "tsa-anchors-v2",
+  "trustBundlePath": "records/trust/tsa-anchors-v2.json",
+  "trustBundleSha256": "b8ece84adcc354f413f10f1b3999ac99679196b9391d76a9967369047b7d7716",
+  "anchorOutcomes": [
+    {
+      "status": "available",
+      "tsa": "https://freetsa.org/tsr",
+      "tsaAnchorId": "freetsa-root-2016",
+      "tokenPath": "records/2026-09-03/digest-33782132558-1.freetsa-root-2016.tsr",
+      "tokenSha256": "63636e439f747cfeb2253143a8f8d33237f5f9575a1a3ff9d9bdb5034bf84e6b",
+      "tsaPolicyOid": "1.2.3.4.1",
+      "tsaImprintAlgorithmOid": "2.16.840.1.101.3.4.2.1",
+      "tsaGenTime": "2026-09-03T17:05:05Z",
+      "tsaSignerCertificateSha256": "32e841a95cc1164101ffde41298ef2fc75c1c4372ef095e88a6bbd47dfb191fc",
+      "tsaSignerSpkiSha256": "fa02bd555e3e483d62b4e70be6218692068d2b0b0a7525db58dcbf2901cdb072"
+    },
+    {
+      "status": "available",
+      "tsa": "http://timestamp.digicert.com",
+      "tsaAnchorId": "digicert-trusted-root-g4",
+      "tokenPath": "records/2026-09-03/digest-33782132558-1.digicert-trusted-root-g4.tsr",
+      "tokenSha256": "f7111b5b07364f9a83e4e47d51911c7b3f5691aa1a44ac2423bc8eced9eb0055",
+      "tsaPolicyOid": "2.16.840.1.114412.7.1",
+      "tsaImprintAlgorithmOid": "2.16.840.1.101.3.4.2.1",
+      "tsaGenTime": "2026-09-03T17:05:06Z",
+      "tsaSignerCertificateSha256": "4aa03fa22cd75c84c55c938f828e676b9caecab33fe36d269aa334f146110a33",
+      "tsaSignerSpkiSha256": "7abda95ed7301ac94bded350babc319903d0b4f16c4e7e39346dba5f9e992b72"
+    }
+  ],
+  "supplementalOutcomes": []
+}

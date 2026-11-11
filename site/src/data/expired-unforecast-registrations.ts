@@ -48,6 +48,22 @@ export const EXPIRED_UNFORECAST_REGISTRATIONS = [
   // Ordinary rolls now refuse both terminal ids and ids with an existing
   // immutable registration. If the fresh registration lapses through grace
   // unforecast, a new terminal entry will be added.
+  // That happened: the 2026-08-14T17:27Z re-registration crossed the
+  // seven-day orphan grace on 2026-08-21 unforecast. Not ungenerated:
+  // its registering roll (run 31824000315) generated a candidate cell,
+  // but the publish leg failed the site suite on this list's own
+  // exactness contract — the id was still a terminal entry from the
+  // seed's 08-07 termination, and a terminal id gaining a forecast is
+  // precisely what the contract refuses — so no cell or batch manifest
+  // reached main, and the in-grace retry lane's committed-manifest
+  // trust anchor could never reach the target (the 2026-08-05 AWE/PPI
+  // failure mode below). Its October 30 first print is still in the future,
+  // but forecasting it now would record a run against the nine-day-stale
+  // 2026-08-14 pin — the same chronology violation the JOLTS and vacancies
+  // entries above terminate on — so the accidental re-registration ends
+  // here (added 2026-08-23, alongside the aging/disability resolver batch,
+  // when the lapse surfaced as the first non-skip CI run since 08-18).
+  "bls.eci.total_compensation_private_industry_qoq.2026_q3.first_print",
   // The 2026-08-03 Farm Bill CRP conditional-pair registrations
   // (ticket …7916cf57) could never be forecast: every documented
   // attempt failed closed and published nothing. The two August 3 rolls
@@ -78,6 +94,50 @@ export const EXPIRED_UNFORECAST_REGISTRATIONS = [
   // explicitly.
   "ons.awe.regular_pay_yoy_3m_avg.2026_06.first_print",
   "ons.ppi.input_manufacturing_index.2026_07.first_print",
+  // The 2026-09-20T17:30:51Z registration of initial claims for the week
+  // ending 2026-09-26 crossed its seven-day orphan grace on 2026-09-27
+  // unforecast. Its registering roll (run 35526068252) generated a
+  // candidate cell, but the publish leg refused it ("custody verification
+  // failed: draft_tool evidence calls lack native completion events"), so
+  // no cell or batch manifest reached main. The 2026-09-21 and 2026-09-25
+  // rolls (runs 35651332378, 36183523886) skipped it as already
+  // registered, and nothing retried the generation inside grace. DOL
+  // prints that week on 2026-10-01, but a forecast now would run against
+  // the eight-day-stale 2026-09-20 pin, the chronology violation the
+  // entries above terminate on. The registered window (2026-10-13 to
+  // 2026-10-17) is also one of the drifted weekly claims windows.
+  "us.dol.initial_claims.sa.week_2026-09-26",
+  // The 2026-09-28T22:12:52Z registration of continued claims for the week
+  // ending 2026-10-03 crossed its seven-day orphan grace on 2026-10-05
+  // unforecast. Its registering roll (run 36490945941) generated a
+  // candidate cell that passed validation, but the publish leg failed the
+  // site suite before committing anything: `forecasts every registered
+  // ledger target` was red that day on the initial-claims entry above,
+  // which was recorded here the next day (#303). No cell or batch manifest
+  // reached main. The 2026-10-02 roll (run 37063211068), the only one
+  // inside grace, skipped it as already registered, and nothing retried
+  // the generation. The registered window (2026-10-23 to 2026-10-27) has
+  // not opened, but a forecast now would run against the 2026-09-28 pin,
+  // twelve days stale, the chronology violation the entries above
+  // terminate on.
+  "dol.eta.continued_claims.sa.week_2026-10-03.first_print",
+  // The 2026-10-19T21:11:01Z registrations of the October CPI, core CPI and
+  // unemployment rate first prints crossed their seven-day orphan grace on
+  // 2026-10-26 unforecast. Their registering roll (run 39325379866) generated
+  // three candidate cells that passed validation, but the publish leg failed
+  // the site suite before committing anything: `retains official outcomes
+  // while excluding unverified forecast scores` counted 245 distinct
+  // observation ids against 251 ledger rows, which #378 fixed the next day.
+  // No cell or batch manifest reached main. The 2026-10-23 and 2026-10-26
+  // rolls (runs 40015811469, 40401561201), the only ones inside grace,
+  // skipped them as already registered, and nothing retried the generation.
+  // The registered windows (unemployment 2026-11-06, both CPI series
+  // 2026-11-10) have not opened, but a forecast now would run against the
+  // 2026-10-19 pin, fourteen days stale, the chronology violation the entries
+  // above terminate on.
+  "bls.cpi.u.headline_mom.2026_10.first_print",
+  "bls.cpi.u.core_mom.2026_10.first_print",
+  "bls.cps.unemployment_rate.2026_10.first_print",
 ] as const;
 
 export const EXPIRED_UNFORECAST_SET: ReadonlySet<string> = new Set(

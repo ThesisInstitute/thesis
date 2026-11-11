@@ -1,18 +1,19 @@
 # The open challenge: external forecasters on the registered docket
 
-*Design, 2026-07-19. Status (2026-07-31): the lane is live with a simpler
-intake than sketched below — challengers PR one JSON file into
-`challenge/inbox/<github-login>/<cell>.json` (template:
-`challenge/README.md`) and the PR is reviewed and merged (first:
-[#49](https://github.com/ThesisInstitute/thesis/pull/49)). The publish
-adapter that copies accepted submissions into `records/` through the
-attested workflow path is in progress. Submitter-side keyless signing
-shipped per [#52](https://github.com/ThesisInstitute/thesis/issues/52) —
-optional Sigstore signatures give submissions platform-independent
-digest + chronology proof; see `docs/challenge-signing.md`. The
-`challenge-inbox/` close-PR mechanism described under "Mechanism" below
-is the original sketch, kept for design history; the validator it
-references was deleted when the design was held on 2026-07-20.*
+*Design, 2026-07-19. **Status (2026-08-23): WITHDRAWN from the public
+surface** — operator decision: v1 shipped ahead of its dependencies (intake
+was a human-discretion PR merge, signing optional, no scoring ingestion of
+`records/challenge/`, no headline-tier path) while the grading loop it
+showcases still carries resolver debt. The complete v1 implementation and
+the v2 target design (API intake, **required** Sigstore signing, attested
+records-path writes) live on branch `challenge-lane-v2`
+(`docs/challenge-v2-api-design.md` there); the lane returns when it wins a
+roadmap slot and can be operated to its own standard. The two accepted v1
+submissions (PavelMakarchuk, khs — both 2026-07-31, grandfathered as
+GitHub-identity-attributed, claimed-time tier, reward-excluded) remain
+published on their cells and in the witnessed records chain: withdrawal
+closed the door, it did not unpublish anyone. The rules and mechanism below
+are kept as design history.*
 
 ## Why
 

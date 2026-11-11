@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ccsa-2026-08-20-d798ce1af67bd307.csv.gz",
+      "sha256": "74207d70c9e294a9a983b4779a49b770675a346bb50050fff249c677c1d90498",
+      "bytes": 15648,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/computsa-2026-08-18-ade9c18a3f5afca7.csv.gz",
+      "sha256": "83116011720e007d615d6d810405a00875905a4d8990984f2aac78dfd13bb779",
+      "bytes": 3047,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/iq-2026-08-18-07f3668a534ed704.csv.gz",
+      "sha256": "29fa8fc3fdab3dfe57f2a7af5f435945aac74317c3c72c9aae14496b9894f38b",
+      "bytes": 2012,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ipman-2026-08-18-e6d08eb98ef44866.csv.gz",
+      "sha256": "703019c3e6a87c33ad017f21734901be7e8eabef5a396115b46d0fe5bc48c911",
+      "bytes": 3941,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/mcumfn-2026-08-18-be91351553f17dc6.csv.gz",
+      "sha256": "d3b2260581fef6feb3586107a23dd9591bbdbb8a83956edc389c303121cfa936",
+      "bytes": 3876,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/permit-2026-08-18-1b2d32574a1a24f9.csv.gz",
+      "sha256": "8331b0b6b16a57ae8a7a99743117f179a0e1c558a43aae5f95409974f7456e69",
+      "bytes": 3500,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/indpro-2026-08-18-410913dcd51d9084.csv.gz",
+      "sha256": "9f25515d858a7f699921a8be8d8639e3ed27bd70fe5ef10d059995d003844963",
+      "bytes": 7650,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/tcu-2026-08-18-edd8132ee93e6f5c.csv.gz",
+      "sha256": "7c82dfd9740b2c92c4b472d146a7faddc591d59d743b32d696a7e07d98ea384a",
+      "bytes": 4222,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/houst-2026-08-18-6cdf7013c40365cb.csv.gz",
+      "sha256": "896ddeba1e696f20387aef16bc28c5f3696fd41e3e79de02859e8d71480d961c",
+      "bytes": 3547,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ir-2026-08-18-0b15fdccf2f4cdeb.csv.gz",
+      "sha256": "343dd8a0246d5424f1ea4d326da6b3c0211050c1f9e45c595d9483c567e90c9b",
+      "bytes": 2061,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/va-vba-mmwr-rating-bundle-pending-2026-07-13-7f60873a98064c67.json.gz",
+      "sha256": "9a3d23ebb71d39c810c4693605261cee0bc0bd8c7638bd215b1d2281aac82721",
+      "bytes": 640328,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ssa-ssi-monthly-table01-total-65-plus-2026-08-23-a1b74d2819566d5a.json.gz",
+      "sha256": "005fbaef22f4584e2e5ac6d5d585585d4eeaf29571d71cfba42d0dcbf7107a1d",
+      "bytes": 9561,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ssa-stat-snapshot-table02-disabled-workers-2026-08-23-a4e256ef9b8b4715.json.gz",
+      "sha256": "4160caec3bac9c237c756a74baff77ae6aa59c006b944a9eb89f4cafcb2794f2",
+      "bytes": 25230,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/lns11324230-2026-08-23-d600bf30f2a589d5.json.gz",
+      "sha256": "420025aa8524ef21369ce87cd9fda243c7e605d87a4c36d034db1f75582e6020",
+      "bytes": 519,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/lnu02374597-2026-08-23-5c48c2d40c7b2d18.json.gz",
+      "sha256": "7f6a8b32c1d7b8ed910a769b50644ff59616e5e52e86648cd25c5b099afa4f9c",
+      "bytes": 528,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ces6562160001-2026-08-23-81a4c331d9672f28.json.gz",
+      "sha256": "61bbef486fa78ce5eafcfb2b2dc72a610ef44bd6356dfe21afcba0ac36114cfc",
+      "bytes": 424,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ssa-ssi-monthly-table04-colorado-total-2026-08-23-d33615df49a0fbed.json.gz",
+      "sha256": "f1248d0281178867be59c52c95e711390c9d8d8ad185571314b31cb836ee6bd8",
+      "bytes": 10293,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/lasst080000000000006-2026-08-23-8d99e11e8ccad9b8.json.gz",
+      "sha256": "27c1c5c7d4009458114ed23fe857c95ed2282f82a5e754481ad83f4fdf094193",
+      "bytes": 531,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ssa-ssi-monthly-table04-colorado-65-plus-2026-08-23-fea025cf82aae9a8.json.gz",
+      "sha256": "7962a343f164d2e86d2f62e44ca7d91249f3b9864b0c6125c70545aecd73dabf",
+      "bytes": 10342,
+      "createdAt": "2026-08-23T16:22:57Z"
+    },
+    {
+      "artifactType": "resolver_response",
+      "path": "responses/ssa-ssi-monthly-table02-total-recipients-2026-08-23-e72caade4e72227b.json.gz",
+      "sha256": "a2f7416e0d699bb6803bf941555457a157ece5172ce7200cabe9f042e1feb6b2",
+      "bytes": 8565,
+      "createdAt": "2026-08-23T16:22:57Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "d8e85848bb0291f97992c1c3ad72cc1dde06a3c13be0f9934c33c1d90008db17"
+  }
+}

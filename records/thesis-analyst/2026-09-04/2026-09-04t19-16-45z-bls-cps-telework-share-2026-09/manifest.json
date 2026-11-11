@@ -1,0 +1,372 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-09-04T19:16:45Z",
+  "runStartedAt": "2026-09-04T19:16:45Z",
+  "sealedAt": "2026-09-04T19:18:12Z",
+  "series": "bls.cps.telework_share",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-telework-rate-september-2026",
+    "country": "US",
+    "dataPointId": "bls.cps.telework_share.2026-09.first_print",
+    "expectedReleaseWindow": {
+      "end": "2026-10-08",
+      "start": "2026-09-30"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-04T19:02:52Z",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "registrationState": "preregistered",
+    "series": "bls.cps.telework_share",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-08",
+        "start": "2026-09-30"
+      },
+      "field": "bls.cps.telework_share",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "bls.cps.telework_share",
+      "sourceUrl": "https://www.bls.gov/web/empsit/cpseea41.htm",
+      "table": "U.S. Bureau of Labor Statistics, Employment Situation, CPS Table A-41",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "0bc190e7fe95e2a7812ba70143f1394069f3cc59c61671e6021c2283181fc418",
+    "targetRegistrationPath": "records/targets/2026-09-04-0bc190e7fe95e2a7812ba70143f1394069f3cc59c61671e6021c2283181fc418.json",
+    "targetUnit": "percent",
+    "valueScale": 1
+  },
+  "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "targetContentHash": "0bc190e7fe95e2a7812ba70143f1394069f3cc59c61671e6021c2283181fc418",
+  "targetRegistrationPath": "records/targets/2026-09-04-0bc190e7fe95e2a7812ba70143f1394069f3cc59c61671e6021c2283181fc418.json",
+  "registeredAtUtc": "2026-09-04T19:02:52Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-09-04T19:16:45Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "454b4dc290f71e54fe5f2af139f17a204ceb8cbdc99970296930b577c2e6a3b3"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "The draft sets resolutionDate to 2026-10-02, but the ledger target contract uses the bounded expectedReleaseWindow ending 2026-10-08 for this registered target.",
+        "actionRequested": "Change the JSON resolutionDate to 2026-10-08 while keeping the same BLS A-41 first-print resolver and noting any release-calendar discrepancy in reasoning rather than changing the target."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Mention that the 0.46-point sigma is based on a very short Jan-Aug 2026 change sample, so the interval is a deliberately recent-volatility interval rather than a long-run model interval."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the blocking resolver critique by setting resolutionDate to the registered bounded target date 2026-10-08 while preserving the BLS A-41 first-print resolver and noting the 2026-10-02 BLS schedule discrepancy; accepted the optional interval clarification about the short recent-volatility sample; rejected no critique items.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the blocking resolver critique by setting resolutionDate to the registered bounded target date 2026-10-08 while preserving the BLS A-41 first-print resolver and noting the 2026-10-02 BLS schedule discrepancy; accepted the optional interval clarification about the short recent-volatility sample; rejected no critique items.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is methodologically usable, but it has a blocking mismatch with the ledger resolution date contract."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/prompt.md",
+      "sha256": "f38e694763f338d70138311d55147d0dbabcab1aff2b808495f87aeb2a0f101c",
+      "bytes": 10566,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_command.json",
+      "sha256": "5695db3bc1423748d1855b8cf4f8ea02ee133a04a2e091e667fd5a3a525a6e92",
+      "bytes": 752,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_codex_stdout.jsonl",
+      "sha256": "627eeec4dac75e80c8704774fd70714edd0f29efb88d8b7f8c2ed4e5c06aa8ec",
+      "bytes": 10406,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_codex_stderr.log",
+      "sha256": "024b7859ca6573b0474d4d8b783ae0684231c4de089fb343a2846cb665b3bd7b",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_codex_events.jsonl",
+      "sha256": "f44d15bfd7f6af089bdadf2fdbe00013fd270bce062a158b26af0ae72679bf5f",
+      "bytes": 10460,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_codex_last_message.txt",
+      "sha256": "264b3791f9c8ccf74a7fd6450b6f6525d14a4c41df16c5e737e3288c60e9db3b",
+      "bytes": 5571,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_codex_trace.json",
+      "sha256": "6584ebd4e61b561faf7f96a688c230f5fca328eec29e3fa0c6ac2f49fc1d345b",
+      "bytes": 558,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_stdout.txt",
+      "sha256": "264b3791f9c8ccf74a7fd6450b6f6525d14a4c41df16c5e737e3288c60e9db3b",
+      "bytes": 5571,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/draft_stderr.txt",
+      "sha256": "fc6efef514287ffc7aa60e53fbee6c7dd98b0a2a0994de5efb47a61b1b7be6e7",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_prompt.md",
+      "sha256": "bcbdb78d476f70de06416038b7f9bccc44a09c1748c57c4fba205b271ede5f58",
+      "bytes": 8798,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_command.json",
+      "sha256": "191c6be8905563b143c8d02a227c71458a42e7aa0a981e728bf69cb3ee1488c5",
+      "bytes": 748,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "bbb5eb3af9e316b75629a14c71701da5091d207c29800a847d05179e9534d26c",
+      "bytes": 1123,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_codex_stderr.log",
+      "sha256": "184623d36b45901986a6cf0f2e8639fac43a3a5ecac5eeb0f2aabde38bf6607a",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_codex_events.jsonl",
+      "sha256": "82bfdbd664029a34b33a400e1736d22fc69a6fa58c14030abbfe2b8ef3fb0875",
+      "bytes": 1145,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_codex_last_message.txt",
+      "sha256": "af64f79a9be9b2911c89d8b0bcaff9ee18e9965ad3c64c9e1400245f1534c61c",
+      "bytes": 780,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_codex_trace.json",
+      "sha256": "d72a2b21aba4b9a0c0d971cdbd43cd6f53a4b6e87fd4c4f783d0861ee6589019",
+      "bytes": 555,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_stdout.txt",
+      "sha256": "af64f79a9be9b2911c89d8b0bcaff9ee18e9965ad3c64c9e1400245f1534c61c",
+      "bytes": 780,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/pre_submit_review_stderr.txt",
+      "sha256": "0b56099806fbf20264be0424be3e03f3dc3db2cf02852824abb363f2784b90d6",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/revision_prompt.md",
+      "sha256": "9ae7cb1971e6a4da56637b57fdaad14acf1db5fd2850329f4191f2c4849dd2c5",
+      "bytes": 17853,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/command.json",
+      "sha256": "7b13d84b5c81024e6671a0ba615ba13d83eb62807b8bda200cb9aa32d665f4d3",
+      "bytes": 746,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/codex_stdout.jsonl",
+      "sha256": "c65d34a23629da0aecb060a4017bb0919e7d35b53e405339bb78b3b154ab389e",
+      "bytes": 6636,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/codex_stderr.log",
+      "sha256": "f49ab06b69c0cc60bc4a9e2f1b98e8684ac79a9f4032c1ef435fa4e089602760",
+      "bytes": 233,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/codex_events.jsonl",
+      "sha256": "973647fabbf6862ee51d7f3ab5a138736e40824f0df2b08be6f715739df0c648",
+      "bytes": 6658,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/codex_last_message.txt",
+      "sha256": "38ef60fe89422d82564b11fdf307816d8766ece570036968d9de180b5aea196e",
+      "bytes": 6016,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/codex_trace.json",
+      "sha256": "278c15819e769eb870e39bdc01bd11bce6e9d767d04dc5697f8bdae663217d8e",
+      "bytes": 555,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/stdout.txt",
+      "sha256": "38ef60fe89422d82564b11fdf307816d8766ece570036968d9de180b5aea196e",
+      "bytes": 6016,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/stderr.txt",
+      "sha256": "04b290384b7eb9c7a302a2687ce3efffa835ae9b39c13df9f2d297693bd15467",
+      "bytes": 248,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/raw_response.txt",
+      "sha256": "38ef60fe89422d82564b11fdf307816d8766ece570036968d9de180b5aea196e",
+      "bytes": 6016,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/parsed_cells.json",
+      "sha256": "29924c13ed33b4edc67183bfe86962fe940d8adc570d8c322c6fec5b3ed4d870",
+      "bytes": 7171,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/normalized_cells.json",
+      "sha256": "18e4c18ad850484cf65918ef2a213a529ccbcaf04f4b2834afa2d22e6d88981f",
+      "bytes": 24500,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/distribution.json",
+      "sha256": "0c752ca096c7a6809cccfbfdd88c0cc1c0df31658425782aa4a1444f50181b67",
+      "bytes": 13545,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/validation.json",
+      "sha256": "b4f83654a49bc7aa0f647503776d32a6ee391207ea6f9b2a58c6884f08f2add1",
+      "bytes": 132,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/cells.with_activity.json",
+      "sha256": "8e15bffdfc923b8056d0be1a08ccbfc87cf368fce90f91dc618a5f223d0bf2f5",
+      "bytes": 38322,
+      "createdAt": "2026-09-04T19:16:45Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-09-04/2026-09-04t19-16-45z-bls-cps-telework-share-2026-09/manifest.json",
+      "sha256": "f68a37360952af1efb6e27c3ee91d21e7657a74da35334634e734936df2f94f6",
+      "bytes": 14158,
+      "createdAt": "2026-09-04T19:16:45Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "us-telework-rate-september-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "8027efda34eaef678453b9dcae9d1d89ba7a1561862ee3ed1a466b4679464892"
+}

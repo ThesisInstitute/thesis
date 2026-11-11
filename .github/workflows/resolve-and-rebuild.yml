@@ -8,7 +8,19 @@ name: Resolve pending cells
 on:
   schedule:
     - cron: "40 13 * * *" # daily 13:40 UTC
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      restate_base_units:
+        # The one-time base-unit migration (AGENTS.md): one release that
+        # restates every current Chronicle row in a scaled unit in base
+        # units. With none left, it rebuilds the records of a restatement
+        # run that merged but never reached Thesis. It resolves nothing, so
+        # the status page is left alone. GitHub keeps one waiting run per
+        # concurrency group and a newer one cancels it, so dispatch this only
+        # when no other run of this workflow is waiting.
+        description: "Restate Chronicle's scaled rows in base units instead of resolving"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # resolution marker commit makes HEAD deployable
@@ -21,7 +33,32 @@ concurrency: resolve-pending
 jobs:
   resolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Successful runs took 1-11 minutes through August 2026 and the resolve
+    # step alone 14-17 minutes by mid-September as the pending set grew. At
+    # 30 minutes the 2026-09-03 run was cancelled in the pin step, after it
+    # had appended five observations to the ledger, so the site went on
+    # showing them as pending. The next run heals that (the ledger head no
+    # longer equals records/resolutions/latest.json, so needs_publish is 1),
+    # but only if it gets that far. Leave real headroom. A run that takes
+    # longer than the 37 minutes before the recorder's 14:17 slot can now
+    # overlap it, and that day's snapshot would then predate the fresh
+    # resolutions. The next snapshot picks them up; a cancelled run loses
+    # the publish outright, so the longer cap is the better trade.
+    # Since 2026-10-01 the SBA loan-performance targets' window is open, and
+    # the first of them verifies the whole witnessed record timeline before
+    # it can refuse or resolve: about 50 minutes on 2026-10-09, when the
+    # resolve step took 58 and the 60-minute cap cancelled the site rebuild
+    # after that day's append had merged (chronicle#327); on 2026-10-10 it
+    # cancelled the resolve step itself. The resolver also waits for
+    # Chronicle's append gates, whose jobs sat queued for a runner 33-68
+    # minutes on 2026-09-22/23 (chronicle #285, #286); that wait has its own
+    # 150-minute budget (DEFAULT_APPEND_GATE_TIMEOUT_MINUTES; override with
+    # LEDGER_APPEND_GATE_TIMEOUT_MINUTES on the resolve step). 240 covers a
+    # 60-minute resolve, the whole gate budget, the pin and witness step,
+    # a 7-minute rebuild and the 12-minute deploy canary. The workflow-level
+    # concurrency group queues a dispatched or next-day run behind a long
+    # one instead of overlapping it.
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v5
         with:
@@ -39,25 +76,65 @@ jobs:
           # receipt: the staged chronicle series-catalog generator (run during
           # witnessed append proposals) imports it via check_thesis_facts_append.
           # Exact-pinned like its neighbors and matching chronicle's own pin.
-          pip install --user xlrd==2.0.1 pypdf==6.14.2 receipt==0.5.1
+          pip install --user xlrd==2.0.1 pypdf==6.14.2 receipt==0.6.2
           sudo apt-get update -q && sudo apt-get install -y -q poppler-utils
           pdftotext -v 2>&1 | head -1
+          # SSA official pages resolve through a declared headless-browser
+          # transport (scripts/official_browser_fetch.py): ssa.gov's Akamai
+          # Bot Manager answers every non-browser TLS client with 403 while
+          # serving Chromium normally (verified from this runner 2026-08-23).
+          # A missing engine is fatal in the resolver, never a silent defer.
+          pip install --user playwright==1.62.0
+          python3 -m playwright install --with-deps chromium
+          python3 scripts/official_browser_fetch.py \
+            https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/index.html \
+            --out /tmp/ssa-transport-smoke.html | head -c 600
 
       - name: Resolve pending cells against official prints
         id: resolve
         env:
           GH_TOKEN: ${{ secrets.ARCH_DATA_TOKEN }}
           LEDGER_PRODUCER_SIGNING_KEY: ${{ secrets.LEDGER_PRODUCER_SIGNING_KEY }}
+          RESTATE_BASE_UNITS: ${{ inputs.restate_base_units == true }}
         run: |
           set -euo pipefail
           # Stream resolver output while capturing it: command substitution
           # swallowed stdout whenever the resolver failed, hiding which
           # cells resolved or deferred before the failure.
-          python3 scripts/resolve_pending.py 2>&1 | tee /tmp/resolve-out.log
+          # -u: through the pipe Python block-buffers stdout, so every line
+          # carried the timestamp of the flush, not of the event, and a run
+          # that died mid-buffer lost its last lines.
+          # Exit 3 (EXIT_REFUSED_ROWS) means the resolver finished cleanly
+          # but refused some rows: what it appended must still be committed
+          # and published, so the step goes on and the job fails at the end
+          # ("Fail the run on refused rows"). Any other failure stops here.
+          mode=()
+          if [ "$RESTATE_BASE_UNITS" = "true" ]; then
+            mode=(--restate-base-units)
+          fi
+          set +e
+          python3 -u scripts/resolve_pending.py "${mode[@]}" 2>&1 | tee /tmp/resolve-out.log
+          statuses=("${PIPESTATUS[@]}")
+          set -e
+          resolver_rc=${statuses[0]}
+          if [ "${statuses[1]}" -ne 0 ]; then
+            exit "${statuses[1]}"
+          fi
+          if [ "$resolver_rc" -ne 0 ] && [ "$resolver_rc" -ne 3 ]; then
+            exit "$resolver_rc"
+          fi
+          echo "resolver_rc=$resolver_rc" >> "$GITHUB_OUTPUT"
           if grep -q "^appended" /tmp/resolve-out.log; then
             echo "appended=1" >> "$GITHUB_OUTPUT"
           else
             echo "appended=0" >> "$GITHUB_OUTPUT"
+          fi
+          # A rebuilt restatement run's records must be committed even when
+          # the ledger has not moved since the last deployment.
+          if grep -q "^restored" /tmp/resolve-out.log; then
+            echo "restored=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "restored=0" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Compare ledger branch with the last successful deployment
@@ -65,6 +142,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.ARCH_DATA_TOKEN }}
           APPENDED: ${{ steps.resolve.outputs.appended }}
+          RESTORED: ${{ steps.resolve.outputs.restored }}
         run: |
           set -euo pipefail
           CURRENT=$(gh api \
@@ -86,12 +164,13 @@ jobs:
           )
           echo "current_sha=$CURRENT" >> "$GITHUB_OUTPUT"
           echo "last_deployed_sha=$LAST" >> "$GITHUB_OUTPUT"
-          if [ "$APPENDED" = "1" ] || [ "$CURRENT" != "$LAST" ]; then
+          if [ "$APPENDED" = "1" ] || [ "$RESTORED" = "1" ] \
+              || [ "$CURRENT" != "$LAST" ]; then
             echo "needs_publish=1" >> "$GITHUB_OUTPUT"
           else
             echo "needs_publish=0" >> "$GITHUB_OUTPUT"
           fi
-          echo "ledger current=$CURRENT last-successfully-deployed=${LAST:-none} appended=$APPENDED"
+          echo "ledger current=$CURRENT last-successfully-deployed=${LAST:-none} appended=$APPENDED restored=$RESTORED"
 
       - name: Advance the ledger pin and witness the new upstream state
         id: pin_witness
@@ -241,20 +320,124 @@ jobs:
           echo "pushed_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Attest the deployed-ledger push
+        id: attest_deployed
         if: steps.deployed_ledger.outputs.pushed_sha != ''
         uses: ./.github/actions/attest-records-push
         with:
           commit: ${{ steps.deployed_ledger.outputs.pushed_sha }}
 
+      - name: Publish why each overdue forecast has not resolved
+        # Runs whatever happened above: a failed run is exactly when the
+        # pending list most needs an explanation. It never fails the job,
+        # and it commits only the status file, on a clean copy of main, so
+        # nothing else in this job's tree (pin, records, marker) rides
+        # along and the attested marker push above is left alone. The file
+        # is outside records/**, so the push needs no attestation; it does
+        # touch site/, so Vercel rebuilds and the reasons reach the page. A
+        # restatement run examines no reference, so it would mark every
+        # overdue forecast as never reached; it publishes no status.
+        if: always() && inputs.restate_base_units != true
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [ -f /tmp/resolve-out.log ] || : > /tmp/resolve-out.log
+          git fetch origin main
+          git worktree add --detach /tmp/status-tree origin/main
+          python3 scripts/resolution_status.py \
+            --resolver-log /tmp/resolve-out.log \
+            --workflow-run "${GITHUB_RUN_ID}" \
+            --out /tmp/status-tree/site/src/data/resolution-status.json
+          cd /tmp/status-tree
+          if [ -z "$(git status --porcelain -- site/src/data/resolution-status.json)" ]; then
+            echo "overdue backlog unchanged; nothing to publish"
+            exit 0
+          fi
+          git config user.name "thesis-resolver"
+          git config user.email "recorder@thesisinstitute.org"
+          git add -- site/src/data/resolution-status.json
+          git commit -m "Resolution status $(date -u +%F)"
+          auth_helper="!f() { echo username=x-access-token; echo \"password=\$GH_TOKEN\"; }; f"
+          for attempt in 1 2 3; do
+            if git -c credential.helper= -c credential.helper="$auth_helper" \
+                push origin HEAD:main; then
+              exit 0
+            fi
+            git pull --rebase origin main
+          done
+          echo "::warning::resolution status was not published (push raced three times)"
+
+      - name: Fail the run on refused rows
+        id: refused_gate
+        if: steps.resolve.outputs.resolver_rc == '3'
+        run: |
+          echo "The resolver refused one or more rows (see 'Resolve pending" >&2
+          echo "cells'); everything it appended was committed and published." >&2
+          exit 1
+
       - name: Alert on failure
-        if: failure()
+        # Each kind of red gets its own title (scripts/resolution_alert.py):
+        # "Resolution rows refused" when the step above failed (its `if`
+        # names no status function, so every earlier step succeeded or was
+        # skipped, the always-run status page aside: the loop worked),
+        # naming each refused row, or "Resolution records not rebuilt" when
+        # a failed rebuild of a restatement run's records was its only
+        # cause; "Resolution loop failed" otherwise. A
+        # second red run on the same day comments on the open issue instead
+        # of vanishing. If the script fails, the old title and one-line body
+        # go out; if the issue call fails, a one-line issue under the same
+        # title does (a call that failed only on our side can then post
+        # twice, which beats posting nothing). A run cancelled before it
+        # finished publishing alerts too: from 2026-10-01 every scheduled run
+        # hit the 60-minute cap, and none of them opened an issue. A cancel
+        # turns failure() false and skips "Fail the run on refused rows", so
+        # a cancelled run stays silent only when the resolver exited 0 (no
+        # refused rows) and publication completed: the ledger step said there
+        # was nothing to publish, or the deployed-ledger record succeeded and
+        # its attestation did not fail. The status page still runs on a
+        # cancel. A step output that a cancelled step never wrote is null, and
+        # GitHub evaluates null == '0' as true, so each output is trusted only
+        # beside its own step's success.
+        if: >-
+          failure() || (cancelled() && !(steps.resolve.outcome == 'success'
+          && steps.resolve.outputs.resolver_rc == '0'
+          && ((steps.ledger.outcome == 'success'
+          && steps.ledger.outputs.needs_publish == '0')
+          || (steps.deployed_ledger.outcome == 'success'
+          && steps.attest_deployed.outcome != 'failure'))))
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          REFUSED_GATE: ${{ steps.refused_gate.outcome }}
+          RESOLVE_OUTCOME: ${{ steps.resolve.outcome }}
+          NEEDS_PUBLISH: ${{ steps.ledger.outputs.needs_publish }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          title="Resolution loop failed $(date -u +%F)"
-          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number' || true)
+          [ -f /tmp/resolve-out.log ] || : > /tmp/resolve-out.log
+          fallback="The resolve-pending loop failed: $RUN_URL. Unresolved cells stay pending — fix before the next release day."
+          if python3 scripts/resolution_alert.py \
+              --resolver-log /tmp/resolve-out.log \
+              --refused-gate "$REFUSED_GATE" \
+              --resolve-outcome "$RESOLVE_OUTCOME" \
+              --needs-publish "$NEEDS_PUBLISH" \
+              --run-url "$RUN_URL" \
+              --date "$(date -u +%F)" \
+              --out /tmp/alert.json; then
+            title=$(python3 -c 'import json; print(json.load(open("/tmp/alert.json"))["title"])')
+            python3 -c 'import json; print(json.load(open("/tmp/alert.json"))["body"], end="")' > /tmp/alert-body.md
+          else
+            title="Resolution loop failed $(date -u +%F)"
+            printf '%s\n' "$fallback" > /tmp/alert-body.md
+          fi
+          cat /tmp/alert-body.md >> "$GITHUB_STEP_SUMMARY"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" \
+            --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty" || true)
+          short="The alert body could not be posted; see $RUN_URL"
           if [ -z "$existing" ]; then
-            gh issue create --title "$title" \
-              --body "The resolve-pending loop failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Unresolved cells stay pending — fix before the next release day."
+            gh issue create --title "$title" --body-file /tmp/alert-body.md \
+              || gh issue create --title "$title" --body "$short"
+          else
+            gh issue comment "$existing" --body-file /tmp/alert-body.md \
+              || gh issue create --title "$title" --body "$short"
           fi

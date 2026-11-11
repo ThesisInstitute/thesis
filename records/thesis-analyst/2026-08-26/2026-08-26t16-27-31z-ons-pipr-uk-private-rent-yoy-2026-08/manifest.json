@@ -1,0 +1,380 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-08-26T16:27:31Z",
+  "runStartedAt": "2026-08-26T16:27:31Z",
+  "sealedAt": "2026-08-26T16:29:10Z",
+  "series": "ons.pipr.uk_private_rent_yoy",
+  "period": "2026-08",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "uk-private-rent-annual-rate-august-2026",
+    "country": "UK",
+    "dataPointId": "ons.pipr.uk_private_rent_yoy.2026_08.first_print",
+    "expectedReleaseDate": "2026-09-16",
+    "expectedReleaseWindow": {
+      "end": "2026-09-16",
+      "start": "2026-09-16"
+    },
+    "period": "2026-08",
+    "registeredAt": "2026-08-26T16:23:02Z",
+    "registeredAtUtc": "2026-08-26T16:23:02Z",
+    "registrationCommit": "b4f1d890f91c9ece5fc1e068a92fbe28ea25be43",
+    "registrationState": "preregistered",
+    "resolutionSourceUrl": "https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/priceindexofprivaterentsukmonthlypricestatistics",
+    "series": "ons.pipr.uk_private_rent_yoy",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.ons.gov.uk"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-09-16",
+        "start": "2026-09-16"
+      },
+      "field": "UK, all property types, annual percentage change",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "priceindexofprivaterentsukmonthlypricestatistics",
+      "sourceUrl": "https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/priceindexofprivaterentsukmonthlypricestatistics",
+      "table": "Price Index of Private Rents, UK: monthly price statistics",
+      "transform": {
+        "factor": 1,
+        "operation": "identity"
+      }
+    },
+    "sourceField": "UK, all property types, annual percentage change",
+    "sourceSeriesId": "priceindexofprivaterentsukmonthlypricestatistics",
+    "sourceTable": "Price Index of Private Rents, UK: monthly price statistics",
+    "targetContentHash": "ea72854092e5b7d2ffc1e87736b878925ecad998c58768551ae364ef2ffc5452",
+    "targetRegistrationPath": "records/targets/2026-08-26-ea72854092e5b7d2ffc1e87736b878925ecad998c58768551ae364ef2ffc5452.json",
+    "targetUnit": "percent_growth",
+    "transform": {
+      "factor": 1,
+      "operation": "identity"
+    },
+    "valueScale": 1
+  },
+  "registrationCommit": "b4f1d890f91c9ece5fc1e068a92fbe28ea25be43",
+  "targetContentHash": "ea72854092e5b7d2ffc1e87736b878925ecad998c58768551ae364ef2ffc5452",
+  "targetRegistrationPath": "records/targets/2026-08-26-ea72854092e5b7d2ffc1e87736b878925ecad998c58768551ae364ef2ffc5452.json",
+  "registeredAtUtc": "2026-08-26T16:23:02Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-08-26T16:27:31Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "c0e85ad7faa6513cff73d743e6ec69a51198c962697d7e20e54f00eda021fd2f"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Clarify that the September 2026 ONS release is expected to contain the August 2026 PIPR first print, to avoid ambiguity from the bulletin month naming."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "State explicitly that no richer time-series model was used beyond a persistence/random-walk prior because the relevant first-print recent sample is short."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted both reviewer suggestions by clarifying that the September 2026 release contains the August 2026 PIPR first print and by stating that the forecast uses a persistence/random-walk prior rather than a richer time-series model because the comparable first-print sample is short; no required fixes were raised.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted both reviewer suggestions by clarifying that the September 2026 release contains the August 2026 PIPR first print and by stating that the forecast uses a persistence/random-walk prior rather than a richer time-series model because the comparable first-print sample is short; no required fixes were raised.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "The draft satisfies the target contract and rubric with coherent resolver metadata, prior/update logic, interval sizing, tails, and JSON fields."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/prompt.md",
+      "sha256": "372d046e67c3681c0df14382a453241468c366c8e04fe602ed1489970631006d",
+      "bytes": 10771,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_command.json",
+      "sha256": "de68e1fab9cd98ad867ba02b3529b506ac4b6fcd1abeb237d1b890a5f7a71360",
+      "bytes": 758,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_codex_stdout.jsonl",
+      "sha256": "21e1aa4dba9f32d13a8b8bd701edc850e4cbe056c6ca5b83abfc6dbef8bb30d1",
+      "bytes": 11942,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_codex_stderr.log",
+      "sha256": "ea6272d13cb5e153c43310cc9dd001b68b24af93c50071133b027c45ab97c6d5",
+      "bytes": 233,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_codex_events.jsonl",
+      "sha256": "975be610fff9b3aaf18e023b75cb54b635c44b779796461becfc5db74c579141",
+      "bytes": 11956,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_codex_last_message.txt",
+      "sha256": "335c5c9a30c80c4d65f9c8a72a0d35cf9ae873aa746077741ab2105d1d888a24",
+      "bytes": 6583,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_codex_trace.json",
+      "sha256": "d30778b050ca9696d1545acbda52a4187f8c5e1871abdadc07a074c1598c8b8f",
+      "bytes": 559,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_stdout.txt",
+      "sha256": "335c5c9a30c80c4d65f9c8a72a0d35cf9ae873aa746077741ab2105d1d888a24",
+      "bytes": 6583,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/draft_stderr.txt",
+      "sha256": "012b27466d889c102e3f41d766a940598bffe973feb34b0d1355e73bd3e51aae",
+      "bytes": 248,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_prompt.md",
+      "sha256": "c61c473919e98620e9d9fe735768a35779dd669714469a50ac0fd2c67d23e0c4",
+      "bytes": 10090,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_command.json",
+      "sha256": "4da1f07a110835a69d9b3a0d5ad5f1ba44df37dd6c9ae052c254c60dedcb3684",
+      "bytes": 754,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "3d4904a0bdf7fa5fad37a621d6cafffd8444ef0c10f3da24b48c4058f3bad8f8",
+      "bytes": 2073,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_codex_stderr.log",
+      "sha256": "e85c788cfe8e4d0d998a6a0a423b270ea2a0c1fdb6d095660b9a5f18262712f1",
+      "bytes": 233,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_codex_events.jsonl",
+      "sha256": "cb2df5b468f194536bf79be5a45ef022d7365a61d42df785fb5722eefc3fb400",
+      "bytes": 2106,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_codex_last_message.txt",
+      "sha256": "63f2fe17a4bb71f3574f3d6e46f6180f17117c307cdd502e64de9d4cc7a0d5a6",
+      "bytes": 512,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_codex_trace.json",
+      "sha256": "2fb19c9b6db799a493ad9a90ec9f651829b3ddc8d3bd9a3154de772d54a18b0f",
+      "bytes": 555,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_stdout.txt",
+      "sha256": "63f2fe17a4bb71f3574f3d6e46f6180f17117c307cdd502e64de9d4cc7a0d5a6",
+      "bytes": 512,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/pre_submit_review_stderr.txt",
+      "sha256": "1b5ef58d014dc6025f549e50ef08ab649fa62a15107363eb0f8b7246481e4ca1",
+      "bytes": 248,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/revision_prompt.md",
+      "sha256": "96829805b727755deba0d12147e0fd461daf81753970b62ba3255d973aea5620",
+      "bytes": 18802,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/command.json",
+      "sha256": "5d8aeb53e187ca3f3fe42a9d86b57bc468a6cafee0f2f2cf89a55e7a6e92f57f",
+      "bytes": 752,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/codex_stdout.jsonl",
+      "sha256": "744c7fae766c73c5cbf38a3187f7a465b962036695dabae09f355e00d754ff40",
+      "bytes": 7908,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/codex_stderr.log",
+      "sha256": "259a56f62fee0a356c47ff832800be057b56e1e32d2f65662ab7680ebac2fcf8",
+      "bytes": 233,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/codex_events.jsonl",
+      "sha256": "43cf9cffdfb752e033637049d6f670438758c2807937a52e762e51ee5f409d09",
+      "bytes": 7930,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/codex_last_message.txt",
+      "sha256": "8cc447c034ba89349e493dc8ba75c6c6c7866761d31e18ef0d6a317f898d4758",
+      "bytes": 7277,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/codex_trace.json",
+      "sha256": "c375f7c93f5269c2c9a3702080c665203bbb3eca81bf88a91aa02e54a88a6151",
+      "bytes": 552,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/stdout.txt",
+      "sha256": "8cc447c034ba89349e493dc8ba75c6c6c7866761d31e18ef0d6a317f898d4758",
+      "bytes": 7277,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/stderr.txt",
+      "sha256": "50cb3c9d04920fd10c282b019d4efd9774ca5da34c28d481524732c9ae070ad5",
+      "bytes": 248,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/raw_response.txt",
+      "sha256": "8cc447c034ba89349e493dc8ba75c6c6c7866761d31e18ef0d6a317f898d4758",
+      "bytes": 7277,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/parsed_cells.json",
+      "sha256": "291479f0ca331f4c9bedf4a881b1d797167b7b70c7a38d77f4b37ecd50c0d20d",
+      "bytes": 8487,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/normalized_cells.json",
+      "sha256": "f75910e99c3308f2f6c50dcdd02b45530e7b3b7bb0ee0e9e7ae0499fe16bf326",
+      "bytes": 25499,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/distribution.json",
+      "sha256": "d8e74c99f7a8897c786a14e7795c837c89e5c465ac0d80fc06095774e16360f0",
+      "bytes": 13228,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/validation.json",
+      "sha256": "011e8acf1abe05ed7f07955a31bde9dacf34f146ab9cfbf1ab287baed999a7c8",
+      "bytes": 140,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/cells.with_activity.json",
+      "sha256": "fc01932b5b7ca42d4a309f1d30a4a0e235c92a56ab67445ac61b0c5ca5790761",
+      "bytes": 39293,
+      "createdAt": "2026-08-26T16:27:31Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-08-26/2026-08-26t16-27-31z-ons-pipr-uk-private-rent-yoy-2026-08/manifest.json",
+      "sha256": "6756d01b041a502726ef01f4b238c89726a20c103f0b9ba227a2888086aae80d",
+      "bytes": 14738,
+      "createdAt": "2026-08-26T16:27:31Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "uk-private-rent-annual-rate-august-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "b4f1d890f91c9ece5fc1e068a92fbe28ea25be43",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "fb94fbdcf2ce70e801c78d08ed23418fd5d5217da2907e56c1cf86b09fec6660"
+}
