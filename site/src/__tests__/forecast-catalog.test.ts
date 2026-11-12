@@ -620,8 +620,8 @@ describe("forecast catalog", () => {
     expect(exportPayload.policy.method).toContain("No model produced");
     expect(exportPayload.policy.rule).not.toMatch(/llm/i);
 
-    // The same rows reach the reward export, the log summary and the
-    // target-architecture projection, which carries the model field alone.
+    // The same rows reach the reward export and the target-architecture
+    // projection, which carries the model field alone.
     const specs = buildPredictionSpecs(resolvedForecastCells);
     const rewardExport = buildBrierRewardExport({
       forecasts: resolvedForecastCells,

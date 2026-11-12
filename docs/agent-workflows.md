@@ -31,8 +31,9 @@ This works well in tools like Codex because they already have the two things `br
 - access to local context
 - the ability to log decisions through the CLI or Python package
 
-Minimal workflow (the commands on this page install from this repository; the
-`brier` project on PyPI belongs to someone else and is unrelated):
+Minimal workflow (the commands on this page install from this repository,
+which pip checks out in full, about 2 GB; the `brier` project on PyPI belongs
+to someone else and is unrelated):
 
 ```bash
 python -m pip install 'brier @ git+https://github.com/ThesisInstitute/thesis'

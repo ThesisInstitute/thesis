@@ -55,9 +55,10 @@ export default function DocsPage() {
             Use brier with Codex, Claude Code, or the local CLI.
           </h1>
           <p className="text-[1.02rem] text-[#415463] leading-[1.7] max-w-[760px] mb-8">
-            The install story is package-first. The PyPI package now includes
-            the CLI, MCP server, and packaged Codex and Claude skills. The CLI
-            itself is local-only and does not call an LLM or require an API key.
+            The install story is package-first. The package includes the CLI,
+            MCP server, and packaged Codex and Claude skills, and it installs
+            from the Thesis repository. The CLI itself is local-only and does
+            not call an LLM or require an API key.
           </p>
 
           <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
@@ -217,7 +218,9 @@ brier setup claude`}</CodeBlock>
           <p className="mt-5 text-[0.92rem] text-[#415463] leading-[1.7] max-w-[760px]">
             These commands install from the Thesis repository. The `brier`
             project on PyPI belongs to someone else and is unrelated, so `pip
-            install brier` fetches a different package.
+            install brier` fetches a different package. pip checks out the
+            whole repository to build the package: about 2 GB, most of it
+            forecast records.
           </p>
           <div className="mt-6 grid grid-cols-2 gap-6 max-md:grid-cols-1">
             <CodeBlock>{`brier doctor codex`}</CodeBlock>

@@ -22,7 +22,8 @@ python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesi
 
 This installs from this repository. The `brier` project on PyPI belongs to
 someone else and is unrelated, so `pip install brier` fetches a different
-package.
+package. pip checks out the whole repository to build the package: about
+2 GB, most of it forecast records.
 
 ## Quick Start
 
@@ -293,21 +294,29 @@ python3 -m brier.experiments stability --strongest-validation --model gpt-5.2  #
 ### Publishing to PyPI
 
 The `publish.yml` workflow builds the package and uploads it with PyPI
-Trusted Publishing when a GitHub release is published.
+Trusted Publishing when a GitHub release is published or someone runs the
+workflow by hand.
 
-**Current state (verified 2026-11-11): another project owns the `brier`
-name on PyPI.** PyPI's API lists `brier` 0.2.0 by a different author, first
-uploaded on 2026-10-02, with no connection to this repository. So
-`pip install brier` installs that project; install this one from Git, as
-the Installation section shows. `publish.yml` still builds this package
-under the name `brier` and uploads it when a GitHub release is published.
-It last ran for the v0.2.x tags in March 2026. Don't publish a release
-until the distribution has a new name.
+**Current state (verified 2026-11-12): another project owns the `brier`
+name on PyPI.** PyPI's API lists `brier` (latest release 0.2.0) by a
+different author, who first uploaded it on 2026-10-02 and has no connection
+to this repository. So `pip install brier` installs that project; install
+this one from Git, as the Installation section shows.
+
+This package reached PyPI under its earlier name, `farness`. The workflow
+published `farness` 0.2.0 to 0.2.4 on 2026-03-24 and 2026-03-25 and has not
+run since. Those releases install the `farness` and `farness-mcp` commands
+and none of the work since March. `publish.yml` now builds the package as
+`brier`, so don't publish a release or run the workflow until
+`pyproject.toml` names a distribution this project can publish.
 
 **To start publishing (only if a release is actually wanted):** first
-pick a distribution name PyPI still has free and set it in
-`pyproject.toml`. The new project then needs a *pending* publisher,
-registered at the account level rather than on a project page:
+settle the distribution name and set it in `pyproject.toml`: `farness`,
+this package's earlier name on PyPI, or a name PyPI still has free. To
+reuse `farness`, check on that project's PyPI publishing settings that its
+trusted publisher names this repository and `publish.yml`. A new name needs
+a *pending* publisher, registered at the account level rather than on a
+project page:
 
 1. Open `https://pypi.org/manage/account/publishing/`.
 2. Add a pending publisher with:
@@ -319,7 +328,9 @@ registered at the account level rather than on a project page:
 
 The first release then creates the project. The import package and the
 `brier` and `brier-mcp` commands can keep their names; only the
-distribution name on PyPI has to change.
+distribution name on PyPI has to change. The other `brier` project also
+installs an import package named `brier`, so the two can't share an
+environment.
 
 **To publish a new version:**
 1. Update version in `pyproject.toml`

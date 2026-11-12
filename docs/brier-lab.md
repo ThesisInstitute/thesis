@@ -81,7 +81,9 @@ The Thesis Log carries summary counts and a link to the full export.
 Code in `site/src/data/forecast-judges.ts` builds every one of them from rules,
 and no model reads a trace. Each row's metadata says so:
 `kind: "rule_based_rubric"` and `model: "none"`. The export's `policy.method`
-says the same in a sentence.
+says the same in a sentence. Until November 2026 the export labelled these
+rows `kind: "llm_judge"` and `model: "configured-llm-judge"`; the rows and
+their scores did not change with the label.
 
 - trace-quality rows score public reasoning on seven dimensions (base rates,
   source grounding, resolution clarity, uncertainty calibration, mechanisms,
@@ -91,7 +93,7 @@ says the same in a sentence.
   pack-informed or prior-informed runs, from the difference between their
   trace-quality scores
 - post-resolution rows tag likely failure modes after official facts arrive,
-  from thresholds on the resolved score
+  from thresholds on the resolved score and from the run's pack labels
 
 Each trace-quality row also carries a `prompt`: the template a model judge
 would receive. No model has received it.
@@ -103,8 +105,8 @@ objective remains resolved forecast accuracy.
 
 Model-generated judge runs are a separate lane.
 `scripts/run_brier_reasoning_judge.py` writes them to `records/brier-judges/`,
-which holds two runs (2026-06-27 and 2026-06-28). The judge export doesn't
-read them.
+which held two runs on 2026-11-12 (dated 2026-06-27 and 2026-06-28). The
+judge export doesn't read them.
 
 ## Pre-submit Review
 
