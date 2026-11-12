@@ -143,7 +143,7 @@ function RenderedStep({
       return (
         <div className="mt-6 rounded-xl border border-[var(--color-accent)] bg-[var(--color-accent-subtle)] p-5">
           <div className="mb-2 [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.12em] text-[var(--color-rose-700)]">
-            calibrated forecast · 80% CI
+            forecast · 80% CI
           </div>
           <div className="flex items-baseline gap-4">
             <span className="[font-family:var(--font-display)] text-[2rem] font-semibold leading-none text-[var(--color-rose-700)]">
