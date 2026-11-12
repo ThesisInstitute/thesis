@@ -171,7 +171,7 @@ const JUDGE_PROMPT_VERSION = "forecast-trace-quality-v0.1";
 // Every row this module builds comes from rules, so it names no model.
 const RULE_BASED_JUDGE_MODEL = "none";
 const RULE_BASED_JUDGE_METHOD =
-  "No model produced these rows. Code in site/src/data/forecast-judges.ts scores each public trace by counting rubric keywords and structural features such as tool calls, a stated interval and a distribution. It picks each pairwise winner from the difference between two such scores, and it tags each resolved forecast from thresholds on its resolved score, from its pack labels and from whether it names a data point. Each trace row's `prompt` holds the template a model judge would receive; no model has received it.";
+  "No model produced these rows. Code in site/src/data/forecast-judges.ts scores each public trace by counting rubric keywords and structural features such as tool calls, a stated interval and a distribution. It picks each pairwise winner from the difference between two such scores, and it tags each resolved run from thresholds on its resolved score, from its pack labels and from whether it names a data point. A run that trips none of those rules gets the tag bad_baseline. Each trace row's `prompt` holds the template a model judge would receive; no model has received it.";
 
 type NormalizedForecastScore = ResolvedForecastScore & {
   normalizationScale: number;

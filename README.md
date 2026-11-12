@@ -317,9 +317,11 @@ this package's earlier name on PyPI, or a name PyPI still has free.
 To reuse `farness`, add a trusted publisher on that project's PyPI
 publishing settings: owner `ThesisInstitute`, repository `thesis`, workflow
 `publish.yml`, no environment. PyPI's provenance for `farness` 0.2.4 names
-the publisher `MaxGhenis/farness`, this repository's name before its
-transfer. If the project's settings still name it, PyPI answers a run from
-`ThesisInstitute/thesis` with `invalid-publisher`.
+the publisher `MaxGhenis/farness`, an earlier name of this repository. The
+repository was later renamed `MaxGhenis/brier` and moved to
+`ThesisInstitute/thesis` on 2026-07-22. If `MaxGhenis/farness` is still the
+project's only publisher, PyPI answers a run from `ThesisInstitute/thesis`
+with `invalid-publisher`.
 
 A new name needs a *pending* publisher, registered at the account level
 rather than on a project page:

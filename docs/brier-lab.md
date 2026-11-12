@@ -94,7 +94,8 @@ their scores did not change with the label.
   trace-quality scores
 - post-resolution rows tag likely failure modes after official facts arrive,
   from thresholds on the resolved score, the run's pack labels and whether
-  the score names a data point
+  the score names a data point; a run that trips none of those rules gets
+  `bad_baseline`
 
 Each trace-quality row also carries a `prompt`: the template a model judge
 would receive. No model has received it.

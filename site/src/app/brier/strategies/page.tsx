@@ -554,7 +554,9 @@ function JudgeDisagreementRow({
     <tr className="border-b border-[var(--theme-border)] last:border-b-0">
       <td className="py-4 pr-5 align-top">
         <div className="[font-family:var(--font-mono)] text-[0.64rem] uppercase tracking-[0.08em] text-[var(--color-accent)]">
-          {row.disagreement.replace(/_/g, " ")}
+          {row.disagreement === "high_judge_bad_score"
+            ? "high rubric, bad score"
+            : "low rubric, good score"}
         </div>
       </td>
       <td className="max-w-[260px] py-4 pr-5 align-top">
