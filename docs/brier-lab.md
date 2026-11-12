@@ -93,7 +93,8 @@ their scores did not change with the label.
   pack-informed or prior-informed runs, from the difference between their
   trace-quality scores
 - post-resolution rows tag likely failure modes after official facts arrive,
-  from thresholds on the resolved score and from the run's pack labels
+  from thresholds on the resolved score, the run's pack labels and whether
+  the score names a data point
 
 Each trace-quality row also carries a `prompt`: the template a model judge
 would receive. No model has received it.

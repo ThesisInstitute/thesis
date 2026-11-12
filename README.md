@@ -312,11 +312,17 @@ and none of the work since March. `publish.yml` now builds the package as
 
 **To start publishing (only if a release is actually wanted):** first
 settle the distribution name and set it in `pyproject.toml`: `farness`,
-this package's earlier name on PyPI, or a name PyPI still has free. To
-reuse `farness`, check on that project's PyPI publishing settings that its
-trusted publisher names this repository and `publish.yml`. A new name needs
-a *pending* publisher, registered at the account level rather than on a
-project page:
+this package's earlier name on PyPI, or a name PyPI still has free.
+
+To reuse `farness`, add a trusted publisher on that project's PyPI
+publishing settings: owner `ThesisInstitute`, repository `thesis`, workflow
+`publish.yml`, no environment. PyPI's provenance for `farness` 0.2.4 names
+the publisher `MaxGhenis/farness`, this repository's name before its
+transfer. If the project's settings still name it, PyPI answers a run from
+`ThesisInstitute/thesis` with `invalid-publisher`.
+
+A new name needs a *pending* publisher, registered at the account level
+rather than on a project page:
 
 1. Open `https://pypi.org/manage/account/publishing/`.
 2. Add a pending publisher with:
@@ -329,8 +335,8 @@ project page:
 The first release then creates the project. The import package and the
 `brier` and `brier-mcp` commands can keep their names; only the
 distribution name on PyPI has to change. The other `brier` project also
-installs an import package named `brier`, so the two can't share an
-environment.
+installs an import package and a command named `brier`, so the two can't
+share an environment.
 
 **To publish a new version:**
 1. Update version in `pyproject.toml`

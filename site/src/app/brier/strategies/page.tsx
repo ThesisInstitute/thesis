@@ -123,7 +123,7 @@ export default async function StrategyLabPage() {
               value={judgeReport.calibration.counts.judgedRuns.toLocaleString()}
             />
             <FactStrip
-              label="with a resolved score"
+              label="in the nCRPS comparison"
               value={judgeReport.calibration.counts.scoredJudgedRuns.toLocaleString()}
             />
             <FactStrip
@@ -133,7 +133,7 @@ export default async function StrategyLabPage() {
               )}
             />
             <FactStrip
-              label="post-resolution tags"
+              label="post-resolution rows"
               value={judgeReport.calibration.counts.postResolutionReviews.toLocaleString()}
             />
           </div>
@@ -143,7 +143,7 @@ export default async function StrategyLabPage() {
                 <tr className="border-b border-[var(--theme-border)] [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
                   <th className="py-3 pr-5 font-medium">band</th>
                   <th className="py-3 pr-5 font-medium">traces</th>
-                  <th className="py-3 pr-5 font-medium">scored</th>
+                  <th className="py-3 pr-5 font-medium">resolved</th>
                   <th className="py-3 pr-5 font-medium">rubric</th>
                   <th className="py-3 pr-5 font-medium">nCRPS</th>
                   <th className="py-3 font-medium">80% cover</th>
