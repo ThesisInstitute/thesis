@@ -464,7 +464,7 @@ def test_a19_is_a_constrained_family() -> None:
 def test_every_registered_a19_contract_on_disk_selects_millions() -> None:
     contracts = resolve_pending.registration_contracts()
     refs = [ref for ref in contracts if ref.startswith(resolve_pending.A19_STEM)]
-    archive_leg = 0
+    archive_leg = bls_api_leg = 0
     for ref in refs:
         contract = contracts[ref]["contract"]
         unit = contract["unit"]
@@ -474,14 +474,19 @@ def test_every_registered_a19_contract_on_disk_selects_millions() -> None:
         ):
             # The registry has held A-19 rows registered through the BLS API
             # template since 2026-11-10. The registered adapter sends those to
-            # the BLS API leg, which must state the same unit and scale.
+            # the BLS API leg, which must state the same unit and scale. That
+            # leg never reads the contract's own scale, so check it here.
             kind, spec = routed(ref, unit)
             assert kind == "bls_api", ref
-            assert (unit, spec["unit"], spec["scale"]) == (
+            assert (unit, spec["unit"], spec["scale"], spec["round"]) == (
                 "millions",
                 "millions",
                 0.001,
+                3,
             ), ref
+            assert contract["valueScale"] == spec["scale"], ref
+            assert resolve_pending.execution_plan_refusal(contracts[ref]) is None, ref
+            bls_api_leg += 1
             continue
         executed, refusal = resolve_pending.a19_execution_spec(
             routed_spec(ref, unit), contracts[ref]
@@ -489,8 +494,10 @@ def test_every_registered_a19_contract_on_disk_selects_millions() -> None:
         assert refusal is None, ref
         assert (executed["unit"], executed["scale"]) == ("millions", 0.001), ref
         archive_leg += 1
-    # The BLS API branch must not hollow out the Archive-leg check.
+    # Neither branch may go unexercised: 18 Archive-leg rows and 2 BLS API
+    # rows were on disk on 2026-11-12.
     assert archive_leg >= 12
+    assert bls_api_leg >= 2
 
 
 # -- the fact names the publisher and keeps the capture -----------------------
