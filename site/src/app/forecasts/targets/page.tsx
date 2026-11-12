@@ -44,7 +44,7 @@ export default async function TargetArchitecturePage() {
           <p className="text-[1.02rem] leading-[1.65] text-[var(--theme-text-muted)]">
             Generated targets, target versions, strategy versions, pack joins,
             baseline candidates, tool calls, artifact joins, distributions,
-            public reasoning events, reviews, judges, resolution events, and
+            public reasoning events, reviews, rubric rows, resolution events, and
             score rows.
           </p>
           <div className="mt-5 flex flex-wrap gap-4">
@@ -83,7 +83,7 @@ export default async function TargetArchitecturePage() {
           <Metric label="tool calls" value={projection.counts.toolCalls} />
           <Metric label="resolved" value={projection.counts.resolutionEvents} />
           <Metric label="reviews" value={projection.counts.reviewRuns} />
-          <Metric label="judges" value={projection.counts.judgeRuns} />
+          <Metric label="rubric rows" value={projection.counts.judgeRuns} />
           <Metric
             label="CDF points"
             value={projection.counts.forecastDistributionPoints}

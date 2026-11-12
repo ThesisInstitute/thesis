@@ -17,8 +17,12 @@ Instead of asking "Is X good?" or "Should I do Y?", brier helps you:
 ## Installation
 
 ```bash
-python -m pip install 'brier[mcp]'
+python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 ```
+
+This installs from this repository. The `brier` project on PyPI belongs to
+someone else and is unrelated, so `pip install brier` fetches a different
+package.
 
 ## Quick Start
 
@@ -163,7 +167,7 @@ For agent-agnostic setup and prompt guidance, see [`docs/agent-workflows.md`](do
 The default builder path is package-first:
 
 ```bash
-python -m pip install 'brier[mcp]'
+python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup codex
 brier doctor codex
 ```
@@ -179,7 +183,7 @@ python -m pip install -e /path/to/brier
 If you want a native tool interface instead of prompt copy-paste, install the package and run the MCP server locally:
 
 ```bash
-python -m pip install 'brier[mcp]'
+python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier-mcp
 ```
 
@@ -199,7 +203,7 @@ This installs the packaged Codex skill and registers the MCP server with the sam
 Claude Code can use the same local MCP server and a local skill wrapper:
 
 ```bash
-python -m pip install 'brier[mcp]'
+python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup claude
 brier doctor claude
 ```
@@ -291,27 +295,31 @@ python3 -m brier.experiments stability --strongest-validation --model gpt-5.2  #
 The `publish.yml` workflow builds the package and uploads it with PyPI
 Trusted Publishing when a GitHub release is published.
 
-**Current state (verified 2026-07-25): there is no `brier` project on
-PyPI.** The API returns 404 for it, so nothing is installable from PyPI
-today and no trusted publisher exists to migrate after the repository
-transfer. The workflow last ran for the v0.2.x tags in March 2026; treat
-it as dormant rather than as evidence of a published package.
+**Current state (verified 2026-11-11): another project owns the `brier`
+name on PyPI.** PyPI's API lists `brier` 0.2.0 by a different author, first
+uploaded on 2026-10-02, with no connection to this repository. So
+`pip install brier` installs that project; install this one from Git, as
+the Installation section shows. `publish.yml` still builds this package
+under the name `brier` and uploads it when a GitHub release is published.
+It last ran for the v0.2.x tags in March 2026. Don't publish a release
+until the distribution has a new name.
 
-**To start publishing (only if a release is actually wanted):** the
-project does not exist yet, so it needs a *pending* publisher, registered
-at the account level rather than on a project page:
+**To start publishing (only if a release is actually wanted):** first
+pick a distribution name PyPI still has free and set it in
+`pyproject.toml`. The new project then needs a *pending* publisher,
+registered at the account level rather than on a project page:
 
 1. Open `https://pypi.org/manage/account/publishing/`.
 2. Add a pending publisher with:
-   - PyPI Project Name: `brier`
+   - PyPI Project Name: the new distribution name
    - Owner: `ThesisInstitute`
    - Repository name: `thesis`
    - Workflow name: `publish.yml`
    - Environment name: leave blank (the publish job defines no environment)
 
-The first release then creates the project. Note the package name still
-carries the pre-Thesis `brier` naming; decide whether to rename before
-claiming a name on PyPI.
+The first release then creates the project. The import package and the
+`brier` and `brier-mcp` commands can keep their names; only the
+distribution name on PyPI has to change.
 
 **To publish a new version:**
 1. Update version in `pyproject.toml`

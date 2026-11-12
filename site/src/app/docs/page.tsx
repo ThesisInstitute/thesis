@@ -113,7 +113,7 @@ export default function DocsPage() {
                 This gives Codex native tools, access to stored decisions, and a
                 reusable `$brier` skill.
               </p>
-              <CodeBlock>{`python -m pip install 'brier[mcp]'
+              <CodeBlock>{`python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup codex
 # restart Codex, then use $brier`}</CodeBlock>
             </div>
@@ -127,7 +127,7 @@ brier setup codex
                 Codex, but through Claude skills instead of the Codex skill
                 format.
               </p>
-              <CodeBlock>{`python -m pip install 'brier[mcp]'
+              <CodeBlock>{`python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup claude
 # restart Claude Code`}</CodeBlock>
             </div>
@@ -140,7 +140,7 @@ brier setup claude
                 This path creates and scores decisions locally. No LLM API key
                 is required for these commands.
               </p>
-              <CodeBlock>{`python -m pip install brier
+              <CodeBlock>{`python -m pip install 'brier @ git+https://github.com/ThesisInstitute/thesis'
 brier new "Should we rewrite the auth layer?"
 brier list
 brier calibration`}</CodeBlock>
@@ -204,15 +204,20 @@ claude plugin install brier@maxghenis-plugins
           title="Two commands, then restart the client"
         >
           <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
-            <CodeBlock>{`python -m pip install 'brier[mcp]'
+            <CodeBlock>{`python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup codex`}</CodeBlock>
-            <CodeBlock>{`python -m pip install 'brier[mcp]'
+            <CodeBlock>{`python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup claude`}</CodeBlock>
           </div>
           <p className="mt-5 text-[0.92rem] text-[#415463] leading-[1.7] max-w-[760px]">
             `brier setup` installs the packaged skill and registers the local
             MCP server with the same Python interpreter that launched `brier`.
             The last step is just restarting Codex or Claude Code.
+          </p>
+          <p className="mt-5 text-[0.92rem] text-[#415463] leading-[1.7] max-w-[760px]">
+            These commands install from the Thesis repository. The `brier`
+            project on PyPI belongs to someone else and is unrelated, so `pip
+            install brier` fetches a different package.
           </p>
           <div className="mt-6 grid grid-cols-2 gap-6 max-md:grid-cols-1">
             <CodeBlock>{`brier doctor codex`}</CodeBlock>
@@ -240,7 +245,7 @@ brier setup claude`}</CodeBlock>
                 </span>
                 in Codex, then confirm the decision landed in the local store.
               </p>
-              <CodeBlock>{`python -m pip install 'brier[mcp]'
+              <CodeBlock>{`python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup codex
 brier doctor codex`}</CodeBlock>
             </div>
