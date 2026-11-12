@@ -74,23 +74,41 @@ persistence baseline; below 1 beats persistence), tie-breaking on unpaired
 mean reward and then scored-run count. It also reports the share of paired
 targets where the agent's CRPS beats the baseline's on the same target.
 
-## LLM Judges
+## Rule-based rubric rows (the judge export)
 
-The Thesis Log carries judge summary counts and a link to the full judge export.
-`/forecasts/judges.json` and the Brier reward export carry the auxiliary judge
-records:
+The Thesis Log carries summary counts and a link to the full export.
+`/forecasts/judges.json` and the Brier reward export carry the auxiliary rows.
+Code in `site/src/data/forecast-judges.ts` builds every one of them from rules,
+and no model reads a trace. Each row's metadata says so:
+`kind: "rule_based_rubric"` and `model: "none"`. The export's `policy.method`
+says the same in a sentence. Until November 2026 the export labelled these
+rows `kind: "llm_judge"` and `model: "configured-llm-judge"`; the rows and
+their scores did not change with the label.
 
-- trace-quality judges score public reasoning for base rates, source
-  grounding, resolution clarity, uncertainty calibration, mechanisms,
-  counterarguments, and forecast coherence
-- pairwise judges compare two runs on the same target, such as primary vs
-  pack-informed or prior-informed runs
-- post-resolution judges tag likely failure modes after official facts arrive
+- trace-quality rows score public reasoning on seven dimensions (base rates,
+  source grounding, resolution clarity, uncertainty calibration, mechanisms,
+  counterarguments and forecast coherence) by counting rubric keywords and
+  structural features such as tool calls, a stated interval and a distribution
+- pairwise rows compare two runs on the same target, such as primary vs
+  pack-informed or prior-informed runs, from the difference between their
+  trace-quality scores
+- post-resolution rows tag likely failure modes after official facts arrive,
+  from thresholds on the resolved score, the run's pack labels and whether
+  the score names a data point; a run that trips none of those rules gets
+  `bad_baseline`
 
-These records are explicitly `rewardEligible: false`. They are process
-diagnostics for triage and prompt/pack iteration. Before any judge signal can
+Each trace-quality row also carries a `prompt`: the template a model judge
+would receive. No model has received it.
+
+These rows are explicitly `rewardEligible: false`. They are process
+diagnostics for triage and prompt/pack iteration. Before any such signal can
 guide training, it must be checked against held-out proper scores; the reward
 objective remains resolved forecast accuracy.
+
+Model-generated judge runs are a separate lane.
+`scripts/run_brier_reasoning_judge.py` writes them to `records/brier-judges/`,
+which held two runs on 2026-11-12 (dated 2026-06-27 and 2026-06-28). The
+judge export doesn't read them.
 
 ## Pre-submit Review
 

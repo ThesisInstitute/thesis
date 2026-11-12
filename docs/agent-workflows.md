@@ -31,10 +31,12 @@ This works well in tools like Codex because they already have the two things `br
 - access to local context
 - the ability to log decisions through the CLI or Python package
 
-Minimal workflow:
+Minimal workflow (the commands on this page install from this repository,
+which pip checks out in full, about 2 GB; the `brier` project on PyPI belongs
+to someone else and is unrelated):
 
 ```bash
-python -m pip install brier
+python -m pip install 'brier @ git+https://github.com/ThesisInstitute/thesis'
 brier new "Should we rewrite the auth layer?" --context "3 incidents this quarter; CTO prefers Rust; team is strongest in Node."
 ```
 
@@ -43,7 +45,7 @@ Then ask the agent to use the core instruction above and to read or update the d
 If you want Codex to pick this workflow up as a native skill, install the packaged skill:
 
 ```bash
-python -m pip install 'brier[mcp]'
+python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup codex
 brier doctor codex
 ```
@@ -61,7 +63,7 @@ brier doctor codex --fix
 If you want a native tool surface instead of prompt copy-paste, `brier` ships an MCP server:
 
 ```bash
-python -m pip install 'brier[mcp]'
+python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier-mcp
 ```
 
@@ -92,7 +94,7 @@ brier setup codex
 Claude Code can use the same local MCP server and a local skill wrapper:
 
 ```bash
-python -m pip install 'brier[mcp]'
+python -m pip install 'brier[mcp] @ git+https://github.com/ThesisInstitute/thesis'
 brier setup claude
 brier doctor claude
 ```

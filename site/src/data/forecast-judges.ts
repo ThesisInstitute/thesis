@@ -31,7 +31,11 @@ export interface ForecastTraceJudgeRubricDimension {
 }
 
 export interface ForecastJudgeModelMetadata {
-  kind: "llm_judge";
+  // "rule_based_rubric": the deterministic code in this module scored the row
+  // and no model read the trace. "llm_judge" stays in the type for a
+  // model-judge lane; this module emits none.
+  kind: "rule_based_rubric" | "llm_judge";
+  // The model that scored the row, or "none" for a rule-based row.
   model: string;
   promptVersion: string;
   inputScope: "public_trace_and_spec";
@@ -152,6 +156,8 @@ export interface ForecastJudgeExport {
   policy: {
     role: "auxiliary_process_eval";
     rewardEligible: false;
+    // How the rows were produced, in plain words for a reader of the JSON.
+    method: string;
     rule: string;
   };
   traceQuality: ForecastTraceJudgeRecord[];
@@ -162,7 +168,10 @@ export interface ForecastJudgeExport {
 
 const JUDGE_GENERATED_AT = "2026-06-26T00:00:00Z";
 const JUDGE_PROMPT_VERSION = "forecast-trace-quality-v0.1";
-const JUDGE_MODEL = "configured-llm-judge";
+// Every row this module builds comes from rules, so it names no model.
+const RULE_BASED_JUDGE_MODEL = "none";
+const RULE_BASED_JUDGE_METHOD =
+  "No model produced these rows. Code in site/src/data/forecast-judges.ts scores each public trace by counting rubric keywords and structural features such as tool calls, a stated interval and a distribution. It picks each pairwise winner from the difference between two such scores, and it tags each resolved run from thresholds on its resolved score, from its pack labels and from whether it names a data point. A run that trips none of those rules gets the tag bad_baseline. Each trace row's `prompt` holds the template a model judge would receive; no model has received it.";
 
 type NormalizedForecastScore = ResolvedForecastScore & {
   normalizationScale: number;
@@ -272,7 +281,8 @@ export function buildForecastJudgeExport({
     policy: {
       role: "auxiliary_process_eval",
       rewardEligible: false,
-      rule: "LLM judge scores evaluate public trace quality and failure modes. They are never used as proper-score reward; resolved CRPS/Brier-style scores remain the training objective.",
+      method: RULE_BASED_JUDGE_METHOD,
+      rule: "Rubric scores describe public trace quality and failure modes. They are never used as proper-score reward; resolved CRPS/Brier-style scores remain the training objective.",
     },
     traceQuality,
     pairwise,
@@ -671,6 +681,8 @@ function buildTraceSummary(
     .join(" ");
 }
 
+// The template a model judge would receive. Nothing sends it today: the
+// rules above score every row, and policy.method says so in the export.
 function buildTraceJudgePrompt(
   forecast: ForecastCell,
   run: ForecastRunEntry,
@@ -865,8 +877,8 @@ function getRunId(forecast: ForecastCell, run: ForecastRunEntry) {
 
 function buildJudgeMetadata(): ForecastJudgeModelMetadata {
   return {
-    kind: "llm_judge",
-    model: JUDGE_MODEL,
+    kind: "rule_based_rubric",
+    model: RULE_BASED_JUDGE_MODEL,
     promptVersion: JUDGE_PROMPT_VERSION,
     inputScope: "public_trace_and_spec",
     executionMode: "rubric_seed",

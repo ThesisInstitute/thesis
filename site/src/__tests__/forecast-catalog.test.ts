@@ -528,7 +528,7 @@ describe("forecast catalog", () => {
     expect(exportPayload.leaderboard.length).toBeGreaterThan(0);
   });
 
-  it("builds LLM judge records without replacing proper scoring", () => {
+  it("builds rule-based rubric records without replacing proper scoring", () => {
     const scores = scoreResolvedForecasts(
       resolvedForecastCells,
       policyEngineLedger,
@@ -568,11 +568,13 @@ describe("forecast catalog", () => {
     }
     for (const judge of exportPayload.traceQuality) {
       expect(judge.schemaVersion).toBe("thesis_forecast_trace_judge_v1");
-      expect(judge.judge.kind).toBe("llm_judge");
+      expect(judge.judge.kind).toBe("rule_based_rubric");
       expect(judge.judge.rewardEligible).toBe(false);
       expect(judge.overallScore).toBeGreaterThanOrEqual(0);
       expect(judge.overallScore).toBeLessThanOrEqual(4);
       expect(judge.dimensions).toHaveLength(7);
+      // The template a model judge would receive; policy.method says no
+      // model has received it.
       expect(judge.prompt.system).toContain("LLM-as-judge");
     }
     for (const pair of exportPayload.pairwise) {
@@ -585,6 +587,62 @@ describe("forecast catalog", () => {
       expect(review.schemaVersion).toBe("thesis_forecast_resolution_judge_v1");
       expect(scoreRunIds.has(review.runId)).toBe(true);
       expect(review.judge.rewardEligible).toBe(false);
+    }
+  });
+
+  it("labels every judge row as rule-based and names no model", () => {
+    const scores = scoreResolvedForecasts(
+      resolvedForecastCells,
+      policyEngineLedger,
+    );
+    const exportPayload = buildForecastJudgeExport({
+      forecasts: resolvedForecastCells,
+      scores,
+    });
+    // Rules in forecast-judges.ts build all three row types, so none may
+    // claim a model produced it.
+    const rows = [
+      ...exportPayload.traceQuality,
+      ...exportPayload.pairwise,
+      ...exportPayload.postResolution,
+    ];
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(row.judge).toEqual({
+        kind: "rule_based_rubric",
+        model: "none",
+        promptVersion: "forecast-trace-quality-v0.1",
+        inputScope: "public_trace_and_spec",
+        executionMode: "rubric_seed",
+        rewardEligible: false,
+      });
+    }
+    expect(exportPayload.policy.method).toContain("No model produced");
+    expect(exportPayload.policy.rule).not.toMatch(/llm/i);
+
+    // The same rows reach the reward export and the target-architecture
+    // projection, which carries the model field alone.
+    const specs = buildPredictionSpecs(resolvedForecastCells);
+    const rewardExport = buildBrierRewardExport({
+      forecasts: resolvedForecastCells,
+      specs,
+      runs: buildRecordedPredictionRunRecords(resolvedForecastCells, specs),
+      ledger: policyEngineLedger,
+    });
+    expect(rewardExport.judgeResults.policy.method).toBe(
+      exportPayload.policy.method,
+    );
+    for (const row of rewardExport.judgeResults.traceQuality) {
+      expect(row.judge.kind).toBe("rule_based_rubric");
+      expect(row.judge.model).toBe("none");
+    }
+    const projection = buildTargetArchitectureProjection(
+      resolvedForecastCells,
+      policyEngineLedger,
+    );
+    expect(projection.judgeRuns.length).toBeGreaterThan(0);
+    for (const judgeRun of projection.judgeRuns) {
+      expect(judgeRun.judgeModel).toBe("none");
     }
   });
 
