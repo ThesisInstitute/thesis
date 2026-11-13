@@ -74,6 +74,12 @@ from zoneinfo import ZoneInfo
 import ssa_official_pages
 import va_mmwr
 import verify_records_attestations as records_provenance
+from alfred_vintage import (
+    ALFRED_VINTAGE_CSV_REORDERED,
+    AlfredVintageError,
+    alfred_today,
+    read_alfred_vintage,
+)
 from canonical_json import canonical_bytes, canonical_sha256
 from ledger_release_chain import (
     DEFAULT_CLOCK_SKEW_SECONDS,
@@ -500,52 +506,136 @@ def utc_now() -> str:
     )
 
 
+# Verdict heads for an ALFRED read that holds no vintage of the day it asked
+# for. scripts/resolution_status.py classifies each.
+ALFRED_VINTAGE_LAGGED = "ALFRED VINTAGE LAGGED (deferring)"
+ALFRED_VINTAGE_NOT_REACHED = "ALFRED VINTAGE NOT REACHED (deferring)"
+ALFRED_READ_FAILED = "ALFRED READ FAILED (deferring)"
+
+
+@dataclass(frozen=True)
+class AlfredVintageRead:
+    """One read of ALFRED's vintage of one day of one series.
+
+    ``rows`` come only from a response labeled that day. When no response
+    was, ``refusal`` is the verdict head and detail to print, and ``raw`` and
+    ``source_url`` are the last response and request.
+    """
+
+    rows: dict[str, float]
+    raw: bytes | None
+    source_url: str
+    retrieved_at: str
+    refusal: tuple[str, str] | None = None
+
+
+def alfred_http_get(url: str) -> bytes | None:
+    """The body ALFRED serves at ``url``; None for an HTTP error status."""
+    try:
+        with urllib.request.urlopen(url, timeout=120) as response:
+            return response.read()
+    except urllib.error.HTTPError:
+        return None
+
+
+def read_alfred_vintage_of(
+    series_id: str,
+    day: dt.date,
+    *,
+    spellings: tuple[str, ...] = (FRED_CSV, ALFRED_VINTAGE_CSV_REORDERED),
+    get: Callable[[str], bytes | None] | None = None,
+) -> AlfredVintageRead:
+    """ALFRED's vintage of ``day``, taken only from a response labeled ``day``.
+
+    ALFRED sometimes answers with an earlier day's vintage under that day's
+    label (scripts/alfred_vintage.py). Such a response cannot stand for
+    ``day``: a release on ``day`` is missing from it, and archived as
+    ``day``'s vintage it would misdate the record. So the request is made
+    in each spelling in turn until one is answered with ``day``'s label.
+    The read is refused, with a verdict for the caller to print, when
+
+    - ``day`` is after alfred_today(), before anything is requested: ALFRED
+      would answer with an earlier day's vintage;
+    - every spelling is answered with an earlier day's label;
+    - a response is not a vintage CSV of the series, or is labeled after
+      ``day``.
+
+    An HTTP error status on the first request leaves the read empty with no
+    verdict, which callers report as not yet published.
+    """
+
+    get = get or alfred_http_get
+    vintage = day.isoformat()
+    urls = [form.format(series=series_id, vintage=vintage) for form in spellings]
+    today = alfred_today()
+    if day > today:
+        return AlfredVintageRead(
+            {},
+            None,
+            urls[0],
+            utc_now(),
+            (
+                ALFRED_VINTAGE_NOT_REACHED,
+                f"vintage {vintage} has not begun in St. Louis, where it is "
+                f"{today}; ALFRED would answer with an earlier day's vintage",
+            ),
+        )
+    answered: list[str] = []
+    for url in urls:
+        retrieved_at = utc_now()
+        raw = get(url)
+        if raw is None:
+            break
+        try:
+            label, rows = read_alfred_vintage(raw, series_id, day)
+        except AlfredVintageError as exc:
+            return AlfredVintageRead(
+                {}, raw, url, retrieved_at, (ALFRED_READ_FAILED, str(exc))
+            )
+        if label == day:
+            return AlfredVintageRead(rows, raw, url, retrieved_at)
+        answered.append(f"its vintage of {label} at {url}")
+    if not answered:
+        return AlfredVintageRead({}, None, url, retrieved_at)
+    if raw is None:
+        answered.append(f"an HTTP error at {url}")
+    return AlfredVintageRead(
+        {},
+        raw,
+        url,
+        retrieved_at,
+        (
+            ALFRED_VINTAGE_LAGGED,
+            f"ALFRED answered {series_id} vintage {vintage} with "
+            + ", then ".join(answered)
+            + f"; an earlier day's vintage cannot show what it printed on {vintage}",
+        ),
+    )
+
+
 def fred_advance_value(
     series_id: str, week: str, vintage: str
 ) -> tuple[float | None, bytes | None, str, str]:
-    """The series value for `week` as printed on `vintage` (advance print)."""
-    url = FRED_CSV.format(series=series_id, vintage=vintage)
-    retrieved_at = utc_now()
-    try:
-        with urllib.request.urlopen(url, timeout=120) as r:
-            raw = r.read()
-    except urllib.error.HTTPError:
-        return None, None, url, retrieved_at
-    text = raw.decode()
-    for row in csv.DictReader(io.StringIO(text)):
-        date = row.get("observation_date") or row.get("DATE")
-        value = row.get(f"{series_id}_{vintage.replace('-', '')}") or row.get(series_id)
-        if date == week and value not in (None, "", "."):
-            return float(value), raw, url, retrieved_at
-    return None, raw, url, retrieved_at
+    """The series value for `week` in ALFRED's vintage of `vintage`.
+
+    The weekly claims leg's read: the week as DOL printed it on its release
+    day, so only a response labeled that day counts. Only the FRED_CSV
+    spelling is asked, because claims_fact names that URL as the source.
+    """
+    read = read_alfred_vintage_of(
+        series_id, dt.date.fromisoformat(vintage), spellings=(FRED_CSV,)
+    )
+    return read.rows.get(week), read.raw, read.source_url, read.retrieved_at
 
 
-def parse_fred_vintage_csv(
-    raw: bytes, series_id: str, vintage: str
-) -> dict[str, float]:
-    """Parse a vintage CSV response, including date-constrained fixtures."""
-    rows: dict[str, float] = {}
-    for row in csv.DictReader(io.StringIO(raw.decode())):
-        date = row.get("observation_date") or row.get("DATE")
-        value = row.get(f"{series_id}_{vintage.replace('-', '')}") or row.get(series_id)
-        if date and value not in (None, "", "."):
-            rows[date] = float(value)
-    return rows
+def fred_vintage_series(series_id: str, vintage: str) -> AlfredVintageRead:
+    """Every dated value of `series_id` in ALFRED's vintage of `vintage`.
 
-
-def fred_vintage_series(
-    series_id: str, vintage: str
-) -> tuple[dict[str, float], bytes | None, str, str]:
-    """Every dated value of `series_id` as printed on `vintage`."""
-    url = FRED_CSV.format(series=series_id, vintage=vintage)
-    retrieved_at = utc_now()
-    try:
-        with urllib.request.urlopen(url, timeout=120) as r:
-            raw = r.read()
-    except urllib.error.HTTPError:
-        return {}, None, url, retrieved_at
-    rows = parse_fred_vintage_csv(raw, series_id, vintage)
-    return rows, raw, url, retrieved_at
+    The generic ALFRED leg's read. It must show the period as ALFRED printed
+    it on the cell's resolution date, so it takes only a response labeled
+    that date, asked in either spelling (read_alfred_vintage_of).
+    """
+    return read_alfred_vintage_of(series_id, dt.date.fromisoformat(vintage))
 
 
 # Generic ALFRED adapters for monthly/quarterly first prints, one entry per
@@ -15442,7 +15532,7 @@ def _main() -> int:
     # BLS API series, A-19 snapshot rows, international native sources, and
     # witnessed SBA PDF custody. Shared official responses are cached so
     # multiple cells from one release archive the same bytes.
-    alfred_cache: dict[tuple[str, str], tuple[dict, bytes | None, str, str]] = {}
+    alfred_cache: dict[tuple[str, str], AlfredVintageRead] = {}
     bea_release_page_cache: dict[str, tuple[bytes | None, str, str]] = {}
     bea_itable_cache: dict[bytes, tuple[bytes | None, str, dict[str, Any], str]] = {}
     usaspending_cache: dict[
@@ -15983,8 +16073,15 @@ def _main() -> int:
             cache_key = (spec["fred"], release_day.isoformat())
             if cache_key not in alfred_cache:
                 alfred_cache[cache_key] = fred_vintage_series(*cache_key)
-            rows, raw, source_url, retrieved_at = alfred_cache[cache_key]
-            value = apply_transform(rows, spec, period_type, period)
+            alfred_read = alfred_cache[cache_key]
+            if alfred_read.refusal:
+                head, detail = alfred_read.refusal
+                print(f"  {head}: {ref} — {detail}")
+                continue
+            raw = alfred_read.raw
+            source_url = alfred_read.source_url
+            retrieved_at = alfred_read.retrieved_at
+            value = apply_transform(alfred_read.rows, spec, period_type, period)
             series_id = spec["fred"]
             source_file = "alfredgraph.csv"
             extension = "csv"

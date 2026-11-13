@@ -2407,6 +2407,54 @@ def _verify_legacy_derived_without_root(
     )
 
 
+def _verify_resolver_alfred_labels(run_dir: Path, manifest: dict[str, Any]) -> None:
+    """Each fact read from an ALFRED vintage holds ALFRED's vintage of its day.
+
+    ALFRED sometimes answers a request for one day with an earlier day's
+    vintage and names that day in the header (scripts/alfred_vintage.py).
+    The resolver keeps a response as a fact's vintage only when the header
+    names the fact's sourceVintage; this replays that rule on the archive.
+    A fact's own response whose header names an ALFRED vintage must name its
+    sourceVintage, for the series its archive is named for. Responses with
+    any other header are another adapter's and are not judged here.
+    """
+
+    from datetime import date
+
+    from alfred_vintage import AlfredVintageError, alfred_vintage_label
+
+    for fact in manifest["facts"]:
+        declared = str(fact["responseArchive"].get("path", ""))
+        relative = _manifest_relative(run_dir, declared, legacy=False)
+        raw = gzip.decompress(_safe_artifact_path(run_dir, relative).read_bytes())
+        header = raw.split(b"\n", 1)[0].removesuffix(b"\r")
+        match = re.fullmatch(rb"observation_date,([A-Za-z0-9]+)_\d{8}", header)
+        if match is None:
+            continue
+        series = match.group(1).decode()
+        record = fact.get("dataPointId")
+        try:
+            vintage = date.fromisoformat(str(fact.get("sourceVintage")))
+        except ValueError as exc:
+            raise CustodyError(
+                f"resolver fact {record} has no sourceVintage date for its ALFRED "
+                f"response {relative}"
+            ) from exc
+        if not PurePosixPath(relative).name.startswith(f"{series.lower()}-"):
+            raise CustodyError(
+                f"resolver fact {record} archives ALFRED {series} as {relative}"
+            )
+        try:
+            label = alfred_vintage_label(raw, series, vintage)
+        except AlfredVintageError as exc:
+            raise CustodyError(f"resolver fact {record}: {exc}") from exc
+        if label != vintage:
+            raise CustodyError(
+                f"resolver fact {record} keeps ALFRED's {series} vintage of "
+                f"{label} as its vintage of {vintage}: {relative}"
+            )
+
+
 def verify_run(run_dir: Path) -> CustodyVerification:
     run_dir = run_dir.resolve()
     root_path = run_dir / "custody_root.json"
@@ -2638,6 +2686,7 @@ def verify_run(run_dir: Path) -> CustodyVerification:
             _verify_analyst_v2(run_dir, manifest, manifest_entries, normalized_entries)
         elif run_mode == "resolver":
             _verify_resolver_v2(run_dir, manifest, normalized_entries)
+            _verify_resolver_alfred_labels(run_dir, manifest)
         elif run_mode == "ledger_witness":
             _verify_ledger_witness_v2(run_dir, manifest, normalized_entries)
         elif run_mode == "sba_pdf_witness":
