@@ -1133,7 +1133,13 @@ BEA_ITABLE_PAGE_URL = (
 BEA_ITA_ITABLE_PAGE_URL = (
     "https://apps.bea.gov/iTable/?ReqID=62&step=6&isuri=1&tablelist=62&product=1"
 )
-BEA_ITABLE_DATA_URL = "https://apps.bea.gov/iTablecore/data/app/GetStep"
+# BEA serves the iTable data service under /iTable/core/. On 2026-11-05 the
+# path this resolver posted to until then, /iTablecore/, answered a GetStep
+# POST with HTTP 200 and the site's HTML "BEA: Data Tools" page (the iTable
+# page itself was last modified 2026-09-23). The fetch therefore succeeded and
+# only the parse failed, which is how the GDP 2026 Q3 advance capture was lost
+# on its release day, 2026-10-29 ("iTable response is not UTF-8 JSON").
+BEA_ITABLE_DATA_URL = "https://apps.bea.gov/iTable/core/data/app/GetStep"
 BEA_RELEASE_REQUIRED_HOSTS = {"apps.bea.gov", "www.bea.gov"}
 BEA_RELEASE_ALLOWED_HOSTS = {
     *BEA_RELEASE_REQUIRED_HOSTS,
@@ -1455,6 +1461,22 @@ def bea_ita_capture_timing_refusal(
     return None
 
 
+def _bea_html_answer_refusal(raw: bytes, what: str) -> str | None:
+    """Name an HTML answer to a GetStep POST, the way an endpoint move shows.
+
+    A moved endpoint can still answer HTTP 200 with a web page, so the fetch
+    succeeds and only the parse can see what went wrong.
+    """
+
+    head = raw.lstrip()[:15].lower()
+    if head.startswith((b"<!doctype html", b"<html")):
+        return (
+            f"{what} answered with an HTML page, not JSON; check that BEA "
+            f"still serves GetStep at {BEA_ITABLE_DATA_URL}"
+        )
+    return None
+
+
 def _bea_ita_response(raw: bytes) -> tuple[dict[str, Any] | None, str | None]:
     """Authenticate the GetStep envelope for BEA's official ITA iTable.
 
@@ -1470,7 +1492,10 @@ def _bea_ita_response(raw: bytes) -> tuple[dict[str, Any] | None, str | None]:
         if isinstance(response, str):
             response = json.loads(response)
     except (UnicodeDecodeError, json.JSONDecodeError):
-        return None, "ITA iTable response is not complete UTF-8 JSON"
+        return None, (
+            _bea_html_answer_refusal(raw, "ITA iTable")
+            or "ITA iTable response is not complete UTF-8 JSON"
+        )
     expected_identity = {
         "Id": 6206,
         "AppId": 62,
@@ -1689,7 +1714,10 @@ def bea_itable_value(
         if isinstance(response, str):
             response = json.loads(response)
     except (UnicodeDecodeError, json.JSONDecodeError):
-        return None, "iTable response is not UTF-8 JSON"
+        return None, (
+            _bea_html_answer_refusal(raw, "iTable")
+            or "iTable response is not UTF-8 JSON"
+        )
     if not isinstance(response, dict) or response.get("Number") != 3:
         return None, "iTable response is not the interactive-data table step"
     prompts = response.get("Prompts")
