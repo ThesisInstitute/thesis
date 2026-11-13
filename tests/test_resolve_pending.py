@@ -247,8 +247,12 @@ def test_archives_raw_response_and_attaches_append_provenance(
 
     archive = enriched["responseArchive"]
     assert enriched["targetContentHash"] == content_hash
+    assert enriched["value"] == 245000
+    assert enriched["measure"]["unit"] == "count"
+    assert enriched["source"]["recorded_value"] == 245.0
+    assert enriched["source"]["recorded_unit"] == "thousands"
     projection = enriched["sourceBindingProjection"]
-    assert projection["unit"] == "thousands"
+    assert projection["unit"] == "count"
     assert projection["field"] == "ICSA"
     assert projection["responseSha256"] == archive["sha256"]
     assert enriched["assertionVersion"]["id"].startswith("av2:")
@@ -2654,6 +2658,60 @@ def test_append_proposal_builds_byte_correct_verified_release(
         (args, body) for args, body in calls if "/merge" in " ".join(args)
     )
     assert merge_call[1] == {"merge_method": "rebase", "sha": "c" * 40}
+    pull = next(body for args, body in calls if " ".join(args).endswith("/pulls"))
+    assert pull["title"] == "Record 1 first-print observation(s) via resolve_pending.py"
+
+
+def test_append_proposal_names_what_it_appends(
+    tmp_path: pathlib.Path, monkeypatch
+) -> None:
+    # A restatement run's proposal says it restates rather than records prints.
+    tree, _anchor_dir, requester, signing_key_pem = _release_fixture_tree(tmp_path)
+    monkeypatch.setenv(resolve_pending.PRODUCER_SIGNING_KEY_ENV, signing_key_pem)
+    calls: list[tuple[tuple[str, ...], dict | None]] = []
+    published: list[dict[str, bytes]] = []
+    _install_proposal_transport(monkeypatch, tree, calls, published=published)
+    real_verify = resolve_pending.verify_release_chain
+    real_verify_signature = resolve_pending.verify_producer_signature_bytes
+
+    def test_pins_verify(*args, **kwargs):
+        kwargs["enforce_production_pins"] = False
+        return real_verify(*args, **kwargs)
+
+    def test_pin_signature_verify(*args, **kwargs):
+        kwargs["enforce_production_pin"] = False
+        return real_verify_signature(*args, **kwargs)
+
+    monkeypatch.setattr(resolve_pending, "verify_release_chain", test_pins_verify)
+    monkeypatch.setattr(
+        resolve_pending, "verify_producer_signature_bytes", test_pin_signature_verify
+    )
+    candidate = (
+        tree.files["ledger/official_observations.jsonl"]
+        + b'{"source_record_id":"test.series.2030","value":1}\n'
+    )
+
+    resolve_pending.propose_ledger_append(
+        "PolicyEngine/chronicle",
+        "codex/thesis-ledger-facts",
+        "ledger/official_observations.jsonl",
+        candidate.decode(),
+        "a" * 40,
+        "b" * 40,
+        1,
+        poll_seconds=0,
+        poll_attempts=1,
+        timestamp_requester=requester,
+        release_now=dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=2),
+        what="base-unit restatement(s)",
+    )
+
+    pull = next(body for args, body in calls if " ".join(args).endswith("/pulls"))
+    assert pull["title"] == "Record 1 base-unit restatement(s) via resolve_pending.py"
+    assert "resolve_pending.py: 1 base-unit restatement(s) built against" in (
+        pull["body"]
+    )
+    assert "first-print" not in pull["title"] + pull["body"]
 
 
 def test_append_proposal_catalog_generator_failure_is_closed(

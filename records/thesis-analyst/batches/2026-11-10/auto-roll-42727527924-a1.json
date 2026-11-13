@@ -1,0 +1,216 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-11-10T00:23:32Z",
+  "finishedAt": "2026-11-10T00:31:47Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 4,
+  "ok": 4,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "us-cpi-u-mom-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cpi.u.headline_mom.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-10",
+        "expectedReleaseWindow": {
+          "end": "2026-12-10",
+          "start": "2026-12-10"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-10T00:21:03Z",
+        "registeredAtUtc": "2026-11-10T00:21:03Z",
+        "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+        "series": "bls.cpi.u.headline_mom",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-10",
+            "start": "2026-12-10"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "CUSR0000SA0",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0",
+          "table": "Consumer Price Index for All Urban Consumers, US city average, all items, seasonally adjusted (CPI news release, Table A)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_previous_period"
+          }
+        },
+        "targetContentHash": "1063431fc3edbea30f81d65709f46ae1d1f5fb06c004730cac84e427afd85c0b",
+        "targetRegistrationPath": "records/targets/2026-11-10-1063431fc3edbea30f81d65709f46ae1d1f5fb06c004730cac84e427afd85c0b.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "startedAt": "2026-11-10T00:23:32Z",
+      "finishedAt": "2026-11-10T00:25:47Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-23-32z-bls-cpi-u-headline-mom-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-23-32z-bls-cpi-u-headline-mom-2026-11/cells.with_activity.json",
+      "stdoutTail": "551a640b77d8e8fbb7\",\n      \"bytes\": 25204,\n      \"createdAt\": \"2026-11-10T00:23:32Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-23-32z-bls-cpi-u-headline-mom-2026-11/distribution.json\",\n      \"sha256\": \"45bb36c3137970a6a66462f4217c74d54533ff16df5a27f1bfe7eb280799c838\",\n      \"bytes\": 13787,\n      \"createdAt\": \"2026-11-10T00:23:32Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-23-32z-bls-cpi-u-headline-mom-2026-11/validation.json\",\n      \"sha256\": \"c128a00e26e6b86d6f5962f85d8c0cb295d1831d3b94b51ad47653d039fe06d1\",\n      \"bytes\": 127,\n      \"createdAt\": \"2026-11-10T00:23:32Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-23-32z-bls-cpi-u-headline-mom-2026-11/cells.with_activity.json\",\n      \"sha256\": \"68bd978c6e86e4f1b021fb2d899919f5c11aaa28f52fc02285630f32c2e7d5b9\",\n      \"bytes\": 41836,\n      \"createdAt\": \"2026-11-10T00:23:32Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-23-32z-bls-cpi-u-headline-mom-2026-11/manifest.json\",\n      \"sha256\": \"dc6b38675bc1ca53175607085ea29e4f3c91eff4db6f97dea6690867c0f5619d\",\n      \"bytes\": 16616,\n      \"createdAt\": \"2026-11-10T00:23:32Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"us-cpi-u-mom-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"48d10b11037d587eff33b6a8fe1deff8357a60d7\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"067314eeaa4d8b3385161adb743152e4a9d32f4004dde7cffac93186bb8f86a0\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "us-core-cpi-mom-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cpi.u.core_mom.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-10",
+        "expectedReleaseWindow": {
+          "end": "2026-12-10",
+          "start": "2026-12-10"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-10T00:21:03Z",
+        "registeredAtUtc": "2026-11-10T00:21:03Z",
+        "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+        "series": "bls.cpi.u.core_mom",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-10",
+            "start": "2026-12-10"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "CUSR0000SA0L1E",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E",
+          "table": "Consumer Price Index for All Urban Consumers, US city average, all items less food and energy, seasonally adjusted (CPI news release, Table A)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_previous_period"
+          }
+        },
+        "targetContentHash": "b6068648fdcbd4b3bb8812e6021b494ec63fe253ee56207d81321d4ee4aa36ce",
+        "targetRegistrationPath": "records/targets/2026-11-10-b6068648fdcbd4b3bb8812e6021b494ec63fe253ee56207d81321d4ee4aa36ce.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "startedAt": "2026-11-10T00:25:47Z",
+      "finishedAt": "2026-11-10T00:28:06Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/cells.with_activity.json",
+      "stdoutTail": "701d235548a8bf84cda38a37e16254a\",\n      \"bytes\": 24562,\n      \"createdAt\": \"2026-11-10T00:25:48Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/distribution.json\",\n      \"sha256\": \"b9b8a1d790d940b2bf2f9dae54ca250b9644fc8d32929db323896ada05bf9484\",\n      \"bytes\": 13588,\n      \"createdAt\": \"2026-11-10T00:25:48Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/validation.json\",\n      \"sha256\": \"ac21fd76101157768f1875ae5f101b66221a663ef777e918f22e2ebee3958522\",\n      \"bytes\": 130,\n      \"createdAt\": \"2026-11-10T00:25:48Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/cells.with_activity.json\",\n      \"sha256\": \"887432a6923e32c2c68feafaeb750cdea0959340fc21fe842ead6665a0e237a0\",\n      \"bytes\": 41221,\n      \"createdAt\": \"2026-11-10T00:25:48Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/manifest.json\",\n      \"sha256\": \"776e58e87702ec4df4512d0c06d68f12af5d82473be80a4acf392d029e54b015\",\n      \"bytes\": 16656,\n      \"createdAt\": \"2026-11-10T00:25:48Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"us-core-cpi-mom-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"48d10b11037d587eff33b6a8fe1deff8357a60d7\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"279d177ba9054b5706bb168079aa549efc072e7d7a1ce200933a583e0e10798e\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "cps-business-financial-employment-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cps.employed_people_by_occupation.business_financial_operations.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-04",
+        "expectedReleaseWindow": {
+          "end": "2026-12-04",
+          "start": "2026-12-04"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-10T00:21:03Z",
+        "registeredAtUtc": "2026-11-10T00:21:03Z",
+        "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.cps.employed_people_by_occupation.business_financial_operations",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-04",
+            "start": "2026-12-04"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LNU02032454",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032454",
+          "table": "Current Population Survey, employed people, Business and financial operations occupations, total 16 years and over, not seasonally adjusted, in thousands (Employment Situation, Table A-19)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "0d76d97cc6412fa35c60f572b02c4a00c2f76ab4a3acddeeda492e79d2b815f9",
+        "targetRegistrationPath": "records/targets/2026-11-10-0d76d97cc6412fa35c60f572b02c4a00c2f76ab4a3acddeeda492e79d2b815f9.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-11-10T00:28:06Z",
+      "finishedAt": "2026-11-10T00:29:57Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/cells.with_activity.json",
+      "stdoutTail": "0-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/distribution.json\",\n      \"sha256\": \"1252d4e533795f6d02291869efc6e71e208b6c25a093c88e37894a57609c4a06\",\n      \"bytes\": 13504,\n      \"createdAt\": \"2026-11-10T00:28:07Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/validation.json\",\n      \"sha256\": \"67ed0e2bd283a458fa4de9c7eeddeb165fa34ec93a14b36a2f5a702947ee549c\",\n      \"bytes\": 148,\n      \"createdAt\": \"2026-11-10T00:28:07Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/cells.with_activity.json\",\n      \"sha256\": \"fa7d73705da1d249e8ed9510b4a98e98e4291352b44b049e41ad44c3f586cb93\",\n      \"bytes\": 42842,\n      \"createdAt\": \"2026-11-10T00:28:07Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/manifest.json\",\n      \"sha256\": \"f0697708b7e56a29605d1fadbde02d5a9db0c9ce0c14396b1cc72c22b8b5ca59\",\n      \"bytes\": 17838,\n      \"createdAt\": \"2026-11-10T00:28:07Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"cps-business-financial-employment-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"48d10b11037d587eff33b6a8fe1deff8357a60d7\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"35edd27d171f677efb35bfc878911d2e2f47158eba92d0da04941d3370ac5076\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "cps-computer-math-employment-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cps.employed_people_by_occupation.computer_mathematical.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-04",
+        "expectedReleaseWindow": {
+          "end": "2026-12-04",
+          "start": "2026-12-04"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-10T00:21:03Z",
+        "registeredAtUtc": "2026-11-10T00:21:03Z",
+        "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.cps.employed_people_by_occupation.computer_mathematical",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-04",
+            "start": "2026-12-04"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LNU02032455",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455",
+          "table": "Current Population Survey, employed people, Computer and mathematical occupations, total 16 years and over, not seasonally adjusted, in thousands (Employment Situation, Table A-19)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "52e4aa7d06ffc1fcfac9b349051fab7a2493eb7dee2fb4be2f88971178dba154",
+        "targetRegistrationPath": "records/targets/2026-11-10-52e4aa7d06ffc1fcfac9b349051fab7a2493eb7dee2fb4be2f88971178dba154.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-11-10T00:29:57Z",
+      "finishedAt": "2026-11-10T00:31:47Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/cells.with_activity.json",
+      "stdoutTail": "hesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/distribution.json\",\n      \"sha256\": \"54b6b7d4288867bb01fca052b73abb9b3a13a8e162a883806770a91fc4d77e9e\",\n      \"bytes\": 15073,\n      \"createdAt\": \"2026-11-10T00:29:57Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/validation.json\",\n      \"sha256\": \"9eddba2ba4cecb23405a3f3fc0959bdf116a6acd86ac6268e7a3928b2ab6f19a\",\n      \"bytes\": 143,\n      \"createdAt\": \"2026-11-10T00:29:57Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/cells.with_activity.json\",\n      \"sha256\": \"76dc4a31f4aa6e8777ac53aa01b6d25079e65225ffef12f16cc068f770292064\",\n      \"bytes\": 44470,\n      \"createdAt\": \"2026-11-10T00:29:57Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/manifest.json\",\n      \"sha256\": \"d3039ff18c83e4cb4371ae5b0b2fa558b7f3e2a6b63a82971c343ac805dac2a9\",\n      \"bytes\": 17758,\n      \"createdAt\": \"2026-11-10T00:29:57Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"cps-computer-math-employment-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"48d10b11037d587eff33b6a8fe1deff8357a60d7\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"7b43a1d7a064010806d7d3b0236dad9d97b961e02aa236d4ef29dae88c5ff56e\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

@@ -1,0 +1,428 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-11-10T00:25:48Z",
+  "runStartedAt": "2026-11-10T00:25:48Z",
+  "sealedAt": "2026-11-10T00:28:06Z",
+  "series": "bls.cpi.u.core_mom",
+  "period": "2026-11",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-core-cpi-mom-november-2026",
+    "country": "US",
+    "dataPointId": "bls.cpi.u.core_mom.2026_11.first_print",
+    "expectedReleaseDate": "2026-12-10",
+    "expectedReleaseWindow": {
+      "end": "2026-12-10",
+      "start": "2026-12-10"
+    },
+    "period": "2026-11",
+    "registeredAt": "2026-11-10T00:21:03Z",
+    "registeredAtUtc": "2026-11-10T00:21:03Z",
+    "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+    "series": "bls.cpi.u.core_mom",
+    "sourceBinding": {
+      "adapter": "bls-api",
+      "allowedHosts": [
+        "api.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-12-10",
+        "start": "2026-12-10"
+      },
+      "field": "value",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "CUSR0000SA0L1E",
+      "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CUSR0000SA0L1E",
+      "table": "Consumer Price Index for All Urban Consumers, US city average, all items less food and energy, seasonally adjusted (CPI news release, Table A)",
+      "transform": {
+        "factor": 1,
+        "operation": "percent_change_previous_period"
+      }
+    },
+    "targetContentHash": "b6068648fdcbd4b3bb8812e6021b494ec63fe253ee56207d81321d4ee4aa36ce",
+    "targetRegistrationPath": "records/targets/2026-11-10-b6068648fdcbd4b3bb8812e6021b494ec63fe253ee56207d81321d4ee4aa36ce.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+  "targetContentHash": "b6068648fdcbd4b3bb8812e6021b494ec63fe253ee56207d81321d4ee4aa36ce",
+  "targetRegistrationPath": "records/targets/2026-11-10-b6068648fdcbd4b3bb8812e6021b494ec63fe253ee56207d81321d4ee4aa36ce.json",
+  "registeredAtUtc": "2026-11-10T00:21:03Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-11-10T00:25:48Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "2e4ad9846979d3cded17aebed3ffa9a49660523f1437e008ddfebbccce186c95"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "warning",
+        "rubricItem": "update",
+        "summary": "The +0.025 adjustment for sticky shelter/core services is asserted but not tied to a cited metric or calculation beyond the April-September core CPI sample.",
+        "actionRequested": "Either quantify the adjustment from the cited CPI components/history, add a cited public source supporting the services/shelter momentum claim, or reduce the text to a clearly labeled judgmental nudge."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Since the BLS calendar fetch was blocked, explicitly state that the canonical registered target fixes the 2026-12-10 resolution date, with the BLS schedule page as supporting context."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Consider noting that the interval is based on only six observations, so the 80% range is intentionally approximate."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the critique to describe the +0.025 adjustment as a judgmental nudge rather than a separately quantified component estimate, accepted the note to state that the registered target fixes the 2026-12-10 resolution date with the BLS schedule as supporting context, and accepted the note that a six-observation interval is approximate.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the critique to describe the +0.025 adjustment as a judgmental nudge rather than a separately quantified component estimate, accepted the note to state that the registered target fixes the 2026-12-10 resolution date with the BLS schedule as supporting context, and accepted the note that a six-observation interval is approximate.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the critique to describe the +0.025 adjustment as a judgmental nudge rather than a separately quantified component estimate, accepted the note to state that the registered target fixes the 2026-12-10 resolution date with the BLS schedule as supporting context, and accepted the note that a six-observation interval is approximate.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is publication-ready aside from a small evidentiary gap around the discretionary upward adjustment from the six-month persistence prior."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/prompt.md",
+      "sha256": "53ffe037472f7ed34b4845e7458d9ebc99e1e0671ea5a39b94a08d3a17e3a6f2",
+      "bytes": 11964,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_command.json",
+      "sha256": "22d56541d7d453998ab8acd5c7a262e0ca1aefba1815ce497c138e73427ffb36",
+      "bytes": 2049,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_tool_evidence.json",
+      "sha256": "6308a9536ba233716ba58c960a51eb30dfd3e9feaee6728c6199964547a99cf1",
+      "bytes": 28939,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_tool_evidence_verification.json",
+      "sha256": "72a20a3f46b7ea84ab8036cfe6c17833690273207421a549cfb00c2b11ab8684",
+      "bytes": 3797,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_codex_stdout.jsonl",
+      "sha256": "f74030b80bb5bfafe9b20a42e1b2b3ebc29bd3fb6229ef79160bb239473d777b",
+      "bytes": 55636,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_codex_stderr.log",
+      "sha256": "8dd828251fa4bbb80d74762125f10033be0f5b62fe0bfd3594eb3a5f348922d7",
+      "bytes": 233,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_codex_events.jsonl",
+      "sha256": "ebb1fa6c6f0784b95e826da7ae31c5fcc7cf1749ed9feda3efb9472430624c81",
+      "bytes": 57893,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_codex_last_message.txt",
+      "sha256": "78db390d81d1b25b48da6e5d3f4d902120fa8eb6dc74b75033938b150633edf1",
+      "bytes": 5503,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_codex_trace.json",
+      "sha256": "75069316497b177f118d9657ef364d6792fc9937f22aeb759b9f8bb702e4487f",
+      "bytes": 560,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_stdout.txt",
+      "sha256": "78db390d81d1b25b48da6e5d3f4d902120fa8eb6dc74b75033938b150633edf1",
+      "bytes": 5503,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/draft_stderr.txt",
+      "sha256": "3093237f8ca36fb8237d243498fbaec2b28d937a7066a0ae333cfff476c22e99",
+      "bytes": 248,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_prompt.md",
+      "sha256": "74f850f85a34fa9ebaf1ad8b4f5ecbf7cf14eeb41b73e978919ede019e4bc431",
+      "bytes": 8813,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_command.json",
+      "sha256": "47353ac6f0b54308783d4e87218466c0105066d04638d39bb2a303c9509fda7f",
+      "bytes": 1972,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_tool_evidence.json",
+      "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+      "bytes": 100,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_tool_evidence_verification.json",
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+      "bytes": 406,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "01b316192d86d6b6d385712bb14816855a876988d5dd32045a6ca36c87aed16d",
+      "bytes": 1283,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_codex_stderr.log",
+      "sha256": "be6f0f3d989bb90f1641bee4e81585651229bdca3425491d2bbd296ba9af15f7",
+      "bytes": 233,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_codex_events.jsonl",
+      "sha256": "a4d7d0bfd79db879cb936fdf25ee85140273118f0053d70fb6d74a1b3aff06ca",
+      "bytes": 1305,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_codex_last_message.txt",
+      "sha256": "292612119d155303b99c708012ba722577890bd6e7bb4eab2ba6d849c24c61c0",
+      "bytes": 938,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_codex_trace.json",
+      "sha256": "42964ea14abf32ee62af362d7a8e071c500a27fe954a8527b10f2ecfe77f2ee3",
+      "bytes": 555,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_stdout.txt",
+      "sha256": "292612119d155303b99c708012ba722577890bd6e7bb4eab2ba6d849c24c61c0",
+      "bytes": 938,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/pre_submit_review_stderr.txt",
+      "sha256": "cceb3b4531a8c03d1b1826b825c37736cb6dc1ca4cf0de78cd22ae8449f9b927",
+      "bytes": 248,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/revision_prompt.md",
+      "sha256": "c73d30710362a4f2d7ec59283e5be3dfa019ecd62122077bfb3210b9c0d5f4d3",
+      "bytes": 19341,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/command.json",
+      "sha256": "7d0cd4e7885cd3800ab76d47a3f8727cbcfe10f86343cd94a1f31959ffa6cba9",
+      "bytes": 2031,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/tool_evidence.json",
+      "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+      "bytes": 100,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/tool_evidence_verification.json",
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+      "bytes": 406,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/codex_stdout.jsonl",
+      "sha256": "bfb1e71d2c55d905a371302c880f597837e375cb77b7aa7f7c9cba868bb4aa7f",
+      "bytes": 7093,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/codex_stderr.log",
+      "sha256": "979b6c96ea787faef551a832f7265e3ce889faaad7e2b12f45f6d3644f8d2ae5",
+      "bytes": 233,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/codex_events.jsonl",
+      "sha256": "9cea807994254ca64ae006f7b80bbdcf8436a09af9c9332379ff6c65680bdfe4",
+      "bytes": 7143,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/codex_last_message.txt",
+      "sha256": "bb8442eb5ed4bc13e1fdec7fbf5be1349836433d4e723d83baafece27d9436eb",
+      "bytes": 6083,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/codex_trace.json",
+      "sha256": "10890b3fb7f7d3aa3cc6016a10bb71d4fc707d1e3d36a3551cad8f8332ca8375",
+      "bytes": 556,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/stdout.txt",
+      "sha256": "bb8442eb5ed4bc13e1fdec7fbf5be1349836433d4e723d83baafece27d9436eb",
+      "bytes": 6083,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/stderr.txt",
+      "sha256": "708f4bffe621d601bc3e1a06083533759aa32ee2af4cd4822793c26a6c740994",
+      "bytes": 248,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/raw_response.txt",
+      "sha256": "bb8442eb5ed4bc13e1fdec7fbf5be1349836433d4e723d83baafece27d9436eb",
+      "bytes": 6083,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/parsed_cells.json",
+      "sha256": "040d277d3636c3bdd13205c3fde4739e8c8a19dade1510e8083f1191aabb4388",
+      "bytes": 7190,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/normalized_cells.json",
+      "sha256": "83388171434aa134343bbae35106d6ae8701d235548a8bf84cda38a37e16254a",
+      "bytes": 24562,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/distribution.json",
+      "sha256": "b9b8a1d790d940b2bf2f9dae54ca250b9644fc8d32929db323896ada05bf9484",
+      "bytes": 13588,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/validation.json",
+      "sha256": "ac21fd76101157768f1875ae5f101b66221a663ef777e918f22e2ebee3958522",
+      "bytes": 130,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/cells.with_activity.json",
+      "sha256": "887432a6923e32c2c68feafaeb750cdea0959340fc21fe842ead6665a0e237a0",
+      "bytes": 41221,
+      "createdAt": "2026-11-10T00:25:48Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-25-48z-bls-cpi-u-core-mom-2026-11/manifest.json",
+      "sha256": "776e58e87702ec4df4512d0c06d68f12af5d82473be80a4acf392d029e54b015",
+      "bytes": 16656,
+      "createdAt": "2026-11-10T00:25:48Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "us-core-cpi-mom-november-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "279d177ba9054b5706bb168079aa549efc072e7d7a1ce200933a583e0e10798e"
+}

@@ -1,0 +1,1306 @@
+[
+  {
+    "slug": "cps-computer-math-employment-november-2026",
+    "country": "US",
+    "type": "data",
+    "title": "US computer and mathematical employment, November 2026",
+    "question": "What will BLS first print for Current Population Survey employed people in computer and mathematical occupations, total 16 years and over, not seasonally adjusted, for November 2026?",
+    "unit": "millions",
+    "pointEstimate": 7.05,
+    "ciLow": 6.919404275040192,
+    "ciHigh": 7.180595724959808,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-04",
+    "resolutionSource": "U.S. Bureau of Labor Statistics public API, Current Population Survey Table A-19 series LNU02032455",
+    "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455",
+    "resolutionRule": "Resolve to the first official BLS public API value for series LNU02032455 for 2026 M11, Current Population Survey Table A-19, not seasonally adjusted, in thousands, multiplied by 0.001 to millions. Use the first print available after the Employment Situation for November 2026 is released on 2026-12-04; do not use later revisions, same-day corrections, or alternative adjusted series.",
+    "dataPointId": "bls.cps.employed_people_by_occupation.computer_mathematical.2026_11.first_print",
+    "historicalContext": [
+      {
+        "label": "2026-01",
+        "value": 6.632,
+        "period": {
+          "type": "month",
+          "value": "2026-01"
+        }
+      },
+      {
+        "label": "2026-02",
+        "value": 6.692,
+        "period": {
+          "type": "month",
+          "value": "2026-02"
+        }
+      },
+      {
+        "label": "2026-03",
+        "value": 6.574,
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        }
+      },
+      {
+        "label": "2026-04",
+        "value": 6.834,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "2026-05",
+        "value": 6.903,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "2026-06",
+        "value": 6.95,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "2026-07",
+        "value": 6.924,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "2026-08",
+        "value": 7.01,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      },
+      {
+        "label": "2026-09",
+        "value": 7.004,
+        "period": {
+          "type": "month",
+          "value": "2026-09"
+        }
+      },
+      {
+        "label": "2026-10",
+        "value": 7.03,
+        "period": {
+          "type": "month",
+          "value": "2026-10"
+        }
+      }
+    ],
+    "drivers": [
+      "October 2026 level was 7.030 million after the registered transform",
+      "Recent three-month mean was 7.0147 million",
+      "Occupation employment has risen versus November 2025 but remains monthly-noisy in the NSA CPS series",
+      "November target is not seasonally adjusted, so month-specific sampling and seasonal noise matter"
+    ],
+    "sourceContext": [
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455",
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455?startyear=2016&endyear=2026",
+      "https://www.bls.gov/schedule/news_release/empsit.htm"
+    ],
+    "runAt": "2026-11-10T00:31:46Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast for CPS computer and mathematical employment, November 2026"
+      },
+      {
+        "kind": "text",
+        "text": "Resolver framing: the target is BLS CPS series LNU02032455, Current Population Survey Table A-19, employed people in computer and mathematical occupations, total 16 years and over, not seasonally adjusted. The registered source value is in thousands and the target unit is millions, so each API value is multiplied by 0.001. The official BLS Employment Situation schedule for this run lists November 2026 for release on 2026-12-04 at 08:30 Eastern; an evidence fetch to the schedule page was blocked with HTTP 403, so the date verification used the official BLS schedule result available to the run and the sealed ledger registration rather than a captured full-page receipt."
+      },
+      {
+        "kind": "tool",
+        "tool": "mcp__thesis_tool_evidence.fetch_source",
+        "call": "fetch_source https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455",
+        "result": "call-0001 captured the official BLS API response for LNU02032455: October 2026=7030 thousand, September 2026=7004 thousand, August 2026=7010 thousand, July 2026=6924 thousand, June 2026=6950 thousand, May 2026=6903 thousand, April 2026=6834 thousand."
+      },
+      {
+        "kind": "tool",
+        "tool": "mcp__thesis_tool_evidence.fetch_source",
+        "call": "fetch_source https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032455?startyear=2016&endyear=2026",
+        "result": "call-0010 captured the longer official BLS API history, including November 2025=6632 thousand and November 2024=6483 thousand; the API message reported the year range was reduced to the system-allowed 10-year limit."
+      },
+      {
+        "kind": "tool",
+        "tool": "mcp__thesis_tool_evidence.calculate",
+        "call": "calculate recent level, year-over-year, and volatility from captured BLS values",
+        "result": "call-0012 calculated the recent three-month mean from 7.010, 7.004, and 7.030 million as 7.014666666666667; call-0017 calculated October 2026 minus November 2025 as 0.3980000000000006 million; call-0024 calculated November 2025 minus November 2024 as 149 thousand."
+      },
+      {
+        "kind": "text",
+        "text": "Reference class and base rate: for this level series, the practical base rate is persistence around the latest official level with CPS sampling and NSA seasonal noise. The current October level of 7.030 million is above the April-October 2026 mean of 6.9507 million and above November 2025 by about 0.398 million, so I start from October persistence and allow a small positive November update rather than reverting all the way to the spring average."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior = October 2026 level 7.030 million; historical sample = January-October 2026 official BLS values after the registered transform [6.632, 6.692, 6.574, 6.834, 6.903, 6.950, 6.924, 7.010, 7.004, 7.030]; adjustment components = +0.015 million for recent level momentum above the spring/summer mean and +0.005 million for the November reference-class/seasonal tendency, with no policy mechanism adjustment; interval method = sample standard deviation of successive monthly changes from call-0013, sigma = 0.10202791012484985 million, so 1.28*sigma from call-0018 = 0.1305957249598078 million; final point from call-0025 = 7.050 million, final implied bounds from call-0022 and call-0023 = 6.919404275040192 to 7.180595724959808 million."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk would come from another strong CPS occupation sample or continued tech/professional hiring that pushes the first print above 7.1806 million. Downside risk would come from mean reversion after October, a weaker November household-survey sample, or occupation reclassification noise that would land below 6.9194 million. A large CPS sampling surprise is the main outside the interval scenario."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the optional critique to separate the +0.020 million update into a recent-level momentum component and a smaller November seasonal/reference-class component, and clarified that the blocked schedule-page receipt leaves release-date grounding to the official BLS schedule result available in the run plus the sealed ledger registration; no forecast numbers changed."
+      },
+      {
+        "kind": "forecast",
+        "point": 7.05,
+        "ciLow": 6.919404275040192,
+        "ciHigh": 7.180595724959808
+      }
+    ],
+    "agentReportedRunAt": "2026-11-10T00:31:31Z",
+    "runStartedAt": "2026-11-10T00:29:57Z",
+    "promptMode": "fast",
+    "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+    "targetContentHash": "52e4aa7d06ffc1fcfac9b349051fab7a2493eb7dee2fb4be2f88971178dba154",
+    "targetRegistrationPath": "records/targets/2026-11-10-52e4aa7d06ffc1fcfac9b349051fab7a2493eb7dee2fb4be2f88971178dba154.json",
+    "registeredAtUtc": "2026-11-10T00:21:03Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 6.7235106876,
+        "upper": 7.3764893124
+      },
+      "points": [
+        {
+          "value": 6.7235106876,
+          "probability": 0.0
+        },
+        {
+          "value": 6.72677558072,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 6.73004047385,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 6.73330536697,
+          "probability": 0.005
+        },
+        {
+          "value": 6.7365702601,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 6.73983515322,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 6.74310004634,
+          "probability": 0.01
+        },
+        {
+          "value": 6.74636493947,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 6.74962983259,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 6.75289472572,
+          "probability": 0.015
+        },
+        {
+          "value": 6.75615961884,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 6.75942451196,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 6.76268940509,
+          "probability": 0.02
+        },
+        {
+          "value": 6.76595429821,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 6.76921919134,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 6.77248408446,
+          "probability": 0.025
+        },
+        {
+          "value": 6.77574897758,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 6.77901387071,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 6.78227876383,
+          "probability": 0.03
+        },
+        {
+          "value": 6.78554365696,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 6.78880855008,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 6.7920734432,
+          "probability": 0.035
+        },
+        {
+          "value": 6.79533833633,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 6.79860322945,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 6.80186812258,
+          "probability": 0.04
+        },
+        {
+          "value": 6.8051330157,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 6.80839790882,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 6.81166280195,
+          "probability": 0.045
+        },
+        {
+          "value": 6.81492769507,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 6.8181925882,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 6.82145748132,
+          "probability": 0.05
+        },
+        {
+          "value": 6.82472237444,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 6.82798726757,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 6.83125216069,
+          "probability": 0.055
+        },
+        {
+          "value": 6.83451705382,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 6.83778194694,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 6.84104684006,
+          "probability": 0.06
+        },
+        {
+          "value": 6.84431173319,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 6.84757662631,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 6.85084151944,
+          "probability": 0.065
+        },
+        {
+          "value": 6.85410641256,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 6.85737130568,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 6.86063619881,
+          "probability": 0.07
+        },
+        {
+          "value": 6.86390109193,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 6.86716598506,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 6.87043087818,
+          "probability": 0.075
+        },
+        {
+          "value": 6.8736957713,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 6.87696066443,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 6.88022555755,
+          "probability": 0.08
+        },
+        {
+          "value": 6.88349045068,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 6.8867553438,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 6.89002023692,
+          "probability": 0.085
+        },
+        {
+          "value": 6.89328513005,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 6.89655002317,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 6.8998149163,
+          "probability": 0.09
+        },
+        {
+          "value": 6.90307980942,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 6.90634470254,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 6.90960959567,
+          "probability": 0.095
+        },
+        {
+          "value": 6.91287448879,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 6.91613938192,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 6.91940427504,
+          "probability": 0.1
+        },
+        {
+          "value": 6.92266916816,
+          "probability": 0.11
+        },
+        {
+          "value": 6.92593406129,
+          "probability": 0.12
+        },
+        {
+          "value": 6.92919895441,
+          "probability": 0.13
+        },
+        {
+          "value": 6.93246384754,
+          "probability": 0.14
+        },
+        {
+          "value": 6.93572874066,
+          "probability": 0.15
+        },
+        {
+          "value": 6.93899363378,
+          "probability": 0.16
+        },
+        {
+          "value": 6.94225852691,
+          "probability": 0.17
+        },
+        {
+          "value": 6.94552342003,
+          "probability": 0.18
+        },
+        {
+          "value": 6.94878831316,
+          "probability": 0.19
+        },
+        {
+          "value": 6.95205320628,
+          "probability": 0.2
+        },
+        {
+          "value": 6.9553180994,
+          "probability": 0.21
+        },
+        {
+          "value": 6.95858299253,
+          "probability": 0.22
+        },
+        {
+          "value": 6.96184788565,
+          "probability": 0.23
+        },
+        {
+          "value": 6.96511277878,
+          "probability": 0.24
+        },
+        {
+          "value": 6.9683776719,
+          "probability": 0.25
+        },
+        {
+          "value": 6.97164256502,
+          "probability": 0.26
+        },
+        {
+          "value": 6.97490745815,
+          "probability": 0.27
+        },
+        {
+          "value": 6.97817235127,
+          "probability": 0.28
+        },
+        {
+          "value": 6.9814372444,
+          "probability": 0.29
+        },
+        {
+          "value": 6.98470213752,
+          "probability": 0.3
+        },
+        {
+          "value": 6.98796703064,
+          "probability": 0.31
+        },
+        {
+          "value": 6.99123192377,
+          "probability": 0.32
+        },
+        {
+          "value": 6.99449681689,
+          "probability": 0.33
+        },
+        {
+          "value": 6.99776171002,
+          "probability": 0.34
+        },
+        {
+          "value": 7.00102660314,
+          "probability": 0.35
+        },
+        {
+          "value": 7.00429149626,
+          "probability": 0.36
+        },
+        {
+          "value": 7.00755638939,
+          "probability": 0.37
+        },
+        {
+          "value": 7.01082128251,
+          "probability": 0.38
+        },
+        {
+          "value": 7.01408617564,
+          "probability": 0.39
+        },
+        {
+          "value": 7.01735106876,
+          "probability": 0.4
+        },
+        {
+          "value": 7.02061596188,
+          "probability": 0.41
+        },
+        {
+          "value": 7.02388085501,
+          "probability": 0.42
+        },
+        {
+          "value": 7.02714574813,
+          "probability": 0.43
+        },
+        {
+          "value": 7.03041064126,
+          "probability": 0.44
+        },
+        {
+          "value": 7.03367553438,
+          "probability": 0.45
+        },
+        {
+          "value": 7.0369404275,
+          "probability": 0.46
+        },
+        {
+          "value": 7.04020532063,
+          "probability": 0.47
+        },
+        {
+          "value": 7.04347021375,
+          "probability": 0.48
+        },
+        {
+          "value": 7.04673510688,
+          "probability": 0.49
+        },
+        {
+          "value": 7.05,
+          "probability": 0.5
+        },
+        {
+          "value": 7.05326489312,
+          "probability": 0.51
+        },
+        {
+          "value": 7.05652978625,
+          "probability": 0.52
+        },
+        {
+          "value": 7.05979467937,
+          "probability": 0.53
+        },
+        {
+          "value": 7.0630595725,
+          "probability": 0.54
+        },
+        {
+          "value": 7.06632446562,
+          "probability": 0.55
+        },
+        {
+          "value": 7.06958935874,
+          "probability": 0.56
+        },
+        {
+          "value": 7.07285425187,
+          "probability": 0.57
+        },
+        {
+          "value": 7.07611914499,
+          "probability": 0.58
+        },
+        {
+          "value": 7.07938403812,
+          "probability": 0.59
+        },
+        {
+          "value": 7.08264893124,
+          "probability": 0.6
+        },
+        {
+          "value": 7.08591382436,
+          "probability": 0.61
+        },
+        {
+          "value": 7.08917871749,
+          "probability": 0.62
+        },
+        {
+          "value": 7.09244361061,
+          "probability": 0.63
+        },
+        {
+          "value": 7.09570850374,
+          "probability": 0.64
+        },
+        {
+          "value": 7.09897339686,
+          "probability": 0.65
+        },
+        {
+          "value": 7.10223828998,
+          "probability": 0.66
+        },
+        {
+          "value": 7.10550318311,
+          "probability": 0.67
+        },
+        {
+          "value": 7.10876807623,
+          "probability": 0.68
+        },
+        {
+          "value": 7.11203296936,
+          "probability": 0.69
+        },
+        {
+          "value": 7.11529786248,
+          "probability": 0.7
+        },
+        {
+          "value": 7.1185627556,
+          "probability": 0.71
+        },
+        {
+          "value": 7.12182764873,
+          "probability": 0.72
+        },
+        {
+          "value": 7.12509254185,
+          "probability": 0.73
+        },
+        {
+          "value": 7.12835743498,
+          "probability": 0.74
+        },
+        {
+          "value": 7.1316223281,
+          "probability": 0.75
+        },
+        {
+          "value": 7.13488722122,
+          "probability": 0.76
+        },
+        {
+          "value": 7.13815211435,
+          "probability": 0.77
+        },
+        {
+          "value": 7.14141700747,
+          "probability": 0.78
+        },
+        {
+          "value": 7.1446819006,
+          "probability": 0.79
+        },
+        {
+          "value": 7.14794679372,
+          "probability": 0.8
+        },
+        {
+          "value": 7.15121168684,
+          "probability": 0.81
+        },
+        {
+          "value": 7.15447657997,
+          "probability": 0.82
+        },
+        {
+          "value": 7.15774147309,
+          "probability": 0.83
+        },
+        {
+          "value": 7.16100636622,
+          "probability": 0.84
+        },
+        {
+          "value": 7.16427125934,
+          "probability": 0.85
+        },
+        {
+          "value": 7.16753615246,
+          "probability": 0.86
+        },
+        {
+          "value": 7.17080104559,
+          "probability": 0.87
+        },
+        {
+          "value": 7.17406593871,
+          "probability": 0.88
+        },
+        {
+          "value": 7.17733083184,
+          "probability": 0.89
+        },
+        {
+          "value": 7.18059572496,
+          "probability": 0.9
+        },
+        {
+          "value": 7.18386061808,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 7.18712551121,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 7.19039040433,
+          "probability": 0.905
+        },
+        {
+          "value": 7.19365529746,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 7.19692019058,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 7.2001850837,
+          "probability": 0.91
+        },
+        {
+          "value": 7.20344997683,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 7.20671486995,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 7.20997976308,
+          "probability": 0.915
+        },
+        {
+          "value": 7.2132446562,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 7.21650954932,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 7.21977444245,
+          "probability": 0.92
+        },
+        {
+          "value": 7.22303933557,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 7.2263042287,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 7.22956912182,
+          "probability": 0.925
+        },
+        {
+          "value": 7.23283401494,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 7.23609890807,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 7.23936380119,
+          "probability": 0.93
+        },
+        {
+          "value": 7.24262869432,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 7.24589358744,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 7.24915848056,
+          "probability": 0.935
+        },
+        {
+          "value": 7.25242337369,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 7.25568826681,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 7.25895315994,
+          "probability": 0.94
+        },
+        {
+          "value": 7.26221805306,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 7.26548294618,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 7.26874783931,
+          "probability": 0.945
+        },
+        {
+          "value": 7.27201273243,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 7.27527762556,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 7.27854251868,
+          "probability": 0.95
+        },
+        {
+          "value": 7.2818074118,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 7.28507230493,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 7.28833719805,
+          "probability": 0.955
+        },
+        {
+          "value": 7.29160209118,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 7.2948669843,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 7.29813187742,
+          "probability": 0.96
+        },
+        {
+          "value": 7.30139677055,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 7.30466166367,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 7.3079265568,
+          "probability": 0.965
+        },
+        {
+          "value": 7.31119144992,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 7.31445634304,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 7.31772123617,
+          "probability": 0.97
+        },
+        {
+          "value": 7.32098612929,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 7.32425102242,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 7.32751591554,
+          "probability": 0.975
+        },
+        {
+          "value": 7.33078080866,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 7.33404570179,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 7.33731059491,
+          "probability": 0.98
+        },
+        {
+          "value": 7.34057548804,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 7.34384038116,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 7.34710527428,
+          "probability": 0.985
+        },
+        {
+          "value": 7.35037016741,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 7.35363506053,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 7.35689995366,
+          "probability": 0.99
+        },
+        {
+          "value": 7.36016484678,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 7.3634297399,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 7.36669463303,
+          "probability": 0.995
+        },
+        {
+          "value": 7.36995952615,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 7.37322441928,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 7.3764893124,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 7.05,
+        "median": 7.05,
+        "interval80": {
+          "lower": 6.919404275040192,
+          "upper": 7.180595724959808
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/prompt.md",
+        "sha256": "39cf745586aebf00252091e241e8c96b13358640b57f97e0814b497ce0b855d3",
+        "bytes": 12067,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_command.json",
+        "sha256": "f435e2110badd6c3148ddb261419ed83d3e599ec8787836ca71d8f77a50ef66d",
+        "bytes": 2090,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_tool_evidence.json",
+        "sha256": "360cc1804c6ae3fc05b323a26febdcc3dae9888e41f05ebeabda6b9540ab0297",
+        "bytes": 55391,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_tool_evidence_verification.json",
+        "sha256": "09a7c88843398d1b2e63ad9fdf2e88c6e98a6fd1d8f38ccceeba3b3d4f3631d9",
+        "bytes": 3654,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_codex_stdout.jsonl",
+        "sha256": "94da9c25b9fffe305b6d839c861f4791804d9f72555ea6254b536a7c0715e59a",
+        "bytes": 73930,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_codex_stderr.log",
+        "sha256": "f8f98df67bca81e6caeb1343aa57b7bc843fa17be540be2ba51c380dd761fcd0",
+        "bytes": 233,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_codex_events.jsonl",
+        "sha256": "80a60e1dacaf9489e630f5ce6f20d220d9b1a26014b53c8bc06e730c1a1e1183",
+        "bytes": 75852,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_codex_last_message.txt",
+        "sha256": "e12fef40c3056df61646c66fa54a01cbd2f81490b61d05396f89378abebb9d68",
+        "bytes": 6351,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_codex_trace.json",
+        "sha256": "b7defce0f11d9bc2f17062c235f8bd857674fe23e9c7adce4ea0dab9fdc2c1c3",
+        "bytes": 560,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_stdout.txt",
+        "sha256": "e12fef40c3056df61646c66fa54a01cbd2f81490b61d05396f89378abebb9d68",
+        "bytes": 6351,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_stderr.txt",
+        "sha256": "1577b08cc212b5e0bd28c6dec60a4a693ca5868094f87d251bdea2c4e1e71a3d",
+        "bytes": 248,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_prompt.md",
+        "sha256": "01f80537b07a4e3b37d1dedbfd7a4cc13a93f5997fcf28daad452b626e023f25",
+        "bytes": 9764,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_command.json",
+        "sha256": "8aac42d7a9d040e97e9b3a2721c807dc6876a89cd182843733916e57a7bdc12e",
+        "bytes": 2013,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "44ffc6190c000bef5f4fcaa0ae3a6bf325767828e723db58f808820d830cda08",
+        "bytes": 895,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_codex_stderr.log",
+        "sha256": "8de75c3d4ff1b9ebd469a022c06fd3f1709c63aa3252845de7a0da3e8cb59b68",
+        "bytes": 233,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_codex_events.jsonl",
+        "sha256": "d762c79203087d7c878103a106bd712368ccce095130d02473fab2236ca291cc",
+        "bytes": 917,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_codex_last_message.txt",
+        "sha256": "9baad84d20c7780420999092fee8ff62eeb831733f3fee4e42f748223223c1bf",
+        "bytes": 559,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_codex_trace.json",
+        "sha256": "4083d97a5fca6fca60e75fd63faa19a2c3161fafae0f4248e19cca528bdab5ce",
+        "bytes": 555,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_stdout.txt",
+        "sha256": "9baad84d20c7780420999092fee8ff62eeb831733f3fee4e42f748223223c1bf",
+        "bytes": 559,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_stderr.txt",
+        "sha256": "7494cab0518c3ad55e65e1e79c83a546ca41c7cc75978cd7693631b12603e7de",
+        "bytes": 248,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/revision_prompt.md",
+        "sha256": "122ef90c3b01feadc347b93cb0f5be081b762ea24deabcea9713d5c2bbde1c58",
+        "bytes": 19913,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/command.json",
+        "sha256": "d70b97d335f56df1b9d8120df035e05863f8079916d96fb569ae00c55c5aa31f",
+        "bytes": 2072,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/codex_stdout.jsonl",
+        "sha256": "f617abaca4675ee60e043bd0bdaeeee54c29268eb867def080d4d46e33e8a6bb",
+        "bytes": 7922,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/codex_stderr.log",
+        "sha256": "4d2f75cc7fe50a99e93dd27ef22184300dacb3632bc00c1a516311b4bba317b8",
+        "bytes": 233,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/codex_events.jsonl",
+        "sha256": "dd3690808ac96c5a7b6d06824164d105c6fce39bc3c74157e55da2e55c568173",
+        "bytes": 7972,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/codex_last_message.txt",
+        "sha256": "33cf878636033bb771441705a3dfd03fbe6c738fa426bfe7b2b2e541f3107ed3",
+        "bytes": 6854,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/codex_trace.json",
+        "sha256": "f5e9166592d1a70021c643c49ebd0cd640bd01baafdc5ba81a06782e9166bf1b",
+        "bytes": 556,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/stdout.txt",
+        "sha256": "33cf878636033bb771441705a3dfd03fbe6c738fa426bfe7b2b2e541f3107ed3",
+        "bytes": 6854,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/stderr.txt",
+        "sha256": "0142494931c7a8a19448f302caf916e30526f3403a53e6da6ce1810efdbed695",
+        "bytes": 248,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/raw_response.txt",
+        "sha256": "33cf878636033bb771441705a3dfd03fbe6c738fa426bfe7b2b2e541f3107ed3",
+        "bytes": 6854,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/parsed_cells.json",
+        "sha256": "65aef60834ec98a35b5b32d33ca0b7c147658510159e507a099c961604edf351",
+        "bytes": 8242,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/normalized_cells.json",
+        "sha256": "6809242821265bdfd8c4c04f5843237c5884bdb74bbb23149b6c1bd6a1fc5761",
+        "bytes": 27099,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/distribution.json",
+        "sha256": "54b6b7d4288867bb01fca052b73abb9b3a13a8e162a883806770a91fc4d77e9e",
+        "bytes": 15073,
+        "createdAt": "2026-11-10T00:29:57Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/validation.json",
+        "sha256": "9eddba2ba4cecb23405a3f3fc0959bdf116a6acd86ac6268e7a3928b2ab6f19a",
+        "bytes": 143,
+        "createdAt": "2026-11-10T00:29:57Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-11-10T00:29:57Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "aa285a87e05fa625cea885c1f33fddeefe6e65606b0f68f0c6a5c9dae6e46639"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-29-57z-bls-cps-employed-people-by-occupation-computer-mathematical-2026-11/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Tighten the +0.020 million update by separating recent-level momentum from the claimed November seasonal/reference-class tendency, since the seasonal component is asserted but not quantified."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "If possible, replace the blocked schedule-page note with the exact official schedule evidence artifact or state that the ledger registration supplies the release date."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the optional critique to separate the +0.020 million update into a recent-level momentum component and a smaller November seasonal/reference-class component, and clarified that the blocked schedule-page receipt leaves release-date grounding to the official BLS schedule result available in the run plus the sealed ledger registration; no forecast numbers changed.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the optional critique to separate the +0.020 million update into a recent-level momentum component and a smaller November seasonal/reference-class component, and clarified that the blocked schedule-page receipt leaves release-date grounding to the official BLS schedule result available in the run plus the sealed ledger registration; no forecast numbers changed.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "Draft is publishable with the target contract, prior, update, interval, tails, and JSON fields broadly coherent."
+    }
+  }
+]

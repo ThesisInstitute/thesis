@@ -8,7 +8,19 @@ name: Resolve pending cells
 on:
   schedule:
     - cron: "40 13 * * *" # daily 13:40 UTC
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      restate_base_units:
+        # The one-time base-unit migration (AGENTS.md): one release that
+        # restates every current Chronicle row in a scaled unit in base
+        # units. With none left, it rebuilds the records of a restatement
+        # run that merged but never reached Thesis. It resolves nothing, so
+        # the status page is left alone. GitHub keeps one waiting run per
+        # concurrency group and a newer one cancels it, so dispatch this only
+        # when no other run of this workflow is waiting.
+        description: "Restate Chronicle's scaled rows in base units instead of resolving"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # resolution marker commit makes HEAD deployable
@@ -83,6 +95,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.ARCH_DATA_TOKEN }}
           LEDGER_PRODUCER_SIGNING_KEY: ${{ secrets.LEDGER_PRODUCER_SIGNING_KEY }}
+          RESTATE_BASE_UNITS: ${{ inputs.restate_base_units == true }}
         run: |
           set -euo pipefail
           # Stream resolver output while capturing it: command substitution
@@ -95,8 +108,12 @@ jobs:
           # but refused some rows: what it appended must still be committed
           # and published, so the step goes on and the job fails at the end
           # ("Fail the run on refused rows"). Any other failure stops here.
+          mode=()
+          if [ "$RESTATE_BASE_UNITS" = "true" ]; then
+            mode=(--restate-base-units)
+          fi
           set +e
-          python3 -u scripts/resolve_pending.py 2>&1 | tee /tmp/resolve-out.log
+          python3 -u scripts/resolve_pending.py "${mode[@]}" 2>&1 | tee /tmp/resolve-out.log
           statuses=("${PIPESTATUS[@]}")
           set -e
           resolver_rc=${statuses[0]}
@@ -112,12 +129,20 @@ jobs:
           else
             echo "appended=0" >> "$GITHUB_OUTPUT"
           fi
+          # A rebuilt restatement run's records must be committed even when
+          # the ledger has not moved since the last deployment.
+          if grep -q "^restored" /tmp/resolve-out.log; then
+            echo "restored=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "restored=0" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Compare ledger branch with the last successful deployment
         id: ledger
         env:
           GH_TOKEN: ${{ secrets.ARCH_DATA_TOKEN }}
           APPENDED: ${{ steps.resolve.outputs.appended }}
+          RESTORED: ${{ steps.resolve.outputs.restored }}
         run: |
           set -euo pipefail
           CURRENT=$(gh api \
@@ -139,12 +164,13 @@ jobs:
           )
           echo "current_sha=$CURRENT" >> "$GITHUB_OUTPUT"
           echo "last_deployed_sha=$LAST" >> "$GITHUB_OUTPUT"
-          if [ "$APPENDED" = "1" ] || [ "$CURRENT" != "$LAST" ]; then
+          if [ "$APPENDED" = "1" ] || [ "$RESTORED" = "1" ] \
+              || [ "$CURRENT" != "$LAST" ]; then
             echo "needs_publish=1" >> "$GITHUB_OUTPUT"
           else
             echo "needs_publish=0" >> "$GITHUB_OUTPUT"
           fi
-          echo "ledger current=$CURRENT last-successfully-deployed=${LAST:-none} appended=$APPENDED"
+          echo "ledger current=$CURRENT last-successfully-deployed=${LAST:-none} appended=$APPENDED restored=$RESTORED"
 
       - name: Advance the ledger pin and witness the new upstream state
         id: pin_witness
@@ -307,8 +333,10 @@ jobs:
         # nothing else in this job's tree (pin, records, marker) rides
         # along and the attested marker push above is left alone. The file
         # is outside records/**, so the push needs no attestation; it does
-        # touch site/, so Vercel rebuilds and the reasons reach the page.
-        if: always()
+        # touch site/, so Vercel rebuilds and the reasons reach the page. A
+        # restatement run examines no reference, so it would mark every
+        # overdue forecast as never reached; it publishes no status.
+        if: always() && inputs.restate_base_units != true
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -349,11 +377,13 @@ jobs:
           exit 1
 
       - name: Alert on failure
-        # Two kinds of red get two titles (scripts/resolution_alert.py):
+        # Each kind of red gets its own title (scripts/resolution_alert.py):
         # "Resolution rows refused" when the step above failed (its `if`
         # names no status function, so every earlier step succeeded or was
         # skipped, the always-run status page aside: the loop worked),
-        # naming each refused row; "Resolution loop failed" otherwise. A
+        # naming each refused row, or "Resolution records not rebuilt" when
+        # a failed rebuild of a restatement run's records was its only
+        # cause; "Resolution loop failed" otherwise. A
         # second red run on the same day comments on the open issue instead
         # of vanishing. If the script fails, the old title and one-line body
         # go out; if the issue call fails, a one-line issue under the same

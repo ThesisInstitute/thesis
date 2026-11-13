@@ -13,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: "Policy forecasts — Thesis Institute",
   description:
-    "Open forecasts on government statistics, policy states like the federal minimum wage, and outcomes conditional on those policy states. The audit trails, data, and everything else are visible.",
+    "Open forecasts on government statistics, and outcomes conditional on policy states. The audit trails, data, and everything else are visible.",
   robots: {
     index: false,
     follow: false,
@@ -42,10 +42,8 @@ export default async function ForecastsPage() {
             Forecasts on every consequential cell of government data
           </h1>
           <p className="text-[1.05rem] leading-[1.65] text-[var(--theme-text-muted)]">
-            Thesis provides three types of forecasts:{" "}
-            <strong>government statistics</strong>,{" "}
-            <strong>policy states</strong> (like the federal minimum wage), and{" "}
-            <strong>conditional forecasts</strong> <em>given</em> different
+            Thesis provides forecasts of <strong>government statistics</strong>,
+            and <strong>conditional forecasts</strong> <em>given</em> different
             policy states. The audit trails, data, and everything else are
             visible.
           </p>
