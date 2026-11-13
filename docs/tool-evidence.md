@@ -109,8 +109,8 @@ MCP call, with `status: "failed"`, `result: null` and
 - the server has exited;
 - Codex gives up at its tool timeout, in which case the recorder may still
   record the call, which then lacks its completion event;
-- Codex declines the call itself, for example when the model's arguments are
-  not a JSON object, which Codex refuses before it sends anything;
+- Codex declines the call itself, for example when the model passes arguments
+  other than a JSON object, which Codex refuses before it sends anything;
 - the model calls one of Codex's own resource tools (`list_mcp_resources`,
   `list_mcp_resource_templates` or `read_mcp_resource`) on this server, which
   serves no resources.
@@ -124,10 +124,10 @@ that presents as successful. The runner binds a stage when it records
 runner stopped it or it timed out. If the bind fails, the runner fails the
 stage as a `tool_evidence` failure with no cells. The runner does not bind a
 stage it records with a non-zero `returnCode`; custody binds that stage at
-publication. The runner can still seal that run's cells
-beside `ok: false`, and if they validate, the publisher refuses the batch as a
-validator status mismatch. Every other binding error refuses custody whether or
-not the stage failed:
+publication. The runner can still seal that run's cells beside `ok: false`, and
+if they validate, the publisher refuses the batch as a validator status
+mismatch. Every other binding error refuses custody whether or not the stage
+failed:
 
 - an event with no native ID;
 - a repeated completion;

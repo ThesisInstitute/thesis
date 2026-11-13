@@ -1005,8 +1005,8 @@ def result_free_native_error(item: dict[str, Any]) -> bool:
       ``MAX_ARGUMENT_BYTES``);
     - the server had exited;
     - Codex gave up at its tool timeout, or declined the call itself (for
-      example when the arguments are not a JSON object, which Codex refuses
-      before it sends anything);
+      example when the model passed arguments other than a JSON object,
+      which Codex refuses before it sends anything);
     - the model called one of Codex's own resource tools
       (``list_mcp_resources``, ``list_mcp_resource_templates`` or
       ``read_mcp_resource``) on this server, which serves no resources.
