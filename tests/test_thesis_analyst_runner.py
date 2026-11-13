@@ -1638,7 +1638,8 @@ def test_command_start_failure_is_sealed_as_complete_failed_trace(tmp_path):
     command = json.loads((out_dir / "command.json").read_text())
     verification = verify_run(out_dir)
     assert command["returnCode"] == 127
-    assert manifest["error"]["phase"] == "parse"
+    assert manifest["error"]["phase"] == "command"
+    assert manifest["error"]["message"] == "agent command exited 127"
     assert verification.inventory_status == "complete"
     assert verification.run_succeeded is False
     assert verification.headline_eligible is False
@@ -1679,7 +1680,15 @@ def test_reviewer_start_failure_is_sealed_and_labeled_failed(tmp_path):
     reviewer = json.loads((out_dir / "pre_submit_review_command.json").read_text())
     verification = verify_run(out_dir)
     assert reviewer["returnCode"] == 127
-    assert manifest["preSubmitReview"]["status"] == "review_failed"
+    # The draft's cells validate, but a run whose reviewer failed cannot seal
+    # them: it is recorded before parsing, and its stage files (draft and
+    # reviewer, no final stage) are what say how far it got.
+    assert manifest["error"]["phase"] == "command"
+    assert manifest["error"]["message"] == "pre-submit reviewer exited 127"
+    assert manifest["cellsPath"] is None
+    assert (out_dir / "draft_stdout.txt").is_file()
+    assert not (out_dir / "command.json").exists()
+    assert not (out_dir / "parsed_cells.json").exists()
     assert verification.inventory_status == "complete"
     assert verification.run_succeeded is False
     assert verification.headline_eligible is False
@@ -2232,6 +2241,15 @@ def test_codex_network_run_fails_closed_on_workspace_mutation(tmp_path):
     assert any("prompt.md" in mutation for mutation in mutations)
     assert manifest["workspaceHygiene"]["guarded"] is True
     assert manifest["workspaceHygiene"]["mutations"] == mutations
+    # The guard puts the runner's run dir back, so the failed run is still
+    # an exact, verifiable record rather than one custody refuses.
+    assert manifest["error"]["phase"] == "workspace_hygiene"
+    assert manifest["cellsPath"] is None
+    assert not (out_dir / "planted.txt").exists()
+    assert not (out_dir / "prompt.md").read_text().endswith("tampered")
+    verification = verify_run(out_dir)
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is False
 
 
 def test_fast_prompt_network_note_is_gated_and_census_notes_name_endpoint():
@@ -2647,7 +2665,8 @@ def test_command_timeout_writes_failure_manifest(tmp_path):
     assert command["returnCode"] == 124
     assert command["timedOut"] is True
     assert manifest["ok"] is False
-    assert manifest["error"]["phase"] == "parse"
+    assert manifest["error"]["phase"] == "command"
+    assert manifest["error"]["message"] == "agent command exited 124 after timing out"
     assert error["command"]["timedOut"] is True
     assert manifest["targetContext"] == binding
     assert manifest["runStartedAt"] == manifest["createdAt"]
