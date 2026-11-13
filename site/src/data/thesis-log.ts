@@ -1573,6 +1573,45 @@ export interface TargetNormalizationScale {
   observationCount: number;
 }
 
+// A step dispersion must exceed this fraction of the history's own
+// magnitude to count as dispersion at all. Equal decimal steps leave
+// binary-float residue that scales with the values (1.814, 1.805, 1.796
+// left 1.57e-16; the same linear shape near 215 leaves 2.0e-14, which
+// passed the old absolute Number.EPSILON gate). Relative to the magnitude
+// it stays tiny: over the deterministic corpus in scoring-integrity.test.ts
+// (1,728 exactly linear decimal histories of 3 to 10,001 prints,
+// magnitudes 1e-6 to 1.4e8, both signs) the worst residue is 1.3e-16
+// of the magnitude, and the test fails if any exceeds 1e-15. Twelve
+// significant digits is also all the resolution a materialized
+// distribution keeps (toPrecision(12)). The floor is conservative, not a
+// pure residue test: it also refuses some genuine variation in a series'
+// last digits. It refuses three prints at 1e12 whose one change is 1 (the
+// 13th significant digit), and 101 prints at 1e11 whose one change is 1:
+// a lone unit step among 100 leaves a step dispersion of 0.1, just under
+// 1e-12 of the magnitude. Three prints at 1e11 with that change keep their
+// scale (0.71). No catalog series comes close: on 2026-09-27 the smallest
+// usable scale was 1.6e-3 of its history's magnitude.
+export const NORMALIZATION_SCALE_RELATIVE_FLOOR = 1e-12;
+
+// Sample SD of a value history's successive steps, and the largest
+// absolute value it is judged against. targetNormalizationScale gates on
+// exactly these two numbers; the residue corpus test reads them directly.
+export function ledgerStepDispersion(values: readonly number[]): {
+  scale: number;
+  magnitude: number;
+} {
+  const diffs = values.slice(1).map((value, index) => value - values[index]);
+  const mean = diffs.reduce((total, diff) => total + diff, 0) / diffs.length;
+  const variance =
+    diffs.reduce((total, diff) => total + (diff - mean) ** 2, 0) /
+    (diffs.length - 1);
+  const magnitude = values.reduce(
+    (largest, value) => Math.max(largest, Math.abs(value)),
+    0,
+  );
+  return { scale: Math.sqrt(variance), magnitude };
+}
+
 // The denominator is frozen per dataPointId from observations that were in
 // the public ledger before target registration. Legacy registrations have no
 // timestamp, so their primary run seal is the cutoff. No forecast output —
@@ -1622,14 +1661,20 @@ export function targetNormalizationScale(
   if (history.length < 3) {
     return unavailable(cutoff, history.length);
   }
-  const values = history.map((entry) => entry.value);
-  const diffs = values.slice(1).map((value, index) => value - values[index]);
-  const mean = diffs.reduce((total, diff) => total + diff, 0) / diffs.length;
-  const variance =
-    diffs.reduce((total, diff) => total + (diff - mean) ** 2, 0) /
-    (diffs.length - 1);
-  const scale = Math.sqrt(variance);
-  if (!Number.isFinite(scale) || scale <= 0) {
+  const { scale, magnitude } = ledgerStepDispersion(
+    history.map((entry) => entry.value),
+  );
+  // Residue below the relative floor is zero dispersion, not a tiny
+  // denominator: dividing by it put -7.08e13 rewards in the 2026-09-23
+  // export (continued-claims-week-2026-08-01), because the aggregate-only
+  // fix (10670132) left the stored score and the per-row reward ungated.
+  // Refusing here nulls normalized CRPS, sharpness, and reward for every
+  // consumer at once; the variance arithmetic itself is unchanged, so
+  // every usable scale (and its scoreId) stays byte-identical.
+  if (
+    !Number.isFinite(scale) ||
+    !(scale > magnitude * NORMALIZATION_SCALE_RELATIVE_FLOOR)
+  ) {
     return unavailable(cutoff, history.length);
   }
   return {

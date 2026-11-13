@@ -511,9 +511,9 @@ function summarizeStrategies(rows: StrategyScoreRow[]): StrategySummaryRow[] {
         strategyRows.map((row) => row.absoluteError),
       ),
       meanSignedError: meanOrNull(strategyRows.map((row) => row.signedError)),
-      // Normalized aggregates admit only rows with a usable ledger scale:
-      // a sub-epsilon dispersion is numerical zero, and dividing by it
-      // would let one row own every mean. Raw-unit aggregates keep all rows.
+      // Normalized aggregates admit only rows with a usable ledger scale
+      // (float residue is already refused at the source; see
+      // targetNormalizationScale). Raw-unit aggregates keep all rows.
       meanNormalizedCrps: meanOrNull(
         strategyRows
           .filter((row) => hasUsableNormalizationScale(row))
