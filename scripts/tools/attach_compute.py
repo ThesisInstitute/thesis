@@ -13,12 +13,15 @@ Without --row, uses the row registry below (checked in next to the runs that
 produced it). Row provenance should come from the audited call path
 (scripts/tools/policyengine.py compute_block / modal_economy.py output).
 
-Certification is never typed here: a registry row's `certification` must equal,
-key for key, the block pe.compute_block emitted for the grounding run, and its
-versions and validation must equal what that run measured in-container. A row
-whose certification is not certified may still attach (the page lists it with
-its reason and withholds every figure — POLICYENGINE.md §0.2), but a row that
-claims `certified: true` without consistent provenance is refused.
+Certification is never typed here: a row that claims `certified: true` must be
+grounded in GROUNDING by the artifacts of the run that produced it, its
+`certification` must equal, key for key, the block pe.compute_block emitted for
+that run, and its versions, validation and figures must equal what that run
+measured in-container. Every submitted row is checked, not just the first. A row
+whose certification is not certified may still attach without grounding (the
+page lists it with its reason and withholds every figure — POLICYENGINE.md
+§0.2), but a row that claims `certified: true` without grounded, consistent
+provenance is refused.
 """
 
 from __future__ import annotations
@@ -95,17 +98,22 @@ ROWS: dict[tuple[str, int], list[dict]] = {
 }
 
 
-# Run artifacts that ground the registry rows (land via PR #64). When present,
-# attach VERIFIES the registry numbers against them and dies loudly on drift —
-# a hand-transcribed number that no longer matches its source run must never
-# ship silently (that is how the published -$1.6B went stale).
+# Run artifacts that ground compute rows, one entry per run, keyed by the
+# provision it prices. A row is grounded by the entry whose compute-row artifact
+# has the row's identity (model, reform, year, dataset). attach VERIFIES every
+# grounded row against its artifacts and dies loudly on drift — a
+# hand-transcribed number that no longer matches its source run must never ship
+# silently (that is how the published -$1.6B went stale) — and REFUSES a row
+# that claims certification with no grounding at all.
 ARTIFACT_DIR = BILLS_DIR / "stronger-start-working-families-act"
-GROUNDING = {
-    ("s3596-119", 0): {
-        "economy": ARTIFACT_DIR / "buildP-economy-2026.json",
-        "sweep": ARTIFACT_DIR / "buildP-sweep-2026-2035.json",
-        "compute_row": ARTIFACT_DIR / "compute-row-2026.json",
-    },
+GROUNDING: dict[tuple[str, int], list[dict[str, Path]]] = {
+    ("s3596-119", 0): [
+        {
+            "economy": ARTIFACT_DIR / "buildP-economy-2026.json",
+            "sweep": ARTIFACT_DIR / "buildP-sweep-2026-2035.json",
+            "compute_row": ARTIFACT_DIR / "compute-row-2026.json",
+        },
+    ],
 }
 
 
@@ -113,17 +121,20 @@ def publishable_compute_row(row: dict) -> bool:
     """POLICYENGINE.md §0.2 gate: may a page publish this row's figures? Python
     mirror of site/src/lib/compute-publishability.ts (isPublishableCompute); both
     are pinned to tests/fixtures/compute_publishability_cases.json. Fail-closed:
-    the certification must be certified AND agree with the row it certifies."""
+    the certification must be certified AND agree with the row it certifies.
+    Every provenance field it compares must be a JSON string: numbers and
+    booleans compare and format differently in Python and JavaScript (1.0 vs 1,
+    True == 1), so admitting them would let the two gates disagree."""
     c = row.get("certification")
     if not isinstance(c, dict) or c.get("certified") is not True:
         return False
     if row.get("status") != "ok":
         return False
     dataset = row.get("dataset")
-    if not dataset or c.get("build") != dataset:
+    if not _nonempty_str(dataset) or c.get("build") != dataset:
         return False
     running = c.get("running_model_version")
-    if not running or running != row.get("pe_us_version"):
+    if not _nonempty_str(running) or running != row.get("pe_us_version"):
         return False
     if c.get("certified_model_version") != running:
         return False
@@ -131,12 +142,19 @@ def publishable_compute_row(row: dict) -> bool:
         return False
     if row.get("param_source") is not None and row.get("param_source") != c.get("validated_against"):
         return False
-    if c.get("certified_core_version") is not None:
-        if c.get("running_core_version") != c.get("certified_core_version"):
+    certified_core = c.get("certified_core_version")
+    if certified_core is not None:
+        if not _nonempty_str(certified_core):
             return False
-        if row.get("pe_core_version") != c.get("running_core_version"):
+        if c.get("running_core_version") != certified_core:
+            return False
+        if row.get("pe_core_version") != certified_core:
             return False
     return c.get("warning") is None
+
+
+def _nonempty_str(value) -> bool:
+    return isinstance(value, str) and value != ""
 
 
 def _drift(name: str, registry_val, artifact_val) -> None:
@@ -145,56 +163,106 @@ def _drift(name: str, registry_val, artifact_val) -> None:
                          "— re-transcribe from the run artifact before attaching")
 
 
-def _verify_against_artifacts(slug: str, provision_index: int, rows: list[dict]) -> None:
-    ground = GROUNDING.get((slug, provision_index))
-    if not ground:
-        return
-    row = rows[0]
-    checks: list[tuple[str, float, float]] = []
+def _claims_certification(row: dict) -> bool:
+    cert = row.get("certification")
+    return isinstance(cert, dict) and cert.get("certified") is True
+
+
+def _grounding_for(slug: str, provision_index: int, row: dict) -> dict[str, Path] | None:
+    """The run artifacts that produced `row`: the GROUNDING entry whose
+    compute-row artifact carries the row's identity."""
+    for ground in GROUNDING.get((slug, provision_index), []):
+        block_path = ground["compute_row"]
+        if block_path.exists():
+            block = json.loads(block_path.read_text(encoding="utf-8"))
+            if _row_key(block) == _row_key(row):
+                return ground
+    return None
+
+
+def _close(name: str, registry_val, artifact_val, tol: float) -> str:
+    if not isinstance(registry_val, (int, float)) or isinstance(registry_val, bool):
+        raise SystemExit(f"DRIFT in {name}: registry {registry_val!r} is not a number")
+    if abs(registry_val - artifact_val) > tol:
+        raise SystemExit(f"DRIFT in {name}: registry {registry_val} != artifact {artifact_val} "
+                         "— re-transcribe from the run artifact before attaching")
+    return name
+
+
+def _money_tol(artifact_val: float) -> float:
+    return max(abs(artifact_val) * 1e-4, 1e-6)
+
+
+def _verify_row(label: str, row: dict, ground: dict[str, Path]) -> list[str]:
     econ_path, sweep_path, block_path = ground["economy"], ground["sweep"], ground["compute_row"]
-    if econ_path.exists():
-        econ = json.loads(econ_path.read_text(encoding="utf-8"))
-        checks.append(("budgetary_impact", row["budgetary_impact"],
-                       econ["budget"]["budgetary_impact"]))
-        checks.append(("poverty_child_pct_change", row["poverty_child_pct_change"],
-                       econ["poverty"]["child"]["pct_change"]))
-        if econ.get("dataset") != row.get("dataset"):
-            raise SystemExit(f"DRIFT: dataset {row.get('dataset')} != artifact {econ.get('dataset')}")
-        # Provenance is exact, not rounded: what the container measured.
-        _drift("pe_us_version", row.get("pe_us_version"), econ.get("pe_us_version"))
-        _drift("pe_core_version", row.get("pe_core_version"), econ.get("pe_core_version"))
-        _drift("param_source", row.get("param_source"), (econ.get("validation") or {}).get("param_source"))
-    if block_path.exists():
-        block = json.loads(block_path.read_text(encoding="utf-8"))
-        # The certification is the one compute_block emitted for the run.
-        _drift("certification", row.get("certification"), block.get("certification"))
-        for key in ("dataset", "pe_us_version", "pe_core_version", "param_source", "engine", "reform", "year"):
-            _drift(key, row.get(key), block.get(key))
-    elif "certification" in row:
-        raise SystemExit("certification cannot be verified: compute-row artifact missing")
-    if sweep_path.exists():
+    required = [econ_path, block_path]
+    if row.get("ten_year_budgetary_impact") is not None:
+        required.append(sweep_path)
+    missing = [p.name for p in required if not p.exists()]
+    if missing:
+        raise SystemExit(f"REFUSED: {label} run artifacts missing: {', '.join(missing)}")
+    verified: list[str] = []
+
+    econ = json.loads(econ_path.read_text(encoding="utf-8"))
+    if econ.get("dataset") != row.get("dataset"):
+        raise SystemExit(f"DRIFT: dataset {row.get('dataset')} != artifact {econ.get('dataset')}")
+    # Provenance is exact, not rounded: what the container measured.
+    _drift("pe_us_version", row.get("pe_us_version"), econ.get("pe_us_version"))
+    _drift("pe_core_version", row.get("pe_core_version"), econ.get("pe_core_version"))
+    _drift("param_source", row.get("param_source"), (econ.get("validation") or {}).get("param_source"))
+    # Figures are transcriptions, so rounded: money to 1e-4 relative, shares to
+    # half of the fourth decimal the card shows.
+    if row.get("budgetary_impact") is not None:
+        artifact = econ["budget"]["budgetary_impact"]
+        verified.append(_close("budgetary_impact", row["budgetary_impact"], artifact, _money_tol(artifact)))
+    if row.get("poverty_child_pct_change") is not None:
+        artifact = econ["poverty"]["child"]["pct_change"]
+        verified.append(_close("poverty_child_pct_change", row["poverty_child_pct_change"],
+                               artifact, _money_tol(artifact)))
+    if row.get("beneficiaries_share") is not None:
+        shares = econ["intra_decile"]["all"]
+        artifact = shares["gain_more_5pct"] + shares["gain_less_5pct"]
+        verified.append(_close("beneficiaries_share", row["beneficiaries_share"], artifact, 5e-5))
+
+    block = json.loads(block_path.read_text(encoding="utf-8"))
+    # The certification is the one compute_block emitted for the run.
+    _drift("certification", row.get("certification"), block.get("certification"))
+    for key in ("dataset", "pe_us_version", "pe_core_version", "param_source", "engine", "reform",
+                "year", "status"):
+        _drift(key, row.get(key), block.get(key))
+
+    if row.get("ten_year_budgetary_impact") is not None:
         sweep = json.loads(sweep_path.read_text(encoding="utf-8"))
-        checks.append(("ten_year_budgetary_impact", row["ten_year_budgetary_impact"],
-                       sweep["ten_year_budgetary_impact"]))
+        artifact = sweep["ten_year_budgetary_impact"]
+        verified.append(_close("ten_year_budgetary_impact", row["ten_year_budgetary_impact"],
+                               artifact, _money_tol(artifact)))
         for key in ("dataset", "pe_us_version", "pe_core_version"):
             _drift(f"sweep {key}", row.get(key), sweep.get(key))
         # A certified row carries the ten-year figure only if the sweep certified too.
         sweep_cert = sweep.get("certification") or {}
-        if publishable_compute_row(row) and sweep_cert.get("certified") is not True:
+        if _claims_certification(row) and sweep_cert.get("certified") is not True:
             raise SystemExit("REFUSED: row is certified but the ten-year sweep is not — "
                              f"{sweep_cert.get('warning') or 'sweep carries no certification'}")
-    verified = []
-    for name, registry_val, artifact_val in checks:
-        tol = max(abs(artifact_val) * 1e-4, 1e-6)  # transcriptions are rounded
-        if abs(registry_val - artifact_val) > tol:
-            raise SystemExit(f"DRIFT in {name}: registry {registry_val} != artifact {artifact_val} "
-                             f"— re-transcribe from the run artifact before attaching")
-        verified.append(name)
-    if verified:
-        print(f"verified against run artifacts: {', '.join(verified)}")
-    else:
-        print("note: run artifacts not present on this branch — registry values unverified "
-              "(they verify automatically once PR #64's artifacts land)")
+    return verified
+
+
+def _verify_against_artifacts(slug: str, provision_index: int, rows: list[dict]) -> None:
+    """Verify EVERY row. A row that claims certification must be grounded by its
+    run's artifacts and match them; an ungrounded uncertified row may attach
+    (its page withholds every figure) and is reported as unverified."""
+    for i, row in enumerate(rows):
+        label = f"{slug}[{provision_index}] row {i}"
+        ground = _grounding_for(slug, provision_index, row)
+        if ground is None:
+            if _claims_certification(row):
+                raise SystemExit(f"REFUSED: {label} claims certified: true but no run artifacts "
+                                 "ground it — add the run's economy, sweep and compute-row "
+                                 "artifacts to GROUNDING")
+            print(f"note: {label} has no run artifacts — unverified, and the page withholds "
+                  "its figures", file=sys.stderr)
+            continue
+        verified = _verify_row(label, row, ground)
+        print(f"{label} verified against run artifacts: {', '.join(verified) or 'provenance only'}")
 
 
 def _row_key(row: dict) -> tuple:

@@ -1,5 +1,5 @@
 import type { BillCompute } from "@/data/bills";
-import { isPublishableCompute } from "@/lib/compute-publishability";
+import { isPublishableCompute, withheldReason } from "@/lib/compute-publishability";
 import { renderInline } from "@/lib/render-inline";
 
 const chipBase =
@@ -39,9 +39,10 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export function ComputeCard({ row }: { row: BillCompute }) {
   const certified = isPublishableCompute(row);
-  const buildLabel = row.dataset
-    ? (row.dataset.match(/build[a-z]+/i)?.[0] ?? row.dataset.slice(0, 24))
-    : null;
+  // Bill JSON is cast, not validated, so a hand-edited row can carry a
+  // non-string dataset; it still renders (withheld), never crashes the page.
+  const dataset = typeof row.dataset === "string" ? row.dataset : null;
+  const buildLabel = dataset ? (dataset.match(/build[a-z]+/i)?.[0] ?? dataset.slice(0, 24)) : null;
   const hasStats = certified && row.budgetary_impact != null;
   return (
     <div className="rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg)] p-4">
@@ -53,7 +54,7 @@ export function ComputeCard({ row }: { row: BillCompute }) {
         {buildLabel && (
           <span
             className={`${chipBase} border-[var(--theme-border)] text-[var(--theme-text-dim)]`}
-            title={row.dataset}
+            title={dataset ?? undefined}
           >
             populace {buildLabel}
           </span>
@@ -97,10 +98,7 @@ export function ComputeCard({ row }: { row: BillCompute }) {
             so its numbers are inadmissible for publication.
           </p>
           <p className="m-0 mt-1 [font-family:var(--font-mono)] text-[0.72rem] text-[var(--theme-text-dim)]">
-            {row.certification?.warning ??
-              (row.certification
-                ? "The certification record does not match this run's provenance."
-                : "This run carries no certification.")}
+            {withheldReason(row)}
           </p>
         </div>
       )}

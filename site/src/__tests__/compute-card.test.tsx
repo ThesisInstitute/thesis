@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import fixture from "../../../tests/fixtures/compute_publishability_cases.json";
 import { ComputeCard } from "@/components/ComputeCard";
 import { type BillCompute, loadBills } from "@/data/bills";
-import { isPublishableCompute } from "@/lib/compute-publishability";
+import { isPublishableCompute, withheldReason } from "@/lib/compute-publishability";
 
 /**
  * POLICYENGINE.md §0.2: a run whose certification is not certified is
@@ -18,6 +18,12 @@ const cases = fixture.cases as unknown as {
   publishable: boolean;
   row: BillCompute;
 }[];
+
+const grid = fixture.type_grid as unknown as {
+  row_fields: string[];
+  certification_fields: string[];
+  values: unknown[];
+};
 
 const FIGURE_TEXT = ["−$1.83B", "−$17.1B", "Child poverty", "People gaining", "FIGURE-SUMMARY", "FIGURE-NOTE"];
 
@@ -52,9 +58,40 @@ describe("compute publication gate", () => {
   }
 
   it("shows the certification's own reason when it refuses", () => {
-    const refused = cases.find((c) => c.row.certification?.warning)!;
+    const refused = cases.find(
+      (c) => c.row.certification?.warning && !c.row.certification.warning.includes("$"),
+    )!;
     const { container } = render(<ComputeCard row={refused.row} />);
     expect(container.textContent).toContain(refused.row.certification!.warning!);
+  });
+
+  it("never shows a warning that carries a dollar figure", () => {
+    const row = structuredClone(cases[0].row);
+    row.certification = { ...row.certification!, certified: false, warning: "was −$1.83B" };
+    expect(withheldReason(row)).not.toContain("$");
+    const { container } = render(<ComputeCard row={row} />);
+    expect(container.textContent).not.toContain("$");
+  });
+
+  // The Python gate walks the same grid (tests/test_compute_publication_gate.py).
+  it("withholds when any provenance field is not a string", () => {
+    expect(isPublishableCompute(cases[0].row)).toBe(true);
+    let checked = 0;
+    for (const value of grid.values) {
+      for (const field of grid.row_fields) {
+        const row = structuredClone(cases[0].row) as unknown as Record<string, unknown>;
+        row[field] = structuredClone(value);
+        expect(isPublishableCompute(row as unknown as BillCompute), `${field}=${JSON.stringify(value)}`).toBe(false);
+        checked++;
+      }
+      for (const field of grid.certification_fields) {
+        const row = structuredClone(cases[0].row);
+        (row.certification as unknown as Record<string, unknown>)[field] = structuredClone(value);
+        expect(isPublishableCompute(row), `certification.${field}=${JSON.stringify(value)}`).toBe(false);
+        checked++;
+      }
+    }
+    expect(checked).toBe(grid.values.length * (grid.row_fields.length + grid.certification_fields.length));
   });
 });
 

@@ -55,37 +55,94 @@ def populace_dataset_uri(build: str = POPULACE_BUILD) -> str:
     return f"hf://datasets/policyengine/populace-us/populace_us_2024.h5@{build}"
 
 
-_CERT_CACHE: dict[str, Optional[dict]] = {}
+# build -> (certified stack or None, why the manifest certifies nothing or None)
+_CERT_CACHE: dict[str, tuple[Optional[dict], Optional[str]]] = {}
 
 MODEL_PACKAGE = "policyengine-us"
 CORE_PACKAGE = "policyengine-core"
 
+# An exact pin is `==<version>` and nothing else: no `===`, wildcard, range,
+# comma-joined specifier or environment marker.
+_EXACT_PIN_RE = re.compile(r"==\s*([0-9][0-9A-Za-z.+!_-]*)")
 
-def _exact_pin(packages: Any) -> Optional[str]:
-    """The version an exact `==x.y.z` specifier names, else None. A range or a
-    missing specifier certifies nothing."""
-    spec = ((packages or [{}])[0] or {}).get("specifier", "")
-    return spec[2:] if isinstance(spec, str) and spec.startswith("==") and spec[2:] else None
+
+def _package_name(name: Any) -> Optional[str]:
+    """PEP 503-normalized distribution name, or None for a non-string."""
+    return re.sub(r"[-_.]+", "-", name).lower() if isinstance(name, str) else None
+
+
+def _exact_pin(specifier: Any) -> Optional[str]:
+    """The version an exact `==x.y.z` specifier names, else None. A range, a
+    wildcard, `===`, a joined specifier or a non-string certifies nothing."""
+    if not isinstance(specifier, str):
+        return None
+    match = _EXACT_PIN_RE.fullmatch(specifier.strip())
+    return match.group(1) if match else None
+
+
+def _manifest_pin(manifest: dict, key: str, package: str, *,
+                  required: bool) -> tuple[Optional[str], Optional[str]]:
+    """(pinned version, problem) for `package` under manifest[key].
+
+    An absent or empty list means no constraint — a problem only when the pin is
+    required. A present list must be well formed, name `package` exactly once and
+    nothing else, and pin it exactly. Anything else is a problem, never "no
+    constraint": a range or another package's pin must not certify this stack."""
+    entries = manifest.get(key)
+    if entries is None or entries == []:
+        return None, (f"{key} pins no {package}" if required else None)
+    if not isinstance(entries, list) or not all(isinstance(e, dict) for e in entries):
+        return None, f"{key} is malformed"
+    names = [_package_name(e.get("name")) for e in entries]
+    if names != [package]:
+        return None, f"{key} names {names!r}, not exactly one {package}"
+    pin = _exact_pin(entries[0].get("specifier"))
+    if pin is None:
+        return None, (f"{key} constrains {package} with {entries[0].get('specifier')!r}, "
+                      "not an exact == pin")
+    return pin, None
+
+
+def _manifest_stack(manifest: Any) -> tuple[Optional[dict], Optional[str]]:
+    if not isinstance(manifest, dict):
+        return None, "manifest is not a JSON object"
+    model, problem = _manifest_pin(manifest, "compatible_model_packages", MODEL_PACKAGE,
+                                   required=True)
+    if problem:
+        return None, problem
+    core, problem = _manifest_pin(manifest, "compatible_core_packages", CORE_PACKAGE,
+                                  required=False)
+    if problem:
+        return None, problem
+    return {MODEL_PACKAGE: model, CORE_PACKAGE: core}, None
 
 
 def certified_stack(build: str = POPULACE_BUILD) -> Optional[dict]:
     """The package versions a Populace build is CERTIFIED for, read from the
     build's own release_manifest.json: {"policyengine-us": x, "policyengine-core":
-    y or None}. None when the manifest is unreachable or names no exact model pin.
-    Build P certifies us==1.764.6 + core==3.26.11; us==1.784.3 has no released
-    certified build."""
+    y or None}. None when the manifest is unreachable, malformed, or does not pin
+    exactly one policyengine-us version (and, when it constrains core, exactly one
+    policyengine-core version). Build P certifies us==1.764.6 + core==3.26.11;
+    us==1.784.3 has no released certified build. Returns a copy, so a caller
+    cannot change what later certifications compare against."""
     if build not in _CERT_CACHE:
         url = ("https://huggingface.co/datasets/policyengine/populace-us/raw/main/"
                f"releases/{build}/release_manifest.json")
         try:
             with urllib.request.urlopen(urllib.request.Request(url), timeout=60) as r:
-                man = json.loads(r.read())
-            model = _exact_pin(man.get("compatible_model_packages"))
-            core = _exact_pin(man.get("compatible_core_packages"))
-            _CERT_CACHE[build] = {MODEL_PACKAGE: model, CORE_PACKAGE: core} if model else None
-        except Exception:
-            _CERT_CACHE[build] = None
-    return _CERT_CACHE[build]
+                manifest = json.loads(r.read())
+        except Exception as e:
+            _CERT_CACHE[build] = (None, f"unreachable ({type(e).__name__})")
+        else:
+            _CERT_CACHE[build] = _manifest_stack(manifest)
+    stack, _ = _CERT_CACHE[build]
+    return dict(stack) if stack else None
+
+
+def manifest_problem(build: str) -> Optional[str]:
+    """Why the build's manifest certifies nothing, once certified_stack read it."""
+    entry = _CERT_CACHE.get(build)
+    return entry[1] if entry else None
 
 
 def certified_model_version(build: str = POPULACE_BUILD) -> Optional[str]:
@@ -100,7 +157,9 @@ def certification_note(build: str, running_version: Optional[str], *,
                        running_core_version: Optional[str] = None,
                        validated_against: Optional[str] = None) -> dict:
     """Certify a run's model/data pairing. FAIL-CLOSED: certified only when ALL hold —
-      1. the build's release manifest is reachable and pins a policyengine-us version;
+      1. the build's release manifest is reachable and pins exactly one
+         policyengine-us version (and, if it constrains core, exactly one
+         policyengine-core version) with `==`;
       2. the MEASURED running policyengine-us equals that pin;
       3. the measured running policyengine-core equals the manifest's core pin
          (when the manifest pins one);
@@ -115,9 +174,9 @@ def certification_note(build: str, running_version: Optional[str], *,
     certified_core = stack[CORE_PACKAGE] if stack else None
     reasons: list[str] = []
     if certified is None:
-        reasons.append(f"CANNOT CERTIFY: release manifest for {build} unreachable or pins no "
-                       "exact policyengine-us version — refusing to certify; retry with "
-                       "network access to the build manifest.")
+        why = manifest_problem(build) or "unreachable or pins no exact policyengine-us version"
+        reasons.append(f"CANNOT CERTIFY: release manifest for {build} certifies nothing "
+                       f"({why}) — refusing to certify.")
     elif running_version is None:
         reasons.append(f"CANNOT CERTIFY: running model version unknown (build certifies "
                        f"policyengine-us=={certified}) — refusing to certify.")

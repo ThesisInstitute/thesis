@@ -2,12 +2,16 @@
 published number. These tests pin the rule end to end, offline:
 
   - certification_note certifies exactly the measured, validated, manifest-
-    matching stack (Hypothesis property over small version pools);
+    matching stack (Hypothesis properties over small version pools, once with
+    the manifest stack given and once through the real manifest parser);
   - the publication gate (attach_compute.publishable_compute_row, mirrored by
     the site's isPublishableCompute) agrees with the shared fixture and with
     compute_block's own certification (differential);
   - the attach registry cannot carry a certification its run artifacts did not
-    emit, and every committed bill row is exactly a registered, verified row;
+    emit: every row that claims certification must be grounded by its run's
+    artifacts, every submitted row is verified, and every committed bill row is
+    exactly a registered, verified row;
+  - both gates require string provenance (a shared grid of non-string values);
   - the Modal driver reports versions it measured in the container, not its pins.
 """
 
@@ -30,7 +34,9 @@ pe = importlib.import_module("policyengine")
 attach = importlib.import_module("attach_compute")
 
 FIXTURE = ROOT / "tests" / "fixtures" / "compute_publishability_cases.json"
-CASES = json.loads(FIXTURE.read_text(encoding="utf-8"))["cases"]
+FIXTURE_DATA = json.loads(FIXTURE.read_text(encoding="utf-8"))
+CASES = FIXTURE_DATA["cases"]
+GRID = FIXTURE_DATA["type_grid"]
 REFORM = {"gov.irs.credits.ctc.refundable.phase_in.threshold": {"2026-01-01.2100-12-31": 0}}
 
 VERSIONS = st.sampled_from([None, "", "1.764.6", "1.784.3"])
@@ -84,6 +90,70 @@ def test_certified_iff_measured_validated_and_manifest_matching(
     assert note["build"] == "build-x"
 
 
+# The same property through the real manifest parser (Sol review r1: the one
+# above takes the parsed stack as given, so it cannot see a parser defect).
+_US_NAMES = st.sampled_from(["policyengine-us", "PolicyEngine_US", "policyengine-uk", None])
+_CORE_NAMES = st.sampled_from(["policyengine-core", "policyengine.core", "policyengine", None])
+_SPECS = st.sampled_from(["==1.764.6", "==1.784.3", "==3.26.11", "==3.23.6", ">=3.26.11,<4",
+                          "==3.*", "===3.26.11", ">=1.764.6", "", None])
+
+
+def _entries(names):
+    entry = st.fixed_dictionaries({"name": names, "specifier": _SPECS})
+    return st.one_of(st.none(), st.lists(entry, max_size=2), entry)
+
+
+def _norm(name):
+    return name.replace("_", "-").replace(".", "-").lower() if isinstance(name, str) else None
+
+
+def _sole_exact_pin(entries, package):
+    """(applies, version): the reference reading of one manifest package list."""
+    if entries is None or entries == []:
+        return False, None
+    if (not isinstance(entries, list) or len(entries) != 1
+            or _norm(entries[0]["name"]) != package):
+        return True, "REFUSE"
+    spec = entries[0]["specifier"]
+    if not isinstance(spec, str) or not spec.startswith("==") or spec.startswith("==="):
+        return True, "REFUSE"
+    version = spec[2:]
+    return True, (version if version and "*" not in version and "," not in version else "REFUSE")
+
+
+@settings(max_examples=600, deadline=None,
+          suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(model=_entries(_US_NAMES), core=_entries(_CORE_NAMES),
+       running=st.sampled_from(["1.764.6", "1.784.3"]), running_core=CORES)
+def test_certified_iff_manifest_pins_exactly_what_ran(monkeypatch, model, core, running, running_core):
+    manifest = {}
+    if model is not None:
+        manifest["compatible_model_packages"] = model
+    if core is not None:
+        manifest["compatible_core_packages"] = core
+
+    class _Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            return json.dumps(manifest).encode()
+
+    monkeypatch.setattr(pe, "_CERT_CACHE", {})
+    monkeypatch.setattr(pe.urllib.request, "urlopen", lambda *a, **k: _Response())
+    note = pe.certification_note("probe", running, running_core_version=running_core,
+                                 validated_against=f"policyengine-us@{running}")
+    has_model, us_pin = _sole_exact_pin(model, "policyengine-us")
+    has_core, core_pin = _sole_exact_pin(core, "policyengine-core")
+    expected = (has_model and us_pin == running
+                and (not has_core or (core_pin != "REFUSE" and core_pin == running_core)))
+    assert note["certified"] is expected
+    assert (note["warning"] is None) is expected
+
+
 # --------------------------------------------------------------------------- #
 # differential: gate(compute_block row) == compute_block certification         #
 # --------------------------------------------------------------------------- #
@@ -102,6 +172,27 @@ def test_gate_agrees_with_compute_block_certification(
     assert attach.publishable_compute_row(row) is row["certification"]["certified"]
     if engine == "api":
         assert row["certification"]["certified"] is False
+
+
+def _grid_rows():
+    for value in GRID["values"]:
+        for field in GRID["row_fields"]:
+            row = copy.deepcopy(CASES[0]["row"])
+            row[field] = copy.deepcopy(value)
+            yield f"{field}={value!r}", row
+        for field in GRID["certification_fields"]:
+            row = copy.deepcopy(CASES[0]["row"])
+            row["certification"][field] = copy.deepcopy(value)
+            yield f"certification.{field}={value!r}", row
+
+
+def test_gate_requires_string_provenance():
+    # Sol review r1, finding 3. The site suite walks the same grid.
+    assert attach.publishable_compute_row(CASES[0]["row"])
+    rows = list(_grid_rows())
+    assert len(rows) == len(GRID["values"]) * (len(GRID["row_fields"]) + len(GRID["certification_fields"]))
+    for label, row in rows:
+        assert attach.publishable_compute_row(row) is False, label
 
 
 def test_gate_withholds_every_non_ok_status(monkeypatch):
@@ -152,7 +243,7 @@ def test_s3596_row_is_publishable_at_exact_runtime():
     assert cert["running_model_version"] == cert["certified_model_version"] == "1.764.6"
     assert cert["running_core_version"] == cert["certified_core_version"] == "3.26.11"
     assert cert["validated_against"] == "policyengine-us@1.764.6"
-    artifacts = attach.GROUNDING[("s3596-119", 0)]
+    (artifacts,) = attach.GROUNDING[("s3596-119", 0)]
     econ = json.loads(artifacts["economy"].read_text(encoding="utf-8"))
     sweep = json.loads(artifacts["sweep"].read_text(encoding="utf-8"))
     assert econ["versions_measured_in_container"] is True
@@ -176,13 +267,55 @@ def _mutated(mutate):
     lambda r: r.__setitem__("pe_core_version", "3.23.6"),
     lambda r: r.__setitem__("budgetary_impact", r["budgetary_impact"] * 1.01),
     lambda r: r.__setitem__("ten_year_budgetary_impact", r["ten_year_budgetary_impact"] * 1.01),
+    lambda r: r.__setitem__("poverty_child_pct_change", r["poverty_child_pct_change"] * 1.01),
+    lambda r: r.__setitem__("beneficiaries_share", r["beneficiaries_share"] + 0.001),
+    lambda r: r.__setitem__("budgetary_impact", str(r["budgetary_impact"])),
 ], ids=["flip-certified", "off-version-validation", "drop-core", "param-source",
-        "model-version", "core-version", "2026-figure", "ten-year-figure"])
+        "model-version", "core-version", "2026-figure", "ten-year-figure", "child-poverty",
+        "people-gaining", "figure-as-text"])
 def test_hand_edited_registry_rows_are_refused(mutate):
     rows = _mutated(mutate)
     with pytest.raises(SystemExit):
         attach._check_certification_claims(rows)
         attach._verify_against_artifacts("s3596-119", 0, rows)
+
+
+def test_certified_row_without_grounding_is_refused(monkeypatch):
+    # Sol review r1, finding 2: a new registry entry copying a certified row
+    # with an invented figure passed because a missing grounding returned early.
+    key = ("future-certified-row", 0)
+    rows = copy.deepcopy(attach.ROWS[("s3596-119", 0)])
+    rows[0]["budgetary_impact"] = -1e15
+    monkeypatch.setitem(attach.ROWS, key, rows)
+    attach._check_certification_claims(rows)  # internally consistent, so this passes
+    with pytest.raises(SystemExit, match="no run artifacts ground it"):
+        attach._verify_against_artifacts(*key, rows)
+
+
+@pytest.mark.parametrize("second", [
+    lambda r: r.__setitem__("budgetary_impact", -1e15),
+    lambda r: r.__setitem__("year", 2027),
+    lambda r: r.__setitem__("reform", {"gov.irs.credits.ctc.amount.base[0].amount": {
+        "2026-01-01.2100-12-31": 3000}}),
+], ids=["same-run-invented-figure", "another-year", "another-reform"])
+def test_every_submitted_row_is_verified(second):
+    # Sol review r1, finding 2: only rows[0] was checked.
+    rows = [copy.deepcopy(row) for row in attach.ROWS[("s3596-119", 0)] * 2]
+    second(rows[1])
+    assert attach.publishable_compute_row(rows[0])
+    attach._verify_against_artifacts("s3596-119", 0, rows[:1])  # the first row alone is fine
+    with pytest.raises(SystemExit):
+        attach._check_certification_claims(rows)
+        attach._verify_against_artifacts("s3596-119", 0, rows)
+
+
+def test_grounded_row_needs_every_artifact(monkeypatch, tmp_path):
+    (ground,) = attach.GROUNDING[("s3596-119", 0)]
+    for name in ("economy", "sweep"):
+        moved = dict(ground, **{name: tmp_path / "missing.json"})
+        monkeypatch.setitem(attach.GROUNDING, ("s3596-119", 0), [moved])
+        with pytest.raises(SystemExit, match="run artifacts missing"):
+            attach._verify_against_artifacts("s3596-119", 0, attach.ROWS[("s3596-119", 0)])
 
 
 def test_certified_claim_without_consistent_provenance_is_refused():

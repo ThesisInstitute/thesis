@@ -69,8 +69,13 @@ install **1.764.6**, not the newest. The tool enforces this, fail-closed:
 `certification_note` certifies a run only when ALL of these hold, and every
 refusal says which failed.
 
-1. The build's release manifest is reachable and pins an exact
-   `policyengine-us` version.
+1. The build's release manifest is reachable and its
+   `compatible_model_packages` names `policyengine-us` exactly once, alone,
+   pinned with `==` (no range, wildcard, `===` or joined specifier). Its
+   `compatible_core_packages`, when present and non-empty, must likewise name
+   `policyengine-core` exactly once with an exact pin. A malformed list, a range
+   or another package's entry refuses certification; it never reads as "no
+   constraint". Only an absent or empty core list leaves core unconstrained.
 2. The running `policyengine-us`, **measured** in the process that computed
    (package metadata there, `pe.runtime_stack()`), equals that pin. A driver's
    own pin constant is what it asked the installer for, not what ran, and
@@ -98,11 +103,22 @@ are pinned to `tests/fixtures/compute_publishability_cases.json`). A row that is
 not certified, or whose certification disagrees with the row's own versions,
 validation or build, still lists: model, build, engine, an "uncertified pairing"
 chip, the certification's reason, and the reform. It shows **no figure** — no
-stats, no summary, no note. There is no "claimed-tier" display for a model
-number. Nor is certification ever typed by hand: `attach_compute.py` refuses a
-registry row whose certification differs from the block `compute_block` emitted
-for its grounding run, and the tests require every committed row to be a
-registered, verified one.
+stats, no summary, no note — and no reason text that carries a dollar sign.
+There is no "claimed-tier" display for a model number. Both gates require every
+provenance field they compare to be a JSON string, since numbers and booleans
+compare and format differently in Python and JavaScript; a shared grid of
+non-string values pins that. Nor is certification ever typed by hand:
+`attach_compute.py` checks **every** submitted row. A row that claims
+`certified: true` must be grounded — `GROUNDING` names its run's economy,
+compute-row and (for a ten-year figure) sweep artifacts, matched by model,
+reform, year and dataset — and its certification must equal the block
+`compute_block` emitted for that run, its versions and `param_source` the
+measured values, and its structured figures (2026 and ten-year impact, child
+poverty, people gaining) the artifacts' within transcription rounding. An
+ungrounded certified row is refused; an ungrounded uncertified row may attach,
+unverified, and its page withholds every figure. The tests require every
+committed row to be a registered, verified one. The prose `result_summary`
+is not machine-checked against the artifacts.
 
 ## 0.3 Where the national microsim runs — Modal, not a laptop
 

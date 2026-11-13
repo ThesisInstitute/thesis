@@ -275,10 +275,19 @@ uncertified run is inadmissible for a published number.
    `isPublishableCompute` / `publishable_compute_row`, pinned to
    `tests/fixtures/compute_publishability_cases.json`. A failing row lists its
    provenance and reason, and no figure.
-3. **No hand-typed certification.** `attach_compute.py` requires the registry
-   row's certification to equal the `compute_block` output of its grounding run,
-   with versions and `param_source` equal to the measured artifact values. Tests
-   require every committed bill row to be a registered, verified row.
+3. **No hand-typed certification.** `attach_compute.py` verifies every
+   submitted row. A row claiming `certified: true` must be grounded by its run's
+   artifacts (matched by model, reform, year and dataset); its certification
+   must equal that run's `compute_block` output, its versions and
+   `param_source` the measured artifact values, and its structured figures the
+   artifacts'. Tests require every committed bill row to be a registered,
+   verified row.
+4. **The manifest is parsed strictly** (Sol review r1 of #392). A core range,
+   a malformed list, a duplicate or another package's entry refuses
+   certification instead of reading as "no constraint"; package names are
+   checked, not assumed; `certified_stack` returns a copy of its cache. Both
+   gates require string provenance, so they cannot disagree on JSON numbers or
+   booleans.
 
 **Re-run, 2026-10-22, Modal** (2026: `ap-3hNH8qQe8MgQudwigCL6fh`; sweep:
 `ap-pC0HjguLRapdnimfkCfcEV`): measured `policyengine-us==1.764.6` +
