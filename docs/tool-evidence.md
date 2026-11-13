@@ -105,12 +105,12 @@ MCP call, with `status: "failed"`, `result: null` and
 `error: {"message": ...}`) whenever a call fails outside the tool's own result:
 
 - the recorder refuses a call with a JSON-RPC error and records nothing, for
-  example a stage's 129th call, arguments over 32 KiB, or arguments that are
-  not a JSON object;
+  example a stage's 129th call or arguments over 32 KiB;
 - the server has exited;
 - Codex gives up at its tool timeout, in which case the recorder may still
   record the call, which then lacks its completion event;
-- Codex declines the call itself;
+- Codex declines the call itself, for example when the model's arguments are
+  not a JSON object, which Codex refuses before it sends anything;
 - the model calls one of Codex's own resource tools (`list_mcp_resources`,
   `list_mcp_resource_templates` or `read_mcp_resource`) on this server, which
   serves no resources.
@@ -119,11 +119,13 @@ MCP call, with `status: "failed"`, `result: null` and
 0.158.0.
 
 A successful stage refuses all three, so custody never accepts one inside a run
-that presents as successful. When Codex exits 0, the runner fails such a stage
-as a `tool_evidence` failure with no cells. The runner does not bind a stage
-where Codex exits non-zero, since that stage has failed anyway, so only custody
-binds it, at publication. The runner can still seal that run's cells beside
-`ok: false`, and if they validate, the publisher refuses the batch as a
+that presents as successful. The runner binds a stage when it records
+`returnCode` 0: Codex exited 0, or Codex wrote a final message and then the
+runner stopped it or it timed out. If the bind fails, the runner fails the
+stage as a `tool_evidence` failure with no cells. The runner does not bind a
+stage it records with a non-zero `returnCode`; custody binds that stage at
+publication. The runner can still seal that run's cells
+beside `ok: false`, and if they validate, the publisher refuses the batch as a
 validator status mismatch. Every other binding error refuses custody whether or
 not the stage failed:
 

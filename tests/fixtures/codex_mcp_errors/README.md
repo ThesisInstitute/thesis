@@ -31,4 +31,5 @@ wrapping the ``tool call failed for `{server}/{tool}` `` context added in
 exactly the fields these lines carry (`CODEX_MCP_ITEM_FIELDS`), and
 `test_codex_error_events_fixture_is_the_shape_codex_writes` asserts that the
 two sets are equal. Re-record these lines whenever the Codex version CI
-installs changes.
+installs changes: `test_ci_installs_only_a_codex_version_that_wrote_the_fixture`
+fails while any workflow installs a version these lines did not come from.

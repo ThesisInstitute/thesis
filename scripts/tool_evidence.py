@@ -1001,10 +1001,12 @@ def result_free_native_error(item: dict[str, Any]) -> bool:
     Codex writes exactly this shape whenever a call fails outside the tool's
     own result:
     - the recorder refused the call with a JSON-RPC error and recorded
-      nothing (for example past ``MAX_CALLS``, arguments over
-      ``MAX_ARGUMENT_BYTES``, or non-object arguments);
+      nothing (for example past ``MAX_CALLS`` or with arguments over
+      ``MAX_ARGUMENT_BYTES``);
     - the server had exited;
-    - Codex gave up at its tool timeout, or declined the call itself;
+    - Codex gave up at its tool timeout, or declined the call itself (for
+      example when the arguments are not a JSON object, which Codex refuses
+      before it sends anything);
     - the model called one of Codex's own resource tools
       (``list_mcp_resources``, ``list_mcp_resource_templates`` or
       ``read_mcp_resource``) on this server, which serves no resources.
@@ -1062,9 +1064,9 @@ def bind_native_events(
             raise EvidenceError("tool evidence repeats a native completion event")
         completed_ids.add(native_id)
         if result_free_native_error(item):
-            # Nothing to bind: the recorder refused the call before recording
-            # it, or Codex abandoned a call whose record, if any, then lacks
-            # its own completion event.
+            # Nothing to bind: the call failed outside the tool's own result
+            # (result_free_native_error lists the causes). A call the
+            # recorder did record then lacks its own completion event.
             unbound_errors += 1
             continue
         result = item.get("result")

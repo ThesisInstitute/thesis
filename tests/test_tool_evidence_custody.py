@@ -6,6 +6,7 @@ import hashlib
 import json
 import pathlib
 import random
+import re
 import sys
 from typing import Any
 
@@ -851,6 +852,30 @@ def test_codex_error_events_fixture_is_the_shape_codex_writes() -> None:
     assert "Transport closed" in events["item_2"][1]["item"]["error"]["message"]
 
 
+# The Codex binaries that wrote refused_and_closed_calls.jsonl (see its README).
+RECORDED_CODEX_VERSIONS = frozenset({"0.144.0", "0.158.0"})
+
+
+def test_ci_installs_only_a_codex_version_that_wrote_the_fixture() -> None:
+    """The equality rule admits only the field set the fixture's lines carry,
+    and those lines came from the recorded versions. A workflow that installs
+    any other Codex must re-record the fixture first, or a field Codex adds
+    would make every unbound error refuse custody again."""
+    readme = (ROOT / "tests/fixtures/codex_mcp_errors/README.md").read_text()
+    for version in RECORDED_CODEX_VERSIONS:
+        assert version in readme
+    installs = [
+        (workflow.name, match.group(1))
+        for workflow in sorted((ROOT / ".github/workflows").glob("*.y*ml"))
+        for match in re.finditer(
+            r"@openai/codex(?:@(\S+))?", workflow.read_text(encoding="utf-8")
+        )
+    ]
+    assert installs, "no workflow installs @openai/codex"
+    for name, version in installs:
+        assert version in RECORDED_CODEX_VERSIONS, (name, version)
+
+
 @pytest.mark.parametrize("native_id", ["item_129", "item_2"])
 def test_result_free_errors_in_a_stage_that_recorded_nothing(native_id: str) -> None:
     """The real oversized-argument and closed-server runs recorded no call at
@@ -1067,6 +1092,11 @@ def _mutate_native_stream(
             item.update(status="failed", result=None, error={"message": "x"})
             item.pop(rng.choice(["tool", "arguments", "result"]), None)
 
+        def padded_error() -> None:
+            # Codex's bare error, plus a field Codex never writes.
+            item.update(status="failed", result=None, error={"message": "x"})
+            item[rng.choice(["output", "content", "callId"])] = "42"
+
         name, mutate = rng.choice(
             [
                 ("drop", lambda: events.pop(index)),
@@ -1161,6 +1191,7 @@ def _mutate_native_stream(
                     lambda: item.update(error={"message": "x", "content": "42"}),
                 ),
                 ("short error", short_error),
+                ("padded error", padded_error),
             ]
         )
         before = copy.deepcopy(events)
