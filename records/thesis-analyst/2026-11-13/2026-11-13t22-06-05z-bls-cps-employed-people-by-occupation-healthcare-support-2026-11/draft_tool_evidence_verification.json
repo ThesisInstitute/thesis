@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "thesis_tool_evidence_verification_v1",
+  "captureMethod": "thesis-controlled-tools-v1",
+  "valid": true,
+  "errors": [],
+  "callCount": 23,
+  "succeededCount": 18,
+  "failedCount": 5,
+  "checks": [
+    {
+      "callId": "call-0001",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0002",
+      "status": "captured",
+      "checks": [
+        "response_sha256",
+        "response_bytes",
+        "fetch_result"
+      ]
+    },
+    {
+      "callId": "call-0003",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0004",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0005",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0006",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0007",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0008",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0009",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0010",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0011",
+      "status": "captured",
+      "checks": [
+        "response_sha256",
+        "response_bytes",
+        "fetch_result"
+      ]
+    },
+    {
+      "callId": "call-0012",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0013",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0014",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0015",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0016",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0017",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0018",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0019",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0020",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0021",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0022",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0023",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    }
+  ],
+  "evidenceCanonicalSha256": "9a76c54804a689b4fdf59277693e13415de254e03ab63777189de389fc51c602",
+  "evidenceSha256": "fc67ed64b50e35c9ce7327a94d4ad099bdcd5259356182af808efb2da83a79ac"
+}

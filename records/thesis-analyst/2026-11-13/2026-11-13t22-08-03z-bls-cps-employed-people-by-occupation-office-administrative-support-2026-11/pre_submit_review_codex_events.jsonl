@@ -1,0 +1,4 @@
+{"type": "thread.started", "thread_id": "01a1d6f5-56b4-7d13-9cd7-dfb5eb540079"}
+{"type": "turn.started"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "agent_message", "text": "{\"summary\":\"The draft is publishable: it matches the registered resolver contract, states a persistence/seasonal prior, justifies the update, and keeps point, interval, unit, and JSON fields coherent.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Consider noting that the interval uses only six recent month-to-month changes, so the 80% band is mechanically tied to a small realized-volatility sample.\",\"The tail discussion could name concrete downside/upside thresholds in millions, e.g. below 16.053 or above 16.593.\"]}"}}
+{"type": "turn.completed", "usage": {"input_tokens": 22718, "cached_input_tokens": 0, "output_tokens": 633, "reasoning_output_tokens": 516}}
