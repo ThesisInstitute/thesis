@@ -132,6 +132,17 @@ export function ForecastBrowser({ forecasts }: ForecastBrowserProps) {
     filter.publisher || filter.country || filter.status || filter.query?.trim(),
   );
 
+  // A category appears only when the full listing holds a forecast of its
+  // type, so the page never offers a category with nothing published in it.
+  // A filter that empties a category leaves it in place with a count of 0.
+  const sections = useMemo(
+    () =>
+      SECTIONS.filter((section) =>
+        forecasts.some((forecast) => forecast.type === section.key),
+      ),
+    [forecasts],
+  );
+
   const selectClass =
     "rounded-lg border bg-[var(--theme-bg-elevated)] px-2.5 py-1.5 [font-family:var(--font-body)] text-[0.82rem] text-[var(--theme-text)]";
 
@@ -249,7 +260,7 @@ export function ForecastBrowser({ forecasts }: ForecastBrowserProps) {
         className="mb-8 flex flex-wrap items-center gap-1 rounded-xl border bg-[var(--theme-bg-elevated)] p-1.5"
         style={{ borderColor: "var(--theme-border)" }}
       >
-        {SECTIONS.map((section) => (
+        {sections.map((section) => (
           <Link
             key={section.key}
             href={`#${section.key}-forecasts`}
@@ -267,7 +278,7 @@ export function ForecastBrowser({ forecasts }: ForecastBrowserProps) {
         ))}
       </nav>
 
-      {SECTIONS.map((section) => {
+      {sections.map((section) => {
         const sectionForecasts = sortedForecasts.filter(
           (forecast) => forecast.type === section.key,
         );
