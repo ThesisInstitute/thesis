@@ -176,7 +176,7 @@ async function streamSpmChildPovertyForecast(send: SendEvent) {
 
   send("status", {
     state: "model_running",
-    label: "Generating calibrated forecast",
+    label: "Generating forecast",
   });
   await sendStep(send, {
     kind: "heading",
@@ -261,7 +261,7 @@ async function streamCpiForecast(send: SendEvent) {
 
   send("status", {
     state: "model_running",
-    label: "Generating calibrated forecast",
+    label: "Generating forecast",
   });
   await sendStep(send, {
     kind: "heading",
@@ -365,7 +365,7 @@ async function streamCtcExpansionForecast(send: SendEvent) {
 
   send("status", {
     state: "model_running",
-    label: "Generating calibrated forecast",
+    label: "Generating forecast",
   });
   await sendStep(send, {
     kind: "heading",
