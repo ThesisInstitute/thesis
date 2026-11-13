@@ -11,7 +11,7 @@ picks the larger magnitude: 100000.0078125 became 100000.007812 in Python and
 fixture), whose 404 rounding calls include no exact tie. This file's seeded
 corpus reproduces the split: the legacy body rounds 39,785 of its calls
 differently, in 735 of 1,805 inputs. None of the 390 sealed interval_seeded
-records had diverged.
+records of 2026-09-24 had diverged.
 """
 
 from __future__ import annotations

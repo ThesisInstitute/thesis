@@ -239,9 +239,12 @@ const decimalValue = (mantissa: number, decimals: number) =>
   Number(`${mantissa}e-${decimals}`);
 
 // Magnitude exponent plus decimals stays within 10 significant digits, so
-// a genuinely varied history's step dispersion is at least ~3e-11 of its
-// magnitude — well above NORMALIZATION_SCALE_RELATIVE_FLOOR — and every
-// mantissa is a safe integer. Official series publish far fewer digits.
+// a genuinely varied history of at most 14 prints has a step dispersion of
+// at least ~3e-11 of its magnitude — well above
+// NORMALIZATION_SCALE_RELATIVE_FLOOR — and every mantissa is a safe
+// integer. Ten digits alone don't guarantee a scale: 1,000,000 prints of
+// 1e9 followed by one of 1e9 + 1 leave a dispersion of 0.001, under the
+// floor's 0.001000000001. Official series publish far fewer digits.
 const historyArbitrary = (minLength: number) =>
   fc
     .record({
@@ -340,9 +343,12 @@ function quadratureCrps(distribution: NumericCdfDistribution, y: number) {
   return total;
 }
 
-// Arbitrary valid piecewise-linear CDFs: strictly increasing knots at any
-// location and scale, monotone probabilities pinned to 0 and 1, including
-// flat runs and jumps between knots.
+// Valid piecewise-linear CDFs over the sampled domain: strictly increasing
+// knots from origins within ±1e6, with gaps of 1e-5 to 1e4, monotone
+// probabilities pinned to 0 and 1, including flat runs and jumps between
+// knots. Not all doubles: once a support's width overflows (knots near
+// ±1e308), the kernel's CRPS and PIT go wrong, a limit
+// prediction-distribution.ts carries unchanged from main.
 const cdfArbitrary = fc
   .record({
     origin: fc.double({ min: -1e6, max: 1e6, noNaN: true }),
@@ -393,7 +399,7 @@ const cdfArbitrary = fc
   });
 
 describe("CRPS kernel", () => {
-  it("is finite, nonnegative, and equals the defining integral for any valid CDF and outcome", () => {
+  it("is finite, nonnegative, and equals the defining integral for sampled valid CDFs and outcomes", () => {
     fc.assert(
       fc.property(
         cdfArbitrary,
@@ -512,7 +518,7 @@ describe("ledger normalization scale", () => {
 });
 
 describe("ledger persistence baseline", () => {
-  it("is either unavailable with a reason or a CDF the scorer accepts for any outcome", () => {
+  it("is either unavailable with a reason or a CDF the scorer accepts for sampled outcomes", () => {
     fc.assert(
       fc.property(
         historyArbitrary(2),

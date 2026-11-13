@@ -1129,8 +1129,12 @@ def test_accepted_shot_with_a_non_finite_extension_keeps_its_key(
 ) -> None:
     # 2026-10-11 review: refusing these literals in the parse unbound the
     # key such a shot had consumed, and its replacement became a second
-    # shot. Every intake before af8b38f5 accepted the shot below and
-    # recorded strict JSON for it; the replacement must stay refused.
+    # shot. Every intake before af8b38f5 accepted the shot below, and the
+    # replacement must stay refused. Their records differed by site: a
+    # top-level extension was dropped, so the record stayed strict JSON,
+    # but a rung extension was copied into the record, which then failed
+    # json.dumps(..., allow_nan=False) until validate_quantiles kept only
+    # p and value.
     payload = {**submission_repo["submission"], "challenger": "github:legacy-user"}
     path = submission_repo["inbox_dir"] / "legacy-user" / "fixture-rate.json"
     path.parent.mkdir(parents=True, exist_ok=True)
