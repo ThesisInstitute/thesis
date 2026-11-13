@@ -1,0 +1,105 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "title": "Additional child tax credit claiming returns, TY2027",
+  "question": "What is the first officially published IRS SOI Publication 1304 Table 3.3 all-returns total number of returns claiming additional child tax credit or refundable child tax credit for tax year 2027, expressed in millions, under the registered current-law condition?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Use the first official tax-year 2027 Publication 1304 Table 3.3 all-returns total number of returns under the complete Additional child tax credit or Refundable child tax credit or additional child tax credit concept. Multiply the published return count by 0.000001, preserving its published precision. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Ignore subsequent corrections and revisions. Retain the registered conditional gate and resolution deadline.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "historicalContext": [],
+  "drivers": [
+    "Historical claimant-count persistence",
+    "Employment, earned income, and filing participation",
+    "Current-law credit limits and eligibility"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/pub/irs-prior/p1304--2020.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2021.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2024.pdf",
+    "https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases",
+    "https://www.irs.gov/irb/2025-45_IRB"
+  ],
+  "runAt": "2026-10-07T11:46:31Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "TY2027 ACTC claims: failed evidence validation"
+    },
+    {
+      "kind": "text",
+      "text": "Run failed. The mandatory captured-workbook history could not be extracted, and the registered resolution deadline could not be verified from an official schedule. Null estimates record the unavailable forecast; no numeric forecast or calibrated interval is asserted."
+    },
+    {
+      "kind": "text",
+      "text": "The target is irs.actc.total_claims, Publication 1304 Table 3.3, all-returns total claiming returns. Every quantitative PDF cross-check below uses the complete credit concept rather than either component subset. Their first-print vintages remain unverified."
+    },
+    {
+      "kind": "text",
+      "text": "The official Table 3.3 index exposes the latest six tax years, 2018 through 2023, and earlier workbooks. Web fetches of all six canonical YYin33ar.xls URLs failed with HTTP 400, Unsupported content-type: application/vnd.ms-excel. The available tool inventory contains no fetch_source, extract_irs_soi, or calculate tools. No captured bytes, extraction call IDs, or canonical extracted values were obtained. This is an extraction failure, not evidence that fewer than six official prints exist."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened https://www.irs.gov/pub/irs-prior/p1304--2020.pdf and located the tax-year 2018 Table 3.3 all-returns total.",
+      "result": "The official PDF reports 20,450,468 total additional child tax credit claiming returns for tax year 2018. This exact PDF cross-check does not satisfy the required captured-workbook extraction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened https://www.irs.gov/pub/irs-prior/p1304--2021.pdf and located the tax-year 2019 Table 3.3 all-returns total.",
+      "result": "The official PDF reports 19,867,646 total additional child tax credit claiming returns for tax year 2019. This exact PDF cross-check does not satisfy the required captured-workbook extraction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened https://www.irs.gov/pub/irs-prior/p1304--2024.pdf and located the tax-year 2021 Table 3.3 all-returns total.",
+      "result": "The official PDF reports 37,771,612 total refundable child tax credit or additional child tax credit claiming returns for tax year 2021. This exact PDF cross-check does not satisfy the required captured-workbook extraction."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate requires six canonical extracted prints. The three supplemental PDF cross-checks are excluded from historicalContext because they cannot replace the specified adapter extractions. No history-availability waiver is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "The official IRS upcoming-data-releases calendar fetched this run supplies a 2026 annual schedule but does not verify a tax-year 2027 Publication 1304 release by 2029-12-31. The registered resolutionDate is retained as contract metadata and remains unverified; no release date is inferred from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Official Revenue Procedure 2025-32 states that expanded IRC §24(h) was made permanent and sets the tax-year 2026 maximum child tax credit at $2,200 and refundable ceiling at $1,700. These policy parameters provide context but do not establish a numeric adjustment to tax-year 2027 claiming returns."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: A persistence prior would require the latest six canonical claimant-count observations. That historical sample is unavailable through the required extraction workflow. Level, momentum, one-off, and policy-mechanism adjustments therefore remain unestimated. sigma = unavailable; the prescribed half-width of approximately 1.28*sigma and final implied bounds cannot be calculated."
+    },
+    {
+      "kind": "math",
+      "text": "Supplemental PDF unit checks: 20,450,468 × 0.000001 = 20.450468 million; 19,867,646 × 0.000001 = 19.867646 million; 37,771,612 × 0.000001 = 37.771612 million. These conversions are audit cross-checks only. Point-estimate and interval arithmetic were withheld because the mandatory canonical history was not extracted."
+    },
+    {
+      "kind": "text",
+      "text": "As mechanism hypotheses, upside risk includes greater filing participation and more eligible households claiming ACTC; downside risk includes employment losses reducing earned-income eligibility and lower claim participation. A major eligibility change that preserves the registered threshold could produce a regime shift. Outcomes outside the interval cannot be identified numerically because no valid interval was calculated."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

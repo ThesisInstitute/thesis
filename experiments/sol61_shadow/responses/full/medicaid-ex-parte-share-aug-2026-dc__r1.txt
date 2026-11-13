@@ -1,0 +1,83 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-dc",
+  "country": "US",
+  "type": "data",
+  "title": "DC Medicaid ex parte renewal share, August 2026",
+  "question": "What will District of Columbia's ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using the published administrative counts without seasonal adjustment and computing the share to one decimal percent?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to District of Columbia's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.dc.aug_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T10:41:28Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: exact official DC history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target identity, unit, date, and resolver are preserved. This is an unconditional first-print target. The run did not access Thesis sources or local files. Null estimates denote a dropped, ungrounded forecast; they are not a scored numeric prediction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Search official data.medicaid.gov for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The official indexed dataset page reports an update on September 25, 2026, 3,876 rows and 22 columns. It identifies Original O and Updated U submissions, renewal-due Metric 5 and ex parte renewal Metric 5a1. The exposed table contains only the first 25 Alaska rows; no DC history was retrieved."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "Official federal catalog metadata identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified 2026-09-25T18:00:00Z, and its CSV distribution https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. This fetched metadata establishes the distribution's identity, but contains no DC outcome counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "The CMS archive states that June 2026 data were released September 25, 2026; May data August 28; April data July 31; March data June 26; February data May 29; and January data April 24. It provides no scheduled publication date for August 2026."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failure: direct access to the catalog-linked CSV and the exact dataset's datastore API returned inaccessible errors. Filtered and paginated pages did not yield DC original rows. Consequently historicalContext is empty. Official snapshots and adjacent datasets cannot replace the exact original-row artifact required by the resolver. The failure is retrieval, not a claim that CMS exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. No admissible DC target shares were fetched, so last-print persistence, persistence plus panel shrinkage, historical dispersion, and walk-forward scores cannot be calculated. No thesis_model_candidate_v1 candidate is emitted."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: no admissible historical sample was retrieved; the persistence prior is unavailable and no inside-view adjustment is applied. Sigma cannot be computed, so the required 1.28 × sigma interval arithmetic and numerical bounds cannot be produced. Point estimate and both interval bounds are null."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: 2026-12-15 is retained byte-for-byte from the supplied target context. CMS's fetched archive does not verify that date as an official scheduled release. The target supplies no resolve-by-bound designation or registered methodology-announcement tool, so calendar validation remains unsatisfied."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: without an admissible historical interval, no numerical outside-the-interval scenario can be stated. Changes in automated eligibility matching or the composition of the renewal cohort could raise or lower the measured share, but no quantitative effect is asserted."
+    },
+    {
+      "kind": "text",
+      "text": "This object parses as JSON but cannot pass the forecast contract's numeric-estimate, history-floor, model, or interval checks. The catalog slug was taken from the supplied target context; the independence override prohibits querying the Thesis catalog. No activity artifacts or evidence receipts are manufactured."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

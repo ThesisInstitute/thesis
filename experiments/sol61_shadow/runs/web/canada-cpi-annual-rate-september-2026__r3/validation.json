@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "canada-cpi-annual-rate-september-2026",
+      "ok": false,
+      "errors": [
+        "math step does not show interval derivation (sigma = X or 1.28)"
+      ]
+    }
+  ]
+}

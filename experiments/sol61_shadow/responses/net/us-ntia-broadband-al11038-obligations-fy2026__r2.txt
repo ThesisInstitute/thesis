@@ -1,0 +1,152 @@
+{
+  "slug": "us-ntia-broadband-al11038-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 NTIA AL 11.038 obligations",
+  "question": "What will USAspending report for FY2026 net financial-assistance transaction obligations under Assistance Listing 11.038 in the first registered-query resolution snapshot, expressed in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": -30.07719821,
+  "ciLow": -82.80494227,
+  "ciHigh": 22.65054585,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "POST the registered query with group=fiscal_year, spending_level=transactions, program_numbers=[\"11.038\"], award_type_codes=[\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\"], and time_period from 2025-10-01 through 2026-09-30. Read results[time_period.fiscal_year=\"2026\"].aggregated_amount and multiply by 0.000001. Preserve the returned monetary precision, including negative net obligations. Freeze the first official response captured by the registered resolution snapshot; subsequent revisions do not replace that snapshot. No official calendar verifying the snapshot date was found, so this run cannot satisfy the mandatory resolution-date validation.",
+  "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 0
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 0
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 0
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 5.482052
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 134.96116587
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 409.85240647
+    }
+  ],
+  "drivers": [
+    "Current FY2026 snapshot shows negative net obligations",
+    "Completed fiscal year favors snapshot persistence",
+    "Funding rescission changes the historical award regime",
+    "Late award reporting and grant modifications remain uncertain"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://www.oig.doc.gov/wp-content/OIGPublications/OIG-26-003_TMC_FY_2026_SECURED-1.pdf",
+    "https://apply07.grants.gov/grantsws/rest/opportunity/att/download/353846"
+  ],
+  "runAt": "2026-10-07T12:01:44Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FY2026 registered-query obligations: provisional numerical forecast"
+    },
+    {
+      "kind": "text",
+      "text": "Run status: refused for mandatory release-calendar validation. Historical and current query values were fetched successfully, but no official calendar establishes the registered snapshot date. The numerical forecast is therefore provisional, and resolutionDate is null rather than an invented date."
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the exact registered transaction query. The official FY2026 NTIA NOFO identifies Assistance Listing 11.038 as the Public Wireless Supply Chain Innovation Fund; the ledger's broadband wording is a naming discrepancy. No broader broadband, agency-total, award-level, or outlay series is substituted. Historical entries are current-run official query snapshots for prior fiscal years."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Three separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ for FY2020, FY2021, and FY2022. Each used group=fiscal_year, spending_level=transactions, program_numbers=[\"11.038\"], award_type_codes=[\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\"], and the corresponding October 1 through September 30 fiscal-year dates.",
+      "result": "The echoed responses contained numeric aggregated_amount rows: FY2020=$0; FY2021=$0; FY2022=$0. These are returned zeros, not values inferred from empty results. Multiplication by 0.000001 gives 0 USD millions for each year."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Three separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ for FY2023, FY2024, and FY2025, using the same registered filters and substituting each fiscal year's dates.",
+      "result": "The echoed aggregated_amount values were FY2023=$5,482,052.00; FY2024=$134,961,165.87; FY2025=$409,852,406.47. After multiplication by 0.000001, the historical values are 5.482052, 134.96116587, and 409.85240647 USD millions."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the six fetched annual flows: [0, 0, 0, 5.482052, 134.96116587, 409.85240647] USD millions. Their mean is 91.71593739. The three zero years precede recorded grant obligations, so this reference class mixes inception and expansion regimes rather than representing a stable mature program."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ with {\"group\":\"fiscal_year\",\"spending_level\":\"transactions\",\"filters\":{\"time_period\":[{\"start_date\":\"2025-10-01\",\"end_date\":\"2026-09-30\"}],\"award_type_codes\":[\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\"],\"program_numbers\":[\"11.038\"]}}. A supplementary request changed only group to month.",
+      "result": "FY2026 aggregated_amount=$-30,077,198.21, entirely Grant_Obligations, equivalent to -30.07719821 USD millions. The monthly response returned fiscal month 7=$-30,077,000.00 and fiscal month 12=$-198.21; the other ten months were zero. Their sum matches the annual response."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read printed page 30 of the official Commerce OIG FY2026 management-challenges report at https://www.oig.doc.gov/wp-content/OIGPublications/OIG-26-003_TMC_FY_2026_SECURED-1.pdf.",
+      "result": "As of August 18, 2025, the report lists 35 Innovation Fund grants totaling $550.4 million: 17 grants/$140.4 million under NOFO 1 and 18 grants/$410.0 million under NOFO 2. It reports $850 million rescinded in July 2025 from the initial $1.5 billion appropriation."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the official NTIA-PWSCIF-26-01 NOFO at https://apply07.grants.gov/grantsws/rest/opportunity/att/download/353846, particularly pages 1-2.",
+      "result": "The NOFO identifies AL 11.038, sets the application deadline at September 9, 2026, and anticipates rolling awards. It permits up to $53,000,000 total funding, ordinarily up to $25,000,000 per project, with a 50% minimum cost share. It does not establish that any awards were obligated before fiscal-year end."
+    },
+    {
+      "kind": "text",
+      "text": "Level: the completed-year query currently shows -30.07719821 million. Momentum: FY2025's expansion is not extrapolated over this observed FY2026 result. One-off effects: the negative transaction total is retained, but no particular termination is asserted. Policy mechanism: the rescission and smaller new funding opportunity weaken annual-growth persistence; the budget rescission is not treated as a transaction deobligation."
+    },
+    {
+      "kind": "text",
+      "text": "The official USAspending About the Data PDF describes two-week financial-assistance reporting followed by next-day publication. Treasury Financial Manual section 6035 describes reporting at least twice monthly, within 30 days of action, with publication selected by agencies. Neither verifies an October 2026 snapshot release date. The supplied October 15-22 window therefore cannot establish a calendar-verified resolutionDate, and its endpoint is not substituted."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use the six-year flow mean as the outside-view prior, then adopt current-snapshot persistence for the completed fiscal year. Point = 91.71593739 - 121.79313560 = -30.07719821 million; no speculative award or further-deobligation adjustment is added. For annual flows, compute dispersion from the values themselves: sum squared deviations = 135752.6852484120; sample variance = 135752.6852484120/5 = 27150.5370496824; sigma = 164.7742001943 million. The unconditional 80% half-width is 1.28*sigma = 210.9109762487 million. Apply a judgmental 0.25 multiplier, giving 52.7277440622 million and bounds [-82.80494227, 22.65054585]. This substantial narrowing reflects observing the already-ended fiscal year directly rather than forecasting an entire unknown annual flow. Residual uncertainty concerns late reporting and revisions. The $53 million opportunity provides scale context but does not bound modifications or deobligations; the narrowed interval is not calibrated from historical reporting errors."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: late publication of awards with FY2026 action dates raises the snapshot. Adding the full $53 million opportunity to the current total would produce 22.92280179 million, just outside the interval above its upper bound. Downside risk: additional grant reductions or corrected transactions lower the total. Net further deobligations exceeding 52.72774406 million would land below the interval. Awards with FY2027 action dates do not increase this FY2026 transaction total."
+    },
+    {
+      "kind": "forecast",
+      "point": -30.07719821,
+      "ciLow": -82.80494227,
+      "ciHigh": 22.65054585
+    }
+  ]
+}

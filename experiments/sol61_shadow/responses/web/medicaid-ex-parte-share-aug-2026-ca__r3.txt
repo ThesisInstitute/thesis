@@ -1,0 +1,174 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ca",
+  "country": "US",
+  "type": "data",
+  "title": "California ex parte renewal share, August 2026",
+  "question": "What percentage of California Medicaid and CHIP beneficiaries due for renewal in August 2026 will be reported as renewed on an ex parte basis in CMS's first-published original (O) submission, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 43.8,
+  "ciLow": 34.8,
+  "ciHigh": 52.8,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to California's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal. Subsequent corrections, revisions, and updated (U) submissions do not change the resolved value.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ca.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 34
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 34
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 44
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 46
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 45
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 44
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 35
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 43
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 43
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 42
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 43
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 44
+    }
+  ],
+  "drivers": [
+    "Persistence near the recent California renewal rate",
+    "Renewal flexibilities ended in July 2025",
+    "Monthly renewal-cohort composition and processing variation",
+    "Small recent improvement in automatic renewals",
+    "New work and six-month renewal requirements begin after the target period"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.dhcs.ca.gov/wp-content/uploads/2026/05/DHCS-HR1-Implementation-Plan.pdf"
+  ],
+  "runAt": "2026-10-07T11:58:41Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "California August 2026 original-submission ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is California's state row for August 2026 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using the original (O) submission at first publication. It is neither a national total nor a weighted state average. Updated (U) submissions and later corrections are excluded."
+    },
+    {
+      "kind": "text",
+      "text": "Definition limitation: the ledger wording does not explicitly identify the denominator. This forecast follows CMS's state snapshot convention: 100 times beneficiaries renewed ex parte, Metric 5a1, divided by beneficiaries due for renewal, Metric 5. The CMS tables explicitly label this percentage as a share of all beneficiaries due for renewal. Metric 5a1 divided by total successful renewals, Metric 5a, would be a different ratio. The registered slug and dataPointId are retained."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS July, August, and September 2025 original monthly snapshot PDFs; read California in the Coverage Retention and Disenrollment Rates by State tables.",
+      "result": "July 2025: 854,171 beneficiaries due, 34% renewed ex parte. August 2025: 823,204 due, 34% ex parte. September 2025: 851,451 due, 44% ex parte. These are the percentages printed in the corresponding CMS PDFs listed in sourceContext."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS October, November, and December 2025 original monthly snapshot PDFs; read the California renewal tables.",
+      "result": "October 2025: 864,933 beneficiaries due, 46% renewed ex parte. November 2025: 835,824 due, 45% ex parte. December 2025: 1,097,366 due, 44% ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS January, February, and March 2026 original monthly snapshot PDFs; read the California renewal tables.",
+      "result": "January 2026: 1,138,457 beneficiaries due, 35% renewed ex parte. February 2026: 1,003,079 due, 43% ex parte. March 2026: 1,053,563 due, 43% ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS April, May, and June 2026 original monthly snapshot PDFs; read the California renewal tables.",
+      "result": "April 2026: 948,297 beneficiaries due, 42% renewed ex parte. May 2026: 995,076 due, 43% ex parte. June 2026: 901,120 due, 44% ex parte. June also reports 60% renewed overall and 22% pending."
+    },
+    {
+      "kind": "text",
+      "text": "History precision and vintage: all twelve historical entries are fetched CMS original monthly snapshot percentages, published at whole-percentage precision, using the same due-renewal denominator. They are not the quarterly updated outcomes. The web tool could not retrieve the linked raw CSV or API rows, so exact historical one-decimal ratios and numerator counts were unavailable; no missing counts were reconstructed from rounded percentages."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the twelve consecutive original monthly prints from July 2025 through June 2026. Their base rate is an arithmetic mean of 41.4167%, with a median of 43%. The latest five prints average 43%, and the latest print is 44%. This supports persistence around the recent level rather than continuation of the large early recovery jumps."
+    },
+    {
+      "kind": "text",
+      "text": "Policy mechanism: the fetched DHCS implementation plan attributes the July 2025 fall in ex parte rates to termination of unwinding flexibilities. The historical window therefore starts after that regime change. The same plan dates work reporting and six-month renewals to January 1, 2027, after August 2026. I assign no discrete August policy adjustment and no repeat of the initial flexibility-expiration shock."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior with partial reversion, estimated from the twelve fetched July 2025-June 2026 original snapshot prints. Start from the 41.4167% historical base rate; the level update to the equal-weight blend of June's 44% and the latest-five mean of 43% adds 2.0833 points, producing 43.5%. February-June momentum is (44-43)/4 = 0.25 point per month; retain half of its two-month projection, adding 0.25 point. One-off and policy adjustments are both zero. Round 43.75% to a point estimate of 43.8%. Successive changes are [0,10,2,-1,-1,-9,8,0,-1,1,1], averaging 0.9091 point. Their sample squared-deviation sum is 244.9091, so sigma = 4.9488 percentage points = sqrt(244.9091/10). The one-month 80% normal half-width is 1.28*sigma = 6.3345 points. For the two-month horizon from June to August, multiply by sqrt(2), giving 8.9583 points. Rounded bounds from 43.8 +/- 8.9583 are [34.8,52.8] percent."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-considerations: upside risk is better automated data matching or an easier renewal cohort raising the share above recent levels. Downside risk is a harder cohort or processing disruption reducing completed ex parte renewals. A recurrence of August 2025's 34% rate would land below the interval; a major automation improvement producing more than 52.8% would land above it. Such outcomes would falsify the persistence assumption and lie outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "Publication-date validation limitation: the fetched official CMS release list confirms June 2026 was released September 25, 2026, May 2026 on August 28, 2026, and April 2026 on July 31, 2026. No fetched official release calendar or announcement verifies December 15, 2026 for the August report. The required official-date verification could not be completed. resolutionDate retains the registered ledger value 2026-12-15 and must not be read as a CMS-confirmed publication date; cadence was not substituted for verification."
+    },
+    {
+      "kind": "forecast",
+      "point": 43.8,
+      "ciLow": 34.8,
+      "ciHigh": 52.8
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "An Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress, House Report 119-698) is enacted into law on or before 2026-12-31.",
+  "title": "FY2027 DoD prime award obligations",
+  "question": "Conditional on the registered FY2027 NDAA enactment condition, what will nominal, unadjusted FY2027 DoD prime award obligations be in the first retained official response to the registered USAspending agency 097 awards query during the October 15–22, 2027 snapshot window?",
+  "unit": "billions USD",
+  "pointEstimate": 492.85,
+  "ciLow": 392.41,
+  "ciHigh": 593.29,
+  "confidence": 0.8,
+  "resolutionDate": "2027-10-22",
+  "resolutionSource": "USAspending API v2, agency 097 awards summary, registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+  "resolutionRule": "Conditional on enactment by 2026-12-31, use the first successful official response retained by the registered snapshot process during the ledger window 2027-10-15 through 2027-10-22. Read obligations from GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027 and multiply by 1e-9. Preserve returned dollar precision before conversion; apply no additional rounding to the resolved value. Retain that original snapshot and exclude subsequent revisions, backfills, and replacement responses. The stated resolutionDate preserves the ledger window end; an exact official snapshot date was not verified, as disclosed in reasoning.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2018"},
+      "label": "FY2018",
+      "value": 365.94340739236
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2019"},
+      "label": "FY2019",
+      "value": 391.23538542457
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 431.88364015745
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 395.33443647687
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 424.50276360528
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 467.27708690212
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 456.6531220443
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 501.6682566824
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2026"},
+      "label": "FY2026",
+      "value": 384.21991432142
+    }
+  ],
+  "drivers": [
+    "Early-October FY2026 registered-query persistence anchor",
+    "Historical annual obligation growth",
+    "Large procurement and research funding proposals",
+    "Appropriation uncertainty and slow award execution",
+    "DoD reporting delay and snapshot coverage"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2018",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2019",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://comptroller.war.gov/Portals/45/Documents/defbudget/FY2027/FY2027_Budget_Request_Overview_Book.pdf",
+    "https://www.govinfo.gov/content/pkg/CRPT-119hrpt698/pdf/CRPT-119hrpt698.pdf",
+    "https://www.govinfo.gov/content/pkg/PLAW-119publ103/html/PLAW-119publ103.htm",
+    "https://www.cbo.gov/publication/62781",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T12:51:48Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Conditional FY2027 DoD registered-query snapshot forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.agency.097.awards.obligations, obtained from the registered agency awards endpoint. Every historical value uses that query's obligations field multiplied by 1e-9. The variant is nominal, unadjusted fiscal-year prime award obligations. Agency-wide budget totals provide policy context only. Historical responses fetched today contain current database values, not archived original October snapshots."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET of the exact registered endpoint with fiscal_year=2018, 2019, and 2020; read echoed JSON responses.",
+      "result": "Fetched obligations in USD: FY2018 365943407392.36; FY2019 391235385424.57; FY2020 431883640157.45. Each response's latest_action_date ends on its fiscal year's September 30."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET of the exact registered endpoint with fiscal_year=2021, 2022, and 2023; read echoed JSON responses.",
+      "result": "Fetched obligations in USD: FY2021 395334436476.87; FY2022 424502763605.28; FY2023 467277086902.12."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS GET of the exact registered endpoint with fiscal_year=2024, 2025, and 2026; read echoed JSON responses.",
+      "result": "Fetched obligations in USD: FY2024 456653122044.3; FY2025 501668256682.4; FY2026 384219914321.42. FY2025 transaction_count was 4516581; FY2026 was 3218036. FY2026 latest_action_date was 2026-09-30T00:00:00."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is eight mature annual query values, FY2018–FY2025. Their base rate mean is 429.312262 billion, with a range of 365.943407–501.668257 billion. Mean annual dollar change is (501.668257−365.943407)/7 = 19.389264 billion. The FY2026 early-October response supplies the persistence level separately because its reporting maturity differs from those historical values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official FY2027 Budget Request Overview, Appendix A, Table A-1.",
+      "result": "Fetched USD millions: FY2026 enacted total 1009106; FY2027 requested total 1450000, comprising 1100000 discretionary and 350000 mandatory. FY2026/FY2027 O&M: 354835/430588; procurement: 219178/413096; RDT&E: 209424/343689."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CBO publication 62781, its September 28, 2026 NDAA estimate.",
+      "result": "Fetched Senate authorization 1144 billion USD and House H.R.8800 authorization 1146 billion USD. CBO reports procurement authorization growth of 57%, research and development growth of 53%, and O&M/revolving-fund growth of 10%."
+    },
+    {
+      "kind": "text",
+      "text": "House Report 119-698 explains that authorization does not provide budget authority. The fetched FY2027 continuing-resolution law maintains FY2026 funding rates, restricts new starts and production increases, and expires December 11, 2026. Consequently, the enactment condition supports a positive policy adjustment but does not guarantee requested appropriations, separate mandatory funding, or immediate awards."
+    },
+    {
+      "kind": "text",
+      "text": "USAspending documents daily pipeline updates and a 90-day DoD procurement publication delay. Therefore the October target is an incomplete reporting snapshot. The FY2026-to-mature-FY2025 obligation ratio of 0.765884 is not a same-vintage growth estimate. I use FY2026 as an approximate early-October persistence anchor and assign a judgmental 10 billion timing adjustment for the later target window; no matched historical snapshot series was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar-validation limitation: the official Treasury resources page lists an FY27 reporting calendar, but its XLSX fetch returned unsupported content type. Supplemental House appropriations and weapons-budget lookups also returned internal errors; their search-summary numbers were excluded. Successful historical query responses establish the base rate. No exact official date was verified for this rolling awards API. ResolutionDate 2027-10-22 preserves the supplied ledger window end rather than claiming an announced release date. The official-release-date validation requirement remains unsatisfied, and the exact snapshot timing is a resolver discrepancy."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use early-October FY2026 persistence plus historical drift, a timing adjustment, and a shrunk policy adjustment. Level = 384.219914; momentum = 19.389264; timing/one-off = 10.000000 billion. The requested O&M+procurement+RDT&E growth is 1187.373/783.437−1 = 0.515594745. A judgmental 40% pass-through, attenuating appropriation and execution uncertainty, gives policy adjustment = 384.219914×0.515594745×0.40 = 79.240707 billion. Point = 384.219914+19.389264+10+79.240707 = 492.849886 billion. For this annual flow, use the sample standard deviation of the eight FY2018–FY2025 values: sigma = 44.8392950691 billion; 1.28×sigma = 57.3942976884 billion. Widen by 1.75 for the exceptional funding proposal and unmatched reporting vintages: half-width = 100.4400209547 billion. Implied bounds = 392.4098650036 to 593.2899069130; rounded forecast = 492.85, interval 392.41–593.29."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is enactment of large appropriations, additional mandatory funding, and rapid procurement or research awards. Downside risk is prolonged continuing appropriations, execution bottlenecks, or unusually incomplete publication. Broad realization of the requested funding increase or accelerated reporting could land above 593.29 billion, outside the interval; a funding interruption combined with slow publication could land below 392.41 billion, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 492.85,
+      "ciLow": 392.41,
+      "ciHigh": 593.29
+    }
+  ]
+}

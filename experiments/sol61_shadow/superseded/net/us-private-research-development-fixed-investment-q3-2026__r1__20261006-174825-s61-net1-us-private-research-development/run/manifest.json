@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:15Z",
+  "runStartedAt": "2026-10-07T10:14:15Z",
+  "series": "bea.research_and_development_fixed_investment",
+  "period": "2026-Q3",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-private-research-development-fixed-investment-q3-2026",
+    "country": "US",
+    "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+    "expectedReleaseDate": "2026-10-29",
+    "expectedReleaseWindow": {
+      "end": "2026-10-29",
+      "start": "2026-10-29"
+    },
+    "period": "2026-Q3",
+    "registeredAt": "2026-08-17T16:54:17Z",
+    "registeredAtUtc": "2026-08-17T16:54:17Z",
+    "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www.bea.gov/news/schedule",
+    "seedPeriod": "2026-Q3",
+    "series": "bea.research_and_development_fixed_investment",
+    "sourceBinding": {
+      "adapter": "bea-release",
+      "allowedHosts": [
+        "apps.bea.gov",
+        "www.bea.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-29",
+        "start": "2026-10-29"
+      },
+      "field": "Line 18: Research and development",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "T50305:L18",
+      "sourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+      "table": "Gross Domestic Product advance release, NIPA Table 5.3.5, line 18 (Research and development)",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1",
+    "targetRegistrationPath": "records/targets/2026-08-17-a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1.json",
+    "targetUnit": "usd_billions",
+    "valueScale": 1
+  },
+  "registrationCommit": "f3a73cbcc701b9315d3ec1d35ea05889b2c07f95",
+  "targetContentHash": "a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1",
+  "targetRegistrationPath": "records/targets/2026-08-17-a80665069544aa19303c03ea1fb560eba0b15bc2443c19c8b09bfe4d9f0f3ac1.json",
+  "registeredAtUtc": "2026-08-17T16:54:17Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/prompt.md",
+      "sha256": "a8bb00b03642747cfa6b25fa07f8381ec4c7462c13d27d2fa3d65cda52d12506",
+      "bytes": 10731,
+      "createdAt": "2026-10-07T10:14:15Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/command.json",
+      "sha256": "fd956ef2a78df4b8efa672836348ace5eeb5c66ad1e5f0fdb967936b5728be95",
+      "bytes": 214,
+      "createdAt": "2026-10-07T10:14:15Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/stdout.txt",
+      "sha256": "d0b41dc93ff714c24ce6ea911086362fe24359878fa04610dfda16a0cc106cc8",
+      "bytes": 2409,
+      "createdAt": "2026-10-07T10:14:15Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:15Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/raw_response.txt",
+      "sha256": "d0b41dc93ff714c24ce6ea911086362fe24359878fa04610dfda16a0cc106cc8",
+      "bytes": 2409,
+      "createdAt": "2026-10-07T10:14:15Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/parsed_cells.json",
+      "sha256": "e06b7cec5d27779e83758e7e5cf7002ca46c8348cba5bef9b09884e67c60176b",
+      "bytes": 2511,
+      "createdAt": "2026-10-07T10:14:15Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/normalized_cells.json",
+      "sha256": "7941ec7619c113eb0ff557accffe0508086bc548d0899e4e9c310b041aab3274",
+      "bytes": 2378,
+      "createdAt": "2026-10-07T10:14:15Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:15Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/us-private-research-development-fixed-investment-q3-2026__r1/manifest.json",
+      "sha256": "9676948396a6517705a440abed3e0abdd21d168cd7df321853ce94f791d27a63",
+      "bytes": 4921,
+      "createdAt": "2026-10-07T10:14:15Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "80f66cf43a92bc39c59479f19f2f0b43cc8c6759a76601a78a4d18fd12f0a5d1"
+}

@@ -1,0 +1,167 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-de",
+  "country": "US",
+  "type": "data",
+  "title": "Delaware ex parte renewal share, August 2026",
+  "question": "What percentage of Delaware Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, calculated from CMS's original (O) submission row when first published and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 44.2,
+  "ciLow": 33.8,
+  "ciHigh": 54.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Delaware's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the counts as first published, and round to one decimal. Subsequent revisions and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.de.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2024-06"},
+      "label": "June 2024",
+      "value": 47.5
+    },
+    {
+      "period": {"type": "month", "value": "2024-08"},
+      "label": "August 2024",
+      "value": 52.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "June 2025",
+      "value": 43.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 45.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 51.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 42.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 45.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 45.6
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 41.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 40.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 48.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 40.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 43.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 42.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 36.3
+    }
+  ],
+  "drivers": [
+    "Recent decline in Delaware's original renewal reports",
+    "Historical August cohort increases, substantially discounted",
+    "Ex parte data matching and renewal classification",
+    "Two-month horizon from the latest June observation"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=50&conditions[0][property]=state_abbreviation&conditions[0][value]=DE&conditions[0][operator]=%3D&conditions[1][property]=original_or_updated&conditions[1][value]=O&conditions[1][operator]=%3D&conditions[2][property]=reporting_period&conditions[2][value]=202507&conditions[2][operator]=%3E%3D",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=20&conditions[0][property]=state_abbreviation&conditions[0][value]=DE&conditions[0][operator]=%3D&conditions[1][property]=original_or_updated&conditions[1][value]=O&conditions[1][operator]=%3D&conditions[2][property]=reporting_period&conditions[2][value]=202406&conditions[2][operator]=%3E%3D&conditions[3][property]=reporting_period&conditions[3][value]=202506&conditions[3][operator]=%3C%3D",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf"
+  ],
+  "runAt": "2026-10-07T12:28:57Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Delaware August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Delaware's state row in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, reporting_period=202608 and original_or_updated=O. CMS's renewal-outcomes convention uses total beneficiaries due for renewal as the denominator. Every historical anchor uses the same O variant. Historical rows were fetched from the current official dataset; their historical publication versions were not independently archived in this run."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS's datastore API with state_abbreviation=DE, original_or_updated=O, and reporting_period>=202507; echo the complete response.",
+      "result": "Fetched 12 rows. Ex parte numerator / renewals-due denominator: 2025-07 7399/16416; 2025-08 9588/18495; 2025-09 7776/18176; 2025-10 8746/19316; 2025-11 7955/17430; 2025-12 7698/18591; 2026-01 6621/16538; 2026-02 9585/19732; 2026-03 8103/19890; 2026-04 8739/20186; 2026-05 6914/16265; 2026-06 5501/15157. Derived one-decimal percentages: 45.1, 51.8, 42.8, 45.3, 45.6, 41.4, 40.0, 48.6, 40.7, 43.3, 42.5, 36.3."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the arithmetic mean of the twelve original monthly shares from July 2025 through June 2026: 43.6220%. The latest six average 41.9074%, and April-June 2026 average 40.6981%. Calculations use unrounded count ratios. This establishes a lower recent level before considering summer cohort effects."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS's datastore API for Delaware O rows from reporting_period=202406 through 202506; echo the complete response.",
+      "result": "Fetched 13 rows, including June 2024 ex parte 5966 and due 12566, August 2024 ex parte 9033 and due 17110, and June 2025 ex parte 6579 and due 15214. Derived shares are 47.4773%, 52.7937%, and 43.2431%. Together with the separately fetched August 2025 share of 51.8410%, the two historical June-to-August increases are 5.3164 and 8.5980 percentage points."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's June 2026 Eligibility Operations and Enrollment Snapshot, published September 25, 2026; inspect the Delaware renewal-outcomes table on PDF page 30.",
+      "result": "The Delaware row reports 15,157 beneficiaries due for renewal, 61% renewed, 36% disenrolled, 3% pending, and 36% renewed ex parte. The table expresses these percentages against total renewals due. Its rounded ex parte value agrees with 100*5501/15157=36.2935% from the O row."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date verification remains unmet. The official snapshot index lists June 2026 released September 25, 2026 and May 2026 released August 28, 2026, but no fetched calendar or announcement verifies December 15, 2026 for the August original first print. CMS specifications distinguish state submission deadlines from publication dates. The registered resolutionDate is retained without claiming official verification or inferring a replacement date from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "A redundant web lookup of the CMS data-dictionary API returned Internal Error. Further fetching stopped. The numerical base rate and seasonal comparisons had already been fetched successfully from CMS's datastore API, and the denominator was verified in the official snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "Level and momentum: use the April-June mean to incorporate recent weakness, including June's 6.2150-point decline, without mechanically extending that decline. Seasonal cohort effect: discount the two observed summer increases by half because the sample is small. One-off and policy-mechanism adjustments are zero; the fetched evidence does not establish a Delaware-specific change warranting another shift."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The model is a recent-local-level prior with a shrunk seasonal adjustment. The historical sample for level and dispersion is twelve O shares from July 2025 through June 2026, supplemented by the 2024 and 2025 June-to-August comparisons. Start with base rate 43.6220%; recency adjustment = 40.6981-43.6220 = -2.9239 points; seasonal adjustment = 0.5*((5.3164+8.5980)/2) = +3.4786 points; one-off adjustment = 0; policy adjustment = 0. Point = 44.1767%, rounded to 44.2%. The eleven successive monthly changes have mean -0.7980 points; sigma = 5.7199 percentage points, computed as their sample standard deviation, sqrt(sum((change+0.7980)^2)/(11-1)). The one-month 80% half-width is 1.28*sigma = 7.3215 points. Multiply by sqrt(2) for the two-month June-to-August horizon: half-width = 10.3541 points. Implied bounds = 44.1767 +/- 10.3541 = [33.8226, 54.5308], rounded to [33.8, 54.5]. This normal approximation assumes monthly innovations accumulate independently."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: August's cohort may be easier to verify automatically, repeating or exceeding the historical summer increase. A stronger cohort rebound combined with improved matching could land above 54.5%, outside the interval. Downside risk: June's weakness may reflect a persistent matching or processing problem. A further decline, or a reporting shift toward form-based renewals, could land below 33.8%, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 44.2,
+      "ciLow": 33.8,
+      "ciHigh": 54.5
+    }
+  ]
+}

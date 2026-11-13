@@ -1,0 +1,147 @@
+{
+  "slug": "canada-ei-regular-beneficiaries-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada regular EI beneficiaries, August 2026",
+  "question": "What will Statistics Canada's first published August 2026 count of regular Employment Insurance beneficiaries in Canada, seasonally adjusted, both sexes and all ages, be in thousands, for Table 14-10-0011-01 vector v64549350?",
+  "unit": "thousands",
+  "pointEstimate": 546.4,
+  "ciLow": 537.75,
+  "ciHigh": 555.06,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-22",
+  "resolutionSource": "Statistics Canada, Employment Insurance release and Table 14-10-0011-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101",
+  "resolutionRule": "Resolve using the first official August 2026 observation for vector v64549350 in Statistics Canada Table 14-10-0011-01: Canada regular Employment Insurance beneficiaries, seasonally adjusted, both sexes and all ages. Multiply the published persons count by 0.001 and preserve its published precision without additional rounding. Ignore subsequent revisions and corrections, including later same-day corrections.",
+  "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.august_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 554.83
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 542.11
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 548
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 544.44
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 543.69
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 541.96
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 547.05
+    }
+  ],
+  "drivers": [
+    "Persistence near July's beneficiary level",
+    "Slight negative drift across recent first releases",
+    "Lower July claims suggest weaker beneficiary inflows",
+    "August employment decline supplies opposing upward pressure",
+    "Existing temporary EI access and duration measures support persistence"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101&request_locale=en",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260325/dq260325a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260423/dq260423c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260522/dq260522b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260522/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260618/dq260618d-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260723/dq260723c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260819/dq260819d-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410000501",
+    "https://www.canada.ca/en/employment-social-development/programs/ei/ei-list/reports/premium/rates2027.html"
+  ],
+  "runAt": "2026-10-07T11:43:15Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August 2026 Canada regular EI beneficiary forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is the first official August observation of seasonally adjusted Canada regular EI beneficiaries, Table 14-10-0011-01, vector v64549350, converted from persons to thousands. Every beneficiary anchor and historical entry uses that same variant. Historical entries preserve each month's contemporaneous first release; successive differences therefore include intervening revision effects rather than representing changes within a single revised vintage. The vector API could not be fetched through the web tool, so history comes from official The Daily releases."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch January, February and March 2026 Canada regular-beneficiary headlines from Statistics Canada releases dated 2026-03-25, 2026-04-23 and 2026-05-22; verify the March seasonally adjusted table.",
+      "result": "First-release persons counts: January 554,830; February 542,110; March 548,000. The March table identifies Canada, both sexes, seasonally adjusted, at 548,000 and shows revised February at 545,670, confirming why release vintages must be distinguished."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch April, May and June 2026 Canada regular-beneficiary headlines from Statistics Canada releases dated 2026-06-18, 2026-07-23 and 2026-08-19.",
+      "result": "First-release persons counts: April 544,440; May 543,690; June 541,960. Converted history is 544.44, 543.69 and 541.96 thousands."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm for the July anchor and the announced August release schedule.",
+      "result": "July regular EI beneficiaries were 547,050 persons, up 0.5% monthly and down 2.2% annually. The announcement explicitly schedules August data for October 22, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "The official October 22 announcement conflicts with the ledger's expected October 13-21 release window. The forecast retains the registered slug, series, unit and first-print resolver; resolutionDate follows the verified official announcement."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the seven January-July 2026 first-release levels. Their six successive differences are -12.72, +5.89, -3.56, -0.75, -1.73 and +5.09 thousands, averaging -1.296667. Persistence at July's 547.05 thousand is the base rate anchor; the small sample supports shrinking the estimated drift toward zero."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm for August Labour Force Survey conditions.",
+      "result": "Seasonally adjusted employment declined 42,000 (-0.2%) in August, while unemployment remained 6.4%. Manufacturing employment increased 22,000. The reference week was August 9-15, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada Table 14-10-0005-01, https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410000501, for supplementary seasonally adjusted initial and renewal claims received.",
+      "result": "Canada claims received were 278,130 in March, 270,370 in April, 278,890 in May, 300,260 in June and 228,650 in July. July was 23.85% below June, calculated from the fetched counts. Claims are a separate inflow indicator, not beneficiary history."
+    },
+    {
+      "kind": "text",
+      "text": "Current-release adjustments are restrained: August's employment decline creates upward pressure, while July's claims decline and unchanged August unemployment rate argue against a large beneficiary increase. These opposing signals receive no net numerical adjustment because their mapping to the beneficiary stock is uncalibrated. No separately quantified one-off effect is added."
+    },
+    {
+      "kind": "text",
+      "text": "Policy mechanism: the official 2027 EI actuarial summary confirms that waived waiting periods, suspended separation-payment treatment and 20 additional benefit weeks for eligible long-tenured workers remained available through August. It also records further measures announced August 25, after the August 9-15 beneficiary reference week. Existing support is embedded in the persistence anchor; no incremental policy adjustment is assigned to that earlier week. This timing interpretation is an inference, and retroactive implementation remains an upside uncertainty."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence model with half-weighted historical drift, an explicit modeling choice. Historical sample: seven January-July first-release levels and six successive differences in thousands. Level = 547.05; momentum = 0.5*(-1.296667) = -0.648333; net current-release adjustment = 0; one-off adjustment = 0; incremental policy adjustment = 0. Point = 546.401667, rounded to 546.40. Sum of squared deviations of the six differences from their mean = 228.539533; sigma = 6.760762, computed as sqrt(228.539533/(6-1)). Use a normal-approximation 80% predictive interval: half-width = 1.28*sigma = 8.653776. Unrounded bounds = 537.747891 and 555.055442; final bounds = 537.75 and 555.06 thousands. No additional widening or narrowing is applied; coverage is approximate given the short reference class."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a rise in qualifying layoffs, unexpectedly persistent long-tenured claims, or retroactive access changes; a first print above 555.06 thousand would land outside the interval. The downside risk is that July's lower claims feed through strongly while existing beneficiaries return to work or exhaust entitlement; a print below 537.75 thousand would land outside the interval. An unusually large seasonal-adjustment or administrative-processing effect could also breach either bound."
+    },
+    {
+      "kind": "forecast",
+      "point": 546.4,
+      "ciLow": 537.75,
+      "ciHigh": 555.06
+    }
+  ]
+}

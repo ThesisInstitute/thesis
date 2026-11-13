@@ -1,0 +1,68 @@
+{
+  "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DHS Title VI award transaction obligations, FY2026",
+  "question": "What is the FY2026 USD total of DHS Title VI award transaction obligations returned by the exact registered USAspending API v2 spending_over_time query, using its specified Treasury-account and award-type filters, at the registered query snapshot?",
+  "unit": "usd",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered spending_over_time query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the registered_query_snapshot policy supplied in the target context. POST the registered query to the specified endpoint with spendingLevel=transactions, group=fiscal_year, fiscalYear=2026, and the exact registered awardTypeCodes and treasuryAccountComponents. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by the registered factor of 1; report USD. Do not substitute agency totals or another query. The supplied context does not specify an exact resolutionDate or snapshot timestamp.",
+  "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints"
+  ],
+  "runAt": "2026-10-07T12:10:08Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target is the exact registered transaction query. Its registered_query_snapshot policy is preserved. Target identifiers and query parameters come from the supplied target context, not fetched outcome evidence."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "Failed to fetch the exact endpoint: HTTP 405 Method Not Allowed. No fiscal-year aggregated_amount values were returned. This was an open request, not execution of the required POST query."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/docs/endpoints",
+      "result": "The official USAspending API v2 endpoint index lists /api/v2/search/spending_over_time/ with method POST and describes transaction aggregation over time. This is API documentation, not numerical series history."
+    },
+    {
+      "kind": "tool",
+      "tool": "mcp__codex_apps__search_service_web_run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "The second available web tool also returned HTTP 405 Method Not Allowed. No registered-query historical values or current-period totals were returned."
+    },
+    {
+      "kind": "text",
+      "text": "Both available web-tool schemas lack HTTP method and request-body options, and tool discovery found no general HTTP POST or fetch_source tool. Shell networking is prohibited by the run instructions. The registered query could not be executed through an authorized available tool."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no base rate or reference class could be fetched for the exact query. Persistence, model candidates, sigma, interval arithmetic, and tail thresholds cannot be computed without inventing financial values. No numerical forecast is issued."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target context contains an expected release window of 2026-10-15 through 2026-10-22 but no exact resolutionDate or snapshot timestamp. These are supplied registration metadata, not a verified official release calendar; an exact date is not inferred."
+    },
+    {
+      "kind": "text",
+      "text": "Refused under the explicit instruction to refuse with fetch evidence when the registered query cannot be executed. Null estimates and an empty historicalContext represent unavailable evidence, not zero obligations. This object is a refusal record and does not satisfy the numerical forecast-cell validation requirements."
+    }
+  ]
+}

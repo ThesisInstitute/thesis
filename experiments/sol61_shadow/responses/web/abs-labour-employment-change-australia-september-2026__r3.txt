@@ -1,0 +1,125 @@
+{
+  "slug": "abs-labour-employment-change-australia-september-2026",
+  "country": "AU",
+  "type": "data",
+  "title": "Australia September 2026 employment change",
+  "question": "What will the first ABS Labour Force, Australia release report for the September 2026 month-on-month change in total employed persons, Australia, seasonally adjusted, in thousands?",
+  "unit": "thousands",
+  "pointEstimate": 23.0,
+  "ciLow": -22.5,
+  "ciHigh": 68.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-15",
+  "resolutionSource": "Australian Bureau of Statistics, Labour Force, Australia, September 2026",
+  "resolutionSourceUrl": "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/sep-2026",
+  "resolutionRule": "Resolve on the first official ABS September 2026 Labour Force release's published month-on-month change in total employed persons, Australia, seasonally adjusted. Use the published monthly change calculated from unrounded underlying levels, expressed in thousands; divide a persons-denominated figure by 1,000, retaining the published precision. Exclude subsequent revisions, rebenchmarking and corrections, including later same-day corrections. Retain the registered first-print target and series binding LF/M3.3.1599.20.AUS.M, whose API measure definition could not be independently verified in this run.",
+  "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-09"}, "label": "September 2025", "value": 14.9},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "October 2025", "value": 42.2},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "November 2025", "value": -21.3},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "December 2025", "value": 65.2},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "January 2026", "value": 17.8},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "February 2026", "value": 48.9},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "March 2026", "value": 17.9},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "April 2026", "value": -18.6},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "May 2026", "value": 40.3},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "June 2026", "value": 76.3},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "July 2026", "value": -15.8},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "August 2026", "value": 39.5}
+  ],
+  "drivers": [
+    "Positive employment-growth base rate",
+    "Slightly softer six-month momentum",
+    "Declining seasonally adjusted vacancies",
+    "Restrictive financial conditions weigh on hiring",
+    "Survey modernisation and rotation-group variability"
+  ],
+  "sourceContext": [
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/sep-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/oct-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/nov-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/dec-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jan-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/feb-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/mar-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/apr-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/may-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jun-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026",
+    "https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_labour",
+    "https://www.abs.gov.au/articles/update-labour-force-modernisation-and-future-release-plans",
+    "https://www.abs.gov.au/statistics/labour/jobs/job-vacancies-australia/aug-2026",
+    "https://www.rba.gov.au/publications/smp/2026/aug/outlook.html"
+  ],
+  "runAt": "2026-10-07T11:51:38Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September employment: modest growth with substantial monthly uncertainty"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first published Australian seasonally adjusted monthly employment change. All employment anchors and historical observations use that variant, with history taken from each month's own release rather than subsequently revised historical levels. The registered series code is LF/M3.3.1599.20.AUS.M."
+    },
+    {
+      "kind": "text",
+      "text": "The official ABS October release calendar explicitly schedules September Labour Force, Australia for 15 October 2026 at 11:30am AEDT: https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_labour. The modernisation announcement independently confirms this date. This contradicts the registered October 20–28 expected window; the forecast retains the same target and uses the verified October 15 resolution date."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched each period-specific ABS Labour Force release for September 2025 through February 2026, using the Employed people Monthly change row under Key statistics - Seasonally adjusted; corresponding URLs are in sourceContext.",
+      "result": "Published monthly changes, converted from persons to thousands: September 2025 +14.9; October +42.2; November -21.3; December +65.2; January 2026 +17.8; February +48.9."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched each period-specific ABS Labour Force release for March through August 2026, using the same seasonally adjusted employment monthly-change row; corresponding URLs are in sourceContext.",
+      "result": "Published monthly changes in thousands: March +17.9; April -18.6; May +40.3; June +76.3; July -15.8; August +39.5. April and May correction notices state that employment was unaffected."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class and base rate are these 12 consecutive first reported monthly changes. Their sum is 307.3 thousand and mean is 25.6083 thousand; 9 of 12 are positive. The latest six average 23.2667 thousand. This supports a positive-growth prior with a small downward momentum update."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026, including the seasonally adjusted key-statistics and employment sections.",
+      "result": "August employment was 14,836.6 thousand, up 39.5 thousand and 1.6% over the year. Full-time employment fell 6.3 thousand while part-time increased 45.8 thousand. Unemployment was 4.6%, participation 67.1%, and monthly hours increased 0.7%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched https://www.abs.gov.au/statistics/labour/jobs/job-vacancies-australia/aug-2026 and https://www.rba.gov.au/publications/smp/2026/aug/outlook.html.",
+      "result": "ABS seasonally adjusted August vacancies were 325.0 thousand, down 0.9% quarterly; private vacancies fell 2.0% and public vacancies rose 7.8%. The RBA August forecast table projected annual employment growth of 1.4% for December 2026 and described gradual labour-market easing under restrictive financial conditions."
+    },
+    {
+      "kind": "text",
+      "text": "Separate components: the employment level supports continued expansion already captured by the historical mean, with no additional level adjustment. Momentum contributes -0.5854 thousand through partial weighting of the six-month mean. Softer vacancies and the RBA's policy mechanism jointly motivate a judgmental -2.0 thousand demand adjustment, avoiding separate double counting. Survey modernisation supplies no signed adjustment; it increases uncertainty because supplementary-survey seasonal adjustments changed and rotation-group weighting remains relevant."
+    },
+    {
+      "kind": "text",
+      "text": "The registered ABS API query and its metadata were inaccessible through the web tool, so its measure definition and identity transform could not be independently confirmed. Official release-page employment history was fetched successfully. The exact September release URL was also inaccessible before publication; it is the future period-specific resolution destination, not evidence of an already released outcome."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a historical-mean shrinkage model with the 12 September 2025–August 2026 first reported seasonally adjusted employment changes. Prior = 25.6083; momentum update = 0.25*(23.2667-25.6083) = -0.5854; level and one-off signed updates = 0; combined demand/policy adjustment = -2.0. Point = 23.0229, rounded to 23.0 thousand. Because this is a change series, dispersion uses the monthly changes themselves: sigma = 32.2888 thousand = sqrt(11468.2292/11). Normal 80% half-width = 1.28*sigma = 41.3297. Apply a judgmental 1.10 multiplier for the short reference sample and survey-transition uncertainty, giving 45.4626. Final implied bounds, rounded to 0.1 thousand, are -22.5 and 68.5."
+    },
+    {
+      "kind": "math",
+      "text": "Point = round(0.75*25.608333 + 0.25*23.266667 - 2.0, 1) = 23.0. Half-width = 1.10*1.28*32.288795 = 45.462623. Lower = round(23.0-45.462623, 1) = -22.5; upper = round(23.0+45.462623, 1) = 68.5 thousand."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: stronger hiring and favourable rotation-group composition could produce another June-sized gain, outside the interval above 68.5 thousand. Downside risk: weaker private-sector hiring combined with adverse sample composition could produce an employment fall outside the interval below -22.5 thousand. An unexpectedly large residual seasonal-adjustment effect could push either tail beyond these bounds."
+    },
+    {
+      "kind": "forecast",
+      "point": 23.0,
+      "ciLow": -22.5,
+      "ciHigh": 68.5
+    }
+  ]
+}

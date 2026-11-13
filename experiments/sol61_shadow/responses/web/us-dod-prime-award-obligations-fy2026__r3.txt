@@ -1,0 +1,75 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 prime award obligations",
+  "question": "What will the obligations field report for FY2026 in the first official registered USAspending API agency 097 awards query snapshot, multiplied by 1e-9 into billions USD?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 awards summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+  "resolutionRule": "Resolve using the first official registered-query snapshot of https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026, reading obligations and multiplying by 1e-9. Retain that snapshot and exclude subsequent revisions. The official snapshot date and published rounding precision could not be verified in this run.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-07T11:48:09Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the registered FY2026 agency 097 awards query, field obligations, transformed into billions USD. The forecast fields are null because the prompt explicitly requires refusal when the exact historical queries cannot be executed."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web open requests to the exact registered URLs for fiscal_year=2025, fiscal_year=2024, and fiscal_year=2023 each returned Internal Error and stated that the URL is not accessible via this tool. No obligations values were returned."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web open requests to the exact registered URLs for fiscal_year=2022, fiscal_year=2021, and fiscal_year=2020 returned the same inaccessible-URL error. A subsequent retry of fiscal_year=2025 also failed. The fiscal_year=2026 query was inaccessible as well."
+    },
+    {
+      "kind": "text",
+      "text": "Official endpoint documentation at https://api.usaspending.gov/docs/endpoints confirms that the agency awards endpoint supports GET and returns transaction counts and award obligations. This definitional evidence supplies no historical obligations observations."
+    },
+    {
+      "kind": "text",
+      "text": "The required base rate and reference class cannot be computed: none of the six attempted historical queries returned a numeric observation. The empty historicalContext records a fetch failure, not a finding that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence or flow prior can be estimated from the unavailable historical sample. Level, momentum, one-off, and policy adjustments therefore remain unestimated; sigma and the 1.28*sigma half-width cannot be calculated, and no numerical bounds are asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date verification also failed. USAspending's official About the Data document, https://www.usaspending.gov/data/about-the-data-download.pdf, describes ongoing award updates and a 90-day delay for DoD procurement publication. It does not establish an official date for this registered FY2026 snapshot. The supplied October 15–22 expected window is target context, not independently verified schedule evidence."
+    },
+    {
+      "kind": "text",
+      "text": "No numerical upside risk, downside risk, or outside the interval scenario can be assessed without an estimated interval. Issuing numeric estimates, historical values, or a resolution date would require unsupported assumptions. This refusal does not satisfy the numeric forecast validation requirements."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

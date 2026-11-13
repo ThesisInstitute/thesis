@@ -1,0 +1,61 @@
+{
+  "slug": "snap-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "July 2026 SNAP participation: forecast unavailable",
+  "question": "What will USDA FNS report for national SNAP Persons in July 2026 in the first official monthly participation print, converted to millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service monthly SNAP participation tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Use July 2026 national Persons from the first official monthly SNAP participation print. Multiply the published value in thousands by 0.001 to express millions, preserving published precision. Exclude subsequent revisions.",
+  "dataPointId": "usda.fns.snap.persons.july_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap"
+  ],
+  "runAt": "2026-10-07T12:28:50Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable because the official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains July 2026 national SNAP Persons, resolved on the first official monthly participation print and expressed in millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap using the web tool.",
+      "result": "Fetch failed: HTTP 403 Forbidden. No official participation statistics were retrieved."
+    },
+    {
+      "kind": "text",
+      "text": "The production instructions require stopping after a failed fetch. This run therefore stops without substituting remembered statistics or issuing a numerical forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The required base rate and six distinct historical prints could not be fetched. The official release date was not verified."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No numerical persistence prior, historical sample, level or momentum adjustments, or interval bounds can be supported by fetched evidence."
+    },
+    {
+      "kind": "math",
+      "text": "Sigma and the 1.28*sigma interval half-width cannot be calculated without fetched historical observations."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "Forest Service Minnesota obligations, FY2026",
+  "question": "What will Forest Service prime-award transaction obligations with Minnesota place of performance total in FY2026, in USD millions, in the first registered-query snapshot captured during October 15–22, 2026?",
+  "unit": "usd_millions",
+  "pointEstimate": 50.76363639,
+  "ciLow": 36.72898946,
+  "ciHigh": 64.79828332,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-22",
+  "resolutionSource": "U.S. Treasury USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the initial registered FY2026 query snapshot captured within the supplied October 15–22, 2026 window. POST to the specified endpoint with group=fiscal_year, spending_level=transactions, time_period=[{start_date:2025-10-01,end_date:2026-09-30}], agencies=[{name:Forest Service,tier:subtier,toptier_name:Department of Agriculture,type:awarding}], place_of_performance_locations=[{country:USA,state:MN}], and award_type_codes=[02,03,04,05,06,07,08,09,10,11,A,B,C,D,IDV_A,IDV_B,IDV_B_A,IDV_B_B,IDV_B_C,IDV_C,IDV_D,IDV_E]. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Preserve dollar-cent precision, equivalent to eight decimal places in USD millions. Freeze that initial snapshot and disregard subsequent revisions. October 22 is retained as the supplied window endpoint; an official announcement establishing this exact snapshot date could not be verified.",
+  "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2018"},
+      "label": "FY2018",
+      "value": 25.90502369
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2019"},
+      "label": "FY2019",
+      "value": 28.74167183
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 27.25941087
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 38.29107807
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 34.0958762
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 49.95892909
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 68.71782809
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 46.83255679
+    }
+  ],
+  "drivers": [
+    "Current FY2026 registered-query total",
+    "Higher contract obligations offset lower grants",
+    "Late financial-assistance reporting",
+    "Corrections and net deobligations",
+    "Unverified exact snapshot date"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T12:28:32Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "FY2026 Forest Service obligations performed in Minnesota"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered USAspending transaction query, sourceSeriesId usaspending.search.spending_over_time.usfs.minnesota_obligations. It measures net obligations by transaction action date, with Forest Service as awarding subagency and Minnesota as place of performance. All historical values use exactly those filters, award-type codes, and fiscal-year grouping. They are official query prints fetched in this run, not archived original-vintage annual releases."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Executed separate POST requests to https://api.usaspending.gov/api/v2/search/spending_over_time/ for FY2018, FY2019, and FY2020. Each used the complete registered filters and transactions spending level, substituting October 1 of the preceding year through September 30 of the requested fiscal year. Read each raw echoed aggregated_amount.",
+      "result": "FY2018 aggregated_amount=25905023.689999998 USD; FY2019=28741671.83 USD; FY2020=27259410.87 USD. At dollar-cent precision, multiplying by 0.000001 gives 25.90502369, 28.74167183, and 27.25941087 USD millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Executed the same registered POST separately for FY2021, FY2022, and FY2023, substituting each fiscal year's date boundaries. Read each raw echoed response.",
+      "result": "FY2021 aggregated_amount=38291078.07 USD; FY2022=34095876.2 USD; FY2023=49958929.089999996 USD. Converted totals are 38.29107807, 34.09587620, and 49.95892909 USD millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Executed the same registered POST separately for FY2024 and FY2025, retaining every agency, location, award-type, and spending-level filter.",
+      "result": "FY2024 aggregated_amount=68717828.09 USD, including Grant_Obligations=38307135.4 USD. FY2025 aggregated_amount=46832556.79 USD, including Contract_Obligations=15398331.29 USD, Grant_Obligations=21158670.82 USD, and Other_Obligations=10275554.68 USD."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the mean of the eight fetched FY2018–FY2025 annual flows: 39.97529682875 USD millions. The reference class ranges from 25.90502369 to 68.71782809 million. FY2024's unusually high grant component cautions against treating its total as a recurring level."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POSTed the exact FY2026 registered query with action dates 2025-10-01 through 2026-09-30 to https://api.usaspending.gov/api/v2/search/spending_over_time/ and read the raw echoed response.",
+      "result": "FY2026 aggregated_amount=50763636.39 USD; Contract_Obligations=33186357.32 USD; Grant_Obligations=4894753.75 USD; Other_Obligations=12682525.32 USD; Direct_Obligations, Idv_Obligations, and Loan_Obligations each equal 0 USD."
+    },
+    {
+      "kind": "text",
+      "text": "The reported FY2026 level is 50.76363639 million, 3.93107960 million above FY2025. Contracts increased by 17.78802603 million, grants decreased by 16.26391707 million, and other obligations increased by 2.40697064 million. These changes are already incorporated in the current observation. I add no separate momentum, recurring grant-spike, policy, or unsupported late-reporting uplift."
+    },
+    {
+      "kind": "text",
+      "text": "Reporting mechanics leave residual snapshot uncertainty. USAspending's fetched Data Sources guide describes daily updates. Treasury's fetched current TFM section 6035 requires financial-assistance actions to be submitted within 30 days and reported at least twice monthly. I use that current Treasury requirement rather than the older guide's shorter assistance-reporting description. Late September actions and corrections can therefore change the October snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "Timing-contract discrepancy: the official Treasury reporting resources, TFM, and USAspending submission-period endpoint did not establish an exact release date for this custom transaction query. The submission-period response included an August 2026 submission due date of October 2 and quarter certification due date of November 17; these concern financial reporting, not this transaction snapshot. The supplied contract gives an October 15–22 window but no exact resolutionDate. October 22 is retained solely as that window's endpoint, not represented as an officially verified release date. Consequently, the prompt's official-date verification requirement remains unmet."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use the eight-year annual-flow mean prior of 39.97529682875 million and update to persistence of the observed FY2026 total by adding 10.78833956125 million, giving 50.76363639 million. Additional momentum, one-off, policy, and reporting adjustments are zero. Compute dispersion from annual flow values: sigma = 14.619423884 million = sqrt(1496.092882893/(8-1)). The normal-approximation 80% half-width is 1.28*sigma = 18.712862571 million. Condition on the fiscal year having ended and its current total being observed by using 0.75 times that half-width, or 14.034646929 million. This gives bounds 36.72898946 and 64.79828332 million. The narrowing is a model judgment; historical revision vintages were not fetched, so this is not a directly calibrated revision-error interval."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a large late financial-assistance batch or upward correction: a net addition exceeding 14.03464693 million would land above the interval. The downside risk is a large deobligation, duplicate removal, or agency/location correction: a net reduction exceeding 14.03464693 million would land below the interval. Either mechanism would put the resolution outside the interval and falsify the persistence assumption."
+    },
+    {
+      "kind": "forecast",
+      "point": 50.76363639,
+      "ciLow": 36.72898946,
+      "ciHigh": 64.79828332
+    }
+  ]
+}

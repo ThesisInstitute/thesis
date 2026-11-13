@@ -1,0 +1,132 @@
+{
+  "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 CDFI assistance obligations: forecast refused",
+  "question": "What will FY2026 financial-assistance transaction obligations be in the first registered USAspending query snapshot for the Community Development Financial Institutions Fund awarding subagency, in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "U.S. Treasury USAspending API",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the registered-query snapshot, with group fiscal_year, spending_level transactions, awarding subtier agency Community Development Financial Institutions Fund, award_type_codes 02 through 11, and FY2026 action dates 2025-10-01 through 2026-09-30. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Preserve the returned dollar precision in conversion to USD millions; do not replace the resolving snapshot with subsequent revisions. The supplied expected window is 2026-10-15 through 2026-10-22, but an official resolution date could not be verified this run.",
+  "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2019"
+      },
+      "label": "FY2019",
+      "value": 201.446413
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 544.34114872
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 1457.58697844
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 577.03832827
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 1986.065187
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 782.042553
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 319.455176
+    }
+  ],
+  "drivers": [
+    "Registered-query snapshot timing",
+    "Financial-assistance transaction postings",
+    "Net obligations including deobligations"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://tfx.treasury.gov/monthly-reporting-requirements"
+  ],
+  "runAt": "2026-10-06T21:59:49Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused because the official resolution date could not be verified"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.search.spending_over_time.cdfi.program_obligations. Historical values below were fetched by separate POST requests to the registered endpoint for each fiscal year. Each request used {\"group\":\"fiscal_year\",\"filters\":{\"time_period\":[{\"start_date\":\"<prior-year>-10-01\",\"end_date\":\"<year>-09-30\"}],\"agencies\":[{\"type\":\"awarding\",\"tier\":\"subtier\",\"name\":\"Community Development Financial Institutions Fund\"}],\"award_type_codes\":[\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\"]},\"spending_level\":\"transactions\"}. These are current official query observations, not archived original vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate curl POST requests executing the registered query for FY2019, FY2020, and FY2021; raw JSON responses were echoed and read.",
+      "result": "results[].aggregated_amount: FY2019 = 201446413.0 USD; FY2020 = 544341148.72 USD; FY2021 = 1457586978.44 USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate curl POST requests executing the registered query for FY2022, FY2023, and FY2024; raw JSON responses were echoed and read.",
+      "result": "results[].aggregated_amount: FY2022 = 577038328.27 USD; FY2023 = 1986065187.0 USD; FY2024 = 782042553.0 USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate curl POST requests executing the registered query for FY2025 and FY2026; raw JSON responses were echoed and read.",
+      "result": "results[].aggregated_amount: FY2025 = 319455176.0 USD; the current FY2026 observation = -7917461.89 USD. The FY2026 observation is not the future registered resolving snapshot."
+    },
+    {
+      "kind": "math",
+      "text": "Apply the registered conversion value_usd_millions = aggregated_amount × 0.000001. For example, FY2025 = 319455176.0 × 0.000001 = 319.455176; the current FY2026 observation = -7917461.89 × 0.000001 = -7.91746189."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched reference class contains seven distinct fiscal-year observations, FY2019 through FY2025. This satisfies the history count, but cannot establish the required official publication date."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification failed: web requests opening https://www.usaspending.gov/data/data-sources-download.pdf, https://www.usaspending.gov/data/about-the-data-download.pdf, and https://tfx.treasury.gov/monthly-reporting-requirements returned 'Fatal error: network error: error sending request'. No official calendar or announcement was successfully fetched that verifies a resolutionDate within the supplied window. Search-result summaries were not used as evidence. Only already-started query responses were retrieved after the failure."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Forecast construction stopped under the instruction to refuse after a failed fetch. No model adjustment, sigma calculation, or 80% interval is asserted. Null estimates and resolutionDate explicitly mark this as a refusal, not a valid forecast; supplying numerical bounds or an inferred release date would misrepresent completion."
+    }
+  ]
+}

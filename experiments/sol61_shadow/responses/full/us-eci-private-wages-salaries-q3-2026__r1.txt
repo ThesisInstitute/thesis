@@ -1,0 +1,143 @@
+{
+  "slug": "us-eci-private-wages-salaries-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "Private wages ECI, Q3 2026: registered index",
+  "question": "What will the FIRST PRINT of the US BLS Employment Cost Index, Table 2, Private industry workers / All workers, wages and salaries, seasonally adjusted index (December 2005=100), for September 2026 (2026-Q3) be, as represented by registered ALFRED series ECIWAG multiplied by 1? The registered quarterly-growth label and percent_growth unit conflict with this index resolver.",
+  "unit": "percent_growth",
+  "pointEstimate": 180.511,
+  "ciLow": 180.220,
+  "ciHigh": 180.802,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, Employment Cost Index, Table 2; registered ALFRED ECIWAG first-print mirror",
+  "resolutionSourceUrl": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ECIWAG",
+  "resolutionRule": "Preserve the registered alfred-fred binding: read ECIWAG for observation date 2026-07-01, representing 2026-Q3, in the vintage corresponding to the original BLS September 2026 ECI release scheduled October 30, 2026. The underlying official artifact is Employment Cost Index Table 2, Private industry workers / All workers, wages and salaries, seasonally adjusted, September 2026 index column, December 2005=100, at https://www.bls.gov/news.release/eci.t02.htm. Apply the registered multiplication by 1 and round to three decimal places. Resolve on the FIRST PRINT; later revisions and corrections do not count. Do not substitute Table 1 compensation, unadjusted wages, or the separate quarterly percent-change column. The mandated percent_growth token and qoq concept label are a disclosed registration error; this forecast retains the registered raw-index resolver.",
+  "dataPointId": "bls.eci.private_wages_salaries_qoq.2026_q3.first_print",
+  "historicalContext": [
+    {"period": {"type": "quarter", "value": "2023-Q1"}, "label": "2023-Q1", "value": 159.5},
+    {"period": {"type": "quarter", "value": "2023-Q2"}, "label": "2023-Q2", "value": 161.1},
+    {"period": {"type": "quarter", "value": "2023-Q3"}, "label": "2023-Q3", "value": 162.8},
+    {"period": {"type": "quarter", "value": "2023-Q4"}, "label": "2023-Q4", "value": 164.3},
+    {"period": {"type": "quarter", "value": "2024-Q1"}, "label": "2024-Q1", "value": 166.2},
+    {"period": {"type": "quarter", "value": "2024-Q2"}, "label": "2024-Q2", "value": 167.6},
+    {"period": {"type": "quarter", "value": "2024-Q3"}, "label": "2024-Q3", "value": 168.9},
+    {"period": {"type": "quarter", "value": "2024-Q4"}, "label": "2024-Q4", "value": 170.4},
+    {"period": {"type": "quarter", "value": "2025-Q1"}, "label": "2025-Q1", "value": 171.8},
+    {"period": {"type": "quarter", "value": "2025-Q2"}, "label": "2025-Q2", "value": 173.566},
+    {"period": {"type": "quarter", "value": "2025-Q3"}, "label": "2025-Q3", "value": 174.954},
+    {"period": {"type": "quarter", "value": "2025-Q4"}, "label": "2025-Q4", "value": 176.233},
+    {"period": {"type": "quarter", "value": "2026-Q1"}, "label": "2026-Q1", "value": 177.498},
+    {"period": {"type": "quarter", "value": "2026-Q2"}, "label": "2026-Q2", "value": 179.010}
+  ],
+  "drivers": [
+    "Persistent positive first-print index increments",
+    "Expanding mean-increment benchmark selected by walk-forward errors",
+    "September hourly-earnings weakness poses downside risk",
+    "Announced reweighting begins after the target quarter",
+    "Registered growth label conflicts with raw-index binding"
+  ],
+  "sourceContext": [
+    "https://alfred.stlouisfed.org/series?seid=ECIWAG",
+    "https://fred.stlouisfed.org/series/eciwag",
+    "https://www.bls.gov/news.release/eci.t02.htm",
+    "https://www.bls.gov/schedule/news_release/eci.htm",
+    "https://www.bls.gov/news.release/archives/eci_04282023.htm",
+    "https://www.bls.gov/news.release/archives/eci_07282023.htm",
+    "https://www.bls.gov/news.release/archives/eci_10312023.htm",
+    "https://www.bls.gov/news.release/archives/eci_01312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302024.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_10312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_01312025.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302025.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312025.htm",
+    "https://www.bls.gov/news.release/archives/eci_12102025.htm",
+    "https://www.bls.gov/news.release/archives/eci_02102026.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302026.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312026.htm",
+    "https://www.bls.gov/eci/notices/2026/eci-2025-fixed-weights-and-removing-workers-compensation.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm"
+  ],
+  "runAt": "2026-10-07T10:38:55Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Q3 2026 private wages ECI: first-print forecast under the registered resolver"
+    },
+    {
+      "kind": "text",
+      "text": "Framing and registration discrepancy: the required identifiers and percent_growth unit are retained byte-for-byte. Official ECIWAG metadata identifies an index, and the registered multiply-by-1 transformation is the identity. Therefore the scored quantity under that binding is the index level, not quarterly percent growth. No unregistered growth transformation is added. The primary agency first print is the authority; ALFRED is the registered vintage mirror."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://alfred.stlouisfed.org/series?seid=ECIWAG and https://www.bls.gov/news.release/eci.t02.htm; inspect series units and Table 2 private-industry all-workers columns.",
+      "result": "ALFRED: ECIWAG is quarterly, seasonally adjusted, Index Dec 2005=100; Q2 2026=179.010 and Q1 2026=177.498. BLS Table 2 independently shows these index levels and a separate Q2 2026 quarterly growth column of 0.9%. These are different quantities. The current ALFRED page's older observations are revised history and are not used as original first prints."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/schedule/news_release/eci.htm and inspect the Third Quarter 2026 row.",
+      "result": "Official BLS calendar: Third Quarter 2026, Oct. 30, 2026, 08:30 AM Eastern. resolutionDate=2026-10-30 is verified from this row, not inferred from the registered window."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch limitation: the exact registered ALFRED CSV URL and a dated-vintage CSV request returned Internal Error in the web tool. History was instead fetched from the underlying official BLS Table 2 in each quarter's own original archived release. The successful ALFRED metadata page verifies series identity and the latest index. No missing CSV values were invented. The prohibited Thesis catalog lookup was omitted; the slug comes solely from the supplied target context."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch and inspect Table 2, Private industry workers / All workers, current-quarter index column in BLS archives eci_04282023.htm, eci_07282023.htm, eci_10312023.htm, and eci_01312024.htm.",
+      "result": "Original first-print SA wages-and-salaries indexes, Dec 2005=100: 2023-Q1=159.5; 2023-Q2=161.1; 2023-Q3=162.8; 2023-Q4=164.3. Each value comes from its own quarter's initial archived release, not a later historical column."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch and inspect the same Table 2 row and current-quarter index column in BLS archives eci_04302024.htm, eci_07312024.htm, eci_10312024.htm, and eci_01312025.htm.",
+      "result": "Original first-print indexes: 2024-Q1=166.2; 2024-Q2=167.6; 2024-Q3=168.9; 2024-Q4=170.4."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch and inspect the same Table 2 row and current-quarter index column in BLS archives eci_04302025.htm, eci_07312025.htm, eci_12102025.htm, eci_02102026.htm, eci_04302026.htm, and eci_07312026.htm.",
+      "result": "Original first-print indexes: 2025-Q1=171.8; 2025-Q2=173.566; 2025-Q3=174.954; 2025-Q4=176.233; 2026-Q1=177.498; 2026-Q2=179.010. In contrast, the current ALFRED page shows revised Q2 2025=173.563 and Q3 2025=174.948; those revised values are excluded."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate / reference class: fourteen original quarterly index prints from 2023-Q1 through 2026-Q2 span 159.5–179.010, with level mean 169.5615. All thirteen successive first-print increments are positive; their mean is 1.500769 index points, sample standard deviation 0.195257, and range 1.265–1.900. This is a trending level series, so its historical level mean is not the forecast. Publish last-print persistence=179.010 first, then test drift rules using only earlier observations."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated in memory from the fetched history before the agent forecast. All candidates use identical ten rolling-origin one-quarter predictions, 2024-Q1 through 2026-Q2; no future observations enter a training window. Expanding increment mean selects the rule x_last+(x_last-x_first)/(n-1). It has the lowest tested MAE and RMSE, replacing persistence on walk-forward evidence. Candidate intervals are approximate residual wrappers, not native model intervals. Candidate set: [{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"persistence\",\"point\":179.010,\"p10\":177.110,\"p50\":179.010,\"p90\":180.910,\"interval80\":{\"low\":177.110,\"high\":180.910},\"interval90\":{\"low\":176.568,\"high\":181.452},\"intervalMethod\":\"Symmetric normal approximation with zero-centered rolling-origin RMSE; 1.28 times RMSE for 80% and 1.644853627 times RMSE for 90%.\",\"calibration_n\":10,\"trainCutoff\":\"2026-07-31\",\"trainEndPeriod\":\"2026-Q2\",\"walkForward\":{\"startPeriod\":\"2024-Q1\",\"endPeriod\":\"2026-Q2\",\"n\":10,\"mae\":1.471000,\"rmse\":1.484504,\"coverage80\":1,\"coverage90\":1}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"last_increment\",\"point\":180.522,\"p10\":180.155,\"p50\":180.522,\"p90\":180.889,\"interval80\":{\"low\":180.155,\"high\":180.889},\"interval90\":{\"low\":180.051,\"high\":180.993},\"intervalMethod\":\"Symmetric normal approximation with zero-centered rolling-origin RMSE; 1.28 times RMSE for 80% and 1.644853627 times RMSE for 90%.\",\"calibration_n\":10,\"trainCutoff\":\"2026-07-31\",\"trainEndPeriod\":\"2026-Q2\",\"walkForward\":{\"startPeriod\":\"2024-Q1\",\"endPeriod\":\"2026-Q2\",\"n\":10,\"mae\":0.241400,\"rmse\":0.286344,\"coverage80\":0.7,\"coverage90\":0.9}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"trailing_3_increment_mean\",\"point\":180.362,\"p10\":180.055,\"p50\":180.362,\"p90\":180.669,\"interval80\":{\"low\":180.055,\"high\":180.669},\"interval90\":{\"low\":179.967,\"high\":180.757},\"intervalMethod\":\"Symmetric normal approximation with zero-centered rolling-origin RMSE; 1.28 times RMSE for 80% and 1.644853627 times RMSE for 90%.\",\"calibration_n\":10,\"trainCutoff\":\"2026-07-31\",\"trainEndPeriod\":\"2026-Q2\",\"walkForward\":{\"startPeriod\":\"2024-Q1\",\"endPeriod\":\"2026-Q2\",\"n\":10,\"mae\":0.211967,\"rmse\":0.239990,\"coverage80\":0.9,\"coverage90\":1}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"expanding_increment_mean\",\"point\":180.511,\"p10\":180.220,\"p50\":180.511,\"p90\":180.802,\"interval80\":{\"low\":180.220,\"high\":180.802},\"interval90\":{\"low\":180.137,\"high\":180.885},\"intervalMethod\":\"Symmetric normal approximation with zero-centered rolling-origin RMSE; 1.28 times RMSE for 80% and 1.644853627 times RMSE for 90%.\",\"calibration_n\":10,\"trainCutoff\":\"2026-07-31\",\"trainEndPeriod\":\"2026-Q2\",\"walkForward\":{\"startPeriod\":\"2024-Q1\",\"endPeriod\":\"2026-Q2\",\"n\":10,\"mae\":0.205695,\"rmse\":0.227312,\"coverage80\":0.8,\"coverage90\":1}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Inspect September 2026 Employment Situation at https://www.bls.gov/news.release/archives/empsit_10022026.htm and the official ECI reweighting notice.",
+      "result": "September all-private average hourly earnings increased 0.1% to $37.81 and 3.0% over twelve months. BLS's ECI notice says new 2025 fixed employment weights and removal of workers' compensation begin with December 2026 data released in January 2027; 2021 weights remain applicable through September 2026."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: level is anchored at the latest first-print index 179.010; historical momentum is already represented by the selected mean increment. September hourly-earnings weakness points downward, but this different, composition-sensitive survey has no calibrated mapping to fixed-weight ECI in the fetched sample, so its point adjustment is 0.000. No fetched release-specific one-off warrants an adjustment: 0.000. The announced methodology change starts after the target quarter: 0.000. Final point weights are 100% selected benchmark and 0% uncalibrated current narrative; delta from strongest benchmark=0.000."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior=expanding_increment_mean fitted to fourteen original BLS Table 2 index first prints, 2023-Q1–2026-Q2. Thirteen increments are [1.600,1.700,1.500,1.900,1.400,1.300,1.500,1.400,1.766,1.388,1.279,1.265,1.512]. Mean increment=(179.010-159.5)/13=1.500769; point=179.010+1.500769+0.000 current-signal+0.000 one-off+0.000 policy=180.510769, rounded 180.511. sigma = 0.195257 = sqrt(0.457502308/12), using successive first-print increments, not level dispersion. Basic 80% half-width=1.28*sigma=0.249929. Widen by 1.164170 to the realized rolling-origin RMSE 0.227312 because estimated drift, annual-vintage differences and earlier coarser publication precision affect actual prediction errors: half-width=1.28*0.195256734*1.164170232=0.290959460. Raw bounds=180.510769231 +/- 0.290959460=[180.219809771,180.801728690]; round to [180.220,180.802]. The 90% residual band uses 1.644853627*0.227312078=0.373895096, giving [180.137,180.885]."
+    },
+    {
+      "kind": "text",
+      "text": "Calibration and counter-consideration: eight of the ten selected-model walk-forward errors fall within +/-0.290959460; all ten fall within the approximate 90% band. This is calibration-sample coverage, not independent validation. Expanding drift's ten errors average -0.097561, suggesting mild overprediction; its RMSE advantage over trailing-three increment drift is only 0.012678. The short sample and additive-drift assumption limit precision. Recent deceleration is a downside consideration, but evidence does not justify overriding the slightly stronger benchmark."
+    },
+    {
+      "kind": "text",
+      "text": "Stress and falsification: upside risk is widespread private-sector wage settlements, retention raises or incentive payments that make the next index increase exceed 1.792 points, putting the outcome outside the interval above 180.802. Downside risk is broad pay freezes, weaker bonuses or reduced negotiated increases that hold the index increase below 1.210 points, putting it outside the interval below 180.220. Direct evidence of these changes across the ECI's fixed occupational mix would move the point up or down; September's weak hourly-earnings reading supports monitoring the downside."
+    },
+    {
+      "kind": "forecast",
+      "point": 180.511,
+      "ciLow": 180.220,
+      "ciHigh": 180.802
+    }
+  ]
+}

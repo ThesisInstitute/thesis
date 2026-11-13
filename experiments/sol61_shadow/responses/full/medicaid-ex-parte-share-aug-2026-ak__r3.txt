@@ -1,0 +1,97 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ak",
+  "country": "US",
+  "type": "data",
+  "title": "Alaska ex parte renewal share, August 2026",
+  "question": "What percentage of Alaska Medicaid and CHIP beneficiaries with a renewal due in August 2026 were renewed on an ex parte basis, calculated as 100 times Eligibility Processing Data Report Metric 5a1 divided by Metric 5 in the original (O) submission row of CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS FIRST publishes that reporting period, without seasonal adjustment, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Alaska's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ak.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2023-05"}, "label": "2023-05", "value": 18.2},
+    {"period": {"type": "month", "value": "2023-06"}, "label": "2023-06", "value": 24.8},
+    {"period": {"type": "month", "value": "2023-07"}, "label": "2023-07", "value": 28.1},
+    {"period": {"type": "month", "value": "2023-08"}, "label": "2023-08", "value": 28.2},
+    {"period": {"type": "month", "value": "2023-09"}, "label": "2023-09", "value": 23.7},
+    {"period": {"type": "month", "value": "2023-10"}, "label": "2023-10", "value": 27.4},
+    {"period": {"type": "month", "value": "2023-11"}, "label": "2023-11", "value": 27.4},
+    {"period": {"type": "month", "value": "2023-12"}, "label": "2023-12", "value": 25.8},
+    {"period": {"type": "month", "value": "2024-01"}, "label": "2024-01", "value": 28.0},
+    {"period": {"type": "month", "value": "2024-02"}, "label": "2024-02", "value": 29.7},
+    {"period": {"type": "month", "value": "2024-03"}, "label": "2024-03", "value": 34.5}
+  ],
+  "drivers": [
+    "Recent exact dataset history could not be fetched",
+    "Retrieved original-submission history is stale",
+    "Current snapshot percentages are rounded",
+    "Registered resolution date lacks verified official scheduling"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T12:43:34Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required recent first-print history was not retrieved"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Alaska's August 2026 original-submission ex parte renewal share. CMS's state table defines the denominator as beneficiaries due for renewal, rather than beneficiaries successfully renewed. The registered resolver is preserved verbatim."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search official CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c; retrieve its displayed Alaska O rows.",
+      "result": "Fetched ex parte numerator/renewals-due denominator: 2023-05 1193/6539; 2023-06 1867/7530; 2023-07 4011/14250; 2023-08 5634/19995; 2023-09 3055/12884; 2023-10 3232/11813; 2023-11 2956/10781; 2023-12 3288/12729; 2024-01 4376/15619; 2024-02 4572/15385; 2024-03 5598/16229. historicalContext reports the computed percentages rounded to one decimal. These are retrieved O rows, not verified archived publication vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf; inspect PDF page index 30.",
+      "result": "June 2026 Alaska row: 15,924 beneficiaries due for renewal; total renewed 45%; total disenrolled 32%; pending 23%; renewed ex parte 27%. The percentages are shares of all beneficiaries due. This rounded snapshot is not substituted for the required exact dataset history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "Official retrospective release dates: January 2026 released 2026-04-24; February 2026 2026-05-29; March 2026 2026-06-26; April 2026 2026-07-31; May 2026 2026-08-28; June 2026 2026-09-25. No official August 2026 release schedule supporting 2026-12-15 was found."
+    },
+    {
+      "kind": "text",
+      "text": "Recent-history fetch failed. The current official CSV, datastore API, pagination, and filters returned inaccessible or empty content through the web tool. The exact retrieved monthly rows stop in March 2024. The source exposes additional periods, so this is not an official-source-fewer-than-six exception."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate diagnostic only: the retrieved historical reference class contains 11 original-submission monthly shares, May 2023 through March 2024; unrounded mean 26.9011%, range 18.2444%-34.4938%, and last retrieved share 34.4938%. That last retrieved observation is not the latest official print. These stale rows cannot establish the required recent persistence prior."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: for the retrieved historical rows only, y_t = 100*numerator_t/denominator_t and d_t = y_t-y_(t-1). Across 10 successive changes, sigma = sqrt(sum((d_t-mean(d))^2)/9) = 3.23178 percentage points; 1.28*sigma = 4.13668 percentage points. This is a historical diagnostic, not an admissible August 2026 interval. No current prior, adjustment weights, model candidate selection, or final implied bounds are asserted without the required recent first-print sample."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would include improved automated eligibility matching; downside risk would include data-matching failures or a renewal cohort less amenable to automatic renewal. Whether either would land outside the interval cannot be quantified because no valid interval was produced."
+    },
+    {
+      "kind": "text",
+      "text": "The registered resolutionDate remains 2026-12-15, but it was not verified as an official scheduled release date. Catalog slug checking was intentionally skipped under the run's independence restriction. No files or activity receipts were created."
+    },
+    {
+      "kind": "text",
+      "text": "Forecast dropped under the honesty rule. Null pointEstimate, ciLow, and ciHigh record the retrieval failure; they are not numerical forecasts. This object parses as JSON but does not meet the scoreable numeric-cell contract. Producing a conforming numerical cell would require successful retrieval of recent exact original-submission history and verification of the applicable resolution-date basis."
+    }
+  ]
+}

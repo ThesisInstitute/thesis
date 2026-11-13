@@ -1,0 +1,130 @@
+{
+  "slug": "wic-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation in September 2026",
+  "question": "What will USDA FNS report in its first official print for national total WIC participation in September 2026, not seasonally adjusted, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 6.678241,
+  "ciLow": 6.559833,
+  "ciHigh": 6.796649,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-30",
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first officially published September 2026 national monthly Total Participants value in the WIC Data Tables. Include women, infants and children; use the unadjusted monthly total, not a fiscal-year average. Convert thousands to millions by multiplying by 0.001, or raw person counts by dividing by 1000000, and express the result to six decimal places. Preserve the first print permanently; exclude subsequent revisions and same-day corrections. The resolutionDate field is the supplied registration-window endpoint, not a verified official publication date.",
+  "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 6.6963
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 6.664741
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 6.703035
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 6.708518
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 6.687977
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 6.669554
+    }
+  ],
+  "drivers": [
+    "June participation level and modest recent decline",
+    "Variable historical summer participation changes",
+    "Preliminary reporting and subsequent upward revisions",
+    "July income eligibility guideline update"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/wic-program",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-June-2026.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-January-2026.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-February-2026.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-April-2026.pdf",
+    "https://fns-prod.azureedge.us/wic/fr-042926",
+    "https://fns-prod.azureedge.us/pd/overview"
+  ],
+  "runAt": "2026-10-06T22:48:50Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 WIC total participation forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is national monthly total WIC participants, unadjusted, resolved on the first official print. The exact source field is Total Participants in the national WIC Participation and Costs table, also represented by Keydata Table 21. USDA's official content host was accessible when the registered www.fns.usda.gov page was not. The fetched tables report persons: applying the ledger factor 0.001 directly to those counts would misstate millions. Dividing persons by 1000000 preserves the registered target and unit."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch https://fns-prod.azureedge.us/pd/wic-program and its national monthly PDF https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf.",
+      "result": "Total participants: January 2026 6,696,300; February 6,664,741; March 6,703,035; April 6,708,518; May 6,687,977; June 6,669,554. The PDF states data as of September 11, 2026 and marks FY2026 preliminary."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is persistence near June's 6.669554 million, supported by the six recent official monthly observations. HistoricalContext contains current-vintage figures, not six recovered original vintages. All participation observations use the same unadjusted national definition; separate archived-vintage comparisons below estimate the reporting adjustment."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read June and September totals for prior years from https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf.",
+      "result": "June/September totals were 6,732,424/6,677,019 in 2023, 6,736,885/6,838,250 in 2024, and 6,883,200/6,921,686 in 2025. These are current-vintage monthly totals."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch archived January, February and April 2026 Keydata PDFs listed in sourceContext; compare each report's latest-month Table 21 total with the current national table.",
+      "result": "Archived latest-month totals: January 6,689,525; February 6,640,819; April 6,704,900 persons. Current totals exceed these by 6,775, 23,922 and 3,618 persons respectively. The three-pair mean increase is 11,438.333 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch https://fns-prod.azureedge.us/wic/fr-042926 for the income eligibility guidelines effective during the target month.",
+      "result": "Guidelines take effect July 1, 2026. The maximum income standard is 185% of federal poverty guidelines; the contiguous-state four-person household threshold is $61,050 annually or $5,088 monthly."
+    },
+    {
+      "kind": "text",
+      "text": "Level, momentum, reporting and policy effects are separated. June supplies the level. Recent monthly changes support a small negative momentum adjustment. Historical summer changes support a modest positive adjustment. Archived reporting differences support a negative first-print correction. The eligibility update provides a plausible enrollment mechanism, but its participation effect is unquantified, so the explicit policy and one-off adjustments are zero."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use June persistence with a seasonal adjustment and 50% damped momentum. The historical sample is six January-June 2026 current-vintage monthly totals, three June-September paths from 2023-2025, and three archived reporting comparisons. Successive monthly changes in millions are -0.031559, 0.038294, 0.005483, -0.020541 and -0.018423; their mean is -0.0053492 and sample sigma = 0.027886978. Thus 1.28*sigma = 0.035695332. Summer changes average 0.028148667, with sample standard deviation 0.078894573. Point = 6.669554 + 0.028148667 + 0.5*3*(-0.0053492) - 0.011438333 = 6.678240533. Use a conservative normal approximation with half-width 1.28*sqrt(3*sigma^2 + 0.078894573^2) = 0.118407985. Widening beyond 1.75 times the one-month half-width reflects the three-month horizon and inconsistent summer patterns. Final rounded bounds are 6.559833-6.796649 million; small samples and incomplete original-vintage recovery limit calibration."
+    },
+    {
+      "kind": "math",
+      "text": "Convert official persons to millions by dividing by 1000000. The estimated first-print reporting correction is (6775 + 23922 + 3618)/3/1000000 = 0.011438333 million. Round the calculated point 6.678240533 and interval [6.559832548, 6.796648519] to six decimal places."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification limitation: official USDA program pages and targeted calendar searches did not yield a calendar or announcement confirming September 2026's publication date. The supplied December 22-30 window is registration context, not fetched schedule evidence. resolutionDate retains its December 30 endpoint as an administrative placeholder; the mandatory official-calendar verification requirement remains unmet."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is a stronger summer enrollment rebound as newly eligible households participate; an unusually broad rebound could land above 6.796649 million, outside the interval. Downside risk is accelerating enrollment decline; widespread clinic disruption or incomplete large-state reporting could put the first print below 6.559833 million, outside the interval. The limited archived sample could also understate first-print reporting error."
+    },
+    {
+      "kind": "forecast",
+      "point": 6.678241,
+      "ciLow": 6.559833,
+      "ciHigh": 6.796649
+    }
+  ]
+}

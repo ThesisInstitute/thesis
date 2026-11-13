@@ -1,0 +1,96 @@
+{
+  "slug": "snap-participation-august-2026",
+  "dataPointId": "usda.fns.snap.persons.august_2026",
+  "status": "dropped",
+  "error": "A contract-compliant resolutionDate could not be established. The target omits resolutionDate and resolutionDateBasis, so the release-calendar rule applies. No official scheduled release date for August 2026 participation was found. The expected window ending 2027-01-11 cannot substitute for an official release date or a registered resolve-by bound. This is a failure record, not a forecast cell.",
+  "runAt": "2026-10-07T12:21:13Z",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 38.547730
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 37.870817
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 37.298271
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 37.011096
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 36.562128
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 36.352716
+    }
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf"
+  ],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "SNAP August 2026 forecast withheld because release-date verification failed"
+    },
+    {
+      "kind": "text",
+      "text": "The intended outcome is the first published, not seasonally adjusted national SNAP Persons total for August 2026, expressed in millions. Later revisions would be irrelevant."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official snap-persons-4.pdf for TOTAL; open snap-persons-5.pdf.",
+      "result": "January 2026 Initial TOTAL = 38,547,730 persons, data as of April 10, 2026; February 2026 Initial TOTAL = 37,870,817, data as of May 8, 2026. January was fetched through the official document's indexed search content; direct PDF opening failed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-6.pdf and snap-persons-7.pdf.",
+      "result": "March 2026 Initial TOTAL = 37,298,271 persons, data as of June 12, 2026; April 2026 Initial TOTAL = 37,011,096, data as of July 10, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-8.pdf and snap-persons-9.pdf.",
+      "result": "May 2026 Initial TOTAL = 36,562,128 persons, data as of August 14, 2026; June 2026 Initial TOTAL = 36,352,716, data as of September 11, 2026. The landing page lists June 2026 as its latest available month."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate reference class comprises six original monthly national totals for January–June 2026: mean 37.273793 million, range 36.352716–38.547730 million. Persistence is 36.352716 million. Original totals were used instead of revised rows in the September summary."
+    },
+    {
+      "kind": "math",
+      "text": "From the fetched first prints, successive changes in millions are [-0.676913, -0.572546, -0.287175, -0.448968, -0.209412]. Their mean is -0.4390028; sigma = sqrt(sum((change + 0.4390028)^2)/4) = 0.1938414114. These computations are evidence diagnostics; no scored forecast is emitted."
+    },
+    {
+      "kind": "text",
+      "text": "The official PDFs report individual persons, whereas the target describes thousands. Dividing raw counts by 1,000,000 preserves the registered unit millions. Applying the registered 0.001 factor directly to raw person counts would mis-scale the outcome."
+    },
+    {
+      "kind": "text",
+      "text": "The history was fetched, but resolution-date verification was not possible. The requested date clarification remains unanswered. Under the instruction to drop an ungrounded cell, no forecast cell is emitted. No date, receipt, or activity artifact has been invented."
+    }
+  ]
+}

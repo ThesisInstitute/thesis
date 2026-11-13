@@ -1,0 +1,155 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-fl",
+  "country": "US",
+  "type": "data",
+  "title": "Florida ex parte renewal share, August 2026",
+  "question": "What percentage of Florida Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, calculated from CMS's first-published original (O) submission row?",
+  "unit": "percent",
+  "pointEstimate": 22.0,
+  "ciLow": 18.4,
+  "ciHigh": 25.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Florida's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Calculate 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Ignore subsequent revisions and updated (U) submissions.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.fl.aug_2026",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2025-12"
+      },
+      "label": "December 2025",
+      "value": 24
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 24
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": 24
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 20
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 22
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 22
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 22
+    }
+  ],
+  "drivers": [
+    "Persistence of Florida's recent ex parte share",
+    "Renewal-cohort composition and available verification data",
+    "Classification of renewals completed after forms are sent",
+    "Two-month horizon and rounded historical observations"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T11:56:22Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Florida August 2026 ex parte renewal-share forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Florida's state row, not a national total or weighted average. CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c supplies ex parte renewals, Metric 5a1, and beneficiaries due for renewal, Metric 5. The monthly snapshot table confirms that the share's denominator is all renewals due. Resolution uses the first-published August original (O) row."
+    },
+    {
+      "kind": "text",
+      "text": "History-access limitation: I could not retrieve the underlying CSV or API rows and therefore could not fetch unrounded original-row numerators. HistoricalContext contains fetched official snapshot percentages rounded to whole percentage points. Every observation comes from its reporting month's original/preliminary renewal-outcome table, excluding quarterly updated outcomes; these are rounded observations of the target metric."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Florida's reporting-month renewal-outcome tables in https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf.",
+      "result": "December 2025: 165,970 beneficiaries due for renewal; published ex parte share 24%. January 2026: 195,466 due; published ex parte share 24%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Florida's reporting-month renewal-outcome tables in https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf.",
+      "result": "February 2026: 197,339 beneficiaries due for renewal; published ex parte share 24%. March 2026: 190,674 due; published ex parte share 20%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Florida's reporting-month renewal-outcome tables in https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf, https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf, and https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf.",
+      "result": "April 2026: 176,275 beneficiaries due for renewal; ex parte share 22%. May 2026: 172,329 due; ex parte share 22%. June 2026: 171,927 due; ex parte share 22%. These are published rounded percentages."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is seven consecutive Florida reporting-month prints, December 2025 through June 2026. Their mean is 22.5714%, median 22%, and range 20%-24%. The latest three prints are each 22%, supporting a persistence prior centered at 22%."
+    },
+    {
+      "kind": "text",
+      "text": "Level is anchored at the latest 22% print. Recent momentum contributes no adjustment because April through June are unchanged at published precision. March's decline and April's rebound are retained in dispersion rather than extrapolated. CMS notes that data-based renewals completed after a form is sent can be classified as form-based; no fetched evidence establishes an August Florida change, so the policy-mechanism adjustment is zero."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence model with seven fetched rounded Florida prints and six successive changes: 0, 0, -4, 2, 0, 0 percentage points. Level 22% plus momentum 0, one-off adjustment 0, and policy adjustment 0 gives 22.0%. sigma = 1.9664 percentage points, calculated as sqrt(19.3333/(6-1)). The one-month normal 80% half-width is 1.28*sigma = 2.5170 points. Assuming independent monthly shocks over the two-month June-to-August horizon gives 2.5170*sqrt(2) = 3.5595 points. Rounding bounds outward to one decimal produces 18.4%-25.6%. This interval is approximate because the historical shares are rounded."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 22.0. Sample variance of monthly changes = 3.8667; sigma = sqrt(3.8667) = 1.9664. Half-width = 1.28*1.9664*sqrt(2) = 3.5595. Unrounded bounds = 18.4405 and 25.5595; emitted bounds = 18.4 and 25.6."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: more successful automatic verification or an easier August renewal cohort could raise the share above 25.6%. Downside risk: verification failures, a harder cohort, or greater classification of successful renewals as form-based could lower it below 18.4%. A statewide system or reporting-classification break would put the outcome outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification limitation: https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot confirms June 2026 was released September 25, 2026, but provides no future August publication schedule. I could not verify 2026-12-15 from an official calendar or announcement. That date is retained solely as the registered ledger contract; the prompt's official schedule-verification requirement remains unmet."
+    },
+    {
+      "kind": "forecast",
+      "point": 22.0,
+      "ciLow": 18.4,
+      "ciHigh": 25.6
+    }
+  ]
+}

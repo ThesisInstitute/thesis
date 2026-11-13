@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:14Z",
+  "runStartedAt": "2026-10-07T10:14:14Z",
+  "series": "bea.core_pce.mom",
+  "period": "2026-09",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-core-pce-mom-september-2026",
+    "country": "US",
+    "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+    "expectedReleaseWindow": {
+      "end": "2026-11-03",
+      "start": "2026-10-26"
+    },
+    "period": "2026-09",
+    "registeredAt": "2026-09-04T19:02:52Z",
+    "registeredAtUtc": "2026-09-04T19:02:52Z",
+    "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+    "registrationState": "preregistered",
+    "series": "bea.core_pce.mom",
+    "sourceBinding": {
+      "adapter": "generic-url",
+      "allowedHosts": [
+        "www.bea.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-03",
+        "start": "2026-10-26"
+      },
+      "field": "bea.core_pce.mom",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "bea.core_pce.mom",
+      "sourceUrl": "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+      "table": "U.S. Bureau of Economic Analysis, Personal Income and Outlays, August 2026",
+      "transform": {
+        "factor": 1,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558",
+    "targetRegistrationPath": "records/targets/2026-09-04-3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "baad7107ac843adbbb7a8038e4138d5e24100521",
+  "targetContentHash": "3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558",
+  "targetRegistrationPath": "records/targets/2026-09-04-3bd901a59b3f149888eacc83e718008b02d127934c70cbb885ff940917443558.json",
+  "registeredAtUtc": "2026-09-04T19:02:52Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/prompt.md",
+      "sha256": "5654a55b251f2fd6565c1c87bd85beed10823d6914ebc0e6206282de6658c3b3",
+      "bytes": 10600,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/command.json",
+      "sha256": "ecdabc152ac0f1125185945a937d4e965a07ee8e937f4c90a44b46b053f3910a",
+      "bytes": 188,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/stdout.txt",
+      "sha256": "14f53c763f56c43b8cd1b5b9824c68e398369a72a5fd7dba59883e64b68e3109",
+      "bytes": 4020,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/raw_response.txt",
+      "sha256": "14f53c763f56c43b8cd1b5b9824c68e398369a72a5fd7dba59883e64b68e3109",
+      "bytes": 4020,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/parsed_cells.json",
+      "sha256": "98f7057de07755e708e67f1e4764d6f8b1cf8cdcf9ac3411b7300ac4b311f254",
+      "bytes": 4192,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/normalized_cells.json",
+      "sha256": "b8fd1c126125362c7b6e401c5abb25b6a3596d8c4a9221ebd38c6470a12bf426",
+      "bytes": 3934,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:14Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/us-core-pce-mom-september-2026__r1/manifest.json",
+      "sha256": "21e82e09d09a9121a7c2fda46afc94e936d3eb5bf4da032058b6876320b792c5",
+      "bytes": 4439,
+      "createdAt": "2026-10-07T10:14:14Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "44006171c2ae3a9ad3a74ed95ec76dcc448793c6c7cbb1f3a9bb52a6721318d1"
+}

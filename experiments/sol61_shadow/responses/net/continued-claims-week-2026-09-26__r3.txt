@@ -1,0 +1,133 @@
+{
+  "slug": "continued-claims-week-2026-09-26",
+  "country": "US",
+  "type": "data",
+  "title": "US continued claims: September 26, 2026",
+  "question": "What will the US Department of Labor's first advance seasonally adjusted continued-claims count (insured unemployment under regular state programs, CCSA) be for the week ending September 26, 2026, in millions?",
+  "unit": "millions",
+  "pointEstimate": 1.696,
+  "ciLow": 1.67,
+  "ciHigh": 1.722,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-08",
+  "resolutionSource": "US Department of Labor, Unemployment Insurance Weekly Claims",
+  "resolutionSourceUrl": "https://www.dol.gov/ui/data.pdf",
+  "resolutionRule": "Resolve to the first official advance seasonally adjusted insured-unemployment count for the week ending 2026-09-26, scheduled for publication on 2026-10-08. Preserve the registered ALFRED CCSA advance_vintage resolver by using the earliest vintage containing that observation and checking it against the DOL release. Multiply the published person count by 0.000001; published thousand-person precision corresponds to 0.001 million. Ignore subsequent corrections, weekly revisions, and seasonal-factor revisions.",
+  "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "week_ending", "value": "2026-08-01"},
+      "label": "week ending 2026-08-01",
+      "value": 1.777
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-08"},
+      "label": "week ending 2026-08-08",
+      "value": 1.799
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-15"},
+      "label": "week ending 2026-08-15",
+      "value": 1.778
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-22"},
+      "label": "week ending 2026-08-22",
+      "value": 1.779
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-08-29"},
+      "label": "week ending 2026-08-29",
+      "value": 1.774
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-05"},
+      "label": "week ending 2026-09-05",
+      "value": 1.73
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-12"},
+      "label": "week ending 2026-09-12",
+      "value": 1.719
+    },
+    {
+      "period": {"type": "week_ending", "value": "2026-09-19"},
+      "label": "week ending 2026-09-19",
+      "value": 1.701
+    }
+  ],
+  "drivers": [
+    "Persistence around the latest 1.701 million advance count",
+    "Partial continuation of the recent downward trend",
+    "Observed dispersion of weekly first-print changes",
+    "Reporting revisions and seasonal-adjustment residuals"
+  ],
+  "sourceContext": [
+    "https://www.dol.gov/ui/data.pdf",
+    "https://oui.doleta.gov/unemploy/archive.asp",
+    "https://fred.stlouisfed.org/releases/calendar?ob=rd&od=asc&rid=180&ve=2026-12-31&view=week&vs=2026-01-01",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA&cosd=2026-08-01&coed=2026-08-01&vintage_date=2026-08-13",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA&cosd=2026-08-08&coed=2026-08-08&vintage_date=2026-08-20",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA&cosd=2026-08-15&coed=2026-08-15&vintage_date=2026-08-27",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA&cosd=2026-08-22&coed=2026-08-22&vintage_date=2026-09-03",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA&cosd=2026-08-29&coed=2026-08-29&vintage_date=2026-09-10",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA&cosd=2026-09-05&coed=2026-09-05&vintage_date=2026-09-17",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA&cosd=2026-09-12&coed=2026-09-12&vintage_date=2026-09-24",
+    "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA&cosd=2026-09-19&coed=2026-09-19&vintage_date=2026-10-01"
+  ],
+  "runAt": "2026-10-07T12:27:38Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "First-print forecast for continued claims, week ending September 26, 2026"
+    },
+    {
+      "kind": "text",
+      "text": "The target is DOL seasonally adjusted insured unemployment under regular state programs, mirrored by ALFRED series CCSA. Every forecast anchor and historical entry uses this same seasonally adjusted variant. Historical entries are original advance prints, rather than subsequently revised values or moving averages."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification: DOL's archive.asp publication schedule specifies Thursday morning releases at 8:30 a.m. Eastern, with November 25 the listed 2026 exception. The official Federal Reserve release calendar explicitly lists October 8, 2026, at 7:30 a.m. Central for this release. DOL's October 1 release reports continued claims only through September 19. These sources identify October 8 as the September 26 first-print release. The registered October 14-18 window is one week late; the forecast retains the registered period and dataPointId and flags this discrepancy."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.dol.gov/ui/data.pdf and read the October 1, 2026 seasonally adjusted insured-unemployment paragraph and table.",
+      "result": "Week ending 2026-09-19 advance insured unemployment: 1,701,000. Week ending 2026-09-12: revised to 1,712,000 from its original 1,719,000. The latest four-week average is 1,723,750. The forecast anchor is the unsmoothed 1,701,000 advance count."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and echo ALFRED CCSA CSV responses using cosd=coed for weeks 2026-08-01, 2026-08-08, 2026-08-15, and 2026-08-22, with vintage_date respectively 2026-08-13, 2026-08-20, 2026-08-27, and 2026-09-03.",
+      "result": "Original advance counts: 2026-08-01 = 1,777,000; 2026-08-08 = 1,799,000; 2026-08-15 = 1,778,000; 2026-08-22 = 1,779,000. Each populated CSV response was fetched with curl -sS and echoed during this run."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and echo ALFRED CCSA CSV responses using cosd=coed for weeks 2026-08-29, 2026-09-05, 2026-09-12, and 2026-09-19, with vintage_date respectively 2026-09-10, 2026-09-17, 2026-09-24, and 2026-10-01.",
+      "result": "Original advance counts: 2026-08-29 = 1,774,000; 2026-09-05 = 1,730,000; 2026-09-12 = 1,719,000; 2026-09-19 = 1,701,000. Each populated CSV response was fetched with curl -sS and echoed during this run."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class consists of eight consecutive original first prints from August 1 through September 19. The persistence base rate is the latest 1.701 million count. Across seven weekly changes, the series declined by 76,000 overall, giving an average change of -10,857.143 claims per week."
+    },
+    {
+      "kind": "text",
+      "text": "Separate adjustments: level is anchored at 1.701 million; momentum receives half the observed mean weekly decline, a judgmental shrinkage toward persistence because weekly changes are noisy. One-off and policy-mechanism adjustments are both zero because the fetched evidence supplies no quantified target-week effect. The small historical sample limits confidence in the interval's calibration."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior with 50% of the mean change from eight fetched original advance CCSA prints. Seven successive changes, in thousands, are [22, -21, 1, -5, -44, -11, -18], with mean -10.857143 and sum of squared deviations 2506.857143. Sample sigma = 0.0204403895 million = sqrt(2506.857143 / 6) / 1000. Level 1.701 plus momentum 0.5 * (-0.010857143), one-off 0, and policy adjustment 0 gives 1.695571429 million, rounded to 1.696. A normal 80% predictive interval uses half-width 1.28 * sigma = 0.026163699 million. Around the rounded point, bounds are 1.669836301 and 1.722163699, rounded to 1.670 and 1.722 million."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: slower reemployment or catch-up processing could repeat the fetched August 8 increase of 22,000, putting the count at 1.723 million, above the interval. Downside risk: faster benefit exits or seasonal-adjustment residuals could repeat the fetched September 5 decline of 44,000, putting the count at 1.657 million, below the interval. Both scenarios would land outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.696,
+      "ciLow": 1.67,
+      "ciHigh": 1.722
+    }
+  ]
+}

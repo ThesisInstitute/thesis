@@ -1,0 +1,161 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "An Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress, House Report 119-698) is enacted into law on or before 2026-12-31.",
+  "title": "FY2027 DoD prime award obligations",
+  "question": "Conditional on the registered FY2027 NDAA enactment condition, what will USAspending API v2 agency 097 awards obligations for fiscal year 2027 equal, in billions USD, in the first registered query snapshot?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+  "resolutionRule": "Conditional on the registered enactment condition, read obligations from the exact registered FY2027 query and multiply by 1e-09, preserving the returned precision. Resolve against the first registered snapshot, without subsequent revisions or correction grace. The supplied contract provides an expected window but no exact snapshot timestamp or resolutionDate, and an official schedule verifying that date could not be established. Resolution therefore remains unspecified.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 431.88364015745
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 395.33443647687
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 424.50276360528
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 467.27708690212
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 456.6531220443
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 501.6682566824
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2026"
+      },
+      "label": "FY2026",
+      "value": 384.21991432142
+    }
+  ],
+  "drivers": [
+    "DoD contract reporting delay",
+    "Proposed procurement and research funding increases",
+    "Authorization requires subsequent appropriations",
+    "Missing exact registered snapshot date"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/system/files/2025-04/gsdm-information-flow-diagram-v1.1.1.pdf",
+    "https://tfx.treasury.gov/monthly-reporting-requirements",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://www.cbo.gov/publication/62540",
+    "https://comptroller.war.gov/Portals/45/Documents/defbudget/FY2027/FY2027_Budget_Request_Overview_Book.pdf"
+  ],
+  "runAt": "2026-10-07T12:34:00Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required resolution date could not be verified"
+    },
+    {
+      "kind": "text",
+      "text": "The historical base rate was fetched successfully. However, the supplied ledger omits an exact resolutionDate and snapshot timestamp. Official documentation establishes continuous award-data updates, not a scheduled annual print for this query. Choosing a date from the expected window would violate the instruction against inferring resolution dates."
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.agency.097.awards.obligations: the obligations field of GET /api/v2/agency/097/awards/?fiscal_year=YYYY, multiplied by 1e-09. All historical anchors use this registered query, not agency account totals. These are current query vintages, not archived original October snapshots."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the exact registered USAspending query separately for FY2020, FY2021 and FY2022 using curl -sS; echo and inspect each complete JSON response.",
+      "result": "Fetched obligations in USD: FY2020 431883640157.45; FY2021 395334436476.87; FY2022 424502763605.28. Each response reported latest_action_date September 30 of its fiscal year."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the exact registered USAspending query separately for FY2023, FY2024 and FY2025 using curl -sS; echo and inspect each complete JSON response.",
+      "result": "Fetched obligations in USD: FY2023 467277086902.12; FY2024 456653122044.3; FY2025 501668256682.4. Each response reported latest_action_date September 30 of its fiscal year."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026 using curl -sS and inspect the echoed response.",
+      "result": "Fetched FY2026 obligations 384219914321.42 USD, transaction_count 3218036 and latest_action_date 2026-09-30T00:00:00. This early-October observation remains exposed to delayed reporting."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is the six older fiscal-year flows, FY2020 through FY2025. Their base rate mean is 446.2198843114 billion USD. FY2026 is retained as fetched context but excluded from mature-year dispersion because its early-October reporting vintage differs."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official CBO estimate at https://www.cbo.gov/publication/62540 and inspect its authorization and appropriation comparison.",
+      "result": "CBO reports proposed FY2027 defense authorizations 252.4 billion USD, or 28%, above FY2026 discretionary defense appropriations of 891.4 billion USD. Proposed procurement increases 95.0 billion USD and research and development increases 75.5 billion USD. CBO assumes subsequent appropriation of authorized amounts."
+    },
+    {
+      "kind": "text",
+      "text": "USAspending's official Data Sources documentation describes daily updates after its nightly pipeline and a 90-day delay for DoD contract submissions. Treasury's information-flow documentation states that monthly DABS publication does not itself update previously published award records. Consequently, a DABS reporting deadline cannot establish this award-query snapshot date."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: A candidate persistence prior would distinguish the mature annual level, historical momentum, reporting-vintage effects and conditional policy effects. For the six fetched FY2020-FY2025 annual flow values, sigma = 37.130230967925414 billion USD, computed as sqrt(sum((value - 446.21988431140335)^2)/5). The standard 80% half-width is 1.28*sigma = 47.52669563894453 billion USD. Policy and snapshot-timing adjustments cannot yield a validated final point or implied bounds until the exact observation date is specified; no interval is issued."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would arise from appropriated procurement increases and faster award execution; downside risk would arise from delayed appropriations, contract execution or reporting. Unexpected supplemental funding or substantial publication delays could place an observation outside the interval of a subsequently specified model. This run withholds that interval."
+    },
+    {
+      "kind": "text",
+      "text": "The exact FY2027 query returned {\"detail\":\"Value for fiscal_year is outside the range of current submissions\"}, with no obligations statistic. The official FY2027 DABS schedule link was located, but its XLSX content could not be read by the web tool. No unavailable source values were substituted."
+    },
+    {
+      "kind": "text",
+      "text": "Refusal: an auditable forecast satisfying the mandatory official resolution-date verification cannot be completed from the supplied contract and fetched evidence. Estimates and resolutionDate are null to avoid fabricating a compliant forecast."
+    }
+  ]
+}

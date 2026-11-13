@@ -1,0 +1,150 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-il",
+  "country": "US",
+  "type": "data",
+  "title": "Illinois ex parte renewal share, August 2026",
+  "question": "What percentage of Illinois Medicaid and CHIP beneficiaries due for renewal in August 2026 will be renewed on an ex parte basis, calculated from CMS's first published original (O) submission row?",
+  "unit": "percent",
+  "pointEstimate": 65.6,
+  "ciLow": 59.5,
+  "ciHigh": 71.7,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Illinois's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Ignore subsequent revisions and updated (U) submissions.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.il.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 65.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 65.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 58.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 64.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 66.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 64.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 63.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 62.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 64.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 64.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 65.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 65.9
+    }
+  ],
+  "drivers": [
+    "Persistence near the recent Illinois original-submission level",
+    "Modest smoothing toward the latest three-month average",
+    "Renewal-cohort composition and automatic verification success",
+    "Historical monthly volatility, including the September 2025 decline",
+    "Announced eligibility changes begin after the August reporting period"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=100&conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=IL&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202507&conditions%5B2%5D%5Boperator%5D=%3E%3D&properties%5B0%5D=reporting_period&properties%5B1%5D=original_or_updated&properties%5B2%5D=beneficiaries_with_a_renewal_due&properties%5B3%5D=beneficiaries_whose_coverage_was_renewed_total&properties%5B4%5D=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis&properties%5B5%5D=beneficiaries_with_a_pending_renewal&schema=false",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://hfs.illinois.gov/info/fedresctr/faqshowwillfedchimpactmedicaid.html"
+  ],
+  "runAt": "2026-10-07T12:03:25Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Illinois August 2026 ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the Illinois state row for reporting_period=202608 and original_or_updated=O in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. All historical anchors use that dataset's O rows, rather than updated U outcomes. The ledger does not explicitly identify the denominator; this forecast interprets the share as Metric 5a1 divided by Metric 5, consistent with CMS's published state percentage table. This is a state percentage, not a national total or weighted average."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS datastore original Illinois rows for July through December 2025, selecting reporting period, beneficiaries due for renewal, and beneficiaries renewed ex parte; echo and read the API response.",
+      "result": "Fetched ex parte/due counts: July 2025 166096/255612; August 160448/244128; September 128752/221017; October 138414/213528; November 143452/216947; December 143827/222861. Calculated one-decimal shares are 65.0%, 65.7%, 58.3%, 64.8%, 66.1%, and 64.5%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS datastore original Illinois rows from January 2026 onward, including numerator and denominator footnotes; echo and read the API response.",
+      "result": "Fetched ex parte/due counts: January 2026 102862/163325; February 134274/216487; March 152578/236409; April 131055/202881; May 135868/206905; June 132556/201287. Calculated shares are 63.0%, 62.0%, 64.5%, 64.6%, 65.7%, and 65.9%. The response contains six rows through June; numerator and denominator footnotes are blank for each."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's January 2026 Medicaid/CHIP Eligibility Operations and Enrollment Snapshot, Coverage Retention and Disenrollment Rates by State table, PDF page 27.",
+      "result": "The Illinois row reports 163325 beneficiaries due for renewal and 63% renewed on an ex parte basis. The percentage columns explicitly use total beneficiaries due for renewal as their denominator. The API's original January counts give 100*102862/163325=62.979948%, corroborating the published whole-percent figure."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the twelve fetched monthly Illinois O shares from July 2025 through June 2026. Using unrounded ratios, the base rate mean is 64.175083%, the range is 58.254342% to 66.123062%, and the latest three-month mean is 65.372687%. June's 65.854228% supports a current level above the full-sample mean. One previous August observation is insufficient to estimate a separate seasonal effect."
+    },
+    {
+      "kind": "text",
+      "text": "Separate adjustments: level is anchored on June persistence; recent momentum is damped by averaging that level with the April-June mean. No separate one-off shift is assigned. Illinois HFS says work requirements and six-month ACA adult renewals begin in 2027, while immigrant eligibility narrowing begins October 1, 2026. These announced changes occur after August, so the direct policy adjustment is zero. HFS's description of Form A supports automatic data verification as the continuing mechanism."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a smoothed persistence prior with twelve monthly original O observations, July 2025-June 2026. The persistence level is 65.854228%; smoothing toward the April-June mean of 65.372687% contributes -0.240771 percentage points; one-off and direct policy adjustments are each zero. Point = 0.5*65.854228 + 0.5*65.372687 = 65.613457%, rounded to 65.6%. For the eleven successive changes in unrounded shares, mean change = 0.079499 percentage points and sum of squared deviations = 114.459348. Sample sigma = sqrt(114.459348/10) = 3.383184 percentage points. The one-month normal 80% half-width is 1.28*sigma = 4.330476. August is two reporting months beyond June, so use a random-walk horizon factor sqrt(2): half-width = 1.28*3.383184*sqrt(2) = 6.124217. Implied bounds are 65.613457 +/- 6.124217 = [59.489240, 71.737675], rounded to [59.5, 71.7]. The September decline and October rebound remain in the dispersion estimate."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a cohort unusually easy to verify automatically, or improved data matching, could raise the share above 71.7% and outside the interval. Downside risk: disrupted data matching or a cohort requiring substantially more manual verification could lower it below 59.5%. A recurrence of September 2025's fetched 58.3% share would land below the interval."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification limitation: no official forward publication schedule confirming December 15, 2026 was found. CMS's snapshot page lists completed releases, and its specifications describe state submission deadlines rather than public release dates. The specifications' December 15 example concerns an updated August report, not publication of the original row. resolutionDate retains the registered ledger value 2026-12-15, but that date is unverified; the required official-calendar validation could not be satisfied."
+    },
+    {
+      "kind": "forecast",
+      "point": 65.6,
+      "ciLow": 59.5,
+      "ciHigh": 71.7
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "slug": "us-usfs-minnesota-place-of-performance-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 USFS Minnesota obligations: forecast refused",
+  "question": "What will USAspending report for FY2026 prime award transaction obligations filtered to the Forest Service awarding subagency and Minnesota place of performance, in USD millions, at the first registered-query snapshot?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Execute the registered sourceBinding POST query unchanged for FY2026, retaining its awarding-subagency, place-of-performance, award-type, transaction-level and fiscal-year filters. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001 to obtain USD millions, preserving returned precision. Resolve on the first registered-query snapshot, excluding subsequent revisions. The exact snapshot date could not be independently verified in this run.",
+  "dataPointId": "usaspending.usfs.minnesota_place_of_performance_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T12:43:40Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: required registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the exact registered USAspending transaction query for Forest Service awards with Minnesota place of performance. Agency totals and other aggregates cannot supply its historicalContext."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: opening https://api.usaspending.gov/api/v2/search/spending_over_time/ with the web tool returned HTTP 405 Method Not Allowed. This GET attempt did not execute the required POST query and returned no historical observations."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official endpoint index at https://api.usaspending.gov/docs/endpoints specifies POST for spending_over_time. Available web tools expose no request-method or request-body parameter. The run's shell restrictions exclude an alternative HTTP client, so the required historical POST requests could not be executed."
+    },
+    {
+      "kind": "text",
+      "text": "Reference class and base rate: no canonical historical obligation values were fetched. The mandatory history requirement is unmet. This is a tool-access failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Publication timing: https://www.usaspending.gov/data/data-sources-download.pdf describes daily updates after the nightly pipeline and separate monthly accounting submissions. https://tfx.treasury.gov/data-transparency/resources lists a fiscal-year reporting schedule, but no fetched source verifies the exact registered-query snapshot date. The supplied release window is not an independently verified resolutionDate."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no numerical persistence prior, historical sample, level or momentum adjustment, one-off adjustment, or policy adjustment can be estimated from fetched target history. Sigma and the required dispersion-based interval are unavailable; no implied bounds are asserted."
+    },
+    {
+      "kind": "math",
+      "text": "The registered conversion is aggregated_amount multiplied by 0.000001. No aggregated_amount was fetched, so no point estimate or 80% interval can be calculated."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and outcomes outside the interval cannot be quantified without the required observations. Null estimates and empty historicalContext explicitly record the refusal required when the registered query cannot be executed."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "slug": "ssi-recipients-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SSI recipients, September 2026",
+  "question": "How many recipients, in millions, will SSA report for September 2026 in the FIRST PRINT of SSI Monthly Statistics, Table 2, All Federally Administered Payments, Number of recipients, Total, United States, end of month, not seasonally adjusted?",
+  "unit": "millions",
+  "pointEstimate": 7.328840,
+  "ciLow": 7.306982,
+  "ciHigh": 7.350698,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Social Security Administration, SSI Monthly Statistics, Table 2",
+  "resolutionSourceUrl": "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-07/table02.html",
+  "resolutionRule": "Resolve using the September 2026 row, Number of recipients > Total, in Table 2, All Federally Administered Payments, of the FIRST publication of SSA SSI Monthly Statistics for September 2026, at https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-09/table02.html. This is the national end-of-month count including federal-payment-only, federal-plus-state-supplementation, and state-supplementation-only recipients, without seasonal adjustment. Convert integer persons to millions by division by 1,000,000 and retain six decimal places. Later revisions and corrections do not replace the first print. The registered July source URL is preserved, but identifies an earlier issue rather than the resolving September artifact. The registered factor 0.001 does not convert this raw-person column to millions. An exact resolution date was neither supplied nor verified; resolutionDate is null, and this object cannot pass the publication contract until that missing field is established.",
+  "dataPointId": "ssa.ssi.total_recipients.2026-09.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2024-09"}, "label": "2024-09", "value": 7.430106},
+    {"period": {"type": "month", "value": "2024-10"}, "label": "2024-10", "value": 7.413487},
+    {"period": {"type": "month", "value": "2024-11"}, "label": "2024-11", "value": 7.413881},
+    {"period": {"type": "month", "value": "2024-12"}, "label": "2024-12", "value": 7.423856},
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 7.392700},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": 7.414114},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 7.414184},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 7.423718},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": 7.409168},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 7.412558},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 7.394877},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 7.405735},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 7.436689},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 7.393406},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 7.391176},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 7.392201},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 7.369510},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 7.358913},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 7.351825},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 7.338132},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 7.322937},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 7.323731},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": 7.300297},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "2026-08", "value": 7.306182}
+  ],
+  "drivers": [
+    "Latest observed recipient level",
+    "Recurring September increase in two fetched years",
+    "Negative annual recipient drift",
+    "Uncertainty from realized monthly changes"
+  ],
+  "sourceContext": [
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2024-08/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2024-09/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2024-10/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2024-11/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2024-12/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-01/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-02/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-03/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-04/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-05/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-06/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-07/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-08/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-09/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-10/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-11/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-12/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-01/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-02/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-03/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-04/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-05/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-06/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-07/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-08/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/index.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-08/index.html",
+    "https://www.ssa.gov/policy/pub_schedule.html"
+  ],
+  "runAt": "2026-10-07T12:40:14Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 SSI total recipients: official-history seasonal benchmark"
+    },
+    {
+      "kind": "text",
+      "text": "The target is SSA SSI Monthly Statistics Table 2, Total number of recipients of all federally administered SSI payments, for September 2026, national end-of-month count without seasonal adjustment, resolving on FIRST PRINT. Preserve the supplied slug, unit millions, and dataPointId. No policy condition applies. History uses the matching month row of each contemporaneous monthly Table 2 issue, rather than a later issue's historical rows."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/{period}/table02.html for periods 2024-09, 2024-10, 2024-11, 2024-12, 2025-01, and 2025-02; inspect each matching publication-month row, Number of recipients > Total.",
+      "result": "Fetched total persons: 2024-09 = 7,430,106; 2024-10 = 7,413,487; 2024-11 = 7,413,881; 2024-12 = 7,423,856; 2025-01 = 7,392,700; 2025-02 = 7,414,114. Each official Table 2 identifies Supplemental Security Record, 100 percent data, and end-of-month observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/{period}/table02.html for periods 2025-03, 2025-04, 2025-05, 2025-06, 2025-07, and 2025-08; inspect each matching publication-month row, Number of recipients > Total.",
+      "result": "Fetched total persons: 2025-03 = 7,414,184; 2025-04 = 7,423,718; 2025-05 = 7,409,168; 2025-06 = 7,412,558; 2025-07 = 7,394,877; 2025-08 = 7,405,735."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/{period}/table02.html for periods 2025-09, 2025-10, 2025-11, 2025-12, 2026-01, and 2026-02; inspect each matching publication-month row, Number of recipients > Total.",
+      "result": "Fetched total persons: 2025-09 = 7,436,689; 2025-10 = 7,393,406; 2025-11 = 7,391,176; 2025-12 = 7,392,201; 2026-01 = 7,369,510; 2026-02 = 7,358,913."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/{period}/table02.html for periods 2026-03, 2026-04, 2026-05, 2026-06, 2026-07, and 2026-08; inspect each matching publication-month row, Number of recipients > Total.",
+      "result": "Fetched total persons: 2026-03 = 7,351,825; 2026-04 = 7,338,132; 2026-05 = 7,322,937; 2026-06 = 7,323,731; 2026-07 = 7,300,297; 2026-08 = 7,306,182."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2024-08/table02.html and https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2024-09/table02.html; compare with the fetched August and September 2025 issues.",
+      "result": "August 2024 Total recipients = 7,399,737; September 2024 = 7,430,106. August 2025 = 7,405,735; September 2025 = 7,436,689. Derived September increases are 30,369 and 30,954 persons. The tables do not establish an administrative cause for this recurring pattern."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.ssa.gov/policy/pub_schedule.html, https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/index.html, and https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-08/index.html.",
+      "result": "The current publication is August 2026 and says released September 2026. The publishing schedule lists SSI Monthly Statistics as monthly but leaves its anticipated release date blank. No exact release day for the September 2026 observation was verified. The supplied target context contains an expected window, 2026-10-31 through 2026-11-08, but no resolutionDate or resolutionDateBasis. Neither endpoint can honestly be labeled an official scheduled day or a registered resolve-by deadline. resolutionDate is null, preventing full contract validation."
+    },
+    {
+      "kind": "text",
+      "text": "Ledger discrepancy: the registered July Table 2 Total is 7,300,297 persons, not thousands. Multiplication by the registered factor 0.001 gives 7,300.297, whereas the registered unit millions requires 7.300297. Retain the same target and unit and explicitly divide persons by 1,000,000. The pinned July URL also cannot itself resolve September; the resolution rule identifies the same table in the September issue. The slug comes from the supplied target because the independence instruction prohibits checking the catalog website."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the 24 matching monthly prints from September 2024 through August 2026 have mean level 7.384724 million and range 7.300297–7.436689 million. Their 23 successive changes have mean -0.005388 million, median -0.002230 million, sample standard deviation 0.017055821 million, and range -0.043283 to +0.030954 million. The default last-print persistence baseline is 7.306182 million, with an 80% interval [7.284324, 7.328040]. The August 2026 annual change is -0.099553 million. The latest monthly gain of 0.005885 million is already included in the observed level."
+    },
+    {
+      "kind": "tool",
+      "tool": "functions.exec",
+      "call": "Run Python arithmetic and JavaScript candidate construction on the fetched 24-count array. Compare fixed-rule one-step forecasts using preceding observations over October 2025–August 2026. Generate thesis_model_candidate_v1 candidates with Gaussian fallback-prior intervals from the sample standard deviation of 23 successive changes.",
+      "result": "Fetched input ends at August 2026 = 7,306,182 persons. Derived candidate set, all in millions: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":7.306182,\"p10\":7.284324,\"p50\":7.306182,\"p90\":7.328040,\"interval80\":[7.284324,7.328040],\"interval90\":[7.278128,7.334236],\"intervalMethod\":\"Gaussian fallback-prior: sample standard deviation of successive first-print changes\",\"calibration_n\":23,\"trainCutoff\":\"2026-08\",\"walkForward\":{\"n\":11,\"start\":\"2025-10\",\"end\":\"2026-08\",\"mae\":0.013265,\"rmse\":0.017989}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_drift\",\"point\":7.300794,\"p10\":7.278936,\"p50\":7.300794,\"p90\":7.322652,\"interval80\":[7.278936,7.322652],\"interval90\":[7.272740,7.328848],\"intervalMethod\":\"Gaussian fallback-prior: sample standard deviation of successive first-print changes\",\"calibration_n\":23,\"trainCutoff\":\"2026-08\",\"walkForward\":{\"n\":11,\"start\":\"2025-10\",\"end\":\"2026-08\",\"mae\":0.012192,\"rmse\":0.016804}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing6_drift\",\"point\":7.297394,\"p10\":7.275536,\"p50\":7.297394,\"p90\":7.319251,\"interval80\":[7.275536,7.319251],\"interval90\":[7.269339,7.325448],\"intervalMethod\":\"Gaussian fallback-prior: sample standard deviation of successive first-print changes\",\"calibration_n\":23,\"trainCutoff\":\"2026-08\",\"walkForward\":{\"n\":11,\"start\":\"2025-10\",\"end\":\"2026-08\",\"mae\":0.011664,\"rmse\":0.017273}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"seasonal_change\",\"point\":7.337136,\"p10\":7.315278,\"p50\":7.337136,\"p90\":7.358994,\"interval80\":[7.315278,7.358994],\"interval90\":[7.309082,7.365190],\"intervalMethod\":\"Gaussian fallback-prior: sample standard deviation of successive first-print changes\",\"calibration_n\":23,\"trainCutoff\":\"2026-08\",\"walkForward\":{\"n\":11,\"start\":\"2025-10\",\"end\":\"2026-08\",\"mae\":0.011188,\"rmse\":0.015226}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"seasonal_change_annual_drift\",\"point\":7.328840,\"p10\":7.306982,\"p50\":7.328840,\"p90\":7.350698,\"interval80\":[7.306982,7.350698],\"interval90\":[7.300786,7.356894],\"intervalMethod\":\"Gaussian fallback-prior: sample standard deviation of successive first-print changes\",\"calibration_n\":23,\"trainCutoff\":\"2026-08\",\"walkForward\":{\"n\":11,\"start\":\"2025-10\",\"end\":\"2026-08\",\"mae\":0.010239,\"rmse\":0.014223}}]."
+    },
+    {
+      "kind": "text",
+      "text": "Select seasonal_change_annual_drift as the outside-view prior. It has the lowest RMSE and MAE on the common 11-period walk-forward comparison. Its forecast equals the latest level plus the previous year's matching monthly change plus one-twelfth of the latest annual level change. These coefficients are fixed, not fitted to the comparison period. September's positive increment appears in both fetched precedents. The selected point is +0.022658 million above persistence but equals the strongest measured benchmark. No discretionary current-news, momentum, policy, or one-off adjustment is applied."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: selected seasonal_change_annual_drift prior uses the 24 matching monthly prints, September 2024–August 2026. Point = latest level 7.306182 + September seasonal increment (7.436689 - 7.405735) + annual-drift offset (7.306182 - 7.405735)/12 = 7.306182 + 0.030954 - 0.008296083 = 7.328839917 million, rounded to 7.328840. Selected-prior weight = 100%; discretionary momentum, policy and one-off updates = 0. For the 23 successive changes d, mean(d) = -0.005388 million; sigma = sqrt(sum((d - mean(d))^2)/(23 - 1)) = 0.017055821 million. Gaussian fallback-prior half-width = 1.281551566*sigma = 0.021857914 million, approximately 1.28*sigma, with widening factor 1.0. Unrounded 80% bounds = 7.328839917 ± 0.021857914 = [7.306982003, 7.350697830]; rounded bounds = [7.306982, 7.350698]. Retain the broader successive-change dispersion rather than narrowing to the selected model's smaller forecast-error scale. The 90% half-width is 1.644853627*sigma = 0.028054329 million."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: only two fetched September increments and 11 common walk-forward predictions support model selection. Using the final historical dispersion as a retrospective coverage diagnostic, the selected rule's errors fall inside the 80% half-width for 9 of 11 comparisons and 9 of the last 10; persistence covers 8 of the last 10. This coverage diagnostic is not an independently calibrated out-of-sample interval score because its scale uses the complete historical sample. A change in seasonal behavior could reduce coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Downside risk/outside the interval: if the recurring September increase fails while annual attrition persists, removing the seasonal increment gives 7.306182 - 0.008296083 = 7.297885917 million, below 7.306982. A new official signal of elevated terminations or suspensions would move the point down. Upside risk/outside the interval: unusually large new awards or restored benefits producing a net September increase greater than 44,516 recipients from August would exceed 7.350698 million. Official evidence of accelerated additions would move the point up. These are falsifying scenarios, not asserted current events."
+    },
+    {
+      "kind": "forecast",
+      "point": 7.328840,
+      "ciLow": 7.306982,
+      "ciHigh": 7.350698
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-la",
+  "country": "US",
+  "type": "data",
+  "title": "Louisiana ex parte renewal share, August 2026",
+  "question": "What percentage of Louisiana Medicaid and CHIP beneficiaries due for renewal in August 2026 will have coverage renewed on an ex parte basis, using the original submission when CMS first publishes it?",
+  "unit": "percent",
+  "pointEstimate": 41.6,
+  "ciLow": 31.8,
+  "ciHigh": 51.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Louisiana's August 2026 reporting-period row, marked O, in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the published counts, rounded to one decimal. Later corrections and updated submissions do not replace the first print. The denominator follows CMS's published snapshot convention; the ledger wording does not explicitly identify it.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.la.aug_2026",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 43
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": 34
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 40
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 41
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 41
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 42
+    }
+  ],
+  "drivers": [
+    "Recent Louisiana original-submission renewal rates",
+    "Renewal cohort composition and automated eligibility matching",
+    "Monthly volatility retained from February's decline and March's rebound",
+    "Two-month horizon beyond the latest published reporting period",
+    "Classification of renewals completed after forms are sent"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T11:57:17Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Louisiana August 2026 ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Louisiana's August 2026 state row in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, original submission O, at first publication. The dictionary identifies ex parte renewals as Metric 5a1 and renewals due as Metric 5. The ledger does not explicitly name its denominator; this forecast interprets the share using CMS's state snapshot convention, ex parte renewals divided by all beneficiaries due for renewal."
+    },
+    {
+      "kind": "text",
+      "text": "The official snapshot release listing ends with June 2026, released September 25, 2026. It does not announce an August 2026 publication date. The registered resolutionDate 2026-12-15 is retained, but could not be verified from an official forward release calendar or announcement in this run. No date was inferred from release cadence."
+    },
+    {
+      "kind": "text",
+      "text": "All six historical values come from the original/preliminary current-month state tables in their respective CMS snapshots, rather than lagged updated panels. CMS publishes these percentages rounded to whole percentage points. The raw Louisiana O numerator and denominator rows could not be fetched through the web tool, so no exact ex parte counts or one-decimal historical shares were reconstructed from rounded percentages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Louisiana's current-month Coverage Retention and Disenrollment Rates tables in the January and February 2026 CMS snapshots.",
+      "result": "January 2026: 90,934 beneficiaries due for renewal, 58% renewed in total, and 43% renewed ex parte. February 2026: 143,411 due, 49% renewed in total, and 34% renewed ex parte. Both tables express percentages relative to beneficiaries due for renewal."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Louisiana's current-month Coverage Retention and Disenrollment Rates tables in the March and April 2026 CMS snapshots.",
+      "result": "March 2026: 108,555 beneficiaries due for renewal, 59% renewed in total, and 40% renewed ex parte. April 2026: 129,160 due, 59% renewed in total, and 41% renewed ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Louisiana's current-month Coverage Retention and Disenrollment Rates tables in the May and June 2026 CMS snapshots.",
+      "result": "May 2026: 111,446 beneficiaries due for renewal, 59% renewed in total, and 41% renewed ex parte. June 2026: 96,868 due, 61% renewed in total, and 42% renewed ex parte. June also reports 16% pending and 20% disenrolled for procedural reasons."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is the six fetched Louisiana original monthly prints for January–June 2026. Their base rate is an unweighted monthly mean of 40.1667%, with a 34%–43% range. The latest three prints are 41%, 41%, and 42%, supporting a level near 42%."
+    },
+    {
+      "kind": "text",
+      "text": "Level: give June persistence most of the weight and shrink modestly toward the six-month mean. Momentum: the recent increase is small compared with realized monthly volatility, so add no trend extrapolation. One-off effects: retain February's decline and March's rebound in dispersion rather than deleting them. Policy mechanisms: CMS warns that data-source renewals completed after forms are sent may be classified as form-based renewals; no fetched Louisiana-specific change establishes a directional August adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior with 80% weight on June's 42% and 20% on the January–June mean of 40.1667%; level shrinkage is -0.3667 percentage points, while momentum, one-off mean, and policy adjustments are each zero. The five successive changes are -9, +6, +1, 0, and +1 percentage points, averaging -0.2. Their squared deviations sum to 118.8, so sigma = 5.45 percentage points, calculated as sqrt(118.8/4). The one-month 80% normal-innovation half-width is 1.28*sigma = 6.98 points. For the two-month June-to-August horizon, multiply by sqrt(2), giving 9.8651 points. This produces rounded final bounds of 31.8% and 51.5%."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 0.8*42 + 0.2*(43+34+40+41+41+42)/6 = 41.6333%, rounded to 41.6%. Half-width = 1.28*sqrt(118.8/4)*sqrt(2) = 9.8651 percentage points. Bounds = 41.6333 +/- 9.8651 = [31.7682, 51.4985]%, rounded to [31.8, 51.5]%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a cohort with more successful automated eligibility matches could raise the share above the recent level; a sufficiently large matching or processing improvement would land above the interval at 51.5%. Downside risk: weaker data matches, processing interruptions, or more renewals classified as form-based could lower the share; a sustained disruption pushing it below 31.8% would land outside the interval. The interval is approximate because it uses five observed monthly changes and rounded historical rates."
+    },
+    {
+      "kind": "forecast",
+      "point": 41.6,
+      "ciLow": 31.8,
+      "ciHigh": 51.5
+    }
+  ]
+}

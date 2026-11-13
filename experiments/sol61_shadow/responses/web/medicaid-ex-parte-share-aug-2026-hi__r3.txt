@@ -1,0 +1,164 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-hi",
+  "country": "US",
+  "type": "data",
+  "title": "Hawaii ex parte renewal share, August 2026",
+  "question": "What percentage of Hawaii Medicaid and CHIP beneficiaries due for renewal in August 2026 will have coverage renewed ex parte, using the original submission row when CMS first publishes the reporting period?",
+  "unit": "percent",
+  "pointEstimate": 74.9,
+  "ciLow": 62.6,
+  "ciHigh": 87.2,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Hawaii's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.hi.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 86
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 69
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 74
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 72
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 69
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 57
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 65
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 70
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 71
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 74
+    }
+  ],
+  "drivers": [
+    "Persistence near Hawaii's latest original ex parte rate",
+    "Damped continuation of the recovery since February",
+    "Monthly renewal-cohort composition and automated matching",
+    "Original-report processing and classification variation"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T11:56:34Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Hawaii August 2026 original ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Hawaii's state row, reporting period 202608, original submission O, in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. CMS defines the numerator as metric 5a1 and the denominator as metric 5, beneficiaries due for renewal. All historical anchors use the current-month original outcomes in official release PDFs, rather than updated outcomes or national averages."
+    },
+    {
+      "kind": "text",
+      "text": "Evidence limitation: the exact dataset's metadata and dictionary were fetched through web search, but its dynamic table and attempted API and filtered URLs did not expose Hawaii's raw numerator counts. HistoricalContext therefore contains the official snapshots' whole-percentage-point rates, not fabricated one-decimal ratios. The final resolver still requires the first-published raw O-row counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the July-December 2025 CMS snapshot PDFs listed in sourceContext and read each current-month Hawaii coverage-retention table.",
+      "result": "Hawaii renewal due count / ex parte percent of due: July 2025 36,119 / 86%; August 36,003 / 77%; September 40,547 / 69%; October 38,684 / 77%; November 36,753 / 74%; December 40,422 / 72%. These are official rounded original-report rates."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the January-March 2026 CMS snapshot PDFs listed in sourceContext and read each current-month Hawaii coverage-retention table.",
+      "result": "Hawaii renewal due count / ex parte percent of due: January 2026 26,831 / 69%; February 18,463 / 57%; March 23,602 / 65%. Total renewed percentages were 87%, 80%, and 83%, respectively; these are distinct from the ex parte target."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the April-June 2026 CMS snapshot PDFs listed in sourceContext and read each current-month Hawaii coverage-retention table.",
+      "result": "Hawaii renewal due count / ex parte percent of due: April 2026 26,046 / 70%; May 38,958 / 71%; June 36,142 / 74%. June total renewed was 88%, disenrolled 9%, and pending 3%. The June snapshot was released September 25, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is twelve Hawaii original monthly prints from July 2025 through June 2026. Their mean, the base rate, is 71.75%, with observed rates from 57% to 86%. June's 74% is above that mean, while August 2025's 77% supports a mid-70s forecast. One prior August observation is insufficient to estimate a separate seasonal effect."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification limitation: the official CMS snapshot announcement page lists completed releases, including June 2026 on September 25, May on August 28, and April on July 31. No official calendar or announcement confirming December 15, 2026 for the August reporting period was found this run. The required ledger resolutionDate is retained, but it is unverified; no exact publication date is inferred from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Level effect: favor the latest 74% observation while shrinking toward the historical mean. Momentum effect: allow a damped continuation of the recent recovery. One-off effect: retain February's drop in dispersion rather than assume a known cause. Policy-mechanism effect: assign no separate adjustment because fetched evidence establishes no August-specific Hawaii change. CMS cautions that cohort composition and how data-based renewals are classified can affect reported ex parte outcomes."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a shrunk persistence prior on twelve original monthly prints: 0.75*74 + 0.25*71.75 = 73.4375. The latest three changes are +5, +1, +3 points; retain one-quarter of their mean over the two-month horizon, adding 0.25*2*3 = 1.5 points. One-off, seasonal, and policy adjustments are zero, giving 74.9375, rounded to 74.9%. Across all eleven successive changes [-9,-8,8,-3,-2,-3,-12,8,5,1,3], mean change = -1.0909 and squared deviations sum = 460.9091; sigma = 6.7890 percentage points, calculated as sqrt(460.9091/10). A normal 80% half-width is 1.28*sigma = 8.6900 points; multiply by sqrt(2) for June-to-August uncertainty, yielding 12.2895. Final implied bounds round to 62.6% and 87.2%. Calibration uses rounded official rates and assumes approximately independent monthly innovations."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 73.4375 + 1.5 = 74.9375 -> 74.9%. Lower = 74.9375 - 12.2895 = 62.6480 -> 62.6%. Upper = 74.9375 + 12.2895 = 87.2270 -> 87.2%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: stronger automated matching or a cohort with more readily verifiable eligibility could move the share toward July 2025's 86%. Downside risk: a less matchable cohort or more form-based processing could reverse the recovery. Outside the interval: a February-like 57% result would fall below 62.6%; converting nearly all retained beneficiaries to ex parte renewal while sustaining July 2025's 94% total retention could push the share above 87.2%. These are scenarios, not observed August outcomes."
+    },
+    {
+      "kind": "forecast",
+      "point": 74.9,
+      "ciLow": 62.6,
+      "ciHigh": 87.2
+    }
+  ]
+}

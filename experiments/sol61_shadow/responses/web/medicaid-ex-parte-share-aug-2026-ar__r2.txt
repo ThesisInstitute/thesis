@@ -1,0 +1,186 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ar",
+  "country": "US",
+  "type": "data",
+  "title": "Arkansas ex parte renewal share, August 2026",
+  "question": "What percentage of Arkansas Medicaid and CHIP beneficiaries due for renewal in August 2026 will CMS report as renewed on an ex parte basis in its first published original (O) submission row?",
+  "unit": "percent",
+  "pointEstimate": 71.8,
+  "ciLow": 68.4,
+  "ciHigh": 75.3,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Arkansas's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using numerator and denominator as first published, and round to one decimal. Exclude updated (U) submissions and subsequent revisions. The ledger expects publication roughly three to four months after the reporting period; its December 15 date was not verified as an official publication date.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ar.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "2025-06",
+      "value": 75
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 74
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 75
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 75
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 76
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 77
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 78
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 74
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 72
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 71
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 71
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 72
+    }
+  ],
+  "drivers": [
+    "Recent Arkansas ex parte shares stabilize near 71–72 percent",
+    "June share remains below its year-earlier level",
+    "Renewal cohort composition and automated eligibility checks",
+    "No work-requirement penalties during August 2026",
+    "Two unobserved reporting months after the latest CMS print"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/sites/default/files/2025-03/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-june2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://humanservices.arkansas.gov/news/dhs-to-launch-soft-implementation-of-work-and-community-engagement-requirement-starting-july-1/"
+  ],
+  "runAt": "2026-10-07T11:44:27Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Arkansas August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the Arkansas state row for August 2026 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, original submission O, at first publication. CMS's convention divides ex parte renewals, Metric 5a1, by all beneficiaries due for renewal, Metric 5. The contemporaneous monthly snapshot tables supply the same original/current-period concept; separate quarterly updated-outcomes tables are excluded. Definitions are in the [CMS dataset](https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c) and [report specifications](https://www.medicaid.gov/sites/default/files/2025-03/eligibility-processing-data-specs-august-2024.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Arkansas's contemporaneous renewal tables in the [January 2026 snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf) and [February 2026 snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf).",
+      "result": "January 2026: 55,651 beneficiaries due for renewal; published ex parte share 78%. February 2026: 48,463 due; ex parte share 74%. Shares use all beneficiaries due as the denominator."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Arkansas's contemporaneous renewal tables in the [March 2026 snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf) and [April 2026 snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf).",
+      "result": "March 2026: 57,641 beneficiaries due; published ex parte share 72%. April 2026: 56,883 due; ex parte share 71%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Arkansas's contemporaneous renewal tables in the [May 2026 snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf) and [June 2026 snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf).",
+      "result": "May 2026: 53,416 beneficiaries due; published ex parte share 71%. June 2026: 53,431 due; ex parte share 72%. June also reports 82% renewed overall and 0.2% pending."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Arkansas's current-period tables in CMS's [July](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf), [August](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf), [September](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf), [October](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf), [November](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf), and [December 2025](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf) snapshots.",
+      "result": "July–December 2025 ex parte shares respectively: 74%, 75%, 75%, 76%, 77%, 77%. Corresponding beneficiaries due: 50,949; 53,723; 52,006; 51,893; 49,192; 54,096."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Arkansas's contemporaneous renewal table in the [June 2025 snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-june2025.pdf).",
+      "result": "June 2025: 53,097 beneficiaries due and a published ex parte share of 75%. August 2025's fetched share was also 75%, so this single prior summer provides no net June-to-August seasonal increase."
+    },
+    {
+      "kind": "text",
+      "text": "History limitation: all thirteen historical shares are fetched CMS snapshot percentages rounded to whole percentage points. The official catalog exposes a downloadable count dataset, but its CSV and the filtered datastore could not be fetched with the web tool. Exact historical O-row ex parte numerators were therefore unavailable; no numerators were reconstructed from rounded percentages. The history is usable at its published precision, while resolution requires the first-published raw count ratio. Dataset provenance was checked against the [official catalog](https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data)."
+    },
+    {
+      "kind": "text",
+      "text": "Publication-date verification failed: the [official CMS release list](https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot) ends with June 2026, released September 25, 2026, and contains no forward August 2026 announcement establishing December 15. The specifications distinguish state submission deadlines from public releases. I retain resolutionDate 2026-12-15 because it is the required ledger field, but cannot claim that it satisfies the official-calendar verification requirement."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the thirteen fetched monthly Arkansas shares from June 2025 through June 2026 average 74.38%, with median 75%. The six 2026 prints average 73%, and April–June average 71.33%. These show a lower recent level, supporting greater weight on current persistence than on the full-history average. August 2025's 75% is tempered by June 2026 being three percentage points below June 2025."
+    },
+    {
+      "kind": "text",
+      "text": "Adjustment components: level is anchored at June's 72%; momentum receives only a small downward adjustment toward the April–June average because the latest monthly movement was positive. The fetched prior June-to-August change supplies a zero seasonal adjustment. No measured one-off effect is available. Arkansas's [official DHS announcement](https://humanservices.arkansas.gov/news/dhs-to-launch-soft-implementation-of-work-and-community-engagement-requirement-starting-july-1/) says work-requirement soft implementation starts in July 2026, with no penalties during 2026 and full implementation in January 2027. I therefore apply no August penalty adjustment. Any renewal benefit from additional automated checks remains an unquantified scenario."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior blended as 75% of June's 72% plus 25% of the April–June mean, giving 71.8333%. Momentum contributes -0.1667 percentage points relative to June; seasonal, one-off, and quantified policy adjustments are zero. Size uncertainty from the six fetched 2026 prints, whose successive changes are [-4, -2, -1, 0, 1] percentage points. Their mean is -1.2 and centered sum of squares is 14.8, so sigma = 1.9235 percentage points = sqrt(14.8 / 4). The one-month normal 80% half-width is 1.28*sigma = 2.4621. For the two unobserved months from June to August, multiply by sqrt(2), giving 3.4820. This horizon adjustment assumes independent monthly innovations and is approximate given the small, rounded sample. Final implied bounds are 71.8333 +/- 3.4820 = [68.3514, 75.3153], rounded to [68.4, 75.3]."
+    },
+    {
+      "kind": "math",
+      "text": "Point = round(0.75*72 + 0.25*((71+71+72)/3), 1) = 71.8. Half-width = 1.28*sqrt(14.8/4)*sqrt(2) = 3.4820 percentage points. Rounded 80% interval = [68.4, 75.3]."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: improved data matching or a cohort resembling the higher-share late-2025 months could lift the result; a return near the fetched 77–78% levels would land above the interval. Downside risk: failed automated matches, greater reliance on renewal forms, or processing disruption could reduce ex parte completions; a share below 68.4% would be outside the interval. These are falsification scenarios rather than measured adjustments."
+    },
+    {
+      "kind": "forecast",
+      "point": 71.8,
+      "ciLow": 68.4,
+      "ciHigh": 75.3
+    }
+  ]
+}

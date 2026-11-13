@@ -1,0 +1,137 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-de",
+  "country": "US",
+  "type": "data",
+  "title": "Delaware ex parte renewal share, August 2026",
+  "question": "What percentage of Delaware Medicaid and CHIP beneficiaries due for renewal in August 2026 will be reported as renewed on an ex parte basis in the FIRST PRINT of the original (O) submission in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c? Interpret the share as 100 times Metric 5a1 divided by Metric 5, not seasonally adjusted, rounded to one decimal.",
+  "unit": "percent",
+  "pointEstimate": 37.7,
+  "ciLow": 14.7,
+  "ciHigh": 60.7,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Delaware's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal. For computation, use State Abbreviation DE, Reporting Period 202608, Original or Updated O, and 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis (Metric 5a1) divided by Beneficiaries with a Renewal Due (Metric 5). This adopts CMS's published ex parte rate definition; the registered wording does not explicitly identify the denominator. The series is not seasonally adjusted. Later updated submissions and corrections do not replace the first published original submission.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.de.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2023-05"}, "label": "2023-05", "value": 22.0},
+    {"period": {"type": "month", "value": "2023-06"}, "label": "2023-06", "value": 17.1},
+    {"period": {"type": "month", "value": "2023-07"}, "label": "2023-07", "value": 20.3},
+    {"period": {"type": "month", "value": "2023-08"}, "label": "2023-08", "value": 21.0},
+    {"period": {"type": "month", "value": "2023-09"}, "label": "2023-09", "value": 19.3},
+    {"period": {"type": "month", "value": "2023-10"}, "label": "2023-10", "value": 26.8},
+    {"period": {"type": "month", "value": "2023-11"}, "label": "2023-11", "value": 27.2},
+    {"period": {"type": "month", "value": "2023-12"}, "label": "2023-12", "value": 32.4},
+    {"period": {"type": "month", "value": "2024-01"}, "label": "2024-01", "value": 33.2},
+    {"period": {"type": "month", "value": "2024-02"}, "label": "2024-02", "value": 45.4},
+    {"period": {"type": "month", "value": "2024-03"}, "label": "2024-03", "value": 38.9},
+    {"period": {"type": "month", "value": "2024-04"}, "label": "2024-04", "value": 32.3},
+    {"period": {"type": "month", "value": "2024-05"}, "label": "2024-05", "value": 64.5},
+    {"period": {"type": "month", "value": "2024-06"}, "label": "2024-06", "value": 47.5},
+    {"period": {"type": "month", "value": "2024-07"}, "label": "2024-07", "value": 46.3},
+    {"period": {"type": "month", "value": "2024-08"}, "label": "2024-08", "value": 52.8},
+    {"period": {"type": "month", "value": "2024-09"}, "label": "2024-09", "value": 43.2},
+    {"period": {"type": "month", "value": "2024-10"}, "label": "2024-10", "value": 43.4},
+    {"period": {"type": "month", "value": "2024-11"}, "label": "2024-11", "value": 48.4},
+    {"period": {"type": "month", "value": "2024-12"}, "label": "2024-12", "value": 42.2}
+  ],
+  "drivers": [
+    "June CMS Delaware ex parte rate of 36%",
+    "90% state persistence and 10% cross-jurisdiction shrinkage",
+    "Large original-submission changes during unwinding",
+    "Stale calibration history and first-vintage uncertainty"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://huggingface.co/HHS-Official",
+    "https://huggingface.co/datasets/HHS-Official/state-medicaid-and-chip-eligibility-processing-dat",
+    "https://huggingface.co/datasets/HHS-Official/state-medicaid-and-chip-eligibility-processing-dat/blob/main/data/dataset.csv",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:51:01Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Delaware August 2026 ex parte renewal share: forecast with disclosed data limitations"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first publicly published original O row for Delaware's August 2026 reporting cohort. Preserve the registered slug, percent unit, dataPointId, resolution date and original-submission resolver. The registered phrase does not explicitly name a denominator; this forecast adopts the CMS snapshot's ex parte/due definition. No Thesis records or forecasts were consulted, so catalog uniqueness was not checked."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the exact CMS dataset and open its official data.gov distribution metadata.",
+      "result": "CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c was updated September 25, 2026 and exposes 3,876 rows and 22 columns. Official metadata points to https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. This is the target dataset, distinct from the applications/enrollment dataset in the generic skill."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+      "result": "The dictionary identifies O as Original and U as Updated. Beneficiaries with a Renewal Due is Metric 5; Beneficiaries Whose Coverage Was Renewed (Total) is Metric 5a; Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis is Metric 5a1. The CMS snapshot expresses ex parte outcomes as a percentage of total renewals due."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://huggingface.co/datasets/HHS-Official/state-medicaid-and-chip-eligibility-processing-dat and https://huggingface.co/HHS-Official",
+      "result": "The government HHS-Official account links to hhs.gov. Its CMS dataset mirror has 2,040 rows, publisher Centers for Medicare & Medicaid Services, Last Modified 2025-04-30, and source https://healthdata.gov/d/fkfr-fp4z."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://huggingface.co/datasets/HHS-Official/state-medicaid-and-chip-eligibility-processing-dat/blob/main/data/dataset.csv; find DE,Delaware; read original O rows and the CSV header.",
+      "result": "Fetched [period,renewals due,ex parte] original rows: [2023-05,6392,1404], [2023-06,23759,4060], [2023-07,23607,4793], [2023-08,25276,5309], [2023-09,25344,4893], [2023-10,22858,6115], [2023-11,23654,6444], [2023-12,22363,7235], [2024-01,20707,6884], [2024-02,25556,11607], [2024-03,24651,9581], [2024-04,41803,13504], [2024-05,7973,5146], [2024-06,12566,5966], [2024-07,15671,7248], [2024-08,17110,9033], [2024-09,18630,8052], [2024-10,20317,8823], [2024-11,16696,8084], [2024-12,19062,8036]. Historical shares are computed as 100 times ex parte/due and rounded to one decimal."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf, printed pages 31-32, renewal-outcome table.",
+      "result": "June 2026 Delaware: renewals due 15,157, total renewed 61%, ex parte 36%. Fetched ex parte percentages across jurisdictions: AK27 AL36 AR72 AZ60 CA44 CO61 CT82 DC70 DE36 FL22 GA45 HI74 IA59 ID51 IL66 IN8 KS48 KY85 LA42 MA63 MD56 ME77 MI61 MN74 MO56 MS43 MT40 NC55 ND37 NE62 NH35 NJ39 NM68 NV80 NY31 OH52 OK45 OR71 PA21 RI76 SC64 SD63 TN66 TX9 UT35 VA44 VT65 WA80 WI45 WV61 WY37. CMS's volume-weighted national figure is 47%, with 5,400,279 renewals due. These percentages are whole-number rounded, not exact one-decimal raw-row shares."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot and https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf for publication timing.",
+      "result": "CMS lists June 2026 published September 25, 2026; May published August 28; April July 31; March June 26. No future August publication date is listed. Specifications distinguish original state reports due by the 8th from updated reports due by the 15th. These submission deadlines do not establish a CMS publication date."
+    },
+    {
+      "kind": "text",
+      "text": "Recent exact history could not be fetched: the current CMS CSV, datastore API and filtered dataset URLs were inaccessible through the web tool. The exact-count history therefore stops at December 2024 in the official HHS mirror's April 2025 vintage. O identifies an original submission, but this single later CSV vintage does not authenticate each month's immutable first public print. I disclose this limitation and do not invent 2025-2026 counts or substitute rounded snapshots into historicalContext. The mandated 2026-12-15 resolutionDate is retained, but was not verified as a scheduled CMS release day."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: all 20 numeric Delaware O observations available in the fetched mirror, May 2023-December 2024, have mean 36.21%, median 36.05%, level sample SD 13.0337 pp, range 17.1%-64.5%, and empirical p10/p90 20.2%/48.84%. Last-print persistence is 42.2%; the trailing-three-print mean is 44.6667%. On 14 common one-step walk-forward origins after six initial observations, persistence MAE/RMSE are 7.8286/11.3000 pp and trailing-three-mean MAE/RMSE are 6.0429/8.8303 pp. The latter is the strongest tested stale benchmark; neither has a verified score for the distant August 2026 target."
+    },
+    {
+      "kind": "text",
+      "text": "Generated in-memory model-candidate set before choosing the agent forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"stale_persistence\",\"target_period\":\"2026-08\",\"point\":42.2,\"p10\":0,\"p50\":42.2,\"p90\":100,\"interval80\":{\"low\":0,\"high\":100},\"interval90\":{\"low\":0,\"high\":100},\"interval_method\":\"bounded normal, O-row successive-change sigma; sqrt(horizon) scaling\",\"calibration_n\":19,\"train_cutoff\":\"2024-12\",\"walk_forward_score\":{\"horizon_months\":1,\"n\":14,\"mae\":7.828571,\"rmse\":11.3,\"target_horizon_score\":null}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"stale_trailing_3_mean\",\"target_period\":\"2026-08\",\"point\":44.7,\"p10\":0,\"p50\":44.7,\"p90\":100,\"interval80\":{\"low\":0,\"high\":100},\"interval90\":{\"low\":0,\"high\":100},\"interval_method\":\"bounded normal, O-row successive-change sigma; sqrt(horizon) scaling\",\"calibration_n\":19,\"train_cutoff\":\"2024-12\",\"walk_forward_score\":{\"horizon_months\":1,\"n\":14,\"mae\":6.042857,\"rmse\":8.830296,\"target_horizon_score\":null}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"current_persistence_panel_shrinkage\",\"target_period\":\"2026-08\",\"point\":37.7,\"p10\":14.7,\"p50\":37.7,\"p90\":60.7,\"interval80\":{\"low\":14.7,\"high\":60.7},\"interval90\":{\"low\":8.2,\"high\":67.3},\"interval_method\":\"bounded normal, O-row successive-change sigma; sqrt(horizon) scaling; 1.25 widening for stale calibration and original-vintage uncertainty\",\"calibration_n\":19,\"train_cutoff\":\"2026-06\",\"walk_forward_score\":null}]. The stale candidates use a 20-month horizon from December 2024; their physically bounded intervals span 0%-100%. The current candidate updates the level from June 2026 but calibrates dispersion on the older O rows. Its panel weight is a stated modeling choice, not a fitted coefficient; no contemporaneous panel walk-forward score was available."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: CMS's June 2026 36% Delaware observation is substantially fresher than the December 2024 benchmark. Treat 36 as the center of the whole-percent rounded observation, not as a fetched exact 36.0% raw share. Reset the stale trailing-three-mean level downward by 8.6667 pp to current persistence. The fetched panel's unweighted mean excluding Delaware is 53.26% across 50 jurisdictions, so 90% state persistence plus 10% panel shrinkage gives 37.726%. This is a panel benchmark, not the national volume-weighted rate. No separate momentum, one-off or policy effect is added. Select current_persistence_panel_shrinkage; its net change from the strongest stale benchmark is -6.9407 pp, justified by the direct newer CMS signal."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Prior is current_persistence_panel_shrinkage, informed by the June CMS state observation and calibrated on 20 original O observations from May 2023-December 2024 in the April 2025 mirror vintage. Point = 0.90*36 + 0.10*53.26 = 37.726 -> 37.7%; the panel component adds 1.726 pp to current persistence, with no extra momentum, one-off or policy adjustment. For 19 successive changes, mean change = 1.0631579 pp and sum of squared deviations = 1860.0642105; sigma = 10.1654759 pp = sqrt(1860.0642105/(19-1)). One-month 80% half-width = 1.28*sigma = 13.0118092 pp. Multiply by sqrt(2) for June-to-August uncertainty and by 1.25 for stale calibration, unverified first-release vintages and cross-jurisdiction heterogeneity: half-width = 1.28*10.1654759*sqrt(2)*1.25 = 23.0018463 pp. This combined widening is explicitly a regime/data-quality allowance, not a calibrated 2026 first-print coverage claim. Bounds = 37.726 +/- 23.0018463 = [14.7241537,60.7278463] -> [14.7%,60.7%]."
+    },
+    {
+      "kind": "text",
+      "text": "Sanity check: the un-widened 13.0118 pp one-step band covers 8 of the last 10 historical changes; the final interval contains 9 of the last 10 historical levels and accommodates the last two changes, +5.0 and -6.2 pp. The fetched 51-jurisdiction panel has mean 52.9216%, median 56%, sample SD 18.7113 pp and p10/p90 31%/76%, showing broader cross-sectional dispersion than Delaware's historical levels. Persistent state differences limit how strongly this panel should pull the point. These checks do not establish calibration on recent exact first prints."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a broad expansion of automated data matching or an unusually easy-to-match August cohort could push the share above 60.7%, outside the interval; the fetched May 2024 O share reached 64.5%. Downside risk: failure of an electronic verification feed, or a cohort largely requiring returned forms, could push the share below 14.7%, outside the interval. A higher July original-row rate or documented automation expansion would move the point up; a lower July rate or documented batch failure would move it down."
+    },
+    {
+      "kind": "forecast",
+      "point": 37.7,
+      "ciLow": 14.7,
+      "ciHigh": 60.7
+    }
+  ]
+}

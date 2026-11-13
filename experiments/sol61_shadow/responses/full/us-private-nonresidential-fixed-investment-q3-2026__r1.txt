@@ -1,0 +1,155 @@
+{
+  "slug": "us-private-nonresidential-fixed-investment-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US private nonresidential investment, Q3 2026",
+  "question": "What will the FIRST PRINT of US private nonresidential fixed investment for 2026-Q3 be in BEA NIPA Table 5.3.5, line 2 (Nonresidential), series T50305:L2 / A008RC, in billions of current US dollars at a seasonally adjusted annual rate, published with the GDP advance estimate?",
+  "unit": "usd_billions",
+  "pointEstimate": 4845.5,
+  "ciLow": 4758.7,
+  "ciHigh": 4932.3,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "U.S. Bureau of Economic Analysis, GDP (Advance Estimate), 3rd Quarter 2026; NIPA Table 5.3.5, line 2",
+  "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+  "resolutionRule": "Resolve to the original 2026-Q3 value of United States private nonresidential fixed investment in BEA NIPA Table 5.3.5, Private Fixed Investment by Type, line 2 Nonresidential, T50305:L2 / A008RC, in the FIRST PRINT accompanying the GDP advance release scheduled for October 29, 2026, at 8:30 AM Eastern. Use current dollars, seasonally adjusted at annual rates. Express the value in billions of US dollars, applying the registered 0.001 factor to a raw million-dollar value; displayed billion-dollar values are already normalized. Round to one decimal place. Preserve that original release snapshot: all subsequent revisions and corrections are irrelevant.",
+  "dataPointId": "bea.private_nonresidential_fixed_investment.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 4075.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 4081.0
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 4174.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 4203.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 4291.558
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 4378.954
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 4494.45
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 4623.657
+    }
+  ],
+  "drivers": [
+    "Latest official nominal investment level",
+    "Three-quarter investment momentum",
+    "Equipment and intellectual property investment",
+    "Annual-update vintage uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.bea.gov/news/schedule/full",
+    "https://www.bea.gov/sites/default/files/2024-10/gdp3q24-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2025-01/gdp4q24-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2025-04/gdp1q25-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2025-07/gdp2q25-adv.pdf",
+    "https://alfred.stlouisfed.org/release?ob=pv&od=desc&rd=2025-12-23&rid=53&t=nonresidential",
+    "https://alfred.stlouisfed.org/release?ob=pv&od=desc&rd=2026-02-20&rid=53&t=nonresidential",
+    "https://alfred.stlouisfed.org/release?et=&ob=pv&od=desc&pageID=1&rd=2026-04-30&rid=53&t=nonresidential",
+    "https://alfred.stlouisfed.org/release?et=&ob=pv&od=desc&pageID=3&rd=2026-07-30&rid=53&t=",
+    "https://fred.stlouisfed.org/release/tables?eid=8128&rid=53",
+    "https://fred.stlouisfed.org/series/PNFI",
+    "https://fred.stlouisfed.org/data/PNFI",
+    "https://apps.bea.gov/scb/issues/2026/09-september/0926-nea-annual-update.htm"
+  ],
+  "runAt": "2026-10-07T10:42:47Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast of the original 2026-Q3 nominal private nonresidential fixed investment print"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is the US current-dollar level at a seasonally adjusted annual rate, not real investment or a growth rate. The supplied slug, unit, dataPointId and resolver identity are retained. The catalog lookup is omitted under the run's independence restriction. No local files or other forecasts were consulted."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bea.gov/news/schedule/full and find the third-quarter advance GDP release.",
+      "result": "The official 2026 calendar lists October 29, 8:30 AM, GDP (Advance Estimate), 3rd Quarter 2026. Therefore resolutionDate is 2026-10-29; it is verified from the calendar."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the original BEA GDP advance PDFs for 2024-Q3, 2024-Q4, 2025-Q1 and 2025-Q2, listed in sourceContext; inspect Table 3, line 28, each release's new-quarter current-dollar column.",
+      "result": "Original nominal Nonresidential levels, billions of dollars SAAR: 2024-Q3 = 4075.9; 2024-Q4 = 4081.0; 2025-Q1 = 4174.9; 2025-Q2 = 4203.2. These retain the PDF's published precision and exclude revised earlier-quarter columns."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open ALFRED's BEA GDP release-date pages for 2025-12-23, 2026-02-20, 2026-04-30 and 2026-07-30; read PNFI, Quarterly, Seasonally Adjusted Annual Rate.",
+      "result": "Original nominal PNFI observations in billions: 2025-Q3 = 4291.558; 2025-Q4 = 4378.954; 2026-Q1 = 4494.450; 2026-Q2 = 4623.657. Each page explicitly identifies its release date and new-quarter observation. The 2025-Q3 observation is the December 23 initial release."
+    },
+    {
+      "kind": "text",
+      "text": "History provenance limitation: the exact BEA interactive URL and literal archived Table 5.3.5 files were inaccessible through the web tool. The eight original observations were recovered from BEA's original GDP release table and the sanctioned Federal Reserve vintage mirror. FRED's Table 5.3.5, line 2 links directly to PNFI, confirming the exact concept. This is equivalent-series recovery, not a claim that the pinned BEA artifact was parsed. Original first prints remain distinct from the revised level inputs below."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate / reference class: the last eight quarterly first prints, 2024-Q3 through 2026-Q2, have mean level 4290.452375 and range 4075.9-4623.657. Their seven successive changes are 5.100, 93.900, 28.300, 88.358, 87.396, 115.496 and 129.207 billion; mean change = 78.251 and sample standard deviation = 45.204257. Initial last-first-print persistence is 4623.657. Compare persistence, expanding mean-change drift and trailing-three-change drift before using current-vintage information."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated in memory from the fetched first prints: [{\"schema_version\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":4623.7,\"p10\":4536.9,\"p50\":4623.7,\"p90\":4710.4,\"interval80\":[4536.9,4710.4],\"interval90\":[4512.1,4735.2],\"interval_method\":\"Gaussian dispersion of successive original-first-print levels; multiply width by 1.5 for short calibration history and vintage uncertainty\",\"calibration_n\":7,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"metric\":\"MAE\",\"value\":105.11425,\"rmse\":106.628997,\"n\":4}},{\"schema_version\":\"thesis_model_candidate_v1\",\"model\":\"expanding_drift\",\"point\":4701.9,\"p10\":4615.1,\"p50\":4701.9,\"p90\":4788.7,\"interval80\":[4615.1,4788.7],\"interval90\":[4590.4,4813.4],\"interval_method\":\"Gaussian dispersion of successive original-first-print levels; multiply width by 1.5 for short calibration history and vintage uncertainty\",\"calibration_n\":7,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"metric\":\"MAE\",\"value\":48.435008,\"rmse\":49.438383,\"n\":4}},{\"schema_version\":\"thesis_model_candidate_v1\",\"model\":\"trailing_three_drift\",\"point\":4734.4,\"p10\":4647.6,\"p50\":4734.4,\"p90\":4821.1,\"interval80\":[4647.6,4821.1],\"interval90\":[4622.8,4845.9],\"interval_method\":\"Gaussian dispersion of successive original-first-print levels; multiply width by 1.5 for short calibration history and vintage uncertainty\",\"calibration_n\":7,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"metric\":\"MAE\",\"value\":35.684083,\"rmse\":37.720517,\"n\":4}}]. All models are evaluated on the same four first-print targets, 2025-Q3 through 2026-Q2, using only preceding first-print observations and at least four training levels. The primary comparison metric is MAE. Trailing-three-change drift wins both MAE and RMSE, so its unrounded first-print prior is 4623.657 + (87.396 + 115.496 + 129.207)/3 = 4734.356667. These are simple arithmetic benchmarks; no external time-series package was used."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open FRED Table 5.3.5, line 2; PNFI's series page; and https://fred.stlouisfed.org/data/PNFI.",
+      "result": "Table 5.3.5 line 2 Nonresidential links to PNFI, BEA account A008RC, measured in billions of dollars SAAR. The September 30, 2026 vintage gives 2024-Q3 = 4143.523; 2024-Q4 = 4149.189; 2025-Q1 = 4247.243; 2025-Q2 = 4321.643; 2025-Q3 = 4412.236; 2025-Q4 = 4482.556; 2026-Q1 = 4597.400; 2026-Q2 = 4737.171. Latest-level persistence is 4737.171. These are revised inputs, not the historicalContext first prints."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open BEA's September 2026 article, The 2026 Annual Update of the National Economic Accounts.",
+      "result": "BEA dates the completed annual update September 30, 2026, identifies the update period as 2021-Q1 through 2026-Q1, and describes incorporation of new Census Annual Integrated Economic Survey data and revised Quarterly Services Survey data affecting private investment. The target quarter will therefore be printed after this update."
+    },
+    {
+      "kind": "text",
+      "text": "Current evidence updates the selected rule mechanically. Level component: latest Q2 minus original Q2 = 4737.171 - 4623.657 = +113.514 billion. Momentum component: refit the same trailing-three-change rule to the latest coherent vintage; changes are 70.320, 114.844 and 139.771, averaging 108.311667, versus original-print momentum 110.699667, an adjustment of -2.388. Combined update = +111.126. Recomputing momentum from one vintage avoids adding a level revision while retaining revision-contaminated older momentum. Both adjustments are directly observed official series information absent from the original-print candidate. Discretionary one-off and policy adjustments are zero. BEA/FRED already report billions; applying 0.001 again to their displayed values would be a unit error. The registered factor is appropriate for raw millions."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: selected prior = trailing-three-change drift, trained on eight original quarterly prints from 2024-Q3 through 2026-Q2; prior point = 4734.356667. Weights are 1.0 on the selected benchmark rule and 0.0 on discretionary news. Add the directly fetched level revision +113.514 and coherent-vintage momentum adjustment -2.388: point = 4734.356667 + 113.514 - 2.388 = 4845.482667. Equivalently, 4737.171 + (70.320 + 114.844 + 139.771)/3 = 4845.482667. For the seven successive first-print changes, mean = 78.251, sum of squared deviations = 12260.548838, and sigma = 45.204257 = sqrt(12260.548838/(7-1)). Gaussian 80% half-width = 1.28*sigma = 57.861448; multiply by 1.5 for sparse calibration and uncertainty in carrying a completed annual-update vintage into an advance print: half-width = 86.792172. The annual update already occurred; no new annual update is assumed on the target release date. Unrounded bounds = 4845.482667 +/- 86.792172 = [4758.690494,4932.274839]. Rounded forecast = 4845.5, 80% interval [4758.7,4932.3]. The analogous 90% half-width = 1.644853627*sigma*1.5 = 111.531578, giving rounded bounds [4734.0,4957.0]."
+    },
+    {
+      "kind": "text",
+      "text": "Calibration sanity check: the selected rule's four genuine one-step first-print errors are +45.924667, +17.210000, +47.478000 and +32.123667 billion; all four fit the 86.792172 half-width. Six of seven historical first-print changes fit that width around the final 108.311667 drift. The sample is too short to claim an eight-of-ten coverage test; 0.8 denotes the intended interval probability, not demonstrated coverage. Model selection on four test quarters and vintage changes limit precision."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and tails: upside risk would land above the interval, 4932.3, if stronger equipment deliveries and software/R&D investment, or higher investment prices, lift the nominal annual-rate level by more than 195.129 billion above the latest Q2 level. Downside risk would land below the interval, 4758.7, if equipment cancellations, weaker manufacturing construction and slower intellectual-property spending limit that gain to less than 21.529 billion. Direct Q3 shipments, capital-goods imports and private construction spending would move the point up or down; none was assigned a numeric adjustment without a fetched release-specific mapping. A further large level revision could also invalidate the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 4845.5,
+      "ciLow": 4758.7,
+      "ciHigh": 4932.3
+    }
+  ]
+}

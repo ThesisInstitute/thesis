@@ -1,0 +1,97 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "title": "TY2027 ACTC total claims: forecast unavailable",
+  "question": "Conditional on the specified legislation, how many US individual income tax returns claim the Additional Child Tax Credit for tax year 2027, in millions, in the FIRST PRINT of IRS SOI Publication 1304 Table 3.3, all returns total row, plain Additional child tax credit or refundable child tax credit concept, number of returns? This is an annual count without seasonal adjustment.",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS Statistics of Income, Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+  "resolutionRule": "Use the FIRST PRINT of the tax year 2027 IRS SOI Publication 1304 Table 3.3 workbook, all returns total row, plain Additional child tax credit or refundable child tax credit concept, number of returns. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Multiply the published whole-return count by 0.000001 to express millions; disregard later revisions. Evaluate the exact conditionalOn against enacted legislation by 2027-12-31; if the condition fails, mark unresolved. Preserve 2029-12-31 as the registered outer deadline, not an agency-confirmed release day.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "historicalContext": [],
+  "drivers": [
+    "Earned-income eligibility threshold",
+    "Filing and claiming responses",
+    "Other statutory eligibility requirements"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-soi/23in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/22in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/21in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/20in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/19in33ar.xls",
+    "https://www.irs.gov/pub/irs-soi/18in33ar.xls",
+    "https://www.irs.gov/credits-deductions/individuals/child-tax-credit",
+    "https://www.congress.gov/bill/119th-congress/senate-bill/3596/text",
+    "https://api.policyengine.org/us/policy/1"
+  ],
+  "runAt": "2026-10-07T10:40:57Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Run failed: canonical history extraction unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target identity, unit, deadline and conditional text are preserved. The deadline is a supplied outer bound; no official scheduled release day was verified. The prohibited catalog lookup was skipped under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the IRS Publication 1304 page and its Basic Tables Part 3 link.",
+      "result": "The official Table 3.3 index lists tax years 2023, 2022, 2021, 2020, 2019 and 2018, plus earlier years. These are exposed workbook years, not extracted claimant counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.irs.gov/pub/irs-soi/23in33ar.xls through 18in33ar.xls individually.",
+      "result": "All six workbook attempts for 2023, 2022, 2021, 2020, 2019 and 2018 failed. The web tool reported unsupported application/vnd.ms-excel content or an internal fetch error. No canonical ACTC count was extracted."
+    },
+    {
+      "kind": "text",
+      "text": "Tool discovery found neither fetch_source nor extract_irs_soi. The mandatory captured-workbook extraction could not run. This is an access/extraction failure, not evidence that the official source exposes fewer prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.irs.gov/credits-deductions/individuals/child-tax-credit.",
+      "result": "IRS guidance for tax year 2025 states an ACTC earned-income eligibility threshold of $2,500, maximum ACTC of $1,700 per qualifying child, and maximum CTC of $2,200."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open and find the operative text at https://www.congress.gov/bill/119th-congress/senate-bill/3596/text.",
+      "result": "S.3596 section 2 proposes replacing $3,000 with $1 in IRC section 24(d)(1)(B)(i), deleting section 24(h)(6), and applying after December 31, 2025. The fetched version is introduced January 8, 2026; it does not establish enactment."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable because the required first-print counts could not be extracted. Last-print persistence and walk-forward model candidates therefore cannot be computed honestly."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The persistence prior and historical sample are unavailable; no momentum, level, one-off or policy adjustment is quantified. Sigma and the required dispersion-based interval cannot be computed without the canonical history. No point or implied bounds are supplied."
+    },
+    {
+      "kind": "text",
+      "text": "The PolicyEngine policy endpoint fetch also failed; neither policy arm was simulated. A lower earnings threshold can increase benefit amounts for existing claimants without creating the same number of new claiming returns. No affected-population count or claiming-response estimate was fetched, so no conditional claimant increment is asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would include unusually strong filing uptake among newly eligible low-earnings families; downside risk would include weak uptake or tighter eligibility. Without a calibrated interval, neither can be assigned an outside-the-interval threshold."
+    },
+    {
+      "kind": "text",
+      "text": "FAILURE: Drop this forecast under the honesty rule. Null estimates and empty history deliberately record the failure and do not constitute a valid numeric forecast cell. The contract's confidence constant is not a claim of calibrated uncertainty. No activity receipts were manufactured."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "slug": "us-private-research-development-fixed-investment-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US private R&D investment, Q3 2026",
+  "question": "What will BEA first report for private research and development fixed investment in 2026-Q3, NIPA Table 5.3.5 line 18, seasonally adjusted at an annual rate, in billions of current US dollars?",
+  "unit": "usd_billions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "BEA GDP advance release, NIPA Table 5.3.5, line 18",
+  "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+  "resolutionRule": "Use the first official 2026-Q3 observation for T50305:L18, applying the registered multiplication factor of 0.001 to obtain usd_billions and preserving published precision. Ignore subsequent revisions.",
+  "dataPointId": "bea.research_and_development_fixed_investment.2026_q3.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.bea.gov/news/schedule",
+    "https://fred.stlouisfed.org/series/Y006RC1Q027SBEA",
+    "https://fred.stlouisfed.org/data/Y006RC1Q027SBEA.txt"
+  ],
+  "runAt": "2026-10-06T22:01:05Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official history fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official BEA calendar lists GDP (Advance Estimate), 3rd Quarter 2026, for October 29, 2026 at 8:30 AM, confirming the registered resolution date."
+    },
+    {
+      "kind": "text",
+      "text": "Opening the official FRED series and historical-data endpoint failed with 'Fatal error: network error: error sending request.' The BEA table also returned an access error. No historical observations were obtained from successfully fetched source content; search-summary values were excluded."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The required base rate could not be fetched, so historical dispersion, sigma, adjustment components, and an 80% interval cannot be calculated. Per the failed-fetch instruction, this run stops without numerical estimates. Null forecast fields indicate failure, not a forecast."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

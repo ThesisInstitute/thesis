@@ -1,0 +1,142 @@
+{
+  "slug": "snap-participation-june-2026",
+  "country": "US",
+  "type": "data",
+  "title": "June 2026 SNAP participation (retrospective)",
+  "question": "What is the FIRST PRINT of USDA FNS SNAP national monthly Persons participating for June 2026, not seasonally adjusted, expressed in millions, in the national monthly participation tables linked from the registered SNAP data page?",
+  "unit": "millions",
+  "pointEstimate": 36.113160,
+  "ciLow": 35.786236,
+  "ciHigh": 36.440084,
+  "confidence": 0.8,
+  "resolutionDate": "2026-09-18",
+  "resolutionSource": "USDA FNS, SNAP national monthly participation tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve fns.snap.total_persons for June 2026 to national Persons in the FIRST PRINT, not seasonally adjusted, using the June 2026 Initial column and TOTAL row in the SNAP Persons table, cross-checked against June 2026 Persons in the national monthly summary linked from the registered source page. Include disaster assistance as the agency does; exclude territories receiving separate Nutrition Assistance Grants. Normalize whole persons to thousands, then apply the registered factor 0.001 to obtain millions, reported to six decimal places. Later revisions or corrections do not change resolution. The date field records the fetched official page's September 18, 2026 update/as-of date; it is not a verified scheduled release or exact first-publication date. The supplied target has no literal resolutionDate, and its expected October 26-November 3 window is contradicted by the already-public June Initial artifact.",
+  "dataPointId": "usda.fns.snap.persons.june_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 39.513033
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 38.547730
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 37.870817
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 37.298271
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 37.011096
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 36.562128
+    }
+  ],
+  "drivers": [
+    "Initial-print participation declined in every sampled month",
+    "Latest monthly-change benchmark beats persistence in a small backtest",
+    "No additional policy adjustment beyond observed history",
+    "June initial outcome already public; retrospective calculation",
+    "Publication date and source-unit discrepancies disclosed"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf"
+  ],
+  "runAt": "2026-10-07T10:39:19Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Retrospective SNAP June 2026 first-print benchmark"
+    },
+    {
+      "kind": "text",
+      "text": "Preserve the supplied slug, millions unit, dataPointId, series, period and first-print resolver. Official evidence reveals that June is already published. Therefore this is a retrospective benchmark using only December-May initial-print inputs, not a blind prospective forecast, and it should not be scored as one. The outcome was encountered before model selection; excluding it from arithmetic cannot restore blindness."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the registered SNAP page; open the official USDA CDN copy and Program Data Overview; follow the linked Persons and national monthly summary PDFs.",
+      "result": "The registered www.fns.usda.gov endpoint could not be fetched. The official CDN index identifies June 2026 as latest and gives page update September 18, 2026; the overview states data as of September 18, 2026. snap-persons-9.pdf, data as of September 11, 2026, explicitly labels June 2026 Initial: TOTAL 36,352,716 whole persons. snap-4fymonthly-9.pdf independently gives June Persons 36,352,716. The observed target is 36.352716 million; it is disclosed but excluded from model fitting and selection scores."
+    },
+    {
+      "kind": "text",
+      "text": "Timing and representation discrepancies: no official release calendar or dated announcement establishing the exact first-publication day was found. September 18 is a verified official update/as-of marker only; the resolutionDate requirement is not fully established, and November 3 cannot be invented as a registered deadline. The fetched PDFs report whole persons, whereas the binding describes thousands: whole persons / 1,000 gives thousands, then multiplying by 0.001 gives millions. The original resolver URL remains unchanged; the fetched official USDA CDN hostname differs from the binding's allowed host. These issues prevent treating this as a fully validated prospective production cell."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search official USDA CDN indexed snap-persons-3.pdf and snap-persons-4.pdf for their period headers and TOTAL rows.",
+      "result": "snap-persons-3.pdf, data as of March 13, 2026: December 2025 Initial TOTAL 39,513,033 persons. snap-persons-4.pdf, data as of April 10, 2026: January 2026 Initial TOTAL 38,547,730 persons. Direct opens returned 404; these values and Initial headers were fetched from official-PDF search results, not from a secondary publisher."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-5.pdf and snap-persons-6.pdf; read each Initial column's TOTAL row.",
+      "result": "snap-persons-5.pdf, data as of May 8, 2026: February 2026 Initial TOTAL 37,870,817 persons. snap-persons-6.pdf, data as of June 12, 2026: March 2026 Initial TOTAL 37,298,271 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-7.pdf and snap-persons-8.pdf; read each Initial column's TOTAL row.",
+      "result": "snap-persons-7.pdf, data as of July 10, 2026: April 2026 Initial TOTAL 37,011,096 persons. snap-persons-8.pdf, data as of August 14, 2026: May 2026 Initial TOTAL 36,562,128 persons. In the May artifact, Georgia April preliminary/May initial are 1,352,134/1,187,277; Illinois 1,653,845/1,565,308; Texas 2,971,767/2,881,747 persons."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: six consecutive national monthly Initial prints, December 2025-May 2026, mean 37.8005125 million and range 36.562128-39.513033 million. Their five successive changes are -0.965303, -0.676913, -0.572546, -0.287175 and -0.448968 million; mean change -0.590181 million. Last-print persistence is the mandatory benchmark at 36.562128 million. A panel-shrinkage benchmark is inapplicable to this national aggregate."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated in memory before choosing the retrospective point, all in millions: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":36.562128,\"p10\":36.235204,\"p50\":36.562128,\"p90\":36.889052,\"interval80\":[36.235204,36.889052],\"interval90\":[36.142526,36.981730],\"interval_method\":\"Gaussian fallback-prior using sample SD of successive Initial-print changes; no widening\",\"calibration_n\":5,\"train_cutoff\":\"2026-05\",\"walk_forward\":{\"n\":3,\"mae\":0.436230,\"rmse\":0.451608}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"last_change\",\"point\":36.113160,\"p10\":35.786236,\"p50\":36.113160,\"p90\":36.440084,\"interval80\":[35.786236,36.440084],\"interval90\":[35.693558,36.532762],\"interval_method\":\"Gaussian fallback-prior using sample SD of successive Initial-print changes; no widening\",\"calibration_n\":5,\"train_cutoff\":\"2026-05\",\"walk_forward\":{\"n\":3,\"mae\":0.183844,\"rmse\":0.198751}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_drift\",\"point\":35.971947,\"p10\":35.645023,\"p50\":35.971947,\"p90\":36.298871,\"interval80\":[35.645023,36.298871],\"interval90\":[35.552345,36.391549],\"interval_method\":\"Gaussian fallback-prior using sample SD of successive Initial-print changes; no widening\",\"calibration_n\":5,\"train_cutoff\":\"2026-05\",\"walk_forward\":{\"n\":3,\"mae\":0.292052,\"rmse\":0.314332}}]. The common walk-forward periods are March-May 2026, with each point computed from preceding observations only. These are arithmetic time-series baselines, not saved model artifacts. Select last_change because it has the lowest historical MAE. Its delta from persistence is -0.448968 million; its advantage rests on a small sample."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view decomposition: level is the May Initial 36.562128 million; momentum is the selected model's latest change -0.448968 million. No separately quantified one-off or policy effect is added. The historical decline already enters the prior, so adding a policy narrative would duplicate information. Revised historical values in the current summary and the observed June outcome are excluded from this retrospective calculation."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected last_change candidate, trained on six December-May Initial prints; point = 36.562128 + (36.562128 - 37.011096) = 36.113160 million. Weight on this benchmark = 100%; additional momentum, one-off and policy updates = 0. From the five fetched first-print differences, sigma = 0.255099831 million = sqrt(0.260303695338 / (5 - 1)), using deviations around their -0.590181 mean. Gaussian fallback-prior 80% half-width = 1.2815515655 * sigma = 0.326923588 million, with no widening. Bounds = 36.113160 +/- 0.326923588 = [35.786236, 36.440084] after rounding to six decimals. The corresponding 90% half-width = 1.644853627 * sigma = 0.419601882, giving [35.693558, 36.532762]."
+    },
+    {
+      "kind": "text",
+      "text": "Calibration check: recomputing sigma using only training information at each March-May origin gives 80% coverage in two of three last_change predictions. The sample cannot establish an eight-of-ten coverage claim. Confidence 0.8 is the contract's nominal interval level, not demonstrated calibration and not live uncertainty about an already observed first print."
+    },
+    {
+      "kind": "text",
+      "text": "Retrospective stress test: an outcome would land above the interval if the June change from May Initial were greater than -0.122044 million, or below it if the change were less than -0.775892 million. An upside risk scenario is a rebound reversing the May declines in Georgia, Illinois and Texas: 164,857 + 88,537 + 90,020 = 343,414 participants, added relative to the model. A downside risk scenario is additional eligibility exits or state reporting shortfalls of that size relative to the model. Either 0.343414-million perturbation exceeds the 0.326923588 half-width. These are hypothetical model stress scenarios; the fetched June Initial result is already fixed and lies inside the band."
+    },
+    {
+      "kind": "text",
+      "text": "Audit limits: catalog collision checking was intentionally omitted under the independence instruction; the registered slug is echoed. No local files or prior forecasts were consulted, no files were created, and no activity receipts are manufactured. JSON parsing, six distinct historical periods and agreement between forecast fields were verified in memory. The retrospective status and unverified exact publication date remain substantive failures for prospective publication."
+    },
+    {
+      "kind": "forecast",
+      "point": 36.113160,
+      "ciLow": 35.786236,
+      "ciHigh": 36.440084
+    }
+  ]
+}

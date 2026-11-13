@@ -1,0 +1,167 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ak",
+  "country": "US",
+  "type": "data",
+  "title": "Alaska ex parte renewal share, August 2026",
+  "question": "What percentage of Alaska Medicaid and CHIP beneficiaries due for renewal in the August 2026 reporting period will have coverage renewed on an ex parte basis, calculated without seasonal adjustment from the FIRST PRINT of Alaska's original (O) submission in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 27.0,
+  "ciLow": 14.6,
+  "ciHigh": 39.4,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Alaska's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal. Select State Abbreviation AK, Reporting Period 202608, Original or Updated O. Calculate 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis (Metric 5a1) divided by Beneficiaries with a Renewal Due (Metric 5); use the counts in the first publication without seasonal adjustment and round to one decimal. Later updated submissions and corrections do not change resolution. The registered 2026-12-15 date is retained, but this run could not verify it as an official scheduled publication date.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ak.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2023-05"},
+      "label": "2023-05",
+      "value": 18.2
+    },
+    {
+      "period": {"type": "month", "value": "2023-06"},
+      "label": "2023-06",
+      "value": 24.8
+    },
+    {
+      "period": {"type": "month", "value": "2023-07"},
+      "label": "2023-07",
+      "value": 28.1
+    },
+    {
+      "period": {"type": "month", "value": "2023-08"},
+      "label": "2023-08",
+      "value": 28.2
+    },
+    {
+      "period": {"type": "month", "value": "2023-09"},
+      "label": "2023-09",
+      "value": 23.7
+    },
+    {
+      "period": {"type": "month", "value": "2023-10"},
+      "label": "2023-10",
+      "value": 27.4
+    },
+    {
+      "period": {"type": "month", "value": "2023-11"},
+      "label": "2023-11",
+      "value": 27.4
+    },
+    {
+      "period": {"type": "month", "value": "2023-12"},
+      "label": "2023-12",
+      "value": 25.8
+    },
+    {
+      "period": {"type": "month", "value": "2024-01"},
+      "label": "2024-01",
+      "value": 28.0
+    },
+    {
+      "period": {"type": "month", "value": "2024-02"},
+      "label": "2024-02",
+      "value": 29.7
+    },
+    {
+      "period": {"type": "month", "value": "2024-03"},
+      "label": "2024-03",
+      "value": 34.5
+    }
+  ],
+  "drivers": [
+    "Latest CMS snapshot signal: Alaska 27% in June",
+    "Large variation in renewal cohorts",
+    "Persistent Alaska gap from the national share",
+    "Recent exact original rows inaccessible"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T10:45:18Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Alaska August 2026 ex parte renewal share: forecast with explicit evidence limitations"
+    },
+    {
+      "kind": "text",
+      "text": "Use the supplied registered identifiers and date. The target is the first published Alaska O row for August 2026, with ex parte renewals divided by renewals due, not by successful renewals. No seasonal adjustment is applied. The independence instruction prohibits the catalog slug cross-check; the supplied slug is retained."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact official CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c and inspect its Alaska O rows and dictionary.",
+      "result": "The [CMS dataset](https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c) reports 3,876 rows and a September 25, 2026 update. Fetched Alaska O pairs (ex parte count, renewal-due count): 2023-05 (1193,6539); 2023-06 (1867,7530); 2023-07 (4011,14250); 2023-08 (5634,19995); 2023-09 (3055,12884); 2023-10 (3232,11813); 2023-11 (2956,10781); 2023-12 (3288,12729); 2024-01 (4376,15619); 2024-02 (4572,15385); 2024-03 (5598,16229). historicalContext contains 100 times these ratios, rounded to one decimal. These are retrieved original-submission rows, not a claim that March 2024 is the latest published observation."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Inspect the official CMS snapshot publication list and Eligibility Processing Data Report Specifications.",
+      "result": "The [CMS publication list](https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot) dates June 2026's snapshot September 25, 2026, May's August 28, 2026, and April's July 31, 2026. It does not announce an August 2026 publication date. [CMS specifications](https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf), Table 10, show December 15, 2024 as an updated-report submission deadline for August 2024, not a public release date. The registered 2026-12-15 date therefore remains unverified; no replacement date is inferred."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate: the exact retrieved reference class comprises 11 Alaska original-row shares from May 2023 through March 2024. Computed before rounding, mean = 26.9011%, median = 27.4186%, level sample standard deviation = 4.0147 percentage points, and range = 18.2444%-34.4938%. Last retrieved-row persistence is 34.5%; the trailing-three mean is 30.7%. This history is stale and includes unwinding-era reporting issues, so neither is represented as a recent production prior."
+    },
+    {
+      "kind": "math",
+      "text": "Generate the exact-history benchmarks first. Ten successive changes have sample sigma = 3.2318 percentage points. March 2024 to August 2026 is 29 months; the conservative fallback wrapper uses H80 = 1.28*3.2318*sqrt(29) = 22.2767 and H90 = 1.645*3.2318*sqrt(29) = 28.6291. Persistence produces 34.5 with 80% bounds 12.2-56.8; trailing-three mean produces 30.7 with bounds 8.5-53.0. On seven matched two-month historical tests, RMSE is 3.6613 for persistence and 3.1023 for the trailing-three mean. Those short-horizon scores do not validate a 29-month forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open/find",
+      "call": "Fetch November 2025-March 2026 CMS snapshot PDFs and inspect Alaska in Coverage Retention and Disenrollment Rates by State.",
+      "result": "Official snapshot tables show (renewals due, displayed ex parte share): [November 2025](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf), page 29: (18607,32%); [December 2025](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf), page 32: (17644,31%); [January 2026](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf), page 28: (17354,22%); [February 2026](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf), page 28: (20000,23%); [March 2026](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf), page 31: (17809,21%). Percentages are published whole percentages of renewals due. Raw ex parte counts and literal O-row designations were not fetched for these months."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open/find",
+      "call": "Fetch April-June 2026 CMS snapshot PDFs and inspect Alaska's renewal table and June national findings.",
+      "result": "[April 2026](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf), page 28: Alaska due 17318, renewed 44%, pending 21%, ex parte 27%. [May 2026](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf), page 28: due 30712, renewed 27%, pending 34%, ex parte 18%. [June 2026](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf), page 31: due 15924, renewed 45%, pending 23%, ex parte 27%. June's national ex parte share is 47%; state shares range from 8% to 85%. These rounded CMS summaries are current signals, not substitutes for exact resolver-artifact history."
+    },
+    {
+      "kind": "text",
+      "text": "Supplementary recent reference class: eight displayed snapshot signals are [32,31,22,23,21,27,18,27]%, November 2025-June 2026; mean = 25.125%, sample level standard deviation = 4.9407 points, range = 18%-32%. Current-signal persistence is 27.0%. A panel-shrinkage benchmark using 90% Alaska persistence and 10% the published national share gives 0.9*27+0.1*47 = 29.0%; these are analyst-selected benchmark weights. The national gap alone is not evidence that Alaska will converge."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated in memory this run, without files: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence_exact_stale_O_rows\",\"point\":34.5,\"p10\":12.2,\"p50\":34.5,\"p90\":56.8,\"interval80\":{\"low\":12.2,\"high\":56.8},\"interval90\":{\"low\":5.9,\"high\":63.1},\"intervalMethod\":\"Gaussian successive-change wrapper; 29-month random-walk horizon\",\"calibration_n\":10,\"trainCutoff\":\"2024-03\",\"forecastPeriod\":\"2026-08\",\"walkForward\":{\"horizonMonths\":2,\"n\":7,\"rmse\":3.6613,\"mae\":3.0644}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_three_mean_exact_stale_O_rows\",\"point\":30.7,\"p10\":8.5,\"p50\":30.7,\"p90\":53,\"interval80\":{\"low\":8.5,\"high\":53},\"interval90\":{\"low\":2.1,\"high\":59.4},\"intervalMethod\":\"Fallback Gaussian successive-change wrapper; 29-month horizon\",\"calibration_n\":10,\"trainCutoff\":\"2024-03\",\"forecastPeriod\":\"2026-08\",\"walkForward\":{\"horizonMonths\":2,\"n\":7,\"rmse\":3.1023,\"mae\":1.967}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence_recent_rounded_CMS_snapshot_signal\",\"point\":27,\"p10\":14.6,\"p50\":27,\"p90\":39.4,\"interval80\":{\"low\":14.6,\"high\":39.4},\"interval90\":{\"low\":11.1,\"high\":42.9},\"intervalMethod\":\"Gaussian successive-change wrapper; two-month independent-increment approximation plus uniform rounding variance\",\"calibration_n\":7,\"trainCutoff\":\"2026-06\",\"forecastPeriod\":\"2026-08\",\"walkForward\":{\"horizonMonths\":2,\"n\":4,\"rmse\":2.5495,\"mae\":2}}]. Select persistence_recent_rounded_CMS_snapshot_signal as an explicit override of the stale exact-history candidates. In four two-month snapshot backtests, persistence RMSE is 2.5495 points versus 4.5735 for a trailing-three mean. This tiny rounded sample supplies weak supporting evidence, not robust calibration or confirmed superiority."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: re-anchor the level to the current 27% CMS signal, a -7.5-point change from stale persistence and -3.7 points from the stale trailing-three mean. The fetched recent evidence is absent from the history ending March 2024. Give current-signal persistence full point-estimate weight and obsolete levels zero weight. Apply no additional momentum adjustment: April and June both show 27%, with May at 18%. The May-to-June cohort difference motivates uncertainty, without asserting a fitted causal effect. Apply no separate policy or one-off point adjustment because no target-specific quantified mechanism was established."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: selected prior = latest rounded CMS signal persistence, 27.0%; exact historical sample = 11 O-row ratios through March 2024; supplementary calibration sample = eight November 2025-June 2026 snapshot signals. Final point = 1.0*27 + 0.0*34.4938 + 0 momentum + 0 policy = 27.0. Recent successive changes are [-1,-9,1,-2,6,-9,9] points; sum = -5 and sum of squares = 285. Thus sigma = sqrt((285-25/7)/6) = 6.8487 points. This exceeds the exact old-history sigma = 3.2318. Use a Gaussian independent-increment approximation for the two reporting months from June to August and add uniform half-point rounding variance: horizon sigma = sqrt(2*6.8487051^2+1/12) = 9.6898. H80 = 1.28*9.6898 = 12.4030; 27-12.4030 = 14.5970 and 27+12.4030 = 39.4030, yielding 14.6-39.4 after rounding. The effective widening relative to old one-month sigma is 2.9983, justified by larger observed recent changes and the two-month horizon. H90 = 1.645*9.6898 = 15.9398, giving 11.1-42.9. These are model-assigned intervals, not verified empirical coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage and counter-consideration: the old one-month 1.28*sigma wrapper includes seven of ten original-row changes. The final widened band includes April's 27%, May's 18%, June's 27%, and all four available two-month recent persistence errors; this is an in-sample sanity check. June's 8%-85% cross-sectional range reflects substantial state differences and weakens aggressive national pooling. Downside risk outside the interval: a renewal cohort surge comparable to May's 30,712 due, combined with fewer automatic eligibility matches or reporting ex parte completions as form renewals, could push August below 14.6%. Upside risk outside the interval: expanded matching across previously manual renewal categories, combined with a smaller routine cohort, could push the share above 39.4%. Evidence of either mechanism would move the point accordingly."
+    },
+    {
+      "kind": "text",
+      "text": "Evidence limitation: recent exact O-row history could not be fetched through the CMS API, filtered pages, or the September 2026 CSV identified by the [official catalog](https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data). No recent raw counts are invented, and no fewer-than-six exception is claimed. The 11 historicalContext entries are exact-series older O ratios; recent rounded snapshots remain separate signals. Their current-cohort tables are distinct from separately labeled updated-outcome tables, but do not establish literal O-row counts. This forecast therefore does not claim complete compliance with the recent exact-artifact history requirement or official release-calendar verification."
+    },
+    {
+      "kind": "forecast",
+      "point": 27.0,
+      "ciLow": 14.6,
+      "ciHigh": 39.4
+    }
+  ]
+}

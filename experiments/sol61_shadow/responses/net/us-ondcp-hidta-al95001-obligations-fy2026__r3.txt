@@ -1,0 +1,129 @@
+{
+  "slug": "us-ondcp-hidta-al95001-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 HIDTA obligations: forecast refused",
+  "question": "What will USAspending API v2 report for FY2026 financial-assistance transaction obligations filtered to Assistance Listing 95.001 in the first registered-query snapshot?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "U.S. Treasury USAspending API v2",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the original registered-query snapshot from the specified October 15–22, 2026 window. POST group=fiscal_year, spending_level=transactions, filters.time_period=[{start_date:2025-10-01,end_date:2026-09-30}], filters.award_type_codes=[02,03,04,05,06,07,08,09,10,11], and filters.program_numbers=[95.001]. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001. Preserve returned precision and disregard subsequent revisions. A specific resolution date was not verified from an official calendar or announcement.",
+  "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2019"},
+      "label": "FY2019",
+      "value": 284.14514631
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 270.27144368
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 268.60530517
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 252.76050027
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 266.41544691
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 273.95994611
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 271.6576756
+    }
+  ],
+  "drivers": [
+    "Seven fetched annual registered-query observations",
+    "FY2026 query snapshot far below historical obligations",
+    "Financial-assistance reporting lag",
+    "Unverified exact snapshot resolution date"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/api/v2/awards/last_updated/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T12:24:09Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused after failed official-source fetches"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is Assistance Listing 95.001 financial-assistance transaction obligations, aggregated by fiscal year using the registered POST query. All historical values below were fetched during this run using that query with the corresponding fiscal-year dates. These are current historical snapshots, not archived original vintages. No repository files or Thesis forecasts were accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ separately for FY2019 and FY2020, retaining the registered award types, program filter, transaction level and fiscal-year grouping.",
+      "result": "Echoed aggregated_amount: FY2019 $284145146.31; FY2020 $270271443.68. Multiplication by 0.000001 gives 284.14514631 and 270.27144368 usd_millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the same registered POST query separately for FY2021 and FY2022.",
+      "result": "Echoed aggregated_amount: FY2021 $268605305.17; FY2022 $252760500.27. Transformed values: 268.60530517 and 252.76050027 usd_millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the same registered POST query separately for FY2023, FY2024 and FY2025.",
+      "result": "Echoed aggregated_amount: FY2023 $266415446.91; FY2024 $273959946.11; FY2025 $271657675.60. Transformed values: 266.41544691, 273.95994611 and 271.65767560 usd_millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the registered FY2026 POST query and fetch the official awards/last_updated endpoint.",
+      "result": "FY2026 aggregated_amount was $264863.53, or 0.26486353 usd_millions. The last-updated endpoint returned {\"last_updated\":\"10/07/2026\"}. Sitewide freshness does not establish completeness of this program's transactions."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the seven fetched FY2019–FY2025 annual flows: mean 269.68792344 usd_millions. The FY2026 snapshot is dramatically below this reference class; the fetched sources did not establish an ONDCP-specific explanation."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: An annual-flow reference-class prior uses the seven fetched historical values themselves. Sample sigma = 9.39770105 usd_millions, calculated as sqrt(sum((x-269.68792344)^2)/6). The normal 80% half-width is 1.28*sigma = 12.02905735, giving an illustrative unadjusted historical band of [257.65886609, 281.71698078]. Level is the historical mean; momentum and policy adjustments were not adopted; the near-zero current snapshot requires a reporting or regime explanation. No final point or bounds are issued because official fetches failed and the exact resolution date remains unverified."
+    },
+    {
+      "kind": "text",
+      "text": "The official Data Sources PDF describes nightly updates and financial-assistance reporting within two weeks, except loans within 30 days. These requirements do not verify a specific release date for this registered-query snapshot. The supplied October 15–22 window was not independently confirmed as an official announcement schedule, so resolutionDate is null."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is a large upload of omitted FY2026 transactions. Downside risk is persistence of the 0.26486353 million snapshot. Persistence would land below the illustrative historical interval; unusually large catch-up obligations could land above it. Neither scenario has been assigned an unsupported probability."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch failures: https://api.usaspending.gov/api/v2/reporting/agencies/020/overview/ returned '(400) Timeout fetching'; the official FY26 reporting spreadsheet at https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx returned 'Internal Error'. Fetching stopped under the run instructions. Historical query execution succeeded, but these failures and the unverified resolution date prevent a conforming forecast. Null estimates indicate refusal, not zero-dollar predictions."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

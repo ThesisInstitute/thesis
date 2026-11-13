@@ -1,0 +1,145 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ma",
+  "country": "US",
+  "type": "data",
+  "title": "Massachusetts ex parte renewals, August 2026",
+  "question": "What percentage of Massachusetts Medicaid and CHIP beneficiaries due for renewal in August 2026 will CMS report as renewed on an ex parte basis, using the original (O), unadjusted state submission at first publication?",
+  "unit": "percent",
+  "pointEstimate": 64.0,
+  "ciLow": 47.4,
+  "ciHigh": 80.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Massachusetts's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as initially published, and round to one decimal. Subsequent revisions, corrections, and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "June 2025",
+      "value": 54
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 56
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 67
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 55
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 60
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 63
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 72
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 63
+    }
+  ],
+  "drivers": [
+    "Persistence near the recent Massachusetts reference-class mean",
+    "Renewal-cohort composition and automated verification",
+    "Small adjustment from the previous summer's movement",
+    "Volatility in original monthly renewal outcomes",
+    "Classification of renewals completed after forms are sent"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-june2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.mass.gov/doc/eligibility-letter-252-revised-regulation-130-cmr-502000-health-care-reform-masshealth-the-eligibility-process-0/download"
+  ],
+  "runAt": "2026-10-07T11:56:47Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Massachusetts August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the Massachusetts state row, reporting period 202608, Original or Updated = O, in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. Numerator is Eligibility Processing Metric 5a1; denominator is Metric 5, beneficiaries due for renewal. CMS's snapshot tables explicitly use renewals due as the denominator. Resolution uses the first published counts and one-decimal rounding."
+    },
+    {
+      "kind": "text",
+      "text": "All historical anchors use the original, unadjusted current-period renewal-outcome variant in contemporaneous CMS snapshots, excluding quarterly updated outcomes. The fetched snapshot percentages are rounded to whole percentage points. Exact Massachusetts ex parte numerator counts could not be fetched through the web tool; historicalContext therefore contains the published rounded rates, not reconstructed one-decimal shares."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read Massachusetts current-period Coverage Retention and Disenrollment Rates in the January and February 2026 CMS snapshots.",
+      "result": "January: 87,964 renewals due and 67% renewed ex parte. February: 150,458 due and 55% ex parte. Sources: [January CMS snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf), [February CMS snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read Massachusetts current-period Coverage Retention and Disenrollment Rates in the March and April 2026 CMS snapshots.",
+      "result": "March: 248,454 renewals due and 60% renewed ex parte. April: 153,865 due and 63% ex parte. Sources: [March CMS snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf), [April CMS snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read Massachusetts current-period Coverage Retention and Disenrollment Rates in the May and June 2026 CMS snapshots.",
+      "result": "May: 142,436 renewals due and 72% renewed ex parte. June: 72,366 due and 63% ex parte; June total renewed was 80%, disenrolled 17%, and pending 3%. Sources: [May CMS snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf), [June CMS snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the same original current-period Massachusetts rate in the June and August 2025 CMS snapshots.",
+      "result": "June 2025: 102,098 renewals due and 54% ex parte. August 2025: 94,534 due and 56% ex parte. The published June-to-August movement was +2 percentage points. Sources: [June 2025 CMS snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-june2025.pdf), [August 2025 CMS snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf)."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is the six-print January-June 2026 Massachusetts reference class: 67%, 55%, 60%, 63%, 72%, and 63%. Its arithmetic mean is 63.33%, its range is 55%-72%, and the latest print is 63%. This supports a persistence anchor near the recent mean rather than extrapolating May's elevated reading."
+    },
+    {
+      "kind": "text",
+      "text": "Adjustment components: level starts at June's 63%; momentum contributes zero because the successive changes fluctuate sharply; the single previous summer's +2-point movement receives an analyst-chosen 50% shrinkage, adding 1 point; one-off effects contribute zero without verified August-specific evidence. Policy contributes zero additional points: MassHealth's individual-level annual autorenewal regulation became effective February 13, 2026 and is already represented in subsequent history. Source: [MassHealth Eligibility Letter 252](https://www.mass.gov/doc/eligibility-letter-252-revised-regulation-130-cmr-502000-health-care-reform-masshealth-the-eligibility-process-0/download)."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a June-persistence prior with six original monthly snapshot prints from January-June 2026 and a shrunk seasonal update. Point = 63 + 1 seasonal + 0 momentum + 0 one-off + 0 additional policy = 64.0%. Successive changes are [-12, 5, 3, 9, -9] percentage points, with mean -0.8. Sample variance = [(-11.2)^2 + 5.8^2 + 3.8^2 + 9.8^2 + (-8.2)^2]/4 = 336.8/4 = 84.2; sigma = 9.1761 percentage points. The normal-approximation one-month 80% half-width is 1.28*sigma = 11.7454 points. For two unobserved monthly transitions from June to August, assume independent innovations and multiply by sqrt(2), giving 16.6104 points. Final implied bounds are 64.0 +/- 16.6104, rounded to [47.4%, 80.6%]. Dispersion is estimated from rounded official prints and a small sample."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a cohort especially amenable to automated verification or improved data matching; a major increase could land above 80.6%, outside the interval. The downside risk is failed electronic verification, a difficult renewal cohort, or more renewals classified as form-based after forms are sent; a substantial disruption could land below 47.4%, outside the interval. CMS notes that renewals completed using data after a form is sent can be reported as form-based, affecting the measured ex parte share. Source: [June CMS snapshot methodology](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf)."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar verification limitation: the official release archive reports June 2026 published September 25, 2026, but provides no future announcement verifying December 15, 2026 for August's reporting period. The registered resolutionDate is retained as instructed; it is not a verified CMS publication date. The official-calendar verification requirement could not be satisfied in this run, and no release date was inferred from cadence. Source: [CMS snapshot release archive](https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot)."
+    },
+    {
+      "kind": "forecast",
+      "point": 64.0,
+      "ciLow": 47.4,
+      "ciHigh": 80.6
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "slug": "jolts-quits-rate-october-2026",
+  "country": "US",
+  "type": "data",
+  "title": "October 2026 US quits rate",
+  "question": "What will BLS first report for the October 2026 total nonfarm quits rate, seasonally adjusted, in JOLTS Table 4, series JTS000000000000000QUR?",
+  "unit": "percent",
+  "pointEstimate": 1.9,
+  "ciLow": 1.737,
+  "ciHigh": 2.063,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-01",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, JOLTS Table 4 and Public Data API",
+  "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+  "resolutionRule": "Resolve to the first publicly released value for October 2026, year 2026 and period M10, in BLS API series JTS000000000000000QUR: total nonfarm quits rate, seasonally adjusted, corresponding to JOLTS Table 4. Read the value field and multiply by 1, retaining the agency's published one-decimal percent precision. Freeze that original print; subsequent monthly revisions, annual revisions, and corrections do not change resolution.",
+  "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "August 2026",
+      "value": 1.9
+    }
+  ],
+  "drivers": [
+    "Persistence in the latest quits rate",
+    "Limited hiring and job-switching opportunities",
+    "Weak September payroll growth",
+    "Offsetting industry movements",
+    "Two unobserved months before the target"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/jolts.htm",
+    "https://www.bls.gov/schedule/2026/12_sched.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03312026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_05052026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06022026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06302026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_08042026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09012026.htm",
+    "https://www.bls.gov/news.release/jolts.t04.htm",
+    "https://www.bls.gov/news.release/jolts.nr0.htm",
+    "https://www.bls.gov/news.release/empsit.nr0.htm"
+  ],
+  "runAt": "2026-10-07T11:53:02Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 quits rate: persistence at 1.9 percent"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the October 2026 first print of total nonfarm seasonally adjusted quits rate, BLS series JTS000000000000000QUR, JOLTS Table 4. All quits-rate anchors and historical entries use that same variant and each month's original preliminary print. The direct API endpoint was inaccessible through the web tool; official BLS release tables supplied the evidence. The registered API resolver remains unchanged."
+    },
+    {
+      "kind": "text",
+      "text": "The official JOLTS release schedule explicitly maps October 2026 to December 1, 2026 at 10:00 AM. The December calendar independently confirms the release and specifies Eastern Time. These fetched schedules verify the registered resolution date."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read original Table 4 preliminary columns in https://www.bls.gov/news.release/archives/jolts_03132026.htm, https://www.bls.gov/news.release/archives/jolts_03312026.htm, https://www.bls.gov/news.release/archives/jolts_05052026.htm, and https://www.bls.gov/news.release/archives/jolts_06022026.htm.",
+      "result": "Fetched first-print total nonfarm seasonally adjusted quits rates: January 2026 2.0%, February 2026 1.9%, March 2026 2.0%, April 2026 1.9%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read original releases at https://www.bls.gov/news.release/archives/jolts_06302026.htm, https://www.bls.gov/news.release/archives/jolts_08042026.htm, and https://www.bls.gov/news.release/archives/jolts_09012026.htm.",
+      "result": "Fetched first-print seasonally adjusted quits rates: May 2026 1.9%, June 2026 2.0%, July 2026 1.9%. May's later revised 2.0% observation is excluded from the first-print sample."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read https://www.bls.gov/news.release/jolts.t04.htm and https://www.bls.gov/news.release/jolts.nr0.htm for the latest official August release.",
+      "result": "August 2026 first-print quits rate was 1.9%, with 3.066 million quits. The release reported a 4.3% job openings rate, 3.3% hires rate, and 1.0% layoffs and discharges rate. Quits decreased by 34,000 in wholesale trade and increased by 28,000 in nondurable goods manufacturing."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the September Employment Situation released October 2, 2026 at https://www.bls.gov/news.release/empsit.nr0.htm.",
+      "result": "September nonfarm payroll employment increased by 29,000 and unemployment was 4.2%. July and August payroll gains were revised down by a combined 60,000. These are supporting labor-market indicators, not observations of the target series."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is eight fetched first prints from January through August 2026. Their mean is 1.9375%, median is 1.9%, and five of eight prints equal 1.9%. The base rate and the unchanged latest two prints support a persistence anchor of 1.9%."
+    },
+    {
+      "kind": "text",
+      "text": "Level: retain the latest 1.9% rate. Momentum: shrink the small sample's negative average change to zero because the latest monthly rate was unchanged. Weak hiring opportunities and September payroll growth support restrained voluntary switching. One-off effects: August's opposing industry movements provide no established October adjustment. Policy mechanism: any policy effect would operate indirectly through hiring opportunities; no separate numerical adjustment is identified. The net update is zero."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a driftless persistence model anchored at August's 1.9%, with zero net level, momentum, one-off, and policy-mechanism adjustments. The historical sample is eight first prints and seven successive changes: [-0.1, 0.1, -0.1, 0, 0.1, -0.1, 0] percentage points. Mean change = -0.1/7 = -0.0142857; sum of squared changes = 0.05. Sample variance = (0.05 - 7*(-0.0142857)^2)/6 = 0.00809524; sigma = 0.08997354 percentage points. The nominal 80% normal half-width is 1.28*sigma = 0.11516613. Scale by sqrt(2) for the two unobserved months from August to October: half-width = 0.16286951. Bounds = 1.9 +/- 0.16286951 = [1.73713049, 2.06286951], reported as [1.737, 2.063]. Coverage is model-based and approximate given the small sample."
+    },
+    {
+      "kind": "math",
+      "text": "Point estimate = 1.9 + 0 = 1.9 percent. Rounded 80% bounds are 1.737 and 2.063 percent. At the agency's one-decimal publication precision, the interval contains prints of 1.8%, 1.9%, and 2.0%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a broad rebound in vacancies and hiring could increase voluntary job switching and produce a print of 2.1% or higher. Downside risk: an abrupt contraction in hiring opportunities could suppress voluntary departures and produce 1.7% or lower. Both scenarios would land outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.9,
+      "ciLow": 1.737,
+      "ciHigh": 2.063
+    }
+  ]
+}

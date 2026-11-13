@@ -1,0 +1,63 @@
+{
+  "slug": "wic-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "July 2026 WIC participation",
+  "question": "What will USDA FNS first report for total WIC participation in July 2026, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official agency release",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Use the first official USDA FNS publication of July 2026 total WIC participation. Express the published value in millions, preserving official rounding, and exclude subsequent revisions.",
+  "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program"
+  ],
+  "runAt": "2026-10-07T12:23:54Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "July 2026 WIC participation: source-access failure"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first official print of July 2026 total WIC participation, expressed in millions."
+    },
+    {
+      "kind": "text",
+      "text": "The web fetch of the official WIC program-data page returned HTTP 403 Forbidden."
+    },
+    {
+      "kind": "text",
+      "text": "A curl -sS request to the same official URL returned an empty body. Under the run instructions, evidence collection stopped."
+    },
+    {
+      "kind": "text",
+      "text": "The official participation history could not be fetched. No numeric base rate or reference class is available, and no remembered values were substituted."
+    },
+    {
+      "kind": "text",
+      "text": "The resolution date could not be verified from an official release calendar. The registered release window was not substituted for a verified date."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sigma, adjustment components, or 80% bounds could be calculated from fetched evidence. Null forecast fields indicate failure to produce a forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The required six historical prints, three numeric tool-result steps, two source URLs, and verified resolution date could not be supplied. This object records an unsuccessful run."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

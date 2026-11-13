@@ -1,0 +1,69 @@
+{
+  "status": "refused",
+  "refusalReason": "The registered POST query could not be executed with the available web tools. No canonical history was fetched, and no official schedule verified a resolution date. The prompt explicitly requires refusal when this query cannot be executed.",
+  "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "CDFI assistance transaction obligations, FY2026",
+  "question": "What will FY2026 CDFI Fund awarding-subagency financial-assistance transaction obligations equal in the initial registered USAspending query snapshot, expressed in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the initial registered-query snapshot, with spending_level=transactions, group=fiscal_year, awarding-subagency Community Development Financial Institutions Fund, and assistance award type codes 02 through 11. Select results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001, retaining the returned precision. Later API revisions do not replace that snapshot. Its resolution date could not be independently verified.",
+  "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-07T12:44:56Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: exact-query evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains tied to the supplied registered query, slug, unit, and dataPointId. Agency-profile totals and broader published aggregates cannot establish this series."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint index at https://api.usaspending.gov/docs/endpoints lists spending_over_time as POST-only. Neither available web tool supports an HTTP POST body, and the run instructions prohibit shell-based network requests."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: opening https://api.usaspending.gov/api/v2/search/spending_over_time/ returned Internal Error; a second web tool exposed the underlying response as HTTP 405 Method Not Allowed. These were URL fetch attempts, not executions of the registered POST query. No obligation values were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the official USAspending Data Sources PDF and inspect financial-assistance reporting requirements.",
+      "result": "https://www.usaspending.gov/data/data-sources-download.pdf states that non-loan financial-assistance transactions must generally be reported within 14 days, while loans have a 30-day reporting requirement. USAspending updates daily after its nightly pipeline. These reporting lags do not verify a dated FY2026 snapshot release."
+    },
+    {
+      "kind": "text",
+      "text": "The official Treasury resources page links an FY26 Data Broker reporting schedule, but fetching its XLSX failed because the web tool could not read its content type. The retrieved USAspending documentation distinguishes the monthly Files A/B/C schedule from financial-assistance transaction reporting. No exact resolution date was verified."
+    },
+    {
+      "kind": "text",
+      "text": "The required base rate and reference class cannot be established: no prior-period registered-query values were fetched. The empty historicalContext records this failure; it does not assert that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or historical model can be fitted without canonical query history. Level, momentum, one-off, and policy adjustments remain unestimated. Sigma and the resulting 80% interval cannot be computed, so no point estimate or bounds are issued."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk, downside risk, and outcomes outside the interval cannot be quantified without a valid forecast interval. Null forecast fields explicitly record refusal rather than invented evidence."
+    }
+  ]
+}

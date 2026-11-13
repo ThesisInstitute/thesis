@@ -1,0 +1,142 @@
+{
+  "slug": "us-eci-private-wages-salaries-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US private wage growth, Q3 2026",
+  "question": "What will the first BLS Employment Cost Index release report for private-industry wages and salaries, all workers, seasonally adjusted 3-month percent change for the quarter ending September 2026?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.81,
+  "ciLow": 0.65,
+  "ciHigh": 0.97,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "U.S. Bureau of Labor Statistics Employment Cost Index release, Table 2",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/eci.t02.htm",
+  "resolutionRule": "Use the first officially published BLS Table 2 value for Private industry workers, All workers, wages and salaries, seasonally adjusted percent change for the 3 months ending September 2026. Preserve the published one-decimal percentage; disregard subsequent corrections and revisions. The registered ALFRED ECIWAG multiply-by-1 binding returns an index level and cannot automatically resolve this percent-growth target as written; this concrete ledger discrepancy is documented in reasoning.",
+  "dataPointId": "bls.eci.private_wages_salaries_qoq.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 0.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 1.0
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 0.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 0.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 0.9
+    }
+  ],
+  "drivers": [
+    "Persistence around recent quarterly wage growth",
+    "Lower average growth over the latest four quarters",
+    "Soft September hourly earnings and payroll growth",
+    "Lower private-sector quits rate",
+    "Uncertain timing of sector pay settlements"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/eci.htm",
+    "https://www.bls.gov/news.release/eci.t02.htm",
+    "https://alfred.stlouisfed.org/series?seid=ECIWAG",
+    "https://www.bls.gov/news.release/archives/eci_10312024.htm",
+    "https://www.bls.gov/news.release/archives/eci_01312025.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302025.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312025.htm",
+    "https://www.bls.gov/news.release/archives/eci_12102025.htm",
+    "https://www.bls.gov/news.release/archives/eci_02102026.htm",
+    "https://www.bls.gov/news.release/archives/eci_04302026.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09292026.htm"
+  ],
+  "runAt": "2026-10-07T11:42:13Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Q3 2026 private-industry wages and salaries"
+    },
+    {
+      "kind": "text",
+      "text": "The target is BLS Employment Cost Index Table 2, Private industry workers, All workers, wages and salaries, seasonally adjusted 3-month percent change. Every ECI historical anchor uses this same variant and its original dated release. The official BLS ECI calendar explicitly schedules Q3 2026 for October 30, 2026 at 8:30 a.m. Eastern Time."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Inspect ALFRED series ECIWAG and the corresponding BLS Table 2.",
+      "result": "ALFRED reports ECIWAG as a seasonally adjusted index, December 2005=100: 2026-Q1 177.498 and 2026-Q2 179.010. BLS Table 2 separately reports the corresponding quarterly percentage changes as 0.7% and 0.9%. Sources: https://alfred.stlouisfed.org/series?seid=ECIWAG and https://www.bls.gov/news.release/eci.t02.htm."
+    },
+    {
+      "kind": "text",
+      "text": "Concrete ledger discrepancy: multiplying ECIWAG by 1 preserves index units and does not produce the registered percent_growth measure. This forecast retains the specified slug, dataPointId, period, and quarterly wage-growth question. The binding needs correction before automatic resolution; index levels are excluded from the forecasting reference class."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original BLS ECI releases dated October 31, 2024; January 31, April 30, and July 31, 2025. Read each release's latest-quarter Table 2 private-industry All workers wage percentage.",
+      "result": "Fetched seasonally adjusted first prints: 2024-Q3 0.8%, 2024-Q4 0.9%, 2025-Q1 0.8%, and 2025-Q2 1.0%. These correspond respectively to eci_10312024.htm, eci_01312025.htm, eci_04302025.htm, and eci_07312025.htm in the BLS release archive."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original BLS ECI releases dated December 10, 2025; February 10, April 30, and July 31, 2026. Read each release's latest-quarter private-industry wages and salaries SA 3-month change.",
+      "result": "Fetched first prints: 2025-Q3 0.8%, 2025-Q4 0.7%, 2026-Q1 0.7%, and 2026-Q2 0.9%. These correspond respectively to eci_12102025.htm, eci_02102026.htm, eci_04302026.htm, and eci_07312026.htm in the BLS release archive."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the eight original quarterly prints from 2024-Q3 through 2026-Q2. Their mean is 0.825%, with a range of 0.7% to 1.0%. The latest four average 0.775%, versus 0.875% for the preceding four. This supports persistence with modest downward momentum."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch BLS September 2026 Employment Situation and August 2026 JOLTS releases as separate-series labor-market cross-checks.",
+      "result": "September private nonfarm average hourly earnings rose 0.1% monthly; payrolls increased 29,000 and unemployment was 4.2%. August job openings were 7.1 million, and the private quits rate was 2.1%, versus 2.2% in June. Sources: https://www.bls.gov/news.release/archives/empsit_10022026.htm and https://www.bls.gov/news.release/archives/jolts_09292026.htm."
+    },
+    {
+      "kind": "text",
+      "text": "Separate components: the growth level is anchored by the historical mean and latest ECI print; momentum receives a small negative adjustment. CES earnings and JOLTS are qualitative cross-checks, since their composition and measurement differ from ECI. One-off pay settlements add uncertainty but receive zero directional adjustment. The scheduled ECI employment-weight change begins with December 2026 data, so its direct Q3 mechanism adjustment is zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use an equal-weight historical-mean and persistence prior from the eight fetched first prints: 0.5*0.825 + 0.5*0.9 = 0.8625%. Momentum adjustment = 0.25*(0.775-0.875) = -0.025 percentage points; the separate labor-market adjustment is a judgmental -0.03 points; one-off and scheduled-method adjustments are zero. Final mean = 0.8625-0.025-0.03 = 0.8075%, rounded to 0.81%. Because this is a change series, compute dispersion from the eight values themselves: sigma = 0.103510 percentage points = sqrt(0.075/7). The normal central-80% half-width is 1.28*sigma = 0.132493 points. Widen by 1.20 for the short historical sample and sector pay-timing uncertainty, giving 0.158991 points. Bounds = 0.8075 +/- 0.158991 = [0.648509, 0.966491], rounded to [0.65, 0.97]%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: broad pay settlements or stronger hiring competition could produce 1.0% or more, outside the interval above 0.97%. Downside risk: further weakening labor demand or unusually small sector pay increases could produce 0.6% or less, outside the interval below 0.65%. The June rebound cautions against extrapolating soft monthly earnings too aggressively."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.81,
+      "ciLow": 0.65,
+      "ciHigh": 0.97
+    }
+  ]
+}

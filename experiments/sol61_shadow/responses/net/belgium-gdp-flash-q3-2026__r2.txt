@@ -1,0 +1,154 @@
+{
+  "slug": "belgium-gdp-flash-q3-2026",
+  "country": "BE",
+  "type": "data",
+  "title": "Belgium Q3 2026 GDP flash growth",
+  "question": "What will the NAI/NBB first flash estimate report for Belgian real GDP growth in 2026-Q3 compared with the previous quarter, adjusted for seasonal and calendar effects?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.3,
+  "ciLow": 0.1,
+  "ciHigh": 0.4,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "National Accounts Institute / National Bank of Belgium GDP flash estimate",
+  "resolutionSourceUrl": "https://www.nbb.be/en/statistics/latest-figures/nai-flash-estimate-2026q3",
+  "resolutionRule": "Resolve to the first publicly released NAI/NBB flash estimate of 2026-Q3 real GDP growth compared with the previous quarter, adjusted for seasonal and calendar effects, in the GDP real quarterly growth table. Use the nonannualized percentage change at the agency's published one-decimal precision. Ignore subsequent corrections, revisions and later quarterly-account estimates.",
+  "dataPointId": "nbb.gdp.flash_qoq.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 0.4
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "NBB September nowcast favors 0.3% growth",
+    "Business investment expected to recover",
+    "Household consumption expected to remain stable",
+    "September consumer and services confidence weakened",
+    "Fiscal consolidation restrains public consumption",
+    "Net exports expected to contribute approximately neutrally"
+  ],
+  "sourceContext": [
+    "https://www.nbb.be/en/statistics/latest-figures?scope=2&quick_search=Flash",
+    "https://www.nbb.be/en/statistics/latest-figures/nai-flash-estimate-2026q3",
+    "https://www.nbb.be/en/statistics/latest-figures/nai-flash-estimate-2026q2",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/2-30102024-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/2-30012025-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/2-30042025-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/2-30072025-ap",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/2-30102025-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/2-30012026-ap",
+    "https://ec.europa.eu/eurostat/web/products-euro-indicators/w/2-30042026-bp",
+    "https://ec.europa.eu/eurostat/en/web/products-euro-indicators/w/2-30072026-ap",
+    "https://www.nbb.be/en/news/belgian-economic-growth-expected-rebound-03-q3-2026",
+    "https://www.nbb.be/en/statistics/latest-figures/consumer-confidence-indicator-2026m9",
+    "https://www.nbb.be/en/statistics/latest-figures/business-confidence-indicator-2026m9"
+  ],
+  "runAt": "2026-10-07T12:03:44Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Belgium Q3 2026 GDP flash forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Belgian real GDP, seasonally and calendar adjusted, nonannualized quarter-on-quarter growth, first flash print. Country BE follows the canonical ledger despite its omission from the generic JSON example's country menu. The registered slug, unit and dataPointId are preserved."
+    },
+    {
+      "kind": "text",
+      "text": "The official NBB upcoming-release calendar fetched with curl at https://www.nbb.be/en/statistics/latest-figures?scope=2&quick_search=Flash explicitly lists NAI - Flash estimate, period 2026Q3, release date 29 October 2026. The period-specific resolution URL exists but currently denies access before publication; no target outcome was obtained."
+    },
+    {
+      "kind": "text",
+      "text": "Web opening of NBB pages and archived PDFs failed. Direct curl recovered current NBB HTML evidence; historical readings were fetched from official Eurostat archived preliminary t+30 releases, dataset namq_10_gdp. Each historical observation uses only its own release's latest-quarter Belgium cell, preserving the original flash vintage rather than revised back-history. Eurostat republishes member-state submissions, so these are used as historical proxies for NBB first prints. Their footnotes specify real GDP with seasonal and calendar adjustment, matching the target variant. NBB's associated national-accounts table identifier is DF_QNA_DISS."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the archived Eurostat preliminary flash releases dated 30 October 2024, 30 January 2025, 30 April 2025 and 30 July 2025; read the latest-quarter Belgium GDP column.",
+      "result": "Fetched real GDP q/q flash readings: 2024-Q3 0.2%; 2024-Q4 0.2%; 2025-Q1 0.4%; 2025-Q2 0.2%. These are the contemporaneous latest-quarter cells, not earlier-quarter values revised in subsequent releases."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the archived Eurostat preliminary flash releases dated 30 October 2025, 30 January 2026 and 30 April 2026; read the latest-quarter Belgium GDP column.",
+      "result": "Fetched real GDP q/q flash readings: 2025-Q3 0.3%; 2025-Q4 0.2%; 2026-Q1 0.2%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://www.nbb.be/en/statistics/latest-figures/nai-flash-estimate-2026q2 with curl and open Eurostat's 30 July 2026 preliminary flash release.",
+      "result": "NBB's 2026-Q2 flash reports 0.0% q/q real GDP growth and 0.5% y/y. Flash value-added changes were industry -0.8%, construction -0.5% and services +0.2%. Eurostat's contemporaneous latest-quarter Belgium cell also reports 0.0% q/q."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate uses eight consecutive original flash-vintage readings from 2024-Q3 through 2026-Q2: 0.2, 0.2, 0.4, 0.2, 0.3, 0.2, 0.2 and 0.0%. Their mean is 1.7/8 = 0.2125%, median 0.2%, and range 0.0%-0.4%. This reference class anchors the forecast before current-quarter adjustments."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://www.nbb.be/en/news/belgian-economic-growth-expected-rebound-03-q3-2026 with curl.",
+      "result": "NBB's 9 September 2026 Business Cycle Monitor announcement gives Q3 nowcasting-model predictions of 0.3%-0.6%, selects 0.3% as its most plausible estimate, and assesses the risk balance as broadly neutral."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch NBB's September 2026 consumer-confidence and business-confidence release pages with curl; read their published tables.",
+      "result": "Consumer confidence was -5 in July, -7 in August and -10 in September. September raw overall business confidence improved from -13.2 to -12.1; manufacturing improved from -17.8 to -12.2, while business-related services fell from -1.4 to -13.4 and construction from -7.7 to -11.8. These business observations use the raw synthetic curve."
+    },
+    {
+      "kind": "text",
+      "text": "Level: the recent growth base rate remains modest. Momentum: NBB expects stable consumption and recovering business investment. One-off effects: defence-equipment delivery timing affects public investment and imports, so a public-investment rebound need not translate fully into GDP. Policy mechanism: budget consolidation restrains government consumption. These effects are already incorporated in NBB's nowcast and receive no separate additive uplift. Later consumer and services survey weakness warrants a small judgmental downward update."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a historical-mean prior from the eight fetched flash-vintage prints, blended with NBB's current nowcast. Judgmental weights are 25% prior and 75% nowcast: 0.2125 + 0.75*(0.3-0.2125) = 0.278125%. Subtract a subjective 0.02 percentage-point adjustment for post-nowcast consumer and services weakness, giving 0.258125%; this adjustment is not an estimated statistical coefficient. GDP growth is a change series, so dispersion uses the values themselves: sum of squared deviations = 0.08875; sigma = 0.112599 percentage points = sqrt(0.08875/(8-1)). The normal-approximation central 80% half-width is 1.28*sigma = 0.144127 percentage points. Unrounded bounds are 0.258125 +/- 0.144127 = [0.113998, 0.402252]%. Rounding the point and quantiles to the agency's one-decimal reporting precision gives point 0.3% and final bounds [0.1%, 0.4%]. Discrete rounding makes coverage conservative; this is a nominal interval based on historical dispersion, not a calibrated nowcast-error model."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: stronger investment execution and manufacturing demand could produce a 0.5%-0.6% print, outside the interval above 0.4%. Downside risk: services weakness translating into output losses, weaker household spending or an adverse trade contribution could produce stagnation or contraction, outside the interval below 0.1%. The short historical sample may understate shock-driven tails."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.3,
+      "ciLow": 0.1,
+      "ciHigh": 0.4
+    }
+  ]
+}

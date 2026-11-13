@@ -1,0 +1,166 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-fl",
+  "country": "US",
+  "type": "data",
+  "title": "Florida ex parte renewal share, August 2026",
+  "question": "What percentage of Florida Medicaid and CHIP beneficiaries due for renewal in August 2026 will be renewed on an ex parte basis, using the unadjusted original (O) submission row when CMS first publishes it?",
+  "unit": "percent",
+  "pointEstimate": 22.5,
+  "ciLow": 18.1,
+  "ciHigh": 26.9,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Florida's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Subsequent updated submissions and revisions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.fl.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 29
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 24
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 27
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 24
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 24
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 24
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 24
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 24
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 20
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 22
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 22
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 22
+    }
+  ],
+  "drivers": [
+    "Recent Florida original-report rates stable at 22%",
+    "Small adjustment toward the previous August cohort",
+    "Availability of information supporting automatic renewal",
+    "Cohort composition and first-report pending outcomes"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.myflfamilies.com/medicaid"
+  ],
+  "runAt": "2026-10-07T11:44:17Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Florida August 2026 ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Florida's unadjusted state row for August 2026 in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, original submission O, at first publication. The ledger leaves the denominator implicit; this forecast follows CMS's published ex parte rate: Metric 5a1 divided by Metric 5, beneficiaries due for renewal. Historical anchors use the original current-period tables, with quarterly updated outcomes excluded. CMS's table explicitly identifies this denominator. [CMS June snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf)"
+    },
+    {
+      "kind": "text",
+      "text": "Evidence limitation: exact historical Florida numerator counts could not be fetched through the official CSV or API with the web tool. The twelve historical values are the whole-percentage rates actually published in CMS's original monthly snapshot PDFs; they are not reconstructed one-decimal O-row ratios. CMS's state-table rounding permits approximately half a percentage point of quantization uncertainty. [CMS June snapshot](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf)"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Florida's Coverage Retention and Disenrollment Rates tables in the original July through October 2025 CMS snapshots.",
+      "result": "Ex parte share and beneficiaries due: July 2025, 29% and 188,605; August 2025, 24% and 199,175; September 2025, 27% and 195,239; October 2025, 24% and 192,991. [July](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf), [August](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf), [September](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf), [October](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf)"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same Florida original-report tables for November 2025 through February 2026.",
+      "result": "Ex parte share and beneficiaries due: November 2025, 24% and 155,346; December 2025, 24% and 165,970; January 2026, 24% and 195,466; February 2026, 24% and 197,339. [November](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf), [December](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf), [January](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf), [February](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf)"
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same Florida original-report tables for March through June 2026.",
+      "result": "Ex parte share and beneficiaries due: March 2026, 20% and 190,674; April 2026, 22% and 176,275; May 2026, 22% and 172,329; June 2026, 22% and 171,927. June also reports 67% renewed and 15% pending. [March](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf), [April](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf), [May](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf), [June](https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf)"
+    },
+    {
+      "kind": "text",
+      "text": "Publication-date verification could not be completed. CMS's official release list confirms the June 2026 snapshot was released September 25, 2026, but provides no announced August 2026 release date. The specifications describe state submission deadlines, not public publication dates. The required 2026-12-15 remains the registered ledger date and is unverified; this run therefore does not satisfy the official-calendar verification requirement. [CMS release list](https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot), [CMS specifications](https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf)"
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is the twelve fetched Florida original monthly rates from July 2025 through June 2026. Their calculated mean base rate is 23.83%. The latest three prints average 22%, supporting a persistence anchor below the full-year mean. The prior August print was 24%; one observation supports only a small cohort adjustment, not an established seasonal pattern."
+    },
+    {
+      "kind": "text",
+      "text": "Level: use the recent 22% plateau. Momentum: apply no drift because April through June are unchanged at published precision. One-off: make no event adjustment without observed evidence. Policy mechanism: Florida describes automatic renewal when available information supports eligibility, otherwise requesting additional information. No fetched announcement establishes an August-specific statewide change, so the policy adjustment is zero. [Florida DCF](https://www.myflfamilies.com/medicaid)"
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior with weak previous-August shrinkage, based on twelve original-report snapshot rates. Starting from the 23.83% reference-class mean, the recent-level update is -1.83 percentage points to 22%; momentum, one-off, and policy adjustments are zero. Add 0.25*(24-22)=0.5 percentage points for the previous-August cohort, producing 22.5%. The eleven successive changes are [-5,3,-3,0,0,0,0,-4,2,0,0]; sigma = 2.4196 percentage points, calculated as sqrt((63-49/11)/10). The one-month normal 80% half-width is 1.28*sigma = 3.0971. For the two-month June-to-August horizon, assume independent monthly innovations and add rounding variance 1/12: half-width = 1.28*sqrt(2*sigma^2+1/12) = 4.3955, rounded to 4.4. Final implied bounds are 18.1% and 26.9%. This is a model-based nominal interval, not a demonstrated coverage guarantee."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 0.75*22 + 0.25*24 = 22.5%. Sample change variance = 58.54545/10 = 5.85455; sigma = 2.4196. Two-month rounding-adjusted 80% half-width = 4.3955 percentage points, rounded to 4.4. Interval = [22.5-4.4,22.5+4.4] = [18.1,26.9]%."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: a cohort with more readily verifiable eligibility or improved data matching could raise automatic renewals; a share above 26.9% would land outside the interval. Downside risk: unavailable verification data, a more difficult cohort, or processing disruption could move renewals into forms or pending status; a share below 18.1% would land outside the interval. Later completion of pending cases affects updated submissions and does not alter this first-print target."
+    },
+    {
+      "kind": "forecast",
+      "point": 22.5,
+      "ciLow": 18.1,
+      "ciHigh": 26.9
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "slug": "us-dod-prime-award-transactions-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD prime award transactions",
+  "question": "What will USAspending API v2 agency 097 awards summary transaction_count for FY2026 equal, in millions, at the registered-query snapshot, excluding subsequent revisions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official USAspending API registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+  "resolutionRule": "Use transaction_count from the official response captured for the registered FY2026 query snapshot and multiply by the registered factor of 0.000001. Preserve the returned count's precision and exclude subsequent revisions. An exact snapshot resolution date could not be verified from an official calendar or announcement in this run.",
+  "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-07T11:41:35Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the supplied registered USAspending agency awards transaction_count query for FY2026, expressed in millions. Agency profile totals, search summaries and other aggregates cannot substitute for this query."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web open requests to the exact registered URLs with fiscal_year=2025, fiscal_year=2024 and fiscal_year=2023 each returned Internal Error and 'URL ... is not accessible via this tool.' No response body or transaction_count was obtained. Retrying the FY2025 and FY2024 URLs produced the same failures."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web open requests to the exact registered URLs with fiscal_year=2022, fiscal_year=2021 and fiscal_year=2020 each returned Internal Error and 'URL ... is not accessible via this tool.' The FY2026 query also failed identically. These are retrieval failures, not zero transaction counts."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint documentation at https://api.usaspending.gov/docs/endpoints was accessible and identifies the agency awards endpoint as a GET returning transaction and award-obligation summaries. Accessible documentation does not establish the missing historical values."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date verification failed. The official publication guidance at https://www.usaspending.gov/data/about-the-data-download.pdf describes rolling award-data publication. No official calendar or announcement verifying a fixed date within the supplied expected release window was fetched. The window is registration context, not independently verified schedule evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: An annual-flow reference class prior requires fetched registered-query history. No base rate could be estimated, and no level, momentum, one-off or policy-mechanism adjustment was applied. Historical dispersion and final implied bounds are unavailable. Retrieval failure does not establish that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "math",
+      "text": "The registered transformation is transaction_count multiplied by 0.000001. No transaction_count values were fetched, so sigma and the required approximately 1.28 times sigma interval half-width cannot be calculated."
+    },
+    {
+      "kind": "text",
+      "text": "Publication timing could create upside risk through additional transactions arriving before the snapshot and downside risk through incomplete reporting. Whether either would land outside the interval cannot be assessed because no evidence-supported interval was computed."
+    },
+    {
+      "kind": "text",
+      "text": "The prompt explicitly requires refusal when the registered historical query cannot be executed. Null estimates, a null resolution date and empty historicalContext represent that refusal; they do not constitute a valid forecast cell. No historical statistics or statistic-bearing tool results have been invented."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

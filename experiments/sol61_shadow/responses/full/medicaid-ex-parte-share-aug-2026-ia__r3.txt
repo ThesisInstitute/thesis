@@ -1,0 +1,88 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ia",
+  "country": "US",
+  "type": "data",
+  "title": "Iowa ex parte renewal share, August 2026",
+  "question": "What is Iowa's unadjusted ex parte renewal share for the August 2026 reporting period in the FIRST PRINT of CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, calculated from the original (O) row as ex parte renewals divided by beneficiaries due for renewal, expressed as a percentage to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Iowa's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ia.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original submission vintage",
+    "Beneficiaries due for renewal denominator",
+    "Official history retrieval failure"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:44:00Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official Iowa history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Iowa's unadjusted August reporting-period share from CMS's first published original submission. The supplied slug, unit, dataPointId, resolution date, and resolver are retained. Null estimates report a failed run, not a numeric forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the official CMS dataset identifier 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "CMS's indexed dataset page reports an update on September 25, 2026, with 3,876 rows and 22 columns. It distinguishes original O and updated U submissions. No Iowa numeric observations were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+      "result": "The fetched CMS dictionary maps beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis to Metric 5a1 and beneficiaries_with_a_renewal_due to Metric 5. The submission-status field is original_updated, with O meaning Original."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "Official Data.gov metadata identifies CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified 2026-09-25T18:00:00Z, and its distribution https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "The official CMS page lists June 2026 released September 25, 2026; May 2026 released August 28, 2026; and April 2026 released July 31, 2026. It supplies no verified scheduled date for the August target."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. The official CSV returned Cache miss; the datastore API, filtered Iowa/O dataset pages, and pagination requests were inaccessible through the web tool. No admissible Iowa historical counts were retrieved. HistoricalContext is empty because filling it would invent evidence. This is a retrieval failure, not evidence that CMS exposes fewer than the required number of prints."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: the ledger's 2026-12-15 date is preserved, but it was not verified as a CMS scheduled publication date. No resolutionDateBasis or registered methodology-announcement binding was supplied, so the resolve-by-bound branch cannot be asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without fetched Iowa original-row history, last-print persistence, panel shrinkage, walk-forward comparison, and thesis_model_candidate_v1 candidates cannot be computed honestly. No inside-view adjustment is applied."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: prior unavailable; historical sample unavailable; adjustments withheld; sigma unavailable. Realized first-print changes and interval bounds cannot be computed. No point estimate or interval is issued."
+    },
+    {
+      "kind": "text",
+      "text": "Outside the interval scenarios cannot be assigned numeric thresholds without a grounded interval. Changes in automated renewal matching or renewal-cohort composition would be relevant mechanisms to examine after the required history is fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Forecast dropped under the honesty rule. This object parses as JSON but does not satisfy the numeric forecast or historical-depth requirements. Null forecast fields explicitly preserve that failure."
+    }
+  ]
+}

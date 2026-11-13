@@ -1,0 +1,60 @@
+{
+  "status": "refused",
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD unique prime-contract recipients, FY2026",
+  "question": "How many distinct non-null recipient_id values will the registered USAspending query return for FY2026 Department of Defense prime-contract transactions, expressed in thousands, at the first registered-query snapshot?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official USAspending API",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "Use the registered-query snapshot: POST the FY2026 filters for awarding agency Department of Defense, toptier, contract award codes A, B, C, and D, and transaction spending level. Retrieve every page, count distinct non-null results[].recipient_id, and convert the integer count to thousands. Preserve that snapshot; subsequent revisions do not replace it. The snapshot date could not be independently verified in this run.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/search"
+  ],
+  "runAt": "2026-10-06T22:09:17Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: mandatory registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the exact registered recipient query. Agency totals, award counts, and recipient-profile summaries cannot substitute for its distinct recipient_id count."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web.open requested https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/ and returned 'Failed to fetch ... (405) Method Not Allowed'. This URL fetch did not execute the required POST query and returned no recipient observations."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint index at https://api.usaspending.gov/docs/endpoints lists the spending_by_category/recipient endpoint as POST. The available web tools provide no request-method or request-body parameter, so the exact historical queries and their pagination could not be executed. Shell networking is prohibited by the run instructions."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate and reference class are unavailable: no historical values were fetched using the registered query. This is an access limitation, not evidence that the official source exposes fewer historical periods."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: A persistence prior and historical successive-change dispersion cannot be estimated without the required query history. Level, momentum, one-off, and policy adjustments remain unquantified. Sigma and the corresponding interval half-width are unavailable; no bounds are asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Official schedule checking did not verify a target-specific snapshot date. The fetched page https://www.usaspending.gov/search provided no announcement for this registered query. The supplied expected release window is registration context, not an independently verified official schedule, so resolutionDate is null."
+    },
+    {
+      "kind": "text",
+      "text": "The production prompt explicitly requires refusal when the registered query cannot be executed. Null forecast fields and empty historicalContext record that refusal. HTTP errors and documentation identifiers are not statistical observations and have not been presented as numeric tool evidence."
+    }
+  ]
+}

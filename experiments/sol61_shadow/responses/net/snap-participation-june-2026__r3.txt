@@ -1,0 +1,65 @@
+{
+  "slug": "snap-participation-june-2026",
+  "country": "US",
+  "type": "data",
+  "title": "June 2026 SNAP participation: forecast unavailable",
+  "question": "What is the first official USDA FNS print of national monthly SNAP participation (Persons) for June 2026, converted from thousands to millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS national monthly SNAP participation table",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Use the first officially published national monthly Persons value for June 2026. Multiply the reported thousands by 0.001 to obtain millions, retaining the table's precision. Ignore subsequent revisions.",
+  "dataPointId": "usda.fns.snap.persons.june_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap"
+  ],
+  "runAt": "2026-10-07T12:24:07Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "June 2026 SNAP participation: evidence fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target contract identifies fns.snap.total_persons, June 2026, national monthly Persons, with first-print resolution and conversion from thousands to millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official USDA FNS SNAP program-data page.",
+      "result": "The fetch failed with HTTP 403 Forbidden. No participation statistics were returned."
+    },
+    {
+      "kind": "text",
+      "text": "Following the explicit instruction to stop after a failed fetch, evidence collection stopped. No historical values were substituted from memory."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate could not be established: no official monthly participation history was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The resolution date was not verified from an official release calendar. The supplied expected release window is not a verified announcement date."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical dispersion, adjustment components, sigma, or 80% bounds can be calculated from the fetched evidence. Numerical forecast fields are null because emitting values would invent evidence."
+    },
+    {
+      "kind": "text",
+      "text": "No upside risk, downside risk, or outside the interval scenario can be quantified without an evidence-based forecast and interval. This run cannot satisfy the forecast validation requirements."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

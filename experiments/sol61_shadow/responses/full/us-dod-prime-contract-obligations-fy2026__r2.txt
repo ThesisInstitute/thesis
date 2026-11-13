@@ -1,0 +1,66 @@
+{
+  "slug": "us-dod-prime-contract-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 DoD prime contract obligations: forecast refused",
+  "question": "What will USAspending API v2 agency 097 (DoD) obligations by award category report for the contracts row for FY2026, converted to billions USD, in the registered query snapshot?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 obligations by award category",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year={fiscal_year}",
+  "resolutionRule": "Execute the registered GET query for fiscal_year=2026, select results[category=contracts].aggregated_amount, and multiply by the registered factor 1e-09. The registered policy is registered_query_snapshot, rather than a conventional first print. The supplied target does not specify the exact snapshot date or capture time; its expected release window does not establish either.",
+  "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2020"
+  ],
+  "runAt": "2026-10-07T12:10:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: the registered historical queries could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered series is the contracts row of the exact agency 097 obligations-by-award-category query for each fiscal year. Agency totals, profile pages, and search summaries cannot substitute for this series. Target identity fields are retained from the supplied registration; no Thesis sources or local files were accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the exact registered GET URLs for fiscal_year=2025, fiscal_year=2024, and fiscal_year=2023.",
+      "result": "Each request returned: URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025, 2024, or 2023 respectively is not accessible via this tool. No JSON response body or numeric series value was fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the exact registered GET URLs for fiscal_year=2022, fiscal_year=2021, and fiscal_year=2020; search site:api.usaspending.gov for obligations_by_award_category and 097.",
+      "result": "Each exact query returned 'is not accessible via this tool'; the requests covered fiscal_year=2022, 2021, and 2020. The search returned no results. No JSON response body or numeric series value was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class and base rate cannot be computed: none of the requested historical prints was retrieved. This is a tool-access failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Without fetched historical values, persistence, walk-forward model candidates, sigma, and an 80% interval cannot be calculated honestly. No substitute spending totals, remembered values, or invented adjustments were used."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target omits resolutionDate and resolutionDateBasis. Its expectedReleaseWindow is 2026-10-15 through 2026-10-22; those are supplied registration metadata, not fetched calendar evidence. Neither endpoint of that window is established as the exact registered snapshot date, so resolutionDate remains null."
+    },
+    {
+      "kind": "text",
+      "text": "The target explicitly requires refusal when the registered query cannot be executed. Accordingly, no numeric forecast is issued. Null forecast fields and empty historicalContext denote this refusal; this object is not a publishable forecast cell."
+    }
+  ]
+}

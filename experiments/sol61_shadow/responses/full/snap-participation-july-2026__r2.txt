@@ -1,0 +1,176 @@
+{
+  "slug": "snap-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation in July 2026",
+  "question": "What will USDA FNS report on the FIRST PRINT for July 2026 national Supplemental Nutrition Assistance Program participation, series fns.snap.total_persons, Participation Persons in the national monthly data table, not seasonally adjusted, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 36.143304,
+  "ciLow": 35.613214,
+  "ciHigh": 36.673394,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS, SNAP Data Tables, national monthly participation",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Use the July 2026 row and Participation Persons column of the national monthly SNAP table in its first official publication, corresponding to the July Initial TOTAL in the Persons Participating table. The series is not seasonally adjusted and may include disaster participation. Later revisions and corrections do not replace the first print. Express counts in millions: thousands multiplied by 0.001; when the artifact reports actual persons, first divide by 1000 to obtain thousands, then apply 0.001. Preserve published count precision, equivalent to six decimal places in millions for an integer-person artifact. No conditioning event applies. A valid resolution date remains unspecified; the supplied expected-release-window endpoint is not an official release date.",
+  "dataPointId": "usda.fns.snap.persons.july_2026",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2025-12"
+      },
+      "label": "December 2025",
+      "value": 39.513033
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 38.54773
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": 37.870817
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 37.298271
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 37.011096
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 36.562128
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 36.352716
+    }
+  ],
+  "drivers": [
+    "Consecutive declines in initial participation counts",
+    "Slower latest first-print decline",
+    "Significant revisions in preliminary reporting",
+    "Sparse first-print calibration history"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf"
+  ],
+  "runAt": "2026-10-07T12:22:43Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "July 2026 SNAP first-print participation forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the national monthly Persons participation level, without seasonal adjustment. Retain the registered slug, unit and dataPointId. Historical values are initial vintages from official monthly releases, not revised history from the latest release. Official Persons tables provide the national TOTAL; fetched national summaries corroborate the same initial values for February, March, May and June. December, January and April national-summary vintage files could not be fetched; their Initial TOTAL values were fetched from the corresponding official Persons tables. Consequently, exact-national-artifact provenance is incomplete for those three periods."
+    },
+    {
+      "kind": "text",
+      "text": "Unresolved contract requirement: the supplied target omits resolutionDate and resolutionDateBasis. Its expectedReleaseWindow is 2026-11-29 through 2026-12-07, but that is not an official release calendar or a registered resolve-by deadline. Official-source searches did not establish a literal July-data release date. resolutionDate is therefore null; this forecast must be withheld from publication pending clarification. It is not a contract-valid publishable cell. Catalog lookup was skipped under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search official FNS cached snap-persons-3.pdf and snap-persons-4.pdf for December 2025 and January 2026 Initial TOTAL.",
+      "result": "snap-persons-3.pdf, data as of March 13, 2026: December 2025 Initial TOTAL = 39,513,033 persons. snap-persons-4.pdf, data as of April 10, 2026: January 2026 Initial TOTAL = 38,547,730 persons. Official artifact contents were returned by web search; direct opens failed. Converted values are 39.513033 and 38.547730 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open official snap-persons-5.pdf, snap-persons-6.pdf, snap-4fymonthly-5.pdf and snap-4fymonthly-6.pdf; read target-month Initial TOTAL or Participation Persons.",
+      "result": "May 8, 2026 vintage: February 2026 first print = 37,870,817 persons, identical in the Persons and national tables. June 12, 2026 vintage: March 2026 first print = 37,298,271 persons, identical in both tables. Converted values are 37.870817 and 37.298271 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open official snap-persons-7.pdf, snap-persons-8.pdf and snap-4fymonthly-8.pdf; read April and May 2026 initial counts.",
+      "result": "July 10, 2026 vintage snap-persons-7.pdf: April Initial TOTAL = 37,011,096 persons. August 14, 2026 vintage snap-persons-8.pdf: May Initial TOTAL = 36,562,128 persons, matching May Participation Persons in snap-4fymonthly-8.pdf. Converted values are 37.011096 and 36.562128 million."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the official SNAP data page and linked snap-4fymonthly-9.pdf and snap-persons-9.pdf.",
+      "result": "The official page identifies June 2026 as the latest available month and is updated September 18, 2026. Both September 11, 2026 data-vintage tables report June initial participation = 36,352,716 persons. The current national table separately reports revised May = 36,685,024 persons. June Initial TOTAL matches national Participation Persons. The Persons table warns that preliminary data are subject to significant revision."
+    },
+    {
+      "kind": "text",
+      "text": "Scale discrepancy: the registered table description says thousands, but fetched official PDFs report actual persons. Normalize raw persons to thousands before applying the registered 0.001 multiplier; equivalently divide raw persons by 1,000,000. This preserves the registered millions unit and participation concept."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: seven consecutive first-print levels, December 2025 through June 2026, have mean 37.593684 million and range 36.352716–39.513033 million. Their six successive changes are -0.965303, -0.676913, -0.572546, -0.287175, -0.448968 and -0.209412 million; mean change is -0.5267195 million and sample standard deviation is 0.276088593 million. The initial default prior is last-print persistence, 36.352716 million. A momentum rule may replace that prior on the fetched walk-forward comparison."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates are recorded inline because file creation is prohibited. Candidate set: {\"schema\":\"thesis_model_candidate_v1\",\"candidates\":[{\"model\":\"persistence\",\"point\":36.352716,\"p10\":35.822626,\"p50\":36.352716,\"p90\":36.882806,\"interval80\":[35.822626,36.882806],\"interval90\":[35.671467,37.033965],\"intervalMethod\":\"fallback-prior Gaussian; first-print change sigma multiplied by 1.5\",\"calibration_n\":6,\"trainCutoff\":\"2026-06\",\"walkForwardScore\":{\"metric\":\"MAE\",\"value\":0.315185,\"n\":3}},{\"model\":\"last_change\",\"point\":36.143304,\"p10\":35.613214,\"p50\":36.143304,\"p90\":36.673394,\"interval80\":[35.613214,36.673394],\"interval90\":[35.462055,36.824553],\"intervalMethod\":\"fallback-prior Gaussian; first-print change sigma multiplied by 1.5\",\"calibration_n\":6,\"trainCutoff\":\"2026-06\",\"walkForwardScore\":{\"metric\":\"MAE\",\"value\":0.228907,\"n\":3}},{\"model\":\"three_change_drift\",\"point\":36.037531,\"p10\":35.507441,\"p50\":36.037531,\"p90\":36.567621,\"interval80\":[35.507441,36.567621],\"interval90\":[35.356282,36.718780],\"intervalMethod\":\"fallback-prior Gaussian; first-print change sigma multiplied by 1.5\",\"calibration_n\":6,\"trainCutoff\":\"2026-06\",\"walkForwardScore\":{\"metric\":\"MAE\",\"value\":0.247047,\"n\":3}},{\"model\":\"expanding_mean_drift\",\"point\":35.825997,\"p10\":35.295906,\"p50\":35.825997,\"p90\":36.356087,\"interval80\":[35.295906,36.356087],\"interval90\":[35.144748,36.507245],\"intervalMethod\":\"fallback-prior Gaussian; first-print change sigma multiplied by 1.5\",\"calibration_n\":6,\"trainCutoff\":\"2026-06\",\"walkForwardScore\":{\"metric\":\"MAE\",\"value\":0.336121,\"n\":3}}]}. Common walk-forward target periods are April, May and June 2026. Persistence predicts the preceding level; last_change adds the preceding first-print change; three_change_drift adds the preceding three-change average; expanding_mean_drift adds the preceding full-history average change."
+    },
+    {
+      "kind": "text",
+      "text": "Select last_change as the strongest tested benchmark. Common-origin forecasts use only preceding first prints; its April–June MAE is lower than the other candidates. An additional February–June comparison gives last_change MAE 0.215895 versus persistence 0.439003 million across five predictions. This small sample does not establish robust long-run superiority. The selected model incorporates momentum; the agent applies no further adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view decomposition: level is June's 36.352716 million; model momentum is -0.209412 million; additional seasonal, one-off and policy adjustments are zero. The latest same-vintage June-minus-revised-May decline is -0.332308 million, while May's upward revision from its initial print is +0.122896 million. These observations support caution about extrapolation and preliminary reporting, but establish no separate July-specific adjustment. Keep full weight on the selected benchmark. The model replacement moves the point -0.209412 million from persistence; there is no discretionary deviation from the selected candidate."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected last_change candidate, trained on seven fetched first prints from December 2025 through June 2026. Point = 36.352716 + (36.352716 - 36.562128) + 0 additional updates = 36.143304 million. For six successive first-print changes, mean = -0.5267195; sum of squared deviations = 0.3811245548055; sigma = sqrt(0.3811245548055 / 5) = 0.276088593 million. Base 80% half-width = 1.28*sigma = 0.353393399. Widen by 1.5 for sparse calibration and the official warning about significant preliminary revisions: half-width = 1.5*1.28*sigma = 0.530090098. Thus 80% bounds = 36.143304 +/- 0.530090098 = [35.613214, 36.673394] after rounding to six decimal places. Candidate 90% half-width = 1.5*1.645*sigma = 0.681248602, giving [35.462055, 36.824553]. These are nominal fallback-prior intervals, not empirically established coverage probabilities. Arithmetic was inspected this run using python3 -c on the fetched counts."
+    },
+    {
+      "kind": "text",
+      "text": "Calibration sanity check: five available last-change forecast errors are +0.288390, +0.104367, +0.285371, -0.161793 and +0.239556 million; all five fit inside the final half-width 0.530090098. This uses dispersion estimated from the complete sample and is an in-sample check, not independent interval validation. Seven fetched prints cannot establish coverage over ten historical predictions."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: restoration of delayed state reporting, renewed enrollment or disaster participation producing a net July increase greater than 0.320678 million from June would land above the interval, exceeding 36.673394 million. Downside risk: simultaneous large-state case closures or missing submissions producing a net decline greater than 0.739502 million would land below the interval, below 35.613214 million. Such a decline is within the fetched reference class: its largest first-print fall was 0.965303 million. These scenarios are stress tests, not additional measured policy effects."
+    },
+    {
+      "kind": "text",
+      "text": "Publication disposition: withhold this forecast. JSON syntax and numeric field agreement were validated, but the required YYYY-MM-DD resolutionDate cannot honestly be populated, and exact-national-artifact history provenance remains incomplete. No activityLog receipts or publication provenance are manufactured."
+    },
+    {
+      "kind": "forecast",
+      "point": 36.143304,
+      "ciLow": 35.613214,
+      "ciHigh": 36.673394
+    }
+  ]
+}

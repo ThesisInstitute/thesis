@@ -1,0 +1,12 @@
+{
+  "ok": false,
+  "cells": [
+    {
+      "slug": "spm-child-poverty-rate-cy2027-current-law",
+      "ok": false,
+      "errors": [
+        "resolve-by-bound target requires generation ticket context"
+      ]
+    }
+  ]
+}

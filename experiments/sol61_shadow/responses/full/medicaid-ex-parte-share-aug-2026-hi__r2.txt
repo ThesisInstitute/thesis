@@ -1,0 +1,95 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-hi",
+  "country": "US",
+  "type": "data",
+  "title": "Hawaii ex parte renewal share, August 2026",
+  "question": "What percentage of Hawaii Medicaid and CHIP beneficiaries due for renewal in August 2026 had coverage renewed on an ex parte basis, using the FIRST PRINT original (O) submission in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, without seasonal adjustment, computed as 100 times Metric 5a1 divided by Metric 5 and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Hawaii's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal. Select State Abbreviation HI, Reporting Period 202608, Original or Updated O; compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis (Metric 5a1) divided by Beneficiaries with a Renewal Due (Metric 5). Later revisions and updated (U) submissions do not resolve this first-print target. The registered resolutionDate is retained but was not verified as an official scheduled publication date.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.hi.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original submission counts unavailable",
+    "Historical calibration unavailable",
+    "Registered publication date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:18:17Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Evidence fetch failure: forecast withheld"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Hawaii's August original-submission ex parte renewal share, rounded to one decimal. CMS's snapshot convention uses all beneficiaries due for renewal as the denominator. No seasonal adjustment is specified. The supplied slug and identity fields were retained; the prohibited Thesis catalog was not accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Official CMS dataset search: https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+      "result": "CMS identifies 3,876 rows and 22 columns, updated September 25, 2026. O denotes Original and U Updated. The fetched preview contains Alaska rows, not Hawaii history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "Official metadata records modification at 2026-09-25T18:00:00Z and identifies the CSV distribution https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. Opening that distribution directly and through its Download link returned inaccessible errors."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open; web.find",
+      "call": "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf; find 36,142",
+      "result": "The June 2026 snapshot reports Hawaii with 36,142 beneficiaries due for renewal and an ex parte share of 74%, rounded to a whole percentage point. The table's denominator is total beneficiaries due for renewal. These summary figures do not supply the exact original-row numerator or the required one-decimal history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open; web.find",
+      "call": "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf; find 8th and 15th",
+      "result": "CMS specifies original submissions due on the 8th of the following month and pending-outcome updates due on the 15th after three full months. Its August 2024 example has September 8 as the original submission deadline and December 15, 2024 as the updated submission deadline. These are state submission deadlines, not public release dates."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. The official datastore endpoint https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=5&offset=0, filtered queries, dataset pagination, and the official CSV were inaccessible through the web tool. No exact Hawaii original-submission history was recovered. Empty historicalContext reflects a retrieval failure, not a claim that CMS exposes fewer than the required prints."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable for the exact registered series. The rounded June snapshot cannot establish an exact persistence prior, a historical change distribution, or a persistence-plus-panel-shrinkage benchmark. Model candidates were therefore not generated; their calibration inputs would be missing."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the intended prior is the strongest calibrated benchmark from exact Hawaii original submissions. Historical sample unavailable; adjustment components not estimated; sigma unavailable. The required successive-change sigma and 1.28*sigma interval arithmetic cannot be evaluated. No point or interval bounds are asserted."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: the official snapshot page verifies June 2026 publication on September 25, 2026, but supplies no scheduled August publication date. The registered 2026-12-15 is preserved without claiming official calendar verification or inferring a date from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would include improved automated verification or a cohort with more readily verifiable eligibility; downside risk would include matching failures or more complex renewal cases. Without a calibrated interval, neither scenario can honestly be assigned an outside-the-interval threshold."
+    },
+    {
+      "kind": "text",
+      "text": "This cell is dropped under the evidence rule. Null forecast fields explicitly denote unavailable estimates; this object is not a valid numeric forecast and cannot pass the history and interval validation requirements. No historical counts, model outputs, artifact receipts, or numerical uncertainty estimates were fabricated."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

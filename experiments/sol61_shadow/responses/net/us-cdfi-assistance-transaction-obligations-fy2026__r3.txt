@@ -1,0 +1,131 @@
+{
+  "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 CDFI assistance obligations: forecast refused",
+  "question": "What will FY2026 CDFI Fund awarding-subagency financial-assistance transaction obligations equal in the first registered USAspending query snapshot, expressed in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "POST the registered fiscal-year query with spending_level=transactions, the Community Development Financial Institutions Fund awarding subtier agency, and award_type_codes 02 through 11. Select results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001, preserving the returned precision. Resolve on the first official response at the registered snapshot, without subsequent revisions. The supplied registration specifies an October 15–22 window but no exact snapshot date or time; an official resolution date could not be verified.",
+  "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2018"},
+      "label": "FY2018",
+      "value": 341.830155
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2019"},
+      "label": "FY2019",
+      "value": 201.446413
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 544.34114872
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 1457.58697844
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 577.03832827
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 1986.065187
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 782.042553
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 319.455176
+    }
+  ],
+  "drivers": [
+    "Daily publication and reporting delays",
+    "Late-year award postings",
+    "Negative obligations from award adjustments",
+    "Unspecified registered snapshot timing"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/monthly-reporting-requirements",
+    "https://tfx.treasury.gov/data-transparency/resources"
+  ],
+  "runAt": "2026-10-07T12:24:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Registered-query history retrieved; forecast refused after calendar lookup failure"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.search.spending_over_time.cdfi.program_obligations: financial-assistance award transactions, awarding subtier agency Community Development Financial Institutions Fund, award types 02–11, grouped by fiscal year. Each historical query used October 1 of the preceding year through September 30 of the named year. No agency-profile totals were substituted."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate registered POST queries to https://api.usaspending.gov/api/v2/search/spending_over_time/ for FY2018, FY2019 and FY2020; read echoed raw JSON aggregated_amount fields.",
+      "result": "FY2018: 341830155.0 USD; FY2019: 201446413.0 USD; FY2020: 544341148.72 USD. All responses reported spending_level=transactions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate identical registered POST queries, substituting FY2021, FY2022 and FY2023 fiscal-year dates.",
+      "result": "FY2021: 1457586978.44 USD; FY2022: 577038328.27 USD; FY2023: 1986065187.0 USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Separate identical registered POST queries for FY2024, FY2025 and the current FY2026 snapshot.",
+      "result": "FY2024: 782042553.0 USD; FY2025: 319455176.0 USD; current FY2026: -7917461.89 USD. The current FY2026 value is -7.91746189 USD millions and is not the future registered snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched reference class contains eight distinct prior fiscal-year query observations, FY2018–FY2025. These are official historical values retrieved in this run, not archived original vintages. Their large variation establishes that neither a remembered annual funding total nor the current negative FY2026 balance supplies a sufficient base rate by itself."
+    },
+    {
+      "kind": "math",
+      "text": "Apply the registered factor without intermediate rounding: 319455176.0 × 0.000001 = 319.455176 USD millions; -7917461.89 × 0.000001 = -7.91746189 USD millions. No forecast interval was calculated after the stopping condition."
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending methodology describes daily updates after the nightly pipeline. Treasury reporting guidance describes financial-assistance publication within 30 days and reporting at least twice monthly. These rules do not verify an annual release date or a particular October 15–22 registered snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "The official calendar lookup failed: the web tool returned error 400, unsupported spreadsheet content type, for https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx and https://tfx.treasury.gov/system/files/2026-08/fy27-dabs-reporting-window-schedule.xlsx. These are DABS submission schedules, not a verified release schedule for the registered financial-assistance transaction query. Further fetching stopped under the prompt's fail-and-stop instruction."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The intended empirical prior would use the eight fetched annual flows, then distinguish current reported obligations from subsequent award postings and adjustments. Model fitting, sigma estimation, adjustment sizing and final implied bounds were not completed because the required official resolution date remained unverified and the calendar lookup failed. Null forecast fields explicitly record refusal rather than invented estimates."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a substantial batch of late award postings; the downside risk is further deobligation or delayed publication. Without a verified snapshot date and a completed model, whether either scenario would fall outside the interval cannot be assessed honestly."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

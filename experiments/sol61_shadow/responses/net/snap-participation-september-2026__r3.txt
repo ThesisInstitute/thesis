@@ -1,0 +1,53 @@
+{
+  "slug": "snap-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "SNAP participation, September 2026",
+  "question": "What will USDA FNS first report for national monthly SNAP Persons, not seasonally adjusted, for September 2026, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS national monthly SNAP participation table",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve using the first official print of September 2026 national monthly Persons in the USDA FNS SNAP participation table. Convert the published value in thousands to millions by multiplying by 0.001, retaining published precision. Exclude subsequent revisions and corrections.",
+  "dataPointId": "usda.fns.snap.persons.september_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap"
+  ],
+  "runAt": "2026-10-07T12:33:48Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable because official-source retrieval failed"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is September 2026 national monthly SNAP Persons, resolved on its first official print."
+    },
+    {
+      "kind": "text",
+      "text": "Opening the official USDA FNS SNAP program-data page with the web tool returned 403 Forbidden. Fetching the same official URL using curl -sS returned an empty body."
+    },
+    {
+      "kind": "text",
+      "text": "No participation history was fetched. The required six distinct numeric prints and outside-view base rate cannot be supplied without inventing evidence."
+    },
+    {
+      "kind": "text",
+      "text": "An official release-calendar date was not verified. The registered expected release window is not a substitute for calendar verification."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, momentum adjustment, sigma, or 80% interval was calculated because the required official history was unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "The run stops without a numeric forecast under the instruction to fail honestly when the official base rate cannot be fetched."
+    }
+  ]
+}
