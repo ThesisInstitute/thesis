@@ -383,9 +383,9 @@ jobs:
         # skipped, the always-run status page aside: the loop worked),
         # naming each refused row, or "Resolution records not rebuilt" when
         # a failed rebuild of a restatement run's records was its only
-        # cause; "Resolution loop failed" otherwise. A
-        # second red run on the same day comments on the open issue instead
-        # of vanishing. If the script fails, the old title and one-line body
+        # cause; "Resolution loop failed" otherwise. A second red run on the
+        # same day comments on the open issue of the same title instead of
+        # vanishing. If the script fails, the old title and one-line body
         # go out; if the issue call fails, a one-line issue under the same
         # title does (a call that failed only on our side can then post
         # twice, which beats posting nothing). A run cancelled before it
