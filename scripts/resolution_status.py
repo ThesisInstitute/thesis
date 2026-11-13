@@ -69,6 +69,20 @@ _LINE_RULES: tuple[tuple[re.Pattern[str], str, str], ...] = tuple(
             "fetch_failed",
             "SOURCE_UNREACHABLE",
         ),
+        # resolve_pending.ALFRED_VINTAGE_*: ALFRED answered with an earlier
+        # day's vintage, the day has not begun in St. Louis, or the bytes are
+        # not a vintage CSV of the series asked for.
+        (
+            r"^ALFRED VINTAGE LAGGED \(deferring\)$",
+            "deferred",
+            "ALFRED_VINTAGE_LAGGED",
+        ),
+        (
+            r"^ALFRED VINTAGE NOT REACHED \(deferring\)$",
+            "deferred",
+            "RELEASE_DAY_NOT_REACHED",
+        ),
+        (r"^ALFRED READ FAILED \(deferring\)$", "fetch_failed", "SOURCE_UNREACHABLE"),
         (r"^UNIT MISMATCH \(refusing\)$", "refused", "UNIT_MISMATCH"),
         (r"^IMPLAUSIBLE VALUE \(refusing", "refused", "IMPLAUSIBLE_VALUE"),
         (r"^LEDGER UNIT CONFLICT \(refusing\)$", "refused", "LEDGER_UNIT_CONFLICT"),
@@ -131,6 +145,12 @@ REASONS = {
     "NOT_YET_PUBLISHED": (
         "The resolver did not get this period's figure on its last run and "
         "reported it as not yet published."
+    ),
+    "ALFRED_VINTAGE_LAGGED": (
+        "ALFRED answered the resolver's request for this figure's release-day "
+        "vintage with an earlier day's vintage, in every spelling of the "
+        "request. An earlier day's vintage cannot show the release-day print, "
+        "so the resolver waits for one labeled the release day."
     ),
     "WINDOW_NOT_OPEN": "The registered release window for this figure has not opened.",
     "SOURCE_UNREACHABLE": (
