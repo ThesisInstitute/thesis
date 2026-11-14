@@ -1,6 +1,6 @@
 {
   "schemaVersion": "thesis_resolution_status_v1",
-  "asOf": "2026-11-13",
+  "asOf": "2026-11-14",
   "run": {
     "logAvailable": true,
     "completed": true,
@@ -784,6 +784,6 @@
       "reason": "The resolver has no route for this target's reference. The target was registered with a generic source link rather than a resolver binding."
     }
   },
-  "generatedAtUtc": "2026-11-13T20:41:03Z",
-  "workflowRun": "43503457013"
+  "generatedAtUtc": "2026-11-14T18:53:29Z",
+  "workflowRun": "43628848592"
 }
