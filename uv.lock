@@ -163,6 +163,9 @@ resolver = [
     { name = "pypdf" },
     { name = "xlrd" },
 ]
+stan = [
+    { name = "stanli" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -187,12 +190,13 @@ requires-dist = [
     { name = "scipy", marker = "extra == 'experiments'", specifier = ">=1.15.3" },
     { name = "selectolax", marker = "extra == 'bills'", specifier = ">=0.3.21" },
     { name = "sigstore", marker = "python_full_version >= '3.11' and extra == 'challenge'", specifier = "==4.5.0" },
+    { name = "stanli", marker = "extra == 'stan'", specifier = "==0.25.0" },
     { name = "statsmodels", marker = "extra == 'experiments'", specifier = ">=0.14.6" },
     { name = "xlrd", marker = "extra == 'custody'", specifier = "==2.0.1" },
     { name = "xlrd", marker = "extra == 'dev'", specifier = "==2.0.1" },
     { name = "xlrd", marker = "extra == 'resolver'", specifier = "==2.0.1" },
 ]
-provides-extras = ["custody", "challenge", "resolver", "experiments", "mcp", "bills", "dev"]
+provides-extras = ["custody", "challenge", "resolver", "experiments", "mcp", "stan", "bills", "dev"]
 
 [[package]]
 name = "certifi"
@@ -2937,6 +2941,22 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/14/2f/9223c24f568bb7a0c03d751e609844dce0968f13b39a3f73fbb3a96cd27a/sse_starlette-3.3.3.tar.gz", hash = "sha256:72a95d7575fd5129bd0ae15275ac6432bb35ac542fdebb82889c24bb9f3f4049", size = 32420, upload-time = "2026-03-17T20:05:55.529Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/78/e2/b8cff57a67dddf9a464d7e943218e031617fb3ddc133aeeb0602ff5f6c85/sse_starlette-3.3.3-py3-none-any.whl", hash = "sha256:c5abb5082a1cc1c6294d89c5290c46b5f67808cfdb612b7ec27e8ba061c22e8d", size = 14329, upload-time = "2026-03-17T20:05:54.35Z" },
+]
+
+[[package]]
+name = "stanli"
+version = "0.25.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/40/0c/6b2e92672f295bd455bb35f19b1f53e7c79a26ab367373da2830d44bc928/stanli-0.25.0-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:d167b07b1bdd15f3596ce8515e500cadbdcc4a6248c5db6aa155de06ae2106ad", size = 14374633, upload-time = "2026-10-29T02:39:44.504Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/25/c4de22d7625c40e850d3a5c8b2364be7dbc68bde93ae0245169c2814f73c/stanli-0.25.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:1a66de87f61d073263d0e8c8d146dca33eeac71c75f0bf38c0ba3d674c474007", size = 11153319, upload-time = "2026-10-29T02:39:46.591Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/6b/9ea4de588158b4429f7f19afbf3eea6b22683fca7a364e935ff387bdb70f/stanli-0.25.0-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:39ebcf99bb5b90a7268ce24d95c9494caded50c88727de16b9d808933c3cf60f", size = 13825915, upload-time = "2026-10-29T02:39:48.482Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/a4/32ff630d6ca00a6ae24f3699387f0d59f831702c57d679a6f4b795e42cb2/stanli-0.25.0-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:0c182a46033731c28eac65b62b317fab87df553375e1cbce2351a24d599926a4", size = 15320016, upload-time = "2026-10-29T02:39:50.687Z" },
+    { url = "https://files.pythonhosted.org/packages/93/1b/02fd571e5633ecaa3939990713ddbe8fa014867e7a3b239d075be94e5283/stanli-0.25.0-py3-none-win_amd64.whl", hash = "sha256:2a10e8697ef0104a10bb9c0aa289ba69c78a7d22eda103e1920faeeb68c11414", size = 20672644, upload-time = "2026-10-29T02:39:53.528Z" },
 ]
 
 [[package]]
