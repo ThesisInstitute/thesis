@@ -142,7 +142,9 @@ WAIVED_UNATTESTED_COMMITS: dict[str, str] = {
     # correction to operator config counted as a records push. It slipped
     # past the pre-push guard added that same day because a worktree-scoped
     # core.hooksPath shadowed the repo setting, leaving the guard inert in
-    # every Claude Code worktree (now set per worktree; see AGENTS.md).
+    # every Claude Code worktree. Per-worktree settings did not stick (the
+    # Claude desktop app rewrites them); clones now run a dispatcher from
+    # scripts/install_git_hooks.sh with core.hooksPath unset (AGENTS.md).
     # Open question for the operator: batches/*-targets.json are inputs, not
     # attested outputs, and arguably do not belong inside the protected
     # prefix at all.
