@@ -90,8 +90,13 @@ export interface ForecastPairwiseJudgeRecord {
   reason: string;
 }
 
+// Two values are outcome verdicts rather than failures, and each appears
+// alone: "well_calibrated" (interval covered, usable nCRPS at most 0.25) and
+// "not_assessable" (no usable ledger scale, and no raw-unit evidence of a
+// failure). Every other value names a failure the evidence supports.
 export type ForecastResolutionFailureMode =
   | "well_calibrated"
+  | "not_assessable"
   | "bad_baseline"
   | "overreacted_to_recent_data"
   | "ignored_official_projection"
@@ -171,7 +176,7 @@ const JUDGE_PROMPT_VERSION = "forecast-trace-quality-v0.1";
 // Every row this module builds comes from rules, so it names no model.
 const RULE_BASED_JUDGE_MODEL = "none";
 const RULE_BASED_JUDGE_METHOD =
-  "No model produced these rows. Code in site/src/data/forecast-judges.ts scores each public trace by counting rubric keywords and structural features such as tool calls, a stated interval and a distribution. It picks each pairwise winner from the difference between two such scores, and it tags each resolved run from thresholds on its resolved score, from its pack labels and from whether it names a data point. A run that trips none of those rules gets the tag bad_baseline. Each trace row's `prompt` holds the template a model judge would receive; no model has received it.";
+  "No model produced these rows. Code in site/src/data/forecast-judges.ts scores each public trace by counting rubric keywords and structural features such as tool calls, a stated interval and a distribution. It picks each pairwise winner from the difference between two such scores, and it tags each resolved run from thresholds on its resolved score, from its pack labels and from whether it names a data point. A run that trips none of those rules gets the tag bad_baseline if its score has a usable ledger scale and not_assessable if it has none. Each trace row's `prompt` holds the template a model judge would receive; no model has received it.";
 
 type NormalizedForecastScore = ResolvedForecastScore & {
   normalizationScale: number;
@@ -360,8 +365,9 @@ export function buildForecastResolutionJudgeRecords(
   evaluatedAt = JUDGE_GENERATED_AT,
 ): ForecastResolutionJudgeRecord[] {
   return scores.map((score) => {
-    const tags = classifyResolutionFailureModes(score);
-    const primaryFailureMode = tags[0] ?? "well_calibrated";
+    const normalized = usableNormalizedScore(score);
+    const tags = classifyResolutionFailureModes(score, normalized);
+    const [primaryFailureMode] = tags;
     return {
       schemaVersion: "thesis_forecast_resolution_judge_v1",
       judgeId: `judge.resolution.${score.scoreId}`,
@@ -372,8 +378,12 @@ export function buildForecastResolutionJudgeRecords(
       judge: buildJudgeMetadata(),
       primaryFailureMode,
       tags,
-      severity: getFailureSeverity(score),
-      explanation: buildResolutionExplanation(score, primaryFailureMode),
+      severity: getFailureSeverity(score, normalized, primaryFailureMode),
+      explanation: buildResolutionExplanation(
+        score,
+        normalized,
+        primaryFailureMode,
+      ),
     };
   });
 }
@@ -704,53 +714,97 @@ function buildTraceJudgePrompt(
   };
 }
 
+// A covered run whose error exceeds this share of its own 80% interval width
+// still counts as a large raw-unit miss.
+const LARGE_ERROR_INTERVAL_WIDTH_SHARE = 0.75;
+
+type ResolutionFailureModes = [
+  ForecastResolutionFailureMode,
+  ...ForecastResolutionFailureMode[],
+];
+
+// Normalized evidence (nCRPS, normalized absolute error) counts only when
+// the score's ledger scale passes the gate every normalized aggregate in
+// this module applies. A null scale (no cutoff, fewer than three pre-cutoff
+// ledger observations, or no usable step dispersion) and a scale the gate
+// refuses both leave the review with raw-unit evidence alone.
+function usableNormalizedScore(
+  score: ResolvedForecastScore,
+): NormalizedForecastScore | null {
+  return isAggregateEligibleNormalizedScore(score) ? score : null;
+}
+
+// A tag needs evidence. Raw-unit evidence exists for every resolved score:
+// interval coverage, the signed error against the run's own 80% interval
+// width, and the target binding. With a usable ledger scale the rules match
+// the original classifier: missing well_calibrated (a missed interval or
+// nCRPS above 0.25) is itself the sign of underperformance, and a run that
+// fires no specific mode keeps the bad_baseline fallback. Without one, no
+// run can reach well_calibrated, so missing it proves nothing: only
+// raw-unit evidence tags a failure, a projection pack counts only alongside
+// a raw miss, and a run with no such evidence is not_assessable.
 function classifyResolutionFailureModes(
   score: ResolvedForecastScore,
-): ForecastResolutionFailureMode[] {
+  normalized: NormalizedForecastScore | null,
+): ResolutionFailureModes {
   if (
-    score.interval80Covered &&
-    score.normalizedCrps !== null &&
-    score.normalizedCrps <= 0.25
+    normalized &&
+    normalized.interval80Covered &&
+    normalized.normalizedCrps <= 0.25
   ) {
     return ["well_calibrated"];
   }
 
+  const missedInterval = !score.interval80Covered;
+  const largeRawError =
+    Math.abs(score.signedError) >
+    score.interval80.width * LARGE_ERROR_INTERVAL_WIDTH_SHARE;
+  const underperformed = normalized !== null || missedInterval || largeRawError;
+
   const modes: ForecastResolutionFailureMode[] = [];
-  if (!score.interval80Covered) modes.push("interval_too_narrow");
-  if (
-    score.normalizedAbsoluteError !== null &&
-    score.normalizedAbsoluteError > 1.25
-  )
+  if (missedInterval) modes.push("interval_too_narrow");
+  if (normalized && normalized.normalizedAbsoluteError > 1.25)
     modes.push("surprising_release");
-  if (score.packSet?.packs.some((pack) => /projection/i.test(pack.label))) {
+  if (
+    underperformed &&
+    score.packSet?.packs.some((pack) => /projection/i.test(pack.label))
+  ) {
     modes.push("ignored_official_projection");
   }
-  if (Math.abs(score.signedError) > score.interval80.width * 0.75) {
+  if (largeRawError) {
     modes.push(
       score.signedError > 0 ? "bad_baseline" : "overreacted_to_recent_data",
     );
   }
   if (!score.dataPointId) modes.push("resolution_or_units_risk");
 
-  return modes.length ? [...new Set(modes)] : ["bad_baseline"];
+  const [first, ...rest] = [...new Set(modes)];
+  if (first) return [first, ...rest];
+  return normalized ? ["bad_baseline"] : ["not_assessable"];
 }
 
-function getFailureSeverity(score: ResolvedForecastScore) {
+// Severity grades failure evidence, so both outcome verdicts carry "none".
+// Only a usable normalized score can raise it to "high"; without one, a
+// missed interval is "medium" and any other raw-unit failure "low".
+function getFailureSeverity(
+  score: ResolvedForecastScore,
+  normalized: NormalizedForecastScore | null,
+  primaryFailureMode: ForecastResolutionFailureMode,
+): ForecastResolutionJudgeRecord["severity"] {
   if (
-    score.interval80Covered &&
-    score.normalizedCrps !== null &&
-    score.normalizedCrps <= 0.25
-  )
+    primaryFailureMode === "well_calibrated" ||
+    primaryFailureMode === "not_assessable"
+  ) {
     return "none";
+  }
   if (
-    (score.normalizedCrps !== null && score.normalizedCrps >= 1) ||
-    (score.normalizedAbsoluteError !== null &&
-      score.normalizedAbsoluteError >= 1)
+    normalized &&
+    (normalized.normalizedCrps >= 1 || normalized.normalizedAbsoluteError >= 1)
   ) {
     return "high";
   }
   if (
-    (score.normalizedCrps !== null && score.normalizedCrps >= 0.5) ||
+    (normalized && normalized.normalizedCrps >= 0.5) ||
     !score.interval80Covered
   ) {
     return "medium";
@@ -760,21 +814,39 @@ function getFailureSeverity(score: ResolvedForecastScore) {
 
 function buildResolutionExplanation(
   score: ResolvedForecastScore,
+  normalized: NormalizedForecastScore | null,
   mode: ForecastResolutionFailureMode,
 ) {
   if (mode === "well_calibrated") {
     return "Observed value landed inside the forecast interval with low normalized CRPS.";
   }
-  const normalized =
-    score.normalizedCrps !== null
-      ? `nCRPS ${round2(score.normalizedCrps)}`
-      : score.normalizationScaleObservationCount < 3
-        ? "nCRPS unavailable (fewer than three pre-cutoff ledger observations)"
-        : // Enough observations, but targetNormalizationScale found no step
-          // dispersion above its relative floor: a flat or exactly linear
-          // history (continued-claims-week-2026-08-01 is the live case).
-          "nCRPS unavailable (the pre-cutoff ledger history has no usable step dispersion)";
-  return `Observed value ${score.observedValue} versus point ${score.pointEstimate}; signed error ${round2(score.signedError)}, ${normalized}. Primary review tag: ${mode.replace(/_/g, " ")}.`;
+  const normalizedEvidence = normalized
+    ? `nCRPS ${round2(normalized.normalizedCrps)}`
+    : describeMissingNormalizedEvidence(score);
+  if (mode === "not_assessable") {
+    return `Observed value ${score.observedValue} landed inside the 80% interval [${score.interval80.lower}, ${score.interval80.upper}] (point ${score.pointEstimate}, signed error ${round2(score.signedError)}); ${normalizedEvidence}. No raw-unit failure mode fired, and without a usable ledger scale the review cannot grade calibration. Primary review tag: not assessable.`;
+  }
+  return `Observed value ${score.observedValue} versus point ${score.pointEstimate}; signed error ${round2(score.signedError)}, ${normalizedEvidence}. Primary review tag: ${mode.replace(/_/g, " ")}.`;
+}
+
+// Names the reason a score carries no usable normalized evidence: a stored
+// scale the usable-scale gate refuses, or one of targetNormalizationScale's
+// refusals.
+function describeMissingNormalizedEvidence(score: ResolvedForecastScore) {
+  const count = score.normalizationScaleObservationCount;
+  if (score.normalizationScale !== null) {
+    return `nCRPS not usable (the ledger scale ${score.normalizationScale.toPrecision(2)} from ${count} pre-cutoff ledger observations fails the usable-scale gate)`;
+  }
+  if (score.normalizationScaleCutoff === null) {
+    return "nCRPS unavailable (no ledger cutoff to freeze a normalization scale)";
+  }
+  if (count < 3) {
+    return "nCRPS unavailable (fewer than three pre-cutoff ledger observations)";
+  }
+  // Enough observations, but targetNormalizationScale found no step
+  // dispersion above its relative floor: a flat or exactly linear history
+  // (continued-claims-week-2026-08-01 is the live case).
+  return "nCRPS unavailable (the pre-cutoff ledger history has no usable step dispersion)";
 }
 
 function buildScoreBands(
