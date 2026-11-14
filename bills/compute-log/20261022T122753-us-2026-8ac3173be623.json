@@ -1,0 +1,52 @@
+{
+  "status": "ok",
+  "year": 2026,
+  "country": "us",
+  "region": "us",
+  "reform": {
+    "gov.irs.credits.ctc.refundable.phase_in.threshold": {
+      "2026-01-01.2100-12-31": 0
+    }
+  },
+  "reform_policy_id": null,
+  "baseline_policy_id": 2,
+  "api_version": null,
+  "impact": {
+    "budgetary_impact": -1826050568.8046875,
+    "tax_revenue_impact": -1826050568.8046875,
+    "benefit_spending_impact": 0.0,
+    "state_tax_revenue_impact": -345196.7508544922,
+    "household_net_income_delta": 1826396342.3000052,
+    "poverty": {
+      "all": {
+        "baseline": 0.13173200364632814,
+        "reform": 0.13109880881086397,
+        "change": -0.0006331948354641737,
+        "pct_change": -0.004806689475126822
+      },
+      "child": {
+        "baseline": 0.17017327290983747,
+        "reform": 0.1682073127388785,
+        "change": -0.001965960170958958,
+        "pct_change": -0.011552696480137504
+      }
+    },
+    "deep_poverty": {
+      "child": {
+        "baseline": 0.02394905584952191,
+        "reform": 0.023745652203298377,
+        "change": -0.00020340364622353432,
+        "pct_change": -0.008493180169672317
+      }
+    }
+  },
+  "message": "ok",
+  "computed_at": "2026-10-22T12:27:53.415189+00:00",
+  "param_source": "policyengine-us@1.764.6",
+  "checked_existence": true,
+  "pe_us_version": "1.764.6",
+  "engine": "modal",
+  "dataset": "populace-us-2024-buildp-sparse-rmloss100-cae8640-20260728T011454Z",
+  "pe_core_version": "3.26.11",
+  "reform_hash": "8ac3173be623"
+}

@@ -84,18 +84,194 @@ def test_unverifiable_existence_passes_only_with_explicit_override(monkeypatch):
     assert any("allow_unverified" in p for p in r.problems)
 
 
+BUILD_P_STACK = {"policyengine-us": "1.764.6", "policyengine-core": "3.26.11"}
+
+
 def test_certification_refuses_when_manifest_unreachable(monkeypatch):
-    monkeypatch.setattr(pe, "certified_model_version", lambda build=None: None)
-    note = pe.certification_note("some-build", "1.764.6")
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: None)
+    note = pe.certification_note("some-build", "1.764.6", running_core_version="3.26.11",
+                                 validated_against="policyengine-us@1.764.6")
     assert note["certified"] is False
     assert note["warning"] and "CANNOT CERTIFY" in note["warning"]
 
 
 def test_certification_refuses_when_running_version_unknown(monkeypatch):
-    monkeypatch.setattr(pe, "certified_model_version", lambda build=None: "1.764.6")
-    note = pe.certification_note("some-build", None)
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: BUILD_P_STACK)
+    note = pe.certification_note("some-build", None, running_core_version="3.26.11")
     assert note["certified"] is False
     assert note["warning"] and "CANNOT CERTIFY" in note["warning"]
+
+
+def test_certification_certifies_only_the_measured_validated_stack(monkeypatch):
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: BUILD_P_STACK)
+    note = pe.certification_note("some-build", "1.764.6", running_core_version="3.26.11",
+                                 validated_against="policyengine-us@1.764.6")
+    assert note["certified"] is True and note["warning"] is None
+    assert note["validated_against"] == "policyengine-us@1.764.6"
+    assert note["running_core_version"] == note["certified_core_version"] == "3.26.11"
+
+
+def test_certification_refuses_validation_against_another_model(monkeypatch):
+    # prb4 round 3 (2026-07-31): the S.3596 evidence validated against
+    # policyengine-us@1.784.3 while the run was 1.764.6 — not certified.
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: BUILD_P_STACK)
+    note = pe.certification_note("some-build", "1.764.6", running_core_version="3.26.11",
+                                 validated_against="policyengine-us@1.784.3")
+    assert note["certified"] is False
+    assert "validated against policyengine-us@1.784.3" in note["warning"]
+
+
+def test_certification_refuses_wrong_or_unknown_core(monkeypatch):
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: BUILD_P_STACK)
+    for core in ("3.23.6", None):
+        note = pe.certification_note("some-build", "1.764.6", running_core_version=core,
+                                     validated_against="policyengine-us@1.764.6")
+        assert note["certified"] is False and "policyengine-core" in note["warning"]
+
+
+def test_certification_skips_core_when_manifest_pins_none(monkeypatch):
+    monkeypatch.setattr(pe, "certified_stack",
+                        lambda build=None: {"policyengine-us": "1.764.6", "policyengine-core": None})
+    note = pe.certification_note("some-build", "1.764.6",
+                                 validated_against="policyengine-us@1.764.6")
+    assert note["certified"] is True
+
+
+def test_exact_pin_rejects_ranges_and_missing_specifiers():
+    assert pe._exact_pin("==1.764.6") == "1.764.6"
+    assert pe._exact_pin(" == 1.764.6 ") == "1.764.6"
+    for spec in (None, "", "==", ">=1.764", "~=1.764.6", "===1.764.6", "==1.764.*",
+                 "==1.764.6,<2", "==1.764.6; python_version>'3'", "!=1.764.6", 1.764, ["==1.764.6"]):
+        assert pe._exact_pin(spec) is None, spec
+
+
+# --------------------------------------------------------------------------- #
+# the release manifest parser (Sol review r1, finding 1): only exactly one      #
+# exact pin per package certifies; a range or a foreign package never does      #
+# --------------------------------------------------------------------------- #
+BUILD_P_MANIFEST = {  # verbatim package lists of build P's release_manifest.json
+    "compatible_model_packages": [{"name": "policyengine-us", "specifier": "==1.764.6"}],
+    "compatible_core_packages": [{"name": "policyengine-core", "specifier": "==3.26.11"}],
+}
+
+
+def _serve_manifest(monkeypatch, manifest):
+    import json as _json
+
+    class _Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            if isinstance(manifest, Exception):
+                raise manifest
+            return manifest if isinstance(manifest, bytes) else _json.dumps(manifest).encode()
+
+    monkeypatch.setattr(pe, "_CERT_CACHE", {})
+    monkeypatch.setattr(pe.urllib.request, "urlopen", lambda *a, **k: _Response())
+
+
+def _note(build="probe", us="1.764.6", core="3.26.11"):
+    return pe.certification_note(build, us, running_core_version=core,
+                                 validated_against=f"policyengine-us@{us}")
+
+
+def test_build_p_manifest_certifies_its_exact_stack(monkeypatch):
+    _serve_manifest(monkeypatch, BUILD_P_MANIFEST)
+    assert pe.certified_stack("probe") == BUILD_P_STACK
+    assert _note()["certified"] is True
+    assert _note(core="3.23.6")["certified"] is False
+
+
+def _with(model=None, core=None, drop_core=False):
+    manifest = {"compatible_model_packages": model or BUILD_P_MANIFEST["compatible_model_packages"],
+                "compatible_core_packages": core or BUILD_P_MANIFEST["compatible_core_packages"]}
+    if drop_core:
+        manifest.pop("compatible_core_packages")
+    return manifest
+
+
+REFUSED_MANIFESTS = {
+    # The review's two counterexamples.
+    "core range admits any core": _with(core=[{"name": "policyengine-core",
+                                               "specifier": ">=3.26.11,<4"}]),
+    "another country's model": _with(model=[{"name": "policyengine-uk", "specifier": "==1.764.6"}]),
+    # Their neighbours.
+    "core wildcard": _with(core=[{"name": "policyengine-core", "specifier": "==3.*"}]),
+    "core arbitrary equality": _with(core=[{"name": "policyengine-core", "specifier": "===3.26.11"}]),
+    "core entry without specifier": _with(core=[{"name": "policyengine-core"}]),
+    "core list names another package": _with(core=[{"name": "policyengine", "specifier": "==3.26.11"}]),
+    "core listed twice": _with(core=BUILD_P_MANIFEST["compatible_core_packages"] * 2),
+    "core list is an object": _with(core={"name": "policyengine-core", "specifier": "==3.26.11"}),
+    "model listed alongside another": _with(model=[
+        {"name": "policyengine-us", "specifier": "==1.764.6"},
+        {"name": "policyengine-uk", "specifier": "==2.0.0"}]),
+    "model listed twice": _with(model=BUILD_P_MANIFEST["compatible_model_packages"] * 2),
+    "model range": _with(model=[{"name": "policyengine-us", "specifier": ">=1.764.6"}]),
+    "model entry without name": _with(model=[{"specifier": "==1.764.6"}]),
+    "model entry is a string": _with(model=["policyengine-us==1.764.6"]),
+    "no model list": {"compatible_core_packages": BUILD_P_MANIFEST["compatible_core_packages"]},
+    "empty model list": _with(model=[]) | {"compatible_model_packages": []},
+    "manifest is a list": [BUILD_P_MANIFEST],
+    "manifest is not JSON": b"<html>rate limited</html>",
+    "manifest unreachable": OSError("offline"),
+}
+
+
+@pytest.mark.parametrize("manifest", REFUSED_MANIFESTS.values(), ids=REFUSED_MANIFESTS.keys())
+def test_manifest_that_does_not_pin_exactly_refuses_certification(monkeypatch, manifest):
+    _serve_manifest(monkeypatch, manifest)
+    assert pe.certified_stack("probe") is None
+    for core in ("3.26.11", "3.23.6", None):
+        note = _note(core=core)
+        assert note["certified"] is False
+        assert note["warning"].startswith("CANNOT CERTIFY: release manifest for probe certifies nothing")
+
+
+def test_manifest_without_core_constraint_leaves_core_open(monkeypatch):
+    for manifest in (_with(drop_core=True), _with() | {"compatible_core_packages": []}):
+        _serve_manifest(monkeypatch, manifest)
+        assert pe.certified_stack("probe") == {"policyengine-us": "1.764.6", "policyengine-core": None}
+        assert _note(core="3.23.6")["certified"] is True
+
+
+def test_manifest_names_normalize(monkeypatch):
+    _serve_manifest(monkeypatch, _with(model=[{"name": "PolicyEngine_US", "specifier": "==1.764.6"}],
+                                       core=[{"name": "policyengine.core", "specifier": "==3.26.11"}]))
+    assert pe.certified_stack("probe") == BUILD_P_STACK
+
+
+def test_certified_stack_returns_a_copy(monkeypatch):
+    # Sol review r1, finding 4: mutating the returned stack poisoned the cache.
+    _serve_manifest(monkeypatch, BUILD_P_MANIFEST)
+    stack = pe.certified_stack("probe")
+    stack.update({"policyengine-us": "1.784.3", "policyengine-core": "3.23.6"})
+    assert pe.certified_stack("probe") == BUILD_P_STACK
+    assert _note(us="1.784.3", core="3.23.6")["certified"] is False
+
+
+def test_runtime_stack_measures_package_metadata(monkeypatch):
+    import importlib.metadata as md
+
+    versions = {"policyengine-us": "1.764.6"}
+
+    def fake_version(name):
+        if name not in versions:
+            raise md.PackageNotFoundError(name)
+        return versions[name]
+
+    monkeypatch.setattr(md, "version", fake_version)
+    assert pe.runtime_stack() == {"policyengine-us": "1.764.6", "policyengine-core": None}
+    with pytest.raises(pe.PolicyEngineError, match="policyengine-core expected 3.26.11, running not installed"):
+        pe.require_runtime_stack(BUILD_P_STACK)
+    versions["policyengine-core"] = "3.26.11"
+    assert pe.require_runtime_stack(BUILD_P_STACK) == BUILD_P_STACK
+    versions["policyengine-us"] = "1.784.3"
+    with pytest.raises(pe.PolicyEngineError, match="policyengine-us expected 1.764.6, running 1.784.3"):
+        pe.require_runtime_stack(BUILD_P_STACK)
 
 
 # --------------------------------------------------------------------------- #
@@ -142,28 +318,66 @@ def test_compute_block_ok():
 
 
 def test_compute_block_modal_engine_certifies_with_model_version(monkeypatch):
-    # Regression (review follow-up): modal runs know their model version and
+    # Regression (review follow-up): modal runs measure their model version and
     # must certify against it; the summary must not claim "hosted API".
-    monkeypatch.setattr(pe, "certified_model_version", lambda build=None: "1.764.6")
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: BUILD_P_STACK)
     run = pe.EconomyRun("ok", 2026, "us", "us", GOOD_REFORM, None, 2,
                         impact=pe.normalize_economy(RAW), engine="modal",
-                        dataset="some-build", pe_us_version="1.764.6")
+                        dataset="some-build", pe_us_version="1.764.6",
+                        pe_core_version="3.26.11", param_source="policyengine-us@1.764.6",
+                        checked_existence=True)
     block = pe.compute_block(run)
     assert block["certification"]["certified"] is True
+    assert block["pe_core_version"] == "3.26.11"
     assert "engine=modal" in block["result_summary"]
     assert "hosted API" not in block["result_summary"]
+
+
+def test_compute_block_modal_engine_refuses_off_version_validation(monkeypatch):
+    # The S.3596 July run: measured 1.764.6, validated on the laptop's 1.784.3.
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: BUILD_P_STACK)
+    run = pe.EconomyRun("ok", 2026, "us", "us", GOOD_REFORM, None, 2,
+                        impact=pe.normalize_economy(RAW), engine="modal",
+                        dataset="some-build", pe_us_version="1.764.6",
+                        pe_core_version="3.26.11", param_source="policyengine-us@1.784.3",
+                        checked_existence=True)
+    assert pe.compute_block(run)["certification"]["certified"] is False
+
+
+def test_compute_block_refuses_unchecked_existence(monkeypatch):
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: BUILD_P_STACK)
+    run = pe.EconomyRun("ok", 2026, "us", "us", GOOD_REFORM, None, 2,
+                        impact=pe.normalize_economy(RAW), engine="modal",
+                        dataset="some-build", pe_us_version="1.764.6",
+                        pe_core_version="3.26.11", param_source="policyengine-us@1.764.6",
+                        checked_existence=False)
+    cert = pe.compute_block(run)["certification"]
+    assert cert["certified"] is False and cert["validated_against"] is None
 
 
 def test_compute_block_api_engine_refuses_certification(monkeypatch):
     # api_version is the service version, not the model — certification must
     # refuse explicitly rather than conflate the two.
-    monkeypatch.setattr(pe, "certified_model_version", lambda build=None: "1.764.6")
+    monkeypatch.setattr(pe, "certified_stack", lambda build=None: BUILD_P_STACK)
     run = pe.EconomyRun("ok", 2026, "us", "us", GOOD_REFORM, 85587, 2,
                         impact=pe.normalize_economy(RAW), engine="api",
                         dataset="some-build", api_version="3.2.1")
     block = pe.compute_block(run)
     assert block["certification"]["certified"] is False
     assert "CANNOT CERTIFY" in block["certification"]["warning"]
+
+
+def test_api_run_records_no_model_version(monkeypatch, tmp_path):
+    # The hosted service priced it; this process's installed policyengine-us
+    # did not, so it must not appear as the run's model version.
+    monkeypatch.setattr(pe, "validate_reform",
+                        lambda reform, country="us": pe.ValidationResult(True, [], "policyengine-us@9.9.9", True))
+    monkeypatch.setattr(pe, "create_policy", lambda reform, country="us", validate=True: 123)
+    monkeypatch.setattr(pe, "_get", lambda path, timeout=120: (200, {"status": "ok", "result": RAW}))
+    monkeypatch.setattr(pe, "policyengine_us_version", lambda: "9.9.9")
+    run = pe.economy_impact(GOOD_REFORM, 2026, log_dir=tmp_path)
+    assert run.status == "ok" and run.engine == "api"
+    assert run.pe_us_version is None and run.pe_core_version is None
 
 
 def test_compute_block_pending_widens():

@@ -67,6 +67,18 @@ export interface BillMetric {
   category?: string;
 }
 
+/** `certification_note` output (scripts/tools/policyengine.py). */
+export interface BillComputeCertification {
+  build?: string;
+  certified_model_version?: string | null;
+  running_model_version?: string | null;
+  certified_core_version?: string | null;
+  running_core_version?: string | null;
+  validated_against?: string | null;
+  certified: boolean;
+  warning?: string | null;
+}
+
 export interface BillCompute {
   model: string;
   reform: Record<string, unknown>;
@@ -75,18 +87,18 @@ export interface BillCompute {
    * Provenance for the audited PolicyEngine call path (issue #45) —
    * additive contract fields carried by compute rows produced through
    * scripts/tools/policyengine.py. `certification` records whether the
-   * model version matches the dataset build's certified pairing; an
-   * uncertified row is inadmissible for a published number.
+   * measured model/core versions match the dataset build's certified
+   * pairing and the reform was validated against that running model; an
+   * uncertified row is inadmissible for a published number
+   * (POLICYENGINE.md §0.2), so pages gate every figure on
+   * `isPublishableCompute` (@/lib/compute-publishability).
    */
   engine?: string;
   pe_us_version?: string;
   pe_core_version?: string;
   dataset?: string;
-  certification?: {
-    certified_model_version?: string;
-    running_model_version?: string;
-    certified: boolean;
-  };
+  param_source?: string;
+  certification?: BillComputeCertification;
   year?: number;
   region?: string;
   status?: string;
