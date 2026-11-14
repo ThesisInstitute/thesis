@@ -95,11 +95,47 @@ response but seals no parsed cells: evidence that failed cannot vouch for the
 output, and a failed run whose cells still validated would refuse the whole
 docket publication as a validator status mismatch. Custody verifies the record
 with the parse-failure inventory, so a publication retains it as one failed
-trace. A failed stage may preserve an incomplete event stream (a recorded call
-with no completion event) without being promoted as a successful run. Every
-other binding error still applies to a failed stage: an event with no native
-ID, a repeated completion, an unknown call ID, or an event that differs from
-its call refuses custody whether or not the stage failed.
+trace.
+
+A failed stage may keep three things a successful stage refuses, because none
+of them makes a claim: a recorded call with no completion event, a native call
+that never completed, and a native error that carries no result and so binds to
+no recorded call. Codex writes that last shape (every field it writes for an
+MCP call, with `status: "failed"`, `result: null` and
+`error: {"message": ...}`) whenever a call fails outside the tool's own result:
+
+- the recorder refuses a call with a JSON-RPC error and records nothing, for
+  example a stage's 129th call or arguments over 32 KiB;
+- the server has exited;
+- Codex gives up at its tool timeout, in which case the recorder may still
+  record the call, which then lacks its completion event;
+- Codex declines the call itself, for example when the model passes arguments
+  other than a JSON object, which Codex refuses before it sends anything;
+- the model calls one of Codex's own resource tools (`list_mcp_resources`,
+  `list_mcp_resource_templates` or `read_mcp_resource`) on this server, which
+  serves no resources.
+
+`tests/fixtures/codex_mcp_errors` holds verbatim examples from Codex 0.144.0 and
+0.158.0.
+
+A successful stage refuses all three, so custody never accepts one inside a run
+that presents as successful. The runner binds a stage when it records
+`returnCode` 0: Codex exited 0, or Codex wrote a final message and then the
+runner stopped it or it timed out. If the bind fails, the runner fails the
+stage as a `tool_evidence` failure with no cells. The runner does not bind a
+stage it records with a non-zero `returnCode`; custody binds that stage at
+publication. The runner can still seal that run's cells beside `ok: false`, and
+if they validate, the publisher refuses the batch as a validator status
+mismatch. Every other binding error refuses custody whether or not the stage
+failed:
+
+- an event with no native ID;
+- a repeated completion;
+- a completion that binds to no fresh recorded call and departs from that bare
+  error in any way: it carries any result, even beside an error, lacks a
+  failed status, lacks a field Codex writes or adds one, or carries an error
+  with anything beyond a message;
+- an event that differs from its call.
 
 For a standalone evidence artifact:
 
