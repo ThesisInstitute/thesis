@@ -601,6 +601,53 @@ def test_token_time_rejects_future_and_impossibly_early_values() -> None:
         )
 
 
+# Keep this test well away from
+# test_current_witnessed_timeline_does_not_backdate_unwitnessed_roots. The two
+# take most of the suite's time, and xdist queues up to two more tests behind
+# the one a worker is running, so as neighbours they can share a worker and
+# run one after the other.
+@pytest.mark.live_records
+def test_timeline_extracts_direct_and_transitive_cutover_coverage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verification = verify_chain(ROOT / "records")
+    cutover = verification.enumeration_cutover
+    assert cutover is not None
+    witnesses = dict(verification.witnesses)
+    witnesses[cutover] = replace(
+        witnesses[cutover],
+        status="available",
+        gen_time="2026-07-10T03:34:00Z",
+    )
+    witnessed = replace(verification, witnesses=witnesses)
+    monkeypatch.setattr(timeline_module, "verify_chain", lambda _records: witnessed)
+
+    timeline = timeline_module.extract_timeline(ROOT / "records")
+    # The real records tree grows with every recorded wave; assert the
+    # invariants, floored at the state fixed by the enumeration cutover
+    # (218 runs / 8 roots / 2 registrations existed then).
+    assert len(timeline["runs"]) >= 218
+    assert len(timeline["custodyRoots"]) >= 8
+    assert len(timeline["registrationSnapshots"]) >= 2
+    for proof in timeline["custodyRoots"].values():
+        assert proof["coverage"] in {"direct", "transitive"}
+        if proof["inventoryStatus"] == "legacy-incomplete":
+            assert proof["headlineEligible"] is False
+        if proof["headlineEligible"]:
+            assert proof["inventoryStatus"] == "complete"
+    explicit_runs = {
+        commitment["runDirectory"]
+        for commitment in json.loads(cutover.read_text())["artifactCommitments"][
+            "custodyRoots"
+        ]
+    }
+    assert all(
+        timeline["runs"][run]["coverage"] == "transitive" for run in explicit_runs
+    )
+    assert any(run.startswith("records/brier-judges/") for run in timeline["runs"])
+    assert any("median3" in run for run in timeline["runs"])
+
+
 @pytest.fixture
 def synthetic_custody_run(tmp_path: pathlib.Path) -> pathlib.Path:
     run_dir = tmp_path / "run"
@@ -1091,48 +1138,6 @@ def test_current_witnessed_timeline_does_not_backdate_unwitnessed_roots() -> Non
         assert all(
             proof["witnessDigest"] in available_digests for proof in collection.values()
         )
-
-
-@pytest.mark.live_records
-def test_timeline_extracts_direct_and_transitive_cutover_coverage(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    verification = verify_chain(ROOT / "records")
-    cutover = verification.enumeration_cutover
-    assert cutover is not None
-    witnesses = dict(verification.witnesses)
-    witnesses[cutover] = replace(
-        witnesses[cutover],
-        status="available",
-        gen_time="2026-07-10T03:34:00Z",
-    )
-    witnessed = replace(verification, witnesses=witnesses)
-    monkeypatch.setattr(timeline_module, "verify_chain", lambda _records: witnessed)
-
-    timeline = timeline_module.extract_timeline(ROOT / "records")
-    # The real records tree grows with every recorded wave; assert the
-    # invariants, floored at the state fixed by the enumeration cutover
-    # (218 runs / 8 roots / 2 registrations existed then).
-    assert len(timeline["runs"]) >= 218
-    assert len(timeline["custodyRoots"]) >= 8
-    assert len(timeline["registrationSnapshots"]) >= 2
-    for proof in timeline["custodyRoots"].values():
-        assert proof["coverage"] in {"direct", "transitive"}
-        if proof["inventoryStatus"] == "legacy-incomplete":
-            assert proof["headlineEligible"] is False
-        if proof["headlineEligible"]:
-            assert proof["inventoryStatus"] == "complete"
-    explicit_runs = {
-        commitment["runDirectory"]
-        for commitment in json.loads(cutover.read_text())["artifactCommitments"][
-            "custodyRoots"
-        ]
-    }
-    assert all(
-        timeline["runs"][run]["coverage"] == "transitive" for run in explicit_runs
-    )
-    assert any(run.startswith("records/brier-judges/") for run in timeline["runs"])
-    assert any("median3" in run for run in timeline["runs"])
 
 
 def test_python_canonical_json_uses_true_utf16_key_order() -> None:

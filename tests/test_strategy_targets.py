@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import docket_publication  # noqa: E402
 import register_targets  # noqa: E402
+import strategy_targets  # noqa: E402
 from generate_ledger_targets import generated_entry_for  # noqa: E402
 from strategy_targets import (  # noqa: E402
     GENERATED_TARGETS_RELATIVE,
@@ -51,6 +52,7 @@ def selection(
     slug: str = OPEN_SLUG,
     selected_at: str = "2026-07-10T07:00:00Z",
     ledger: pathlib.Path | None = None,
+    auto_select: bool = False,
 ) -> dict:
     return select_targets(
         root=ROOT,
@@ -59,7 +61,7 @@ def selection(
         checked_at_utc=selected_at,
         workflow={"repository": "example/thesis", "runId": 123, "runAttempt": 1},
         requested_slugs=[slug],
-        auto_select=False,
+        auto_select=auto_select,
         max_targets=1,
         suite="both",
         ledger_path=ledger or empty_ledger(tmp_path),
@@ -788,3 +790,39 @@ def test_publisher_projection_keeps_unknown_and_mutated_prompt_context(
             run_started_at="2026-09-21T19:01:00Z",
             require_git_binding=True,
         )
+
+
+def _judged_slugs(monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    judged: list[str] = []
+    real = strategy_targets.published_target
+
+    def counting(root, slug, *args, **kwargs):
+        judged.append(slug)
+        return real(root, slug, *args, **kwargs)
+
+    monkeypatch.setattr(strategy_targets, "published_target", counting)
+    return judged
+
+
+def test_an_explicit_request_judges_only_what_it_named(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    judged = _judged_slugs(monkeypatch)
+    selected = selection(tmp_path)
+    assert judged == [OPEN_SLUG]
+    assert [target["catalogSlug"] for target in selected["targets"]] == [OPEN_SLUG]
+
+
+def test_judging_every_target_gives_an_explicit_request_the_same_answer(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Differential on the real catalog: auto_select judges all of it, and with
+    the one named target filling max_targets it picks nothing else."""
+
+    explicit = selection(tmp_path)
+    judged = _judged_slugs(monkeypatch)
+    judging_all = selection(tmp_path, auto_select=True)
+    assert len(judged) > 1
+    assert judging_all["targets"] == explicit["targets"]
+    assert judging_all["localResolutionEvidence"] == explicit["localResolutionEvidence"]
+    assert judging_all["ledgerEvidence"] == explicit["ledgerEvidence"]
