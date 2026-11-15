@@ -46,7 +46,22 @@ Thesis witnessed the files on their 2026-07-30 release day.
   its exact bytes; 58,604 decoded bytes; SHA-256
   `617c9229ac39ded608b64a71bc30c3c10d713cb1885ee53344d6fb3bc4dd227d`.
 
-The response prints 2026 Q2 in millions at 4,623,657 on Table 5.3.5 line 2
+- `nipa-table-5-3-5-2024-core-endpoint.json`: the raw double-encoded
+  response to the same app 19, step 3 request for first/last year `2024`
+  (scale `-6`, series `Q`, select-all-years `0`), POSTed on 2026-11-05 at
+  19:47:50 UTC to `https://apps.bea.gov/iTable/core/data/app/GetStep`, where
+  BEA now serves the data service; 62,019 bytes; SHA-256
+  `c9ea303119e3fc39ec412159f92494d9d32c9b4457f98ec48e0c6b944657daef`. Its
+  description reads `Last Revised on: October 29, 2026 - Next Release Date
+  November 25, 2026`, and it prints 2024 Q3 at 4,143,523 on line 2 and
+  819,357 on line 18. It holds no 2025 or 2026 quarter. The same request to
+  the old `/iTablecore/` path that day returned HTTP 200 with the site's
+  28,185-byte HTML "BEA: Data Tools" page instead of JSON, which is why the
+  resolver posts to `/iTable/core/` now. The fixtures above were fetched from
+  the old path while it still served GetStep.
+
+The 2026 Q2 response (`nipa-table-5-3-5-2026-q2.json`) prints 2026 Q2 in
+millions at 4,623,657 on Table 5.3.5 line 2
 (`Nonresidential`) and 937,772 on line 18 (`Research and development`), which
 the registered 0.001 transform converts to 4,623.657 and 937.772 USD billions.
 The resolver archives both fetched responses together; ALFRED remains only the

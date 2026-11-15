@@ -9,6 +9,8 @@ import sys
 from typing import Any
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -100,6 +102,126 @@ def test_real_bea_current_release_fixtures_are_hash_pinned_and_parse() -> None:
     assert resolve_pending.bea_itable_value(
         table_raw, research, "2026-04", RELEASE_DAY
     ) == (937.772, None)
+
+
+def test_bea_itable_posts_to_the_core_getstep_path() -> None:
+    # The old /iTablecore/ path answered HTTP 200 with an HTML page on
+    # 2026-11-05, so a fetch there succeeds and every parse refuses.
+    url = resolve_pending.BEA_ITABLE_DATA_URL
+
+    assert url == "https://apps.bea.gov/iTable/core/data/app/GetStep"
+    assert resolve_pending.urlparse(url).hostname in (
+        resolve_pending.BEA_RELEASE_REQUIRED_HOSTS
+    )
+
+
+def test_real_core_endpoint_response_parses_with_the_release_parser() -> None:
+    # A live 2026-11-05 response from the /iTable/core/ endpoint to a
+    # 2024-only request; see the fixture README. It carries the 2026-10-29
+    # revision stamp, so it also proves the stamp check reads this endpoint's
+    # body the way it read the old one.
+    raw = (FIXTURES / "nipa-table-5-3-5-2024-core-endpoint.json").read_bytes()
+    stamped_day = dt.date(2026, 10, 29)
+    pnfi = resolve_pending.BEA_RELEASE_ADAPTERS[
+        "bea.private_nonresidential_fixed_investment"
+    ]
+    research = resolve_pending.BEA_RELEASE_ADAPTERS[
+        "bea.research_and_development_fixed_investment"
+    ]
+
+    assert len(raw) == 62_019
+    assert hashlib.sha256(raw).hexdigest() == (
+        "c9ea303119e3fc39ec412159f92494d9d32c9b4457f98ec48e0c6b944657daef"
+    )
+    assert resolve_pending.bea_itable_value(raw, pnfi, "2024-07", stamped_day) == (
+        4143.523,
+        None,
+    )
+    assert resolve_pending.bea_itable_value(raw, research, "2024-07", stamped_day) == (
+        819.357,
+        None,
+    )
+    value, refusal = resolve_pending.bea_itable_value(
+        raw, pnfi, "2024-07", dt.date(2026, 10, 28)
+    )
+    assert value is None
+    assert refusal is not None
+    assert refusal.startswith("iTable revision stamp ")
+
+
+HTML_ANSWER = (
+    b'\n<!DOCTYPE html>\n<html lang="en"><head><title>BEA: Data Tools'
+    b"</title></head><body></body></html>"
+)
+
+
+def test_bea_release_parser_names_an_html_answer() -> None:
+    value, refusal = resolve_pending.bea_itable_value(
+        HTML_ANSWER,
+        resolve_pending.BEA_RELEASE_ADAPTERS[
+            "bea.private_nonresidential_fixed_investment"
+        ],
+        "2026-04",
+        RELEASE_DAY,
+    )
+
+    assert value is None
+    assert refusal == (
+        "iTable answered with an HTML page, not JSON; check that BEA still "
+        "serves GetStep at https://apps.bea.gov/iTable/core/data/app/GetStep"
+    )
+
+
+@settings(max_examples=200, deadline=None)
+@given(
+    lead=st.sampled_from([b"", b"\n", b"  \r\n\t"]),
+    tag=st.sampled_from([b"<!DOCTYPE html", b"<!doctype HTML", b"<html", b"<HTML"]),
+    rest=st.binary(max_size=256),
+)
+def test_no_html_answer_yields_a_bea_value(
+    lead: bytes, tag: bytes, rest: bytes
+) -> None:
+    # Invariant: an answer that opens as an HTML page never parses to a value,
+    # in either parser, whatever follows the opening tag.
+    raw = lead + tag + rest
+    nipa = resolve_pending.bea_itable_value(
+        raw,
+        resolve_pending.BEA_RELEASE_ADAPTERS[
+            "bea.private_nonresidential_fixed_investment"
+        ],
+        "2026-04",
+        RELEASE_DAY,
+    )
+    ita = resolve_pending.bea_ita_itable_value(
+        raw,
+        resolve_pending.BEA_RELEASE_ADAPTERS[ITA_SERIES],
+        "2026-01",
+        ITA_RELEASE_DAY,
+    )
+
+    assert nipa[0] is None and nipa[1] is not None
+    assert ita[0] is None and ita[1] is not None
+    assert "answered with an HTML page" in nipa[1]
+    assert "answered with an HTML page" in ita[1]
+
+
+def test_bea_ita_parsers_name_an_html_answer() -> None:
+    spec = resolve_pending.BEA_RELEASE_ADAPTERS[ITA_SERIES]
+    expected = (
+        "ITA iTable answered with an HTML page, not JSON; check that BEA still "
+        "serves GetStep at https://apps.bea.gov/iTable/core/data/app/GetStep"
+    )
+
+    value, refusal = resolve_pending.bea_ita_itable_value(
+        HTML_ANSWER, spec, "2026-01", ITA_RELEASE_DAY
+    )
+    assert value is None
+    assert refusal == expected
+    year_key, refusal = resolve_pending.bea_ita_prompt_catalog_selection(
+        HTML_ANSWER, spec, "2026-01"
+    )
+    assert year_key is None
+    assert refusal == expected
 
 
 def _mutate_ita_table(raw: bytes, mutation: Any) -> bytes:
