@@ -252,6 +252,21 @@ The official BEA schedule was re-fetched the same session and still lists
 `GDP (Advance Estimate), 3rd Quarter 2026` for 2026-10-29 at 8:30 AM ET, so
 the quarterly seed uses the default `release-calendar` basis.
 
+### Table 5.3.5 after a missed release day
+
+The two Table 5.3.5 bindings above have a second route. When a cell stays
+pending past its registered release day, the resolver reads BEA's Data Archive
+copy of that day's release: the Section 5 workbook in the quarter's
+`Advance_<Month>-<DD>-<YYYY>` folder at `https://apps.bea.gov/histdata/`. It
+resolves only when BEA's archive index lists that folder as the quarter's only
+advance estimate and lists no estimate dated earlier, the workbook's sheet
+`T50305-Q` prints `Data published` with the release day, and BEA's server
+dates the workbook's last modification to that UTC day. Anything else refuses.
+On the 2026 Q2 advance workbook the route reads 4,623.657 and 937.772 USD
+billions, the values the live iTable leg read on 2026-08-07
+(`tests/fixtures/bea_archive/README.md`, `tests/test_bea_archive_first_print.py`).
+The ITA binding below has no archive route.
+
 ## BEA ITA personal-transfer payments
 
 Status: **VERIFIED CURRENT PRINT** (integrator, 2026-08-12 UTC), not a
