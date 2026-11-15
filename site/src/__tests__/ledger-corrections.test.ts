@@ -517,6 +517,9 @@ describe("Chronicle corrections on the pinned ledger", () => {
     // graded 197. Here every graded row gets both shapes of correction.
     let gradedRows = 0;
     let scoredRuns = 0;
+    // A row that records a scaled figure reaches this path too, and the early
+    // return below would hide it if the site stopped scoring one.
+    let scoredPairRuns = 0;
     for (const forecast of resolvedForecastCells) {
       const graded = getResolvedObservationForForecast(forecast, ledger);
       if (!graded) continue;
@@ -559,6 +562,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
             return;
           }
           scoredRuns += 1;
+          if (graded.ledgerUnit) scoredPairRuns += 1;
           expect(now.score.contractBinding, where).toBe(was.contractBinding);
           expect(now.score.observedValue, where).toBe(plus(graded.value, 5));
           // The chain's first print is unchanged, so is the ex-ante boundary.
@@ -578,6 +582,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
     }
     expect(gradedRows).toBeGreaterThan(0);
     expect(scoredRuns).toBeGreaterThan(0);
+    expect(scoredPairRuns).toBeGreaterThan(0);
   });
 
   it("dates and admits a graded correction by its whole chain", () => {
@@ -735,7 +740,9 @@ describe("Chronicle corrections on the pinned ledger", () => {
     ).toEqual([]);
   });
 
-  // The contract-bound row the most cutoff histories hold, and how many.
+  // The contract-bound row the most cutoff histories hold, and how many. The
+  // tests below change its value and unit directly, so it can't be a row that
+  // records a scaled figure, whose pair the site would then refuse.
   function mostHeldRecord(): [ObservationRecordedLedgerEntry, number] {
     const held = new Map<ObservationRecordedLedgerEntry, number>();
     for (const forecast of FORECAST_CELLS) {
@@ -744,7 +751,8 @@ describe("Chronicle corrections on the pinned ledger", () => {
         ledger,
         "2100-01-01T00:00:00.000Z",
       )) {
-        if (rawRowOf(entry).sourceBindingProjection) {
+        const raw = rawRowOf(entry);
+        if (raw.sourceBindingProjection && !recordedPair(raw)) {
           held.set(entry, (held.get(entry) ?? 0) + 1);
         }
       }
@@ -761,7 +769,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
     // One day later keeps the print on or before the correction's acceptance.
     for (const shape of [observedAt, daysLater(observedAt, 1)]) {
       const { correction, extended, replaced } = withCorrection(record, {
-        value: plus(record.value, 5),
+        value: record.value + 5,
         observed_at: shape,
       });
       const { checks, dropOuts } = historyDropOuts(extended, [
@@ -775,7 +783,7 @@ describe("Chronicle corrections on the pinned ledger", () => {
   it("finds no drop-out when one commit accepts a row and its correction", () => {
     const [record] = mostHeldRecord();
     const { correction, extended, replaced } = withCorrection(record, {
-      value: plus(record.value, 5),
+      value: record.value + 5,
     });
     const sameCommit = { ...correction, acceptedAtUtc: replaced.acceptedAtUtc };
     const sameCommitLedger = extended.map((entry) =>
@@ -802,11 +810,11 @@ describe("Chronicle corrections on the pinned ledger", () => {
     // every history that held the original holds it.
     const [record, holders] = mostHeldRecord();
     const { correction, extended, fix, replaced } = withCorrection(record, {
-      value: plus(record.value, 5),
+      value: record.value + 5,
     });
     const refix: Record<string, unknown> = {
       ...structuredClone(fix),
-      value: plus(record.value, 7),
+      value: record.value + 7,
     };
     delete refix.assertionVersion;
     refix.assertionVersion = {
