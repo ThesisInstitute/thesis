@@ -1,4 +1,5 @@
 import type { BillCompute } from "@/data/bills";
+import { isPublishableCompute, withheldReason } from "@/lib/compute-publishability";
 import { renderInline } from "@/lib/render-inline";
 
 const chipBase =
@@ -8,7 +9,10 @@ const chipBase =
  * One audited model run attached to the provision it prices (issue #45).
  * Shows the mechanical number with its full provenance — model version,
  * dataset build, and whether the model↔data pairing is certified. An
- * uncertified row renders with a warning chip, never silently.
+ * uncertified row is inadmissible for a published number (POLICYENGINE.md
+ * §0.2): it still renders, never silently — provenance, a warning chip, the
+ * certification's reason and the reform — but every figure it carries (stats,
+ * summary, note) is withheld.
  */
 function fmtBillions(v: number, decimals = 2): string {
   const sign = v < 0 ? "−" : "+";
@@ -34,11 +38,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 export function ComputeCard({ row }: { row: BillCompute }) {
-  const certified = row.certification?.certified;
-  const buildLabel = row.dataset
-    ? (row.dataset.match(/build[a-z]+/i)?.[0] ?? row.dataset.slice(0, 24))
-    : null;
-  const hasStats = row.budgetary_impact != null;
+  const certified = isPublishableCompute(row);
+  // Bill JSON is cast, not validated, so a hand-edited row can carry a
+  // non-string dataset; it still renders (withheld), never crashes the page.
+  const dataset = typeof row.dataset === "string" ? row.dataset : null;
+  const buildLabel = dataset ? (dataset.match(/build[a-z]+/i)?.[0] ?? dataset.slice(0, 24)) : null;
+  const hasStats = certified && row.budgetary_impact != null;
   return (
     <div className="rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg)] p-4">
       <div className="mb-2 flex flex-wrap items-center gap-1.5">
@@ -49,7 +54,7 @@ export function ComputeCard({ row }: { row: BillCompute }) {
         {buildLabel && (
           <span
             className={`${chipBase} border-[var(--theme-border)] text-[var(--theme-text-dim)]`}
-            title={row.dataset}
+            title={dataset ?? undefined}
           >
             populace {buildLabel}
           </span>
@@ -59,11 +64,9 @@ export function ComputeCard({ row }: { row: BillCompute }) {
             {row.engine}
           </span>
         )}
-        {row.certification && (
-          <span className={`${chipBase} ${certified ? "border-[#BFE3D2] bg-[#EAF7F0] text-[#1C6B4A]" : "border-[#E5C8C0] bg-[#F9EFEC] text-[#93412A]"}`}>
-            {certified ? "certified pairing" : "uncertified pairing"}
-          </span>
-        )}
+        <span className={`${chipBase} ${certified ? "border-[#BFE3D2] bg-[#EAF7F0] text-[#1C6B4A]" : "border-[#E5C8C0] bg-[#F9EFEC] text-[#93412A]"}`}>
+          {certified ? "certified pairing" : "uncertified pairing"}
+        </span>
       </div>
       {hasStats && (
         <div className="mb-3 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -84,9 +87,21 @@ export function ComputeCard({ row }: { row: BillCompute }) {
           )}
         </div>
       )}
-      <p className="m-0 mb-2 text-[0.88rem] leading-[1.6] text-[var(--theme-text-muted)]">
-        {renderInline(row.result_summary)}
-      </p>
+      {certified ? (
+        <p className="m-0 mb-2 text-[0.88rem] leading-[1.6] text-[var(--theme-text-muted)]">
+          {renderInline(row.result_summary)}
+        </p>
+      ) : (
+        <div className="mb-2 text-[0.88rem] leading-[1.6] text-[var(--theme-text-muted)]">
+          <p className="m-0">
+            Figures withheld: this run is not a certified model–data pairing,
+            so its numbers are inadmissible for publication.
+          </p>
+          <p className="m-0 mt-1 [font-family:var(--font-mono)] text-[0.72rem] text-[var(--theme-text-dim)]">
+            {withheldReason(row)}
+          </p>
+        </div>
+      )}
       <details className="mb-2">
         <summary className="cursor-pointer [font-family:var(--font-mono)] text-[0.68rem] uppercase tracking-[0.08em] text-[var(--theme-text-dim)]">
           Reform parameters
@@ -95,7 +110,7 @@ export function ComputeCard({ row }: { row: BillCompute }) {
           {JSON.stringify(row.reform, null, 2)}
         </pre>
       </details>
-      {row.note && (
+      {certified && row.note && (
         <p className="m-0 text-[0.78rem] leading-[1.55] text-[var(--theme-text-muted)]">
           {renderInline(row.note)}
         </p>
