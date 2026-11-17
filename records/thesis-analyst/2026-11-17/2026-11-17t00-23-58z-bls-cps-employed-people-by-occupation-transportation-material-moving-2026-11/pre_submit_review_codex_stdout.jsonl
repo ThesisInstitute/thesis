@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"01a1e6e4-c6fa-7573-889f-2bf5ce0c556b"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"{\"summary\":\"The draft is publishable: resolver contract, first-print source, unit transform, prior/update/interval logic, tails, and JSON fields are coherent with the registered target.\",\"requiredFixes\":[],\"optionalSuggestions\":[\"Tighten the resolutionRule wording by dropping the ambiguous caveat about replacement before publication is complete, or explicitly define it as the first official BLS API value captured for 2026 M11 at release time.\",\"Mention the small sample size for the October-to-November volatility estimate, since the 80% interval rests on nine usable seasonal changes.\"]}"}}
+{"type":"turn.completed","usage":{"input_tokens":22833,"cached_input_tokens":0,"output_tokens":513,"reasoning_output_tokens":390}}
