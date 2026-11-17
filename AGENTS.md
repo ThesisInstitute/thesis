@@ -540,11 +540,35 @@ and the provenance audit fails main for any records commit that lacks one.
 GitHub cannot enforce this server-side — public source repositories cannot
 carry push rulesets at all (verified 2026-07-25: the API refuses with
 "Source public repos cannot have push rules"), so the preventive half is a
-committed pre-push hook. Activate it once per clone:
+committed pre-push hook. Activate it once per clone, from a checkout of
+current main:
 
 ```bash
-git config core.hooksPath .githooks
+sh scripts/install_git_hooks.sh   # --check to verify, --uninstall to revert
 ```
+
+The installer copies `scripts/pre_push_dispatch.sh` into the clone's shared
+hooks directory (`$(git rev-parse --git-common-dir)/hooks/pre-push`) and
+leaves `core.hooksPath` unset at every scope. Every push, from the main
+checkout or any worktree, then runs `.githooks/pre-push` from the checkout
+doing the push, whatever branch the main checkout has out. A checkout with
+no guard on disk (a branch older than the guard, a sparse checkout without
+`.githooks/`) is refused, not waved through.
+
+Do not set `core.hooksPath` in this repo at any scope, including the old
+`git config core.hooksPath .githooks`. The Claude desktop app copies the
+base repo's value into every worktree it creates or reuses, resolved to an
+absolute path to the main checkout's `.githooks` (verified in app
+2.9939.2 and 2.9939.4, `configureHooksPath`), and `git worktree add` run
+inside a worktree copies that worktree's settings into the new one. So
+worktrees ran whatever guard the main checkout's branch carried: none in
+July 2026 (waiver `346e506`), and on 2026-09-27 one 13 revisions stale
+that blocked a clean push. With nothing set and the dispatcher in place,
+the app clears a worktree's `core.hooksPath` instead. If a setting does
+come back, the guard prints a note and hands the push to the pushing
+checkout's own copy; `--check` lists every worktree whose pushes would
+bypass the dispatcher. The app may write the old value for up to 10
+minutes after install (it caches it), so run `--check` again after that.
 
 It refuses any local push that would publish a commit touching
 `records/**`, using the same commit-level walk the provenance audit
