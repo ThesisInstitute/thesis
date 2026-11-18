@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-11-17T00:23:58Z",
+  "finishedAt": "2026-11-17T00:25:40Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 1,
+  "ok": 1,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "cps-transport-material-moving-employment-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cps.employed_people_by_occupation.transportation_material_moving.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-04",
+        "expectedReleaseWindow": {
+          "end": "2026-12-04",
+          "start": "2026-12-04"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-17T00:21:28Z",
+        "registeredAtUtc": "2026-11-17T00:21:28Z",
+        "registrationCommit": "fe467bb10a37b726dd31de03db0184d1f5273f46",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.cps.employed_people_by_occupation.transportation_material_moving",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-04",
+            "start": "2026-12-04"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LNU02032214",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032214",
+          "table": "Current Population Survey, employed people, Transportation and material moving occupations, total 16 years and over, not seasonally adjusted, in thousands (Employment Situation, Table A-19)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "239c2e6beadd5de01b638fd4d98f233416b53c195c18fd4b630d298399980bd5",
+        "targetRegistrationPath": "records/targets/2026-11-17-239c2e6beadd5de01b638fd4d98f233416b53c195c18fd4b630d298399980bd5.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-11-17T00:23:58Z",
+      "finishedAt": "2026-11-17T00:25:40Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-17/2026-11-17t00-23-58z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-17/2026-11-17t00-23-58z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-11/cells.with_activity.json",
+      "stdoutTail": "s-cps-employed-people-by-occupation-transportation-material-moving-2026-11/distribution.json\",\n      \"sha256\": \"d33dcd1eec8d2be8561bf6198c5d1cf7c5aba0a6979be16fae23b5d6e9ba43fb\",\n      \"bytes\": 13910,\n      \"createdAt\": \"2026-11-17T00:23:58Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-17/2026-11-17t00-23-58z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-11/validation.json\",\n      \"sha256\": \"84a080f4966cc8fdef8b66776d0d349cf3d305f1907c41531b6380505c512742\",\n      \"bytes\": 155,\n      \"createdAt\": \"2026-11-17T00:23:58Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-17/2026-11-17t00-23-58z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-11/cells.with_activity.json\",\n      \"sha256\": \"5762a7b9991a51ad5b29ac15da70da7fa94346f434dc442d46c9a749bdd8c1aa\",\n      \"bytes\": 43245,\n      \"createdAt\": \"2026-11-17T00:23:58Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-17/2026-11-17t00-23-58z-bls-cps-employed-people-by-occupation-transportation-material-moving-2026-11/manifest.json\",\n      \"sha256\": \"a9a777ee2f82db6bac9ccc3dcca2315417a4385a83e77dd99e6b3d4f72ad314c\",\n      \"bytes\": 18069,\n      \"createdAt\": \"2026-11-17T00:23:58Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"cps-transport-material-moving-employment-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"fe467bb10a37b726dd31de03db0184d1f5273f46\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"05e7ac25bd95c193afcc52c23a3710228b6e5ba62bda0eaf7b4cffc1e8876a30\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

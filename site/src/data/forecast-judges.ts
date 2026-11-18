@@ -181,12 +181,12 @@ type NormalizedForecastScore = ResolvedForecastScore & {
 };
 
 // Eligibility gate for every normalized-metric aggregate in this module,
-// delegated to the shared brier-lab predicate: a sub-epsilon
-// ledger-dispersion scale is numerical zero left over from equal decimal
-// steps, never a usable denominator, and scores carrying one must stay out
-// of normalized aggregates. The normalizedAbsoluteError check only narrows
-// the local type — every normalized field is null exactly when the scale
-// is null.
+// delegated to the shared brier-lab predicate. Float residue from equal
+// decimal steps is refused where the scale is computed
+// (targetNormalizationScale's relative floor), so its scores already carry
+// null normalized fields; this gate keeps any other unusable scale out too.
+// The normalizedAbsoluteError check only narrows the local type — every
+// normalized field is null exactly when the scale is null.
 function isAggregateEligibleNormalizedScore(
   score: ResolvedForecastScore,
 ): score is NormalizedForecastScore {
@@ -766,9 +766,14 @@ function buildResolutionExplanation(
     return "Observed value landed inside the forecast interval with low normalized CRPS.";
   }
   const normalized =
-    score.normalizedCrps === null
-      ? "nCRPS unavailable (fewer than three pre-cutoff ledger observations)"
-      : `nCRPS ${round2(score.normalizedCrps)}`;
+    score.normalizedCrps !== null
+      ? `nCRPS ${round2(score.normalizedCrps)}`
+      : score.normalizationScaleObservationCount < 3
+        ? "nCRPS unavailable (fewer than three pre-cutoff ledger observations)"
+        : // Enough observations, but targetNormalizationScale found no step
+          // dispersion above its relative floor: a flat or exactly linear
+          // history (continued-claims-week-2026-08-01 is the live case).
+          "nCRPS unavailable (the pre-cutoff ledger history has no usable step dispersion)";
   return `Observed value ${score.observedValue} versus point ${score.pointEstimate}; signed error ${round2(score.signedError)}, ${normalized}. Primary review tag: ${mode.replace(/_/g, " ")}.`;
 }
 

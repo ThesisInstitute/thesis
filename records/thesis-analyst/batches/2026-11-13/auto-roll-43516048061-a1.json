@@ -1,0 +1,165 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-11-13T22:06:05Z",
+  "finishedAt": "2026-11-13T22:11:29Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 3,
+  "ok": 3,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "cps-healthcare-support-employment-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cps.employed_people_by_occupation.healthcare_support.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-04",
+        "expectedReleaseWindow": {
+          "end": "2026-12-04",
+          "start": "2026-12-04"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-13T22:03:59Z",
+        "registeredAtUtc": "2026-11-13T22:03:59Z",
+        "registrationCommit": "5cb6b72d8468fd0f460d6919a14de9921b0dcd7c",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.cps.employed_people_by_occupation.healthcare_support",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-04",
+            "start": "2026-12-04"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LNU02032463",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032463",
+          "table": "Current Population Survey, employed people, Healthcare support occupations, total 16 years and over, not seasonally adjusted, in thousands (Employment Situation, Table A-19)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "e478a512ee0229a7fc3fa616b12ece177c57c5b24fcdaa060cb6a91298985653",
+        "targetRegistrationPath": "records/targets/2026-11-13-e478a512ee0229a7fc3fa616b12ece177c57c5b24fcdaa060cb6a91298985653.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-11-13T22:06:05Z",
+      "finishedAt": "2026-11-13T22:08:03Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-06-05z-bls-cps-employed-people-by-occupation-healthcare-support-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-06-05z-bls-cps-employed-people-by-occupation-healthcare-support-2026-11/cells.with_activity.json",
+      "stdoutTail": "cords/thesis-analyst/2026-11-13/2026-11-13t22-06-05z-bls-cps-employed-people-by-occupation-healthcare-support-2026-11/distribution.json\",\n      \"sha256\": \"36468a73c767fe84ce5c7f3045b4f3600b96548ebe83fbee7acc7ac258c1c41c\",\n      \"bytes\": 13907,\n      \"createdAt\": \"2026-11-13T22:06:05Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-06-05z-bls-cps-employed-people-by-occupation-healthcare-support-2026-11/validation.json\",\n      \"sha256\": \"2688b531e0c154d3613d61ccff8b84046fc2ec2b9f6e1f0af3128d2e680f5057\",\n      \"bytes\": 148,\n      \"createdAt\": \"2026-11-13T22:06:05Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-06-05z-bls-cps-employed-people-by-occupation-healthcare-support-2026-11/cells.with_activity.json\",\n      \"sha256\": \"f19480b5f7557c15a814d793f21b32de518f4e556a7321d9996f56deb71c4bd4\",\n      \"bytes\": 45237,\n      \"createdAt\": \"2026-11-13T22:06:05Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-06-05z-bls-cps-employed-people-by-occupation-healthcare-support-2026-11/manifest.json\",\n      \"sha256\": \"3f9de2bc929e92861190d250b98f68bda582cecb782f470d53056b7a99462a16\",\n      \"bytes\": 19218,\n      \"createdAt\": \"2026-11-13T22:06:05Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"cps-healthcare-support-employment-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"5cb6b72d8468fd0f460d6919a14de9921b0dcd7c\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"c35ddf61f10899f84e4d07c592b5cee5ae8fad2897ccbb44227cc1592985d9f2\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "cps-office-admin-employment-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cps.employed_people_by_occupation.office_administrative_support.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-04",
+        "expectedReleaseWindow": {
+          "end": "2026-12-04",
+          "start": "2026-12-04"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-13T22:03:59Z",
+        "registeredAtUtc": "2026-11-13T22:03:59Z",
+        "registrationCommit": "5cb6b72d8468fd0f460d6919a14de9921b0dcd7c",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.cps.employed_people_by_occupation.office_administrative_support",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-04",
+            "start": "2026-12-04"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LNU02032207",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032207",
+          "table": "Current Population Survey, employed people, Office and administrative support occupations, total 16 years and over, not seasonally adjusted, in thousands (Employment Situation, Table A-19)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "03ea7af40c5c3b6405c6aafc9e06bf5a776bba4adaff1708334c570a622f1923",
+        "targetRegistrationPath": "records/targets/2026-11-13-03ea7af40c5c3b6405c6aafc9e06bf5a776bba4adaff1708334c570a622f1923.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-11-13T22:08:03Z",
+      "finishedAt": "2026-11-13T22:09:54Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/cells.with_activity.json",
+      "stdoutTail": "1-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/distribution.json\",\n      \"sha256\": \"585138c9de7d8812f140ce6f5f4056ea8413000c5db29f70b5cfa5b0066a827b\",\n      \"bytes\": 13914,\n      \"createdAt\": \"2026-11-13T22:08:03Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/validation.json\",\n      \"sha256\": \"bef3e5bdbc509265d63470ff71a18f1bacb14d4046f9875e6a19870a801d9f83\",\n      \"bytes\": 142,\n      \"createdAt\": \"2026-11-13T22:08:03Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/cells.with_activity.json\",\n      \"sha256\": \"fcfb57ded93fbeb21993676d6797290038ad1727dc3df885a82f386ca1b413e4\",\n      \"bytes\": 42771,\n      \"createdAt\": \"2026-11-13T22:08:03Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/manifest.json\",\n      \"sha256\": \"eea29cc3571813edcd630c0909123677407e74fc82030b515dd03875ca922c40\",\n      \"bytes\": 17869,\n      \"createdAt\": \"2026-11-13T22:08:03Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"cps-office-admin-employment-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"5cb6b72d8468fd0f460d6919a14de9921b0dcd7c\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"b9db46832517d1dbc3023ab88a81d71364bf32fa139890993e1a8ac75e609304\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "cps-production-employment-november-2026",
+        "country": "US",
+        "dataPointId": "bls.cps.employed_people_by_occupation.production.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-04",
+        "expectedReleaseWindow": {
+          "end": "2026-12-04",
+          "start": "2026-12-04"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-13T22:03:59Z",
+        "registeredAtUtc": "2026-11-13T22:03:59Z",
+        "registrationCommit": "5cb6b72d8468fd0f460d6919a14de9921b0dcd7c",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.cps.employed_people_by_occupation.production",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-04",
+            "start": "2026-12-04"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "LNU02032213",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032213",
+          "table": "Current Population Survey, employed people, Production occupations, total 16 years and over, not seasonally adjusted, in thousands (Employment Situation, Table A-19)",
+          "transform": {
+            "factor": 0.001,
+            "operation": "multiply"
+          }
+        },
+        "targetContentHash": "27dc574fa31145e815c71df2e66a54f9d3551f032d0f3c370b2358e1a3f7a75a",
+        "targetRegistrationPath": "records/targets/2026-11-13-27dc574fa31145e815c71df2e66a54f9d3551f032d0f3c370b2358e1a3f7a75a.json",
+        "targetUnit": "millions",
+        "valueScale": 0.001
+      },
+      "startedAt": "2026-11-13T22:09:54Z",
+      "finishedAt": "2026-11-13T22:11:29Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-09-54z-bls-cps-employed-people-by-occupation-production-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-09-54z-bls-cps-employed-people-by-occupation-production-2026-11/cells.with_activity.json",
+      "stdoutTail": "\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-09-54z-bls-cps-employed-people-by-occupation-production-2026-11/distribution.json\",\n      \"sha256\": \"4086cd3aa952877483a3a30beb706e8d0563ea1978e20f09bd16e188f11cf6d5\",\n      \"bytes\": 13910,\n      \"createdAt\": \"2026-11-13T22:09:54Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-09-54z-bls-cps-employed-people-by-occupation-production-2026-11/validation.json\",\n      \"sha256\": \"262a54b34855bd9102c6aca69daea04e3b3bafdfa52760d0ce29161c5171449e\",\n      \"bytes\": 140,\n      \"createdAt\": \"2026-11-13T22:09:54Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-09-54z-bls-cps-employed-people-by-occupation-production-2026-11/cells.with_activity.json\",\n      \"sha256\": \"f014bfbcaca0dc16dedf25b8f628740ad79ea23e38f41184433d206dedbdd237\",\n      \"bytes\": 43528,\n      \"createdAt\": \"2026-11-13T22:09:54Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-13/2026-11-13t22-09-54z-bls-cps-employed-people-by-occupation-production-2026-11/manifest.json\",\n      \"sha256\": \"eb0df3f0ac4797d3e0b1d68c768249fedc52ffc50f275ea4139e3aea8df9b29f\",\n      \"bytes\": 18082,\n      \"createdAt\": \"2026-11-13T22:09:54Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"cps-production-employment-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"5cb6b72d8468fd0f460d6919a14de9921b0dcd7c\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"2fa985a26da26ce4f4c80d78a22cce6df54ee338e6e46e127d24716fdf039188\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}
