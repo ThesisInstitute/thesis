@@ -25,10 +25,12 @@ The script caches its ALFRED downloads (13 MB) in
 `~/.cache/thesis-stanli-backtest`, and both runs read the vintages it downloaded
 on 2026-11-02. The script writes rows in series order, so `--jobs` leaves the
 output alone, and each target draws its sampler seeds from its series and
-period. A rerun of four series (W824RC1, UNRATE, CPILFESL and A191RL1Q225SBEA)
-with one job and no `--walk-forward` reproduced the 60-print run's rows for the
-ten arms that run without `--walk-forward`. It matched every field of those 820
-rows except the walk-forward scores.
+period. We reran four series (W824RC1, UNRATE, CPILFESL and A191RL1Q225SBEA)
+with one job and no `--walk-forward` on 2026-11-18 and compared the 820 rows it
+gives in the ten arms that run without `--walk-forward`. Apart from the
+walk-forward scores, the stanli rows matched the 60-print run exactly, and 19 of
+the 164 `statsmodels` and `statsmodels-ladder` rows differed in CRPS or PIT by
+less than one part in 100 million.
 
 Every comparison in the doc comes from these rows. `summary.json` holds the full
 runs' statistics. For subsets, such as the comparisons without W824RC1, we
