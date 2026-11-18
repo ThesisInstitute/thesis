@@ -1,8 +1,8 @@
 # stanli backtest output
 
-Two runs of `scripts/backtest_stanli_candidates.py` on real ALFRED vintages,
-downloaded 2026-11-02. `docs/stanli-candidates.md` explains the method and reads
-the results.
+We ran `scripts/backtest_stanli_candidates.py` twice on real ALFRED vintages,
+both times with the code at commit ec45aa8c on an Apple-silicon Mac. See
+`docs/stanli-candidates.md` for the method and the results.
 
 | folder | training window | command flags |
 |---|---|---|
@@ -11,12 +11,40 @@ the results.
 
 Each folder holds:
 
-- `table.md`: the arm table the script prints;
-- `summary.json`: per-arm statistics with bootstrap intervals, `perSeriesCrpsRatio`,
-  `byTransform`, `leaveOneSeriesOut`, `selectionCounts` and the run's `config`.
+- `table.md`: the arm table the script writes;
+- `summary.json`: each arm's statistics against persistence with bootstrap
+  intervals and the run's `config`, plus `versusPersistenceLadder`,
+  `pairedComparisons`, `perSeriesCrpsRatio`, `byTransform`,
+  `leaveOneSeriesOut`, `selectionCounts`, `selectionCountsWithoutSkip`,
+  `warningSplit`, `byPeriodHalf`, `windowsFrom` and `ablationPower`;
+- `targets.jsonl.gz`: one row per target and arm, with its CRPS, PIT and 80%
+  coverage. Each stanli program's rows also carry its warning flag and
+  walk-forward score, and the selection arms' rows name the program they picked.
 
-Each run also writes `targets.jsonl`, one row per target and arm (about 3.5 MB),
-which stays out of the repo. To rebuild it, rerun the command; a run takes about 15
-minutes with 4 jobs and caches its 12 MB of downloads in
-`~/.cache/thesis-stanli-backtest`. Turning on `--walk-forward` left all 9,423
-fixed-arm rows in each window identical to a run without it.
+The script caches its ALFRED downloads (13 MB) in
+`~/.cache/thesis-stanli-backtest`, and both runs read the vintages it downloaded
+on 2026-11-02. The script writes rows in series order, so `--jobs` leaves the
+output alone, and each target draws its sampler seeds from its series and
+period. A rerun of four series (W824RC1, UNRATE, CPILFESL and A191RL1Q225SBEA)
+with one job and no `--walk-forward` reproduced the 60-print run's rows for the
+ten arms that run without `--walk-forward`. It matched every field of those 820
+rows except the walk-forward scores.
+
+Every comparison in the doc comes from these rows. `summary.json` holds the full
+runs' statistics. For subsets, such as the comparisons without W824RC1, we
+applied the script's own functions to filtered rows. Run this from the
+repository root to recompute one subset and the power calculation:
+
+```python
+import gzip, json, sys
+
+sys.path.insert(0, "scripts")
+import backtest_stanli_candidates as bt
+
+with gzip.open("experiments/stanli_backtest/window60/targets.jsonl.gz", "rt") as handle:
+    rows = [json.loads(line) for line in handle]
+kept = [row for row in rows if row["series"] != "W824RC1:level"]
+stats = bt.compare(kept, baseline="persistence-ladder", arms=["stanli-ar1-t-ladder"])
+print(stats["stanli-ar1-t-ladder"]["geometricMeanCrpsRatio"])  # 0.904
+print(bt.ablation_power(rows, "stanli-ar1-t-ladder", baseline="persistence-ladder"))
+```
