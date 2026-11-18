@@ -1169,10 +1169,31 @@ def _earlier_stage_failed(out_dir, _manifest, artifacts, _refs):
     artifacts["draft_command.json"] = command
 
 
-def _last_stage_exited_2(out_dir, _manifest, artifacts, _refs):
+def _last_stage_exited_2(out_dir, manifest, artifacts, refs):
+    # The cells expose every earlier artifact ref as their activity log, so
+    # the forger rewrites that log too; otherwise the activity check, not
+    # the exit rule, is what refuses the edit.
     command = json.loads((out_dir / "command.json").read_text())
     command["returnCode"] = 2
-    artifacts["command.json"] = command
+    index = next(
+        i for i, ref in enumerate(refs) if Path(str(ref["path"])).name == "command.json"
+    )
+    refs[index] = runner.write_artifact(
+        out_dir,
+        str(refs[index]["artifactType"]),
+        "command.json",
+        json.dumps(command, indent=2),
+        manifest["runStartedAt"],
+    )
+    activity = [
+        ref
+        for ref in refs
+        if ref.get("artifactType") not in {"cells_with_activity", "manifest"}
+    ]
+    cells = json.loads((out_dir / "cells.with_activity.json").read_text())
+    artifacts["cells.with_activity.json"] = [
+        {**cell, "activityLog": activity} for cell in cells
+    ]
 
 
 FINAL_STAGE = ("command.json", "stdout.txt", "stderr.txt", "revision_prompt.md")
