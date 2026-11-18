@@ -388,8 +388,8 @@ def test_shifting_history_shifts_the_forecast(steps, shift, model):
 @pytest.mark.parametrize("model", sorted(STAN_PROGRAMS))
 def test_repeated_prints_do_not_collapse_the_forecast(model):
     # 40 of 47 changes repeat the print. Without the rounding term the
-    # Student-t likelihood is unbounded as its scale goes to zero, and the
-    # programs returned a point mass at the last print or stopped mixing.
+    # Student-t likelihood is unbounded as its scale goes to zero (see the
+    # next test).
     history = tied_walk()
     values = [row["value"] for row in history]
     assert sum(a == b for a, b in zip(values, values[1:])) == 40
@@ -403,6 +403,19 @@ def test_repeated_prints_do_not_collapse_the_forecast(model):
     assert sampler["nonFiniteRhat"] == 0
     assert sampler["maxRhat"] <= stan_candidates.MAX_RHAT
     assert not stan_candidates.sampler_failed(sampler)
+
+
+@requires_stanli
+@pytest.mark.parametrize("model", sorted(STAN_PROGRAMS))
+def test_without_the_rounding_term_repeated_prints_collapse_and_warn(model):
+    # A grid of 0 drops the rounding term, so the same series collapses onto
+    # the last print, and the diagnostics have to say so.
+    candidate = build(model, history=tied_walk(), grid=0.0, backtest=False)
+    quantiles = predictive_quantiles(candidate)
+
+    assert quantiles[-1] - quantiles[0] < 0.01
+    assert stan_candidates.sampler_failed(candidate.posterior_predictive["sampler"])
+    assert stan_candidates.SAMPLER_WARNING in candidate.diagnostics
 
 
 @requires_stanli
@@ -651,6 +664,10 @@ def test_replay_refuses_a_record_no_build_could_produce(tamper, message):
             lambda record: record["diagnostics"].append(
                 stan_candidates.SAMPLER_WARNING
             ),
+        ),
+        (
+            "posteriorPredictive.draws",
+            lambda record: record["posteriorPredictive"].update(draws=3999),
         ),
         (
             "posteriorPredictive.quantiles",

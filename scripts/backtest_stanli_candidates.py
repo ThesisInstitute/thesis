@@ -90,9 +90,8 @@ ALFRED_CSV = (
 VINTAGES_PER_REQUEST = 12
 GENERATED_AT = "2026-11-02T00:00:00Z"
 NORMAL_Z90 = statistics.NormalDist().inv_cdf(0.9)
-# Arm pairs the summary compares head to head: the selection rule against a
-# fixed program, the rule against itself without the skip, and ladder arms
-# against the ladder baseline.
+# Arm pairs the summary compares head to head, in both shapes: the selection
+# rule against a fixed program, and the rule against itself without the skip.
 PAIRED_COMPARISONS = (
     ("stanli-selected-ladder", "stanli-ar1-t-ladder"),
     ("stanli-selected", "stanli-ar1-t"),

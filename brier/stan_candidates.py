@@ -20,8 +20,8 @@ shift.
 
 Official prints are rounded, and rounded series repeat a print often. When
 more than half of the one-step changes are exactly zero, a Student-t
-likelihood grows without bound as its scale shrinks to zero, and NUTS can
-return a point mass at the last print that still passes R-hat and ESS checks.
+likelihood grows without bound as its scale shrinks to zero, and the
+posterior collapses onto the last print.
 The built-in programs treat each print as the latent value plus rounding error
 uniform on half a grid step either way (variance ``y_grid**2 / 12``) and add
 that variance, for every print a residual involves, to the residual scale.
