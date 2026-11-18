@@ -545,7 +545,9 @@ def utc_now() -> str:
 
 
 # Verdict heads for an ALFRED read that holds no vintage of the day it asked
-# for. scripts/resolution_status.py classifies each.
+# for. scripts/resolution_status.py classifies each. The main loop prints
+# each head as literal text. tests/test_resolution_status.py checks that the
+# two spellings agree.
 ALFRED_VINTAGE_LAGGED = "ALFRED VINTAGE LAGGED (deferring)"
 ALFRED_VINTAGE_NOT_REACHED = "ALFRED VINTAGE NOT REACHED (deferring)"
 ALFRED_READ_FAILED = "ALFRED READ FAILED (deferring)"
@@ -18863,8 +18865,18 @@ def _main() -> int:
                 alfred_cache[cache_key] = fred_vintage_series(*cache_key)
             alfred_read = alfred_cache[cache_key]
             if alfred_read.refusal:
+                # Each head is spelled out, not interpolated, so the
+                # differential in tests/test_resolution_status.py reads
+                # these lines as printed.
                 head, detail = alfred_read.refusal
-                print(f"  {head}: {ref} — {detail}")
+                if head == ALFRED_VINTAGE_LAGGED:
+                    print(f"  ALFRED VINTAGE LAGGED (deferring): {ref} — {detail}")
+                elif head == ALFRED_VINTAGE_NOT_REACHED:
+                    print(
+                        f"  ALFRED VINTAGE NOT REACHED (deferring): {ref} — {detail}"
+                    )
+                else:
+                    print(f"  ALFRED READ FAILED (deferring): {ref} — {detail}")
                 continue
             raw = alfred_read.raw
             source_url = alfred_read.source_url

@@ -629,6 +629,22 @@ def test_the_resolver_still_prints_the_shapes_this_file_reads():
         assert head in heads
 
 
+def test_the_generic_alfred_heads_are_printed_as_the_reader_names_them():
+    """The main loop spells out each head its ALFRED reader returns, so the
+    differential below reads them, and each spelling is the constant."""
+    import resolve_pending
+
+    heads = {shape[0][1].split(":")[0].strip() for shape in TARGET_TEMPLATES}
+    for head in (
+        resolve_pending.ALFRED_VINTAGE_LAGGED,
+        resolve_pending.ALFRED_VINTAGE_NOT_REACHED,
+        resolve_pending.ALFRED_READ_FAILED,
+    ):
+        assert head in heads
+        state, _code = rs._classify(head)
+        assert state in {"deferred", "fetch_failed"}
+
+
 @settings(max_examples=300, deadline=None)
 @given(ref=_REFS, fill=_FILLER, seed=st.integers(0, 2**16))
 def test_every_resolver_target_line_is_read_back_with_its_reference(ref, fill, seed):
