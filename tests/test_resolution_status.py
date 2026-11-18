@@ -243,7 +243,7 @@ def test_without_append_evidence_the_status_does_not_claim_the_ledger_lacks_it()
         # R22 finding 3: each line is the resolver's own format; the case
         # beside it is what the reviewer executed through the resolver.
         (
-            # fred_advance_value on HTTP 503 prints "not yet published".
+            # The generic ALFRED leg on HTTP 503 prints "not yet published".
             "not yet published: {ref}",
             "NOT_YET_PUBLISHED",
             "had not published",

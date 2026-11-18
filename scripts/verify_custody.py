@@ -17,6 +17,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from alfred_vintage import AlfredVintageError, alfred_vintage_label
 from canonical_json import canonical_bytes, canonical_sha256
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -993,7 +994,8 @@ def read_alfred_claims_vintage(
     2026-09-24 (~/reviews/thesis-weekly-claims-2026-10/header_survey/). So a
     response is read as ALFRED's vintage of its label, which must be a real
     date no later than the requested one; a label after it is another
-    vintage and is refused. What a read must show about its label is
+    vintage and is refused (alfred_vintage.alfred_vintage_label, the header
+    reader every ALFRED leg shares). What a read must show about its label is
     judge_claims_first_print's rule, by role.
     """
 
@@ -1004,18 +1006,7 @@ def read_alfred_claims_vintage(
     lines = [line.rstrip("\r") for line in lines]
     while lines and not lines[-1]:
         lines.pop()
-    header = lines[0] if lines else ""
-    match = re.fullmatch(rf"observation_date,{re.escape(series_id)}_(\d{{8}})", header)
-    label = None
-    if match:
-        try:
-            label = datetime.strptime(match.group(1), "%Y%m%d").date()
-        except ValueError:
-            label = None
-    if label is None or label > date.fromisoformat(day):
-        raise ValueError(
-            f"ALFRED {series_id} {day} is not a vintage CSV (header {header[:60]!r})"
-        )
+    label = alfred_vintage_label(raw, series_id, date.fromisoformat(day))
     rows: dict[str, float] = {}
     expected = date.fromisoformat(CLAIMS_SERIES_FIRST_WEEK[series_id])
     for number, line in enumerate(lines[1:], start=2):
@@ -1090,6 +1081,14 @@ CLAIMS_LABEL_LAG = {
     "release_day": (0, "the week as printed on DOL's release day"),
     "vintage_after_release": (1, "the release day's print a day later"),
 }
+# The same rule for the generic ALFRED leg (resolve_pending.ALFRED_ADAPTERS):
+# a cell resolves to the period as ALFRED printed it on the cell's
+# resolutionDate, so its read must be ALFRED's vintage of that very day. An
+# earlier day's vintage may lack the period, or print it before a revision
+# made on that day. resolve_pending.read_alfred_vintage_of takes rows only
+# from such a response, and _verify_resolver_alfred_labels replays the rule
+# on every resolver fact archived from an ALFRED response.
+ALFRED_VINTAGE_LABEL_LAG = 0
 
 
 def claims_vintages_consistent(
@@ -2829,17 +2828,16 @@ def _verify_resolver_alfred_labels(run_dir: Path, manifest: dict[str, Any]) -> N
 
     ALFRED sometimes answers a request for one day with an earlier day's
     vintage and names that day in the header (scripts/alfred_vintage.py).
-    The resolver keeps a response as a fact's vintage only when the header
-    names the fact's sourceVintage; this replays that rule on the archive.
-    A fact's own response whose header names an ALFRED vintage must name its
+    A fact's own response is the read its value came from: the generic leg's
+    read of the resolutionDate (ALFRED_VINTAGE_LABEL_LAG) or the claims leg's
+    release-day read (CLAIMS_LABEL_LAG["release_day"]), both lag 0. So a
+    fact's own response whose header names an ALFRED vintage must name its
     sourceVintage, for the series its archive is named for. Responses with
-    any other header are another adapter's and are not judged here.
+    any other header are another adapter's and are not judged here; the
+    claims leg's other reads are judge_claims_first_print's.
     """
 
-    from datetime import date
-
-    from alfred_vintage import AlfredVintageError, alfred_vintage_label
-
+    lag = timedelta(days=ALFRED_VINTAGE_LABEL_LAG)
     for fact in manifest["facts"]:
         declared = str(fact["responseArchive"].get("path", ""))
         relative = _manifest_relative(run_dir, declared, legacy=False)
@@ -2865,7 +2863,7 @@ def _verify_resolver_alfred_labels(run_dir: Path, manifest: dict[str, Any]) -> N
             label = alfred_vintage_label(raw, series, vintage)
         except AlfredVintageError as exc:
             raise CustodyError(f"resolver fact {record}: {exc}") from exc
-        if label != vintage:
+        if label < vintage - lag:
             raise CustodyError(
                 f"resolver fact {record} keeps ALFRED's {series} vintage of "
                 f"{label} as its vintage of {vintage}: {relative}"

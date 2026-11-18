@@ -128,6 +128,7 @@ from sba_loan_performance import (
 )
 from thesis_log_client import load_thesis_log
 from verify_custody import (
+    ALFRED_VINTAGE_LABEL_LAG,
     CLAIMS_LABEL_LAG,
     CustodyError,
     claims_vintages_consistent,
@@ -582,7 +583,8 @@ def read_alfred_vintage_of(
     spellings: tuple[str, ...] = (FRED_CSV, ALFRED_VINTAGE_CSV_REORDERED),
     get: Callable[[str], bytes | None] | None = None,
 ) -> AlfredVintageRead:
-    """ALFRED's vintage of ``day``, taken only from a response labeled ``day``.
+    """ALFRED's vintage of ``day``, taken only from a response labeled ``day``
+    (verify_custody.ALFRED_VINTAGE_LABEL_LAG).
 
     ALFRED sometimes answers with an earlier day's vintage under that day's
     label (scripts/alfred_vintage.py). Such a response cannot stand for
@@ -613,8 +615,9 @@ def read_alfred_vintage_of(
             utc_now(),
             (
                 ALFRED_VINTAGE_NOT_REACHED,
-                f"vintage {vintage} has not begun in St. Louis, where it is "
-                f"{today}; ALFRED would answer with an earlier day's vintage",
+                f"vintage {vintage} is after {today}, the latest date the "
+                "resolver asks ALFRED for (US Central standard time); ALFRED "
+                "would answer with an earlier day's vintage",
             ),
         )
     answered: list[str] = []
@@ -629,7 +632,7 @@ def read_alfred_vintage_of(
             return AlfredVintageRead(
                 {}, raw, url, retrieved_at, (ALFRED_READ_FAILED, str(exc))
             )
-        if label == day:
+        if label >= day - dt.timedelta(days=ALFRED_VINTAGE_LABEL_LAG):
             return AlfredVintageRead(rows, raw, url, retrieved_at)
         answered.append(f"its vintage of {label} at {url}")
     if not answered:
@@ -648,21 +651,6 @@ def read_alfred_vintage_of(
             + f"; an earlier day's vintage cannot show what it printed on {vintage}",
         ),
     )
-
-
-def fred_advance_value(
-    series_id: str, week: str, vintage: str
-) -> tuple[float | None, bytes | None, str, str]:
-    """The series value for `week` in ALFRED's vintage of `vintage`.
-
-    The weekly claims leg's read: the week as DOL printed it on its release
-    day, so only a response labeled that day counts. Only the FRED_CSV
-    spelling is asked, because claims_fact names that URL as the source.
-    """
-    read = read_alfred_vintage_of(
-        series_id, dt.date.fromisoformat(vintage), spellings=(FRED_CSV,)
-    )
-    return read.rows.get(week), read.raw, read.source_url, read.retrieved_at
 
 
 def fred_vintage_series(series_id: str, vintage: str) -> AlfredVintageRead:

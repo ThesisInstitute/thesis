@@ -7,12 +7,13 @@ always D, and the rows are those of the label's vintage. Observed on
 
 - ICSA asked for 2026-09-25 answered with label 2026-09-24, byte for byte the
   response for 2026-09-24. Seven of 291 daily ICSA dates in 2026 answered a
-  day early. PAYEMS asked for 2026-10-01 answered with label 2026-09-29.
+  day early. PAYEMS asked for 2026-10-01 answered with label 2026-09-29, two
+  days early.
 - The same query with its parameters reordered, ``?vintage_date=D&id=S``,
   answered with label D on each of those dates.
-- A request for a day that has not begun in St. Louis is answered with that
-  day's vintage under that day's label: PAYEMS asked for 2026-11-06 on
-  2026-10-18 came back labeled 2026-10-18.
+- A request for a later date than the current one was answered with the
+  current date's vintage under that date's label: PAYEMS asked for
+  2026-11-06 at 19:12 UTC on 2026-10-18 came back labeled 2026-10-18.
 
 So a response is ALFRED's vintage of its label, whatever date was asked for.
 This module reads the label and the rows; each reader decides what a label
@@ -35,9 +36,10 @@ ALFRED_VINTAGE_CSV_REORDERED = (
     "https://alfred.stlouisfed.org/graph/alfredgraph.csv"
     "?vintage_date={vintage}&id={series}"
 )
-# St. Louis on standard time. Its date is never later than the date in St.
-# Louis on daylight time, nor than the date in any zone east of it, so a day
-# this clock has reached has begun there.
+# Where ALFRED's day turns over is not known. US Central standard time is a
+# conservative clock for it: its date is never later than the date in US
+# Central or Eastern time, on standard or daylight time, nor than the UTC
+# date, so a day this clock has reached has begun in each of those.
 ST_LOUIS_STANDARD_TIME = dt.timezone(dt.timedelta(hours=-6))
 
 _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -51,11 +53,11 @@ class AlfredVintageError(ValueError):
 
 
 def alfred_today(now: dt.datetime | None = None) -> dt.date:
-    """The latest vintage date it is safe to ask ALFRED for at ``now``.
+    """The latest vintage date the resolver asks ALFRED for at ``now``.
 
-    A request for a later day comes back as an earlier day's vintage. This is
-    the date in St. Louis on standard time, which never runs ahead of the
-    date there.
+    A request for a later date than ALFRED's current one comes back as the
+    current date's vintage. This is the date on US Central standard time
+    (ST_LOUIS_STANDARD_TIME), a conservative choice, not a measured boundary.
     """
 
     current = now or dt.datetime.now(dt.timezone.utc)
