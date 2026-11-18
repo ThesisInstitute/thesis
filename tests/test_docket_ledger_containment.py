@@ -71,6 +71,17 @@ CATALOG_ROW_KEYS = {
 # deliberately by duplication, with scripts/stamp_docket_ledger_refs.py:
 # this gate must not import the tool whose output it audits.
 UNIT_SCALE = {"units": 1.0, "thousands": 1e3, "millions": 1e6, "billions": 1e9}
+# The base unit Chronicle stores each scaled target unit in, duplicated for the
+# same reason; tests/test_ledger_units.py holds it to scripts/ledger_units.py.
+BASE_UNIT = {
+    "thousands": "count",
+    "millions": "count",
+    "usd_millions": "usd",
+    "usd_billions": "usd",
+    "billions USD": "usd",
+    "gbp_billions": "gbp",
+    "million_cubic_feet": "cubic_feet",
+}
 
 
 def _units_agree(
@@ -79,14 +90,17 @@ def _units_agree(
     """Whether a docket targetUnit is the catalog unit modulo valueScale.
 
     Identical units always agree (valueScale describes the transform from
-    the publisher's raw feed, whose reference frame varies by entry).
-    Differing units agree only when both are pure magnitude units and the
+    the publisher's raw feed, whose reference frame varies by entry), and so
+    does a scaled target unit with the base unit Chronicle stores it in. Other
+    differing units agree only when both are pure magnitude units and the
     declared valueScale converts catalog-unit values into target-unit
     values: value_in_target = value_in_catalog * valueScale.
     """
     if target_unit is None or catalog_unit is None:
         return True
     if target_unit == catalog_unit:
+        return True
+    if isinstance(target_unit, str) and BASE_UNIT.get(target_unit) == catalog_unit:
         return True
     if type(value_scale) not in (int, float) or not value_scale:
         return False
@@ -625,12 +639,12 @@ def _docket_file(tmp_path: pathlib.Path, entries: list[dict[str, Any]]):
 
 def test_docket_is_contained_in_frozen_catalog_fixture() -> None:
     raw = FIXTURE_PATH.read_bytes()
-    # Copied byte-for-byte from PolicyEngine/chronicle#344's regenerated
-    # catalog: seven entity-drift lineages folded into economy/aggregate
-    # (Max's ruling d353), 221 series over the ledger at d7e45bc5.
-    assert len(raw) == 199_465
+    # Copied byte-for-byte from Chronicle's catalog at 810b8c7b: the ledger
+    # after the base-units migration (83 restatements) and the 12 Table A-19
+    # rows that it unblocked, 221 series.
+    assert len(raw) == 206_499
     assert hashlib.sha256(raw).hexdigest() == (
-        "b055a7aed092ae5c436a634faf6472e8d19d5ca1388f851028c06c1b88a5c441"
+        "8baaf600dfcaf76598ef8c3b700f9ef72843c39cb2a725b3f8bd7230eb198f25"
     )
     _assert_containment(_object(raw, "frozen catalog fixture"), "fixture")
 

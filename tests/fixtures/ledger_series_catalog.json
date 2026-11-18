@@ -1,12 +1,12 @@
 {
   "comment": "Canonical series catalog. One row per (concept, geography level/id/vintage, entity) identity. UUID authority is the append-only ledger/series_uuid_registry.jsonl (digest below): a uuid is minted once, inherited from the registry on every regeneration, and changes only through explicit, chained supersede/retire/revive/succeeds events recorded there (live bindings and rows stay in bijection). Consumers reference series by uuid or concept only. Regenerate with scripts/build_series_catalog.py; verify with --check. Aliases are curated identity statements (plus observed spellings of the same identity) and inherit only within one (geography, entity) slice; aliases listed in ambiguous_aliases match multiple rows and never drive inheritance. source_concepts are publisher labels — provenance, never identity. Cross-spelling and cross-vintage merges are manual curation: delete the absorbed row, alias its concept on the survivor, regenerate with --allow-remint.",
   "generator_version": 3,
-  "observations_sha256": "10c15c16e92c71a0830b5551952f508c2908f3ce2c23615e13a050d7794bd3f2",
-  "observation_rows": 233,
-  "current_assertion_rows": 233,
+  "observations_sha256": "4bdb5e0d99740fb13627a3b44b450cf8855ee79c63d76b2ee72cc2098c6bbfa8",
+  "observation_rows": 350,
+  "current_assertion_rows": 261,
   "docket_seed_sha256": "5914192517350e0166045afd9064a515ea312acbea1844d9cb594cc9f525dbb9",
   "entity_folds_sha256": "f7496541139308e97c65c8681dd9f44829d46df25eede0d4e639203049667b58",
-  "uuid_registry_sha256": "272d8fd6b2e82151d781d8a9bc69f0f7abaf934a837279c47d2f534683443f31",
+  "uuid_registry_sha256": "3bcb97a66df775da590063ad10c634850ff189108adc13b980784cda11dc24a8",
   "suspect_segments": [
     "LNU02374597"
   ],
@@ -94,11 +94,22 @@
       "fed.g19.consumer_credit_total_annual_rate"
     ],
     "2026_08": [
-      "abs.cpi.all_groups.yoy"
+      "abs.cpi.all_groups.yoy",
+      "statcan.gdp_by_industry.monthly_growth"
+    ],
+    "2026_09": [
+      "statcan.cpi.allitems.yoy"
+    ],
+    "2026_10": [
+      "bls.ces.nonfarm_payrolls.change"
     ],
     "2026_q2": [
       "bls.eci.private_wages_salaries_qoq",
       "bls.eci.total_compensation_private_industry_qoq",
+      "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim"
+    ],
+    "2026_q3": [
+      "bls.eci.private_wages_salaries_qoq",
       "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim"
     ],
     "after_june_2026": [
@@ -120,6 +131,14 @@
       "statcan.retail_trade.sales_mom.canada",
       "statcan.wholesale_trade.sales_mom_exclusions.canada"
     ],
+    "august_2026": [
+      "bls.cps.employed_people_by_occupation.business_financial_operations",
+      "bls.cps.employed_people_by_occupation.computer_mathematical",
+      "bls.cps.employed_people_by_occupation.healthcare_support",
+      "bls.cps.employed_people_by_occupation.office_administrative_support",
+      "bls.cps.employed_people_by_occupation.production",
+      "bls.cps.employed_people_by_occupation.transportation_material_moving"
+    ],
     "feb_2026": [
       "cms.medicaid_pi.beneficiaries_disenrolled_procedural",
       "cms.medicaid_pi.beneficiaries_disenrolled_total",
@@ -138,6 +157,18 @@
     "fy2025": [
       "fns.snap.share_jurisdictions_at_or_above_6pct",
       "fns.snap.total_payment_error_rate"
+    ],
+    "fy2026": [
+      "usaspending.cdfi.assistance_transaction_obligations",
+      "usaspending.dhs.title_vi.award_transaction_obligations",
+      "usaspending.dod.new_prime_awards",
+      "usaspending.dod.prime_award_obligations",
+      "usaspending.dod.prime_award_transactions",
+      "usaspending.dod.prime_contract_obligations",
+      "usaspending.dod.small_business_contract_obligation_share",
+      "usaspending.dod.unique_prime_contract_recipients",
+      "usaspending.ntia.broadband_al11038_obligations",
+      "usaspending.usfs.minnesota_place_of_performance_obligations"
     ],
     "july_2026": [
       "bls.cpi.u.core_mom",
@@ -210,6 +241,14 @@
     "q1_2026": [
       "bea.real_gdp.saar.third_estimate"
     ],
+    "september_2026": [
+      "bls.cps.employed_people_by_occupation.business_financial_operations",
+      "bls.cps.employed_people_by_occupation.computer_mathematical",
+      "bls.cps.employed_people_by_occupation.healthcare_support",
+      "bls.cps.employed_people_by_occupation.office_administrative_support",
+      "bls.cps.employed_people_by_occupation.production",
+      "bls.cps.employed_people_by_occupation.transportation_material_moving"
+    ],
     "week_2026-06-13": [
       "us.dol.initial_claims.sa"
     ],
@@ -269,6 +308,9 @@
     "week_2026-09-19": [
       "dol.eta.continued_claims.sa",
       "us.dol.initial_claims.sa"
+    ],
+    "week_2026-09-26": [
+      "dol.eta.continued_claims.sa"
     ],
     "week_2026_06_13": [
       "us.dol.initial_claims.sa"
@@ -424,7 +466,7 @@
         "abs.labour.employment_change.australia.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -569,7 +611,7 @@
         "bea.disposable_personal_income.level.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -604,7 +646,7 @@
         "bea.government_social_benefits.level.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -639,7 +681,7 @@
         "bea.government_social_benefits.medicaid.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -674,7 +716,7 @@
         "bea.government_social_benefits.medicare.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -709,7 +751,7 @@
         "bea.government_social_benefits.social_security.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -837,7 +879,7 @@
         "bea.personal_current_taxes.level.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -953,7 +995,7 @@
         "bea.trade.goods_services_deficit.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -988,7 +1030,7 @@
         "bea.wages_and_salaries.level.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1023,7 +1065,7 @@
         "bls.ces.aerospace_product_and_parts_employment.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1093,7 +1135,7 @@
         "bls.ces.federal_department_of_defense_employment.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1128,7 +1170,7 @@
         "bls.ces.home_health_care_services.employment.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1160,20 +1202,36 @@
       "uuid": "d8ab9f3a-aa0c-4b7f-89df-a0c9107cfdbb",
       "concept": "bls.ces.nonfarm_payrolls.change",
       "family_patterns": [
-        "bls.ces.nonfarm_payrolls.change"
+        "bls.ces.nonfarm_payrolls.change.{P}"
       ],
-      "status": "docket-only",
-      "unit": null,
+      "status": "observed",
+      "unit": "count",
       "cadence": "month",
-      "geography": null,
-      "entity": null,
-      "sources": [],
-      "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "bls_ces"
+      ],
+      "aliases": [
+        "bls.ces.nonfarm_payrolls.change.2026_10"
+      ],
+      "source_concepts": [
+        "CES0000000001"
+      ],
+      "rid_patterns": [
+        "bls.ces.nonfarm_payrolls.change.{P}.first_print"
+      ],
+      "first_observed_period": "2026-10",
+      "last_observed_period": "2026-10",
+      "observation_count": 1
     },
     {
       "uuid": "13c723db-3ec7-4e28-b305-30050f832a71",
@@ -1182,7 +1240,7 @@
         "bls.ces.ship_and_boat_building_employment.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1217,7 +1275,7 @@
         "bls.ces.total_nonfarm_payroll_change.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1252,7 +1310,7 @@
         "bls.ces.total_nonfarm_payroll_change"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1573,7 +1631,7 @@
         "bls.cps.employed_people_by_occupation.business_financial_operations.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1589,7 +1647,9 @@
         "bls_cps"
       ],
       "aliases": [
-        "bls.cps.employed_people_by_occupation.business_financial_operations.june_2026"
+        "bls.cps.employed_people_by_occupation.business_financial_operations.august_2026",
+        "bls.cps.employed_people_by_occupation.business_financial_operations.june_2026",
+        "bls.cps.employed_people_by_occupation.business_financial_operations.september_2026"
       ],
       "source_concepts": [
         "Business and financial operations occupations"
@@ -1598,8 +1658,8 @@
         "bls.cps.employed_people_by_occupation.business_financial_operations.{P}.first_print"
       ],
       "first_observed_period": "2026-06",
-      "last_observed_period": "2026-06",
-      "observation_count": 1
+      "last_observed_period": "2026-09",
+      "observation_count": 3
     },
     {
       "uuid": "54f19551-6288-48e2-9fa0-17933e55d390",
@@ -1608,7 +1668,7 @@
         "bls.cps.employed_people_by_occupation.computer_mathematical.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1624,7 +1684,9 @@
         "bls_cps"
       ],
       "aliases": [
-        "bls.cps.employed_people_by_occupation.computer_mathematical.june_2026"
+        "bls.cps.employed_people_by_occupation.computer_mathematical.august_2026",
+        "bls.cps.employed_people_by_occupation.computer_mathematical.june_2026",
+        "bls.cps.employed_people_by_occupation.computer_mathematical.september_2026"
       ],
       "source_concepts": [
         "Computer and mathematical occupations"
@@ -1633,8 +1695,8 @@
         "bls.cps.employed_people_by_occupation.computer_mathematical.{P}.first_print"
       ],
       "first_observed_period": "2026-06",
-      "last_observed_period": "2026-06",
-      "observation_count": 1
+      "last_observed_period": "2026-09",
+      "observation_count": 3
     },
     {
       "uuid": "25457957-df59-4e16-ae3f-431b4c63e7bf",
@@ -1643,7 +1705,7 @@
         "bls.cps.employed_people_by_occupation.healthcare_support.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1659,7 +1721,9 @@
         "bls_cps"
       ],
       "aliases": [
-        "bls.cps.employed_people_by_occupation.healthcare_support.june_2026"
+        "bls.cps.employed_people_by_occupation.healthcare_support.august_2026",
+        "bls.cps.employed_people_by_occupation.healthcare_support.june_2026",
+        "bls.cps.employed_people_by_occupation.healthcare_support.september_2026"
       ],
       "source_concepts": [
         "Healthcare support occupations"
@@ -1668,8 +1732,8 @@
         "bls.cps.employed_people_by_occupation.healthcare_support.{P}.first_print"
       ],
       "first_observed_period": "2026-06",
-      "last_observed_period": "2026-06",
-      "observation_count": 1
+      "last_observed_period": "2026-09",
+      "observation_count": 3
     },
     {
       "uuid": "2316f164-f13f-4025-980c-b92cc46b4d1a",
@@ -1678,7 +1742,7 @@
         "bls.cps.employed_people_by_occupation.office_administrative_support.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1694,7 +1758,9 @@
         "bls_cps"
       ],
       "aliases": [
-        "bls.cps.employed_people_by_occupation.office_administrative_support.june_2026"
+        "bls.cps.employed_people_by_occupation.office_administrative_support.august_2026",
+        "bls.cps.employed_people_by_occupation.office_administrative_support.june_2026",
+        "bls.cps.employed_people_by_occupation.office_administrative_support.september_2026"
       ],
       "source_concepts": [
         "Office and administrative support occupations"
@@ -1703,8 +1769,8 @@
         "bls.cps.employed_people_by_occupation.office_administrative_support.{P}.first_print"
       ],
       "first_observed_period": "2026-06",
-      "last_observed_period": "2026-06",
-      "observation_count": 1
+      "last_observed_period": "2026-09",
+      "observation_count": 3
     },
     {
       "uuid": "3240539a-c5b8-43de-a240-cc6754fb59aa",
@@ -1713,7 +1779,7 @@
         "bls.cps.employed_people_by_occupation.production.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1729,7 +1795,9 @@
         "bls_cps"
       ],
       "aliases": [
-        "bls.cps.employed_people_by_occupation.production.june_2026"
+        "bls.cps.employed_people_by_occupation.production.august_2026",
+        "bls.cps.employed_people_by_occupation.production.june_2026",
+        "bls.cps.employed_people_by_occupation.production.september_2026"
       ],
       "source_concepts": [
         "Production occupations"
@@ -1738,8 +1806,8 @@
         "bls.cps.employed_people_by_occupation.production.{P}.first_print"
       ],
       "first_observed_period": "2026-06",
-      "last_observed_period": "2026-06",
-      "observation_count": 1
+      "last_observed_period": "2026-09",
+      "observation_count": 3
     },
     {
       "uuid": "e2502908-1e16-46e3-b330-4d6612e510c2",
@@ -1748,7 +1816,7 @@
         "bls.cps.employed_people_by_occupation.transportation_material_moving.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -1764,7 +1832,9 @@
         "bls_cps"
       ],
       "aliases": [
-        "bls.cps.employed_people_by_occupation.transportation_material_moving.june_2026"
+        "bls.cps.employed_people_by_occupation.transportation_material_moving.august_2026",
+        "bls.cps.employed_people_by_occupation.transportation_material_moving.june_2026",
+        "bls.cps.employed_people_by_occupation.transportation_material_moving.september_2026"
       ],
       "source_concepts": [
         "Transportation and material moving occupations"
@@ -1773,8 +1843,8 @@
         "bls.cps.employed_people_by_occupation.transportation_material_moving.{P}.first_print"
       ],
       "first_observed_period": "2026-06",
-      "last_observed_period": "2026-06",
-      "observation_count": 1
+      "last_observed_period": "2026-09",
+      "observation_count": 3
     },
     {
       "uuid": "cfc40ec5-49cc-44d9-8c57-cda9f7748cc5",
@@ -1927,7 +1997,8 @@
         "bls_eci"
       ],
       "aliases": [
-        "bls.eci.private_wages_salaries_qoq.2026_q2"
+        "bls.eci.private_wages_salaries_qoq.2026_q2",
+        "bls.eci.private_wages_salaries_qoq.2026_q3"
       ],
       "source_concepts": [
         "ECIWAG"
@@ -1936,8 +2007,8 @@
         "bls.eci.private_wages_salaries_qoq.{P}.first_print"
       ],
       "first_observed_period": "2026-04",
-      "last_observed_period": "2026-04",
-      "observation_count": 1
+      "last_observed_period": "2026-07",
+      "observation_count": 2
     },
     {
       "uuid": "2820e965-4c7b-40d2-b5b8-e03792cf3fbf",
@@ -2091,7 +2162,7 @@
         "bls.jolts.job_openings.{P}"
       ],
       "status": "observed",
-      "unit": "millions",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -2127,7 +2198,7 @@
         "bls.jolts.job_openings_total.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -2181,7 +2252,7 @@
         "bls.laus.colorado.labor_force.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -2305,7 +2376,8 @@
         "bls_productivity"
       ],
       "aliases": [
-        "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q2"
+        "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q2",
+        "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3"
       ],
       "source_concepts": [
         "PRS85006112"
@@ -2314,8 +2386,8 @@
         "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.{P}.first_print"
       ],
       "first_observed_period": "2026-04",
-      "last_observed_period": "2026-04",
-      "observation_count": 1
+      "last_observed_period": "2026-07",
+      "observation_count": 2
     },
     {
       "uuid": "c6c98b8b-55f6-4543-b057-96726c38a2bf",
@@ -2474,7 +2546,7 @@
         "census.housing.completions_saar.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -2509,7 +2581,7 @@
         "census.housing.permits_saar.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -2545,7 +2617,7 @@
         "us.census.housing_starts.total_saar.{P}"
       ],
       "status": "observed",
-      "unit": "millions",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -2694,7 +2766,7 @@
         "census.mtis.total_business_inventories_level.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -2729,7 +2801,7 @@
         "census.new_residential_sales.new_single_family_houses_sold_saar.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -2989,7 +3061,7 @@
         "dol.eta.continued_claims.sa"
       ],
       "status": "observed",
-      "unit": "millions",
+      "unit": "count",
       "cadence": "week_ending",
       "geography": {
         "level": "country",
@@ -3012,8 +3084,8 @@
         "dol.eta.continued_claims.sa.{P}.first_print"
       ],
       "first_observed_period": "2026-06-27",
-      "last_observed_period": "2026-09-19",
-      "observation_count": 13
+      "last_observed_period": "2026-09-26",
+      "observation_count": 14
     },
     {
       "uuid": "32b335ea-b2dd-4fba-8321-e9751df19318",
@@ -5866,7 +5938,7 @@
         "ons.hmrc.paye_payrolled_employees.{P}"
       ],
       "status": "observed",
-      "unit": "millions",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -5936,7 +6008,7 @@
         "ons.pusf.j5ii.public_sector_net_borrowing_ex_banks.{P}"
       ],
       "status": "observed",
-      "unit": "gbp_billions",
+      "unit": "gbp",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6110,7 +6182,7 @@
         "ssa.oasdi.disabled_worker_beneficiaries.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6145,7 +6217,7 @@
         "ssa.ssi.recipients.colorado.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6215,7 +6287,7 @@
         "ssa.ssi.recipients_aged_65_plus.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6250,7 +6322,7 @@
         "ssa.ssi.total_recipients.{P}"
       ],
       "status": "observed",
-      "unit": "millions",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6431,6 +6503,7 @@
       "uuid": "23bf4da6-874a-4b29-affb-ee68d03d2dee",
       "concept": "statcan.cpi.allitems.yoy",
       "family_patterns": [
+        "statcan.cpi.allitems.yoy",
         "statcan.cpi.allitems.yoy.{P}"
       ],
       "status": "observed",
@@ -6456,11 +6529,12 @@
         "v41690973"
       ],
       "rid_patterns": [
-        "statcan.cpi.allitems.yoy.{P}"
+        "statcan.cpi.allitems.yoy.{P}",
+        "statcan.cpi.allitems.yoy.{P}.first_print"
       ],
       "first_observed_period": "2026-05",
-      "last_observed_period": "2026-05",
-      "observation_count": 1
+      "last_observed_period": "2026-09",
+      "observation_count": 2
     },
     {
       "uuid": "52fba74f-ea83-4b12-981f-3ca2c581686d",
@@ -6469,7 +6543,7 @@
         "statcan.employment_insurance.regular_beneficiaries.canada.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6505,7 +6579,7 @@
         "statcan.employment_insurance.regular_beneficiaries.canada.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6537,6 +6611,7 @@
       "uuid": "166d1a5a-b627-4d1f-9f79-682f28692dd5",
       "concept": "statcan.gdp_by_industry.monthly_growth",
       "family_patterns": [
+        "statcan.gdp_by_industry.monthly_growth",
         "statcan.gdp_by_industry.monthly_growth.{P}"
       ],
       "status": "observed",
@@ -6565,8 +6640,8 @@
         "statcan.gdp_by_industry.monthly_growth.{P}.first_print"
       ],
       "first_observed_period": "2026-04",
-      "last_observed_period": "2026-04",
-      "observation_count": 1
+      "last_observed_period": "2026-08",
+      "observation_count": 2
     },
     {
       "uuid": "552c1dda-abe3-4f6c-86fb-473f455b5e15",
@@ -6575,7 +6650,7 @@
         "statcan.lfs.employment_change"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6870,7 +6945,7 @@
         "treasury.mts.monthly_deficit.{P}"
       ],
       "status": "observed",
-      "unit": "usd_billions",
+      "unit": "usd",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -6941,7 +7016,7 @@
         "us.dol.initial_claims.sa"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "week_ending",
       "geography": {
         "level": "country",
@@ -6975,7 +7050,7 @@
         "us.dol.initial_claims.sa.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "month",
       "geography": {
         "level": "country",
@@ -7048,22 +7123,32 @@
       "family_patterns": [
         "usaspending.cdfi.assistance_transaction_obligations"
       ],
-      "status": "docket-only",
-      "unit": "usd_millions",
-      "cadence": "year",
+      "status": "observed",
+      "unit": "usd",
+      "cadence": "fiscal_year",
       "geography": {
         "level": "country",
         "id": "0100000US",
+        "vintage": "current",
         "name": "United States"
       },
-      "entity": null,
-      "sources": [],
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "signed net federal_action_obligation across prime financial-assistance award transactions whose awarding subtier is Community Development Financial Institutions Fund"
+      ],
+      "rid_patterns": [
+        "usaspending.cdfi.assistance_transaction_obligations.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "e64ea5db-b72a-4a46-8948-6142dbc59d91",
@@ -7071,22 +7156,32 @@
       "family_patterns": [
         "usaspending.dhs.title_vi.award_transaction_obligations"
       ],
-      "status": "docket-only",
+      "status": "observed",
       "unit": "usd",
-      "cadence": "year",
+      "cadence": "fiscal_year",
       "geography": {
         "level": "country",
         "id": "0100000US",
+        "vintage": "current",
         "name": "United States"
       },
-      "entity": null,
-      "sources": [],
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "aggregated_amount of award transactions for the registered union of five 2025/2029 Title VI TAS components and dedicated account 070-0722"
+      ],
+      "rid_patterns": [
+        "usaspending.dhs.title_vi.award_transaction_obligations.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "8146ecb0-3ef3-49eb-b8a0-e61d15aa276e",
@@ -7094,18 +7189,32 @@
       "family_patterns": [
         "usaspending.dod.new_prime_awards"
       ],
-      "status": "docket-only",
-      "unit": "millions",
-      "cadence": "year",
-      "geography": null,
-      "entity": null,
-      "sources": [],
+      "status": "observed",
+      "unit": "count",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "new_award_count"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.new_prime_awards.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "a2649fd9-f382-4003-ba70-01030bc93b5e",
@@ -7113,22 +7222,32 @@
       "family_patterns": [
         "usaspending.dod.prime_award_obligations"
       ],
-      "status": "docket-only",
-      "unit": "billions USD",
-      "cadence": "year",
+      "status": "observed",
+      "unit": "usd",
+      "cadence": "fiscal_year",
       "geography": {
         "level": "country",
         "id": "0100000US",
+        "vintage": "current",
         "name": "United States"
       },
-      "entity": null,
-      "sources": [],
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "obligations"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.prime_award_obligations.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "82ff2d7f-04ee-4366-8fe4-b8e919e6efa6",
@@ -7136,18 +7255,32 @@
       "family_patterns": [
         "usaspending.dod.prime_award_transactions"
       ],
-      "status": "docket-only",
-      "unit": "millions",
-      "cadence": "year",
-      "geography": null,
-      "entity": null,
-      "sources": [],
+      "status": "observed",
+      "unit": "count",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "transaction_count"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.prime_award_transactions.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "11ea0d3d-fab9-42bb-b679-3471d4b60323",
@@ -7155,18 +7288,32 @@
       "family_patterns": [
         "usaspending.dod.prime_contract_obligations"
       ],
-      "status": "docket-only",
-      "unit": "billions USD",
-      "cadence": "year",
-      "geography": null,
-      "entity": null,
-      "sources": [],
+      "status": "observed",
+      "unit": "usd",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "results[category=contracts].aggregated_amount"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.prime_contract_obligations.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "91e3b668-cb4b-4682-94a5-7ae404a6565d",
@@ -7174,18 +7321,32 @@
       "family_patterns": [
         "usaspending.dod.small_business_contract_obligation_share"
       ],
-      "status": "docket-only",
+      "status": "observed",
       "unit": "percent",
-      "cadence": "year",
-      "geography": null,
-      "entity": null,
-      "sources": [],
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "100 * small_business contract obligations / all contract obligations"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.small_business_contract_obligation_share.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "96d17026-b54c-4409-98c9-339b6725fde7",
@@ -7193,18 +7354,32 @@
       "family_patterns": [
         "usaspending.dod.unique_prime_contract_recipients"
       ],
-      "status": "docket-only",
-      "unit": "thousands",
-      "cadence": "year",
-      "geography": null,
-      "entity": null,
-      "sources": [],
+      "status": "observed",
+      "unit": "count",
+      "cadence": "fiscal_year",
+      "geography": {
+        "level": "country",
+        "id": "0100000US",
+        "vintage": "current",
+        "name": "United States"
+      },
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "distinct non-null recipient_id"
+      ],
+      "rid_patterns": [
+        "usaspending.dod.unique_prime_contract_recipients.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "f37307e0-91c6-49ee-afc7-2021e33ea863",
@@ -7212,22 +7387,32 @@
       "family_patterns": [
         "usaspending.ntia.broadband_al11038_obligations"
       ],
-      "status": "docket-only",
-      "unit": "usd_millions",
-      "cadence": "year",
+      "status": "observed",
+      "unit": "usd",
+      "cadence": "fiscal_year",
       "geography": {
         "level": "country",
         "id": "0100000US",
+        "vintage": "current",
         "name": "United States"
       },
-      "entity": null,
-      "sources": [],
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "signed net federal_action_obligation across prime financial-assistance award transactions whose Assistance Listing is 11.038, grouped by action-date federal fiscal year"
+      ],
+      "rid_patterns": [
+        "usaspending.ntia.broadband_al11038_obligations.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "02662bfc-b77d-48f3-938b-7a5b2f9e5c73",
@@ -7258,22 +7443,32 @@
       "family_patterns": [
         "usaspending.usfs.minnesota_place_of_performance_obligations"
       ],
-      "status": "docket-only",
-      "unit": "usd_millions",
-      "cadence": "year",
+      "status": "observed",
+      "unit": "usd",
+      "cadence": "fiscal_year",
       "geography": {
         "level": "country",
         "id": "0100000US",
+        "vintage": "current",
         "name": "United States"
       },
-      "entity": null,
-      "sources": [],
+      "entity": {
+        "name": "economy",
+        "role": "aggregate"
+      },
+      "sources": [
+        "usaspending_api"
+      ],
       "aliases": [],
-      "source_concepts": [],
-      "rid_patterns": [],
-      "first_observed_period": null,
-      "last_observed_period": null,
-      "observation_count": 0
+      "source_concepts": [
+        "signed net federal_action_obligation across prime award transactions whose awarding subtier is Forest Service and whose reported place of performance has country USA and state MN, grouped by action-date federal fiscal year"
+      ],
+      "rid_patterns": [
+        "usaspending.usfs.minnesota_place_of_performance_obligations.{P}.registered_query_snapshot"
+      ],
+      "first_observed_period": "2026",
+      "last_observed_period": "2026",
+      "observation_count": 1
     },
     {
       "uuid": "4266e63f-dbf3-4c86-be8d-44315dbe32e3",
@@ -7305,7 +7500,7 @@
         "va.vba.mmwr.claims_inventory.{P}"
       ],
       "status": "observed",
-      "unit": "thousands",
+      "unit": "count",
       "cadence": "week_ending",
       "geography": {
         "level": "country",

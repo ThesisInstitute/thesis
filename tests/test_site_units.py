@@ -17,6 +17,7 @@ from typing import Any, Iterator
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import ledger_units  # noqa: E402
 import resolve_pending  # noqa: E402
 import spawned_cells_to_ts  # noqa: E402
 
@@ -79,6 +80,14 @@ def test_every_unit_in_the_resolver_tables_is_a_site_unit() -> None:
     assert any(unit == "billions USD" for _, unit, _ in found)
     missing = [entry for entry in found if entry[1] not in site_units()]
     assert not missing, missing
+
+
+def test_every_scaled_and_base_unit_is_a_site_unit() -> None:
+    table = ledger_units.SCALED_UNITS
+    assert set(table) <= site_units(), sorted(set(table) - site_units())
+    bases = {base for base, _ in table.values()}
+    assert bases <= site_units(), sorted(bases - site_units())
+    assert not bases & set(table), "a base unit must hold no scale"
 
 
 def test_the_cell_generator_allows_only_site_units() -> None:

@@ -1,0 +1,8 @@
+{
+  "summary": "Draft is publishable with the target contract, prior, update, interval, tails, and JSON fields broadly coherent.",
+  "requiredFixes": [],
+  "optionalSuggestions": [
+    "Tighten the +0.020 million update by separating recent-level momentum from the claimed November seasonal/reference-class tendency, since the seasonal component is asserted but not quantified.",
+    "If possible, replace the blocked schedule-page note with the exact official schedule evidence artifact or state that the ledger registration supplies the release date."
+  ]
+}

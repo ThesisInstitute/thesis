@@ -1,0 +1,209 @@
+{
+  "schemaVersion": "thesis_tool_evidence_verification_v1",
+  "captureMethod": "thesis-controlled-tools-v1",
+  "valid": true,
+  "errors": [],
+  "callCount": 28,
+  "succeededCount": 20,
+  "failedCount": 8,
+  "checks": [
+    {
+      "callId": "call-0001",
+      "status": "captured",
+      "checks": [
+        "response_sha256",
+        "response_bytes",
+        "fetch_result"
+      ]
+    },
+    {
+      "callId": "call-0002",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0003",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0004",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0005",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0006",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0007",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0008",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0009",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0010",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0011",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0012",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0013",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0014",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0015",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0016",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0017",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0018",
+      "status": "failed",
+      "checks": []
+    },
+    {
+      "callId": "call-0019",
+      "status": "failed",
+      "checks": []
+    },
+    {
+      "callId": "call-0020",
+      "status": "failed",
+      "checks": []
+    },
+    {
+      "callId": "call-0021",
+      "status": "failed",
+      "checks": []
+    },
+    {
+      "callId": "call-0022",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0023",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0024",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0025",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0026",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0027",
+      "status": "captured",
+      "checks": [
+        "response_sha256",
+        "response_bytes",
+        "fetch_result"
+      ]
+    },
+    {
+      "callId": "call-0028",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    }
+  ],
+  "evidenceCanonicalSha256": "65f08bc08418ce36bbe86f3c46b16785fe44710c7839e0c651b462fb10b66e2c",
+  "evidenceSha256": "e8ec5c31bf6bd375c4d3204b612640209602536b9b0682449f1ca53e499c3054"
+}

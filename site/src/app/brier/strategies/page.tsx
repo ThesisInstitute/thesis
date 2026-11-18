@@ -102,14 +102,15 @@ export default async function StrategyLabPage() {
           <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
             <div>
               <h2 className="[font-family:var(--font-display)] text-[1.05rem] font-semibold tracking-[-0.01em] text-[var(--theme-text)]">
-                LLM Judge Layer
+                Rule-based trace rubric
               </h2>
               <p className="mt-2 max-w-[760px] text-[0.86rem] leading-[1.6] text-[var(--theme-text-muted)]">
-                Judge records score forecast process quality from the public
-                trace: base rates, source grounding, resolution clarity,
-                uncertainty, mechanisms, counterarguments, and coherence. They
-                are auxiliary diagnostics; reward still comes only from resolved
-                CRPS.
+                A rule-based rubric scores forecast process quality from the
+                public trace: base rates, source grounding, resolution clarity,
+                uncertainty, mechanisms, counterarguments, and coherence. Code
+                counts keywords and structural features, and no model reads the
+                trace. The scores are auxiliary diagnostics; reward still comes
+                only from resolved CRPS.
               </p>
             </div>
             <span className="[font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
@@ -118,21 +119,21 @@ export default async function StrategyLabPage() {
           </div>
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
             <FactStrip
-              label="trace judges"
+              label="traces scored"
               value={judgeReport.calibration.counts.judgedRuns.toLocaleString()}
             />
             <FactStrip
-              label="scored judges"
+              label="in the nCRPS comparison"
               value={judgeReport.calibration.counts.scoredJudgedRuns.toLocaleString()}
             />
             <FactStrip
-              label="judge ↔ -nCRPS"
+              label="rubric ↔ -nCRPS"
               value={formatMaybe(
                 judgeReport.calibration.judgeScoreVsNegativeNormalizedCrps,
               )}
             />
             <FactStrip
-              label="post-resolution reviews"
+              label="post-resolution rows"
               value={judgeReport.calibration.counts.postResolutionReviews.toLocaleString()}
             />
           </div>
@@ -141,9 +142,9 @@ export default async function StrategyLabPage() {
               <thead>
                 <tr className="border-b border-[var(--theme-border)] [font-family:var(--font-mono)] text-[0.62rem] uppercase tracking-[0.1em] text-[var(--theme-text-dim)]">
                   <th className="py-3 pr-5 font-medium">band</th>
-                  <th className="py-3 pr-5 font-medium">judged</th>
-                  <th className="py-3 pr-5 font-medium">scored</th>
-                  <th className="py-3 pr-5 font-medium">judge</th>
+                  <th className="py-3 pr-5 font-medium">traces</th>
+                  <th className="py-3 pr-5 font-medium">resolved</th>
+                  <th className="py-3 pr-5 font-medium">rubric</th>
                   <th className="py-3 pr-5 font-medium">nCRPS</th>
                   <th className="py-3 font-medium">80% cover</th>
                 </tr>
@@ -163,7 +164,7 @@ export default async function StrategyLabPage() {
                     <th className="py-3 pr-5 font-medium">disagreement</th>
                     <th className="py-3 pr-5 font-medium">target</th>
                     <th className="py-3 pr-5 font-medium">run</th>
-                    <th className="py-3 pr-5 font-medium">judge</th>
+                    <th className="py-3 pr-5 font-medium">rubric</th>
                     <th className="py-3 pr-5 font-medium">nCRPS</th>
                     <th className="py-3 font-medium">80% cover</th>
                   </tr>
@@ -553,7 +554,9 @@ function JudgeDisagreementRow({
     <tr className="border-b border-[var(--theme-border)] last:border-b-0">
       <td className="py-4 pr-5 align-top">
         <div className="[font-family:var(--font-mono)] text-[0.64rem] uppercase tracking-[0.08em] text-[var(--color-accent)]">
-          {row.disagreement.replace(/_/g, " ")}
+          {row.disagreement === "high_judge_bad_score"
+            ? "high rubric, bad score"
+            : "low rubric, good score"}
         </div>
       </td>
       <td className="max-w-[260px] py-4 pr-5 align-top">

@@ -1,0 +1,133 @@
+[
+  {
+    "slug": "canada-monthly-gdp-growth-november-2026",
+    "country": "CA",
+    "type": "data",
+    "title": "Canada monthly GDP growth, November 2026",
+    "question": "Statistics Canada GDP by industry, all industries, Canada, seasonally adjusted at annual rates, chained 2017 dollars: November 2026 first-print month-over-month percent growth from vector v65201210.",
+    "unit": "percent_growth",
+    "pointEstimate": 0.1,
+    "ciLow": -0.27,
+    "ciHigh": 0.47,
+    "confidence": 0.8,
+    "resolutionDate": "2027-01-29",
+    "resolutionSource": "Statistics Canada GDP by industry table 36-10-0434-01 / WDS vector v65201210",
+    "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+    "resolutionRule": "On the first official Statistics Canada print scheduled for 2027-01-29, read vector v65201210 for all industries, Canada, seasonally adjusted at annual rates, chained 2017 dollars, in table 36-10-0434-01. Compute 100*(November 2026 level - October 2026 level)/October 2026 level in percent_growth. Use that first print only; ignore later revisions and do not add same-day correction or release-day grace exceptions.",
+    "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_11.first_print",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-03"
+        },
+        "label": "March 2026",
+        "value": -0.1521
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "April 2026",
+        "value": 0.6326
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "May 2026",
+        "value": 0.3415
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "June 2026",
+        "value": 0.3512
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        },
+        "label": "July 2026",
+        "value": 0.0258
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        },
+        "label": "August 2026",
+        "value": -0.0065
+      }
+    ],
+    "drivers": [
+      "Recent official monthly GDP growth averaged about 0.20% across March-August 2026 on current WDS levels.",
+      "Latest The Daily release says August was essentially unchanged and the advance September estimate was -0.1%.",
+      "Momentum is softer than the six-month mean, but November is two months beyond the last official print and likely mean-reverts toward small positive growth.",
+      "One-off industry rebounds in April-June raise historical volatility but are not assumed to persist into November."
+    ],
+    "sourceContext": [
+      "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+      "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=%2265201210%22&startRefPeriod=2025-10-01&endReferencePeriod=2026-10-01",
+      "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/261030/dq261030a-eng.htm",
+      "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm"
+    ],
+    "runAt": "2026-11-02T23:43:33Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Canada November 2026 monthly GDP by industry first print"
+      },
+      {
+        "kind": "text",
+        "text": "The target is the Statistics Canada all-industries GDP by industry level series v65201210, table 36-10-0434-01, seasonally adjusted at annual rates, chained 2017 dollars, transformed to month-over-month percent growth for November 2026. I verified the 2026-2027 Statistics Canada major economic releases schedule captured in call-0005: Gross domestic product by industry for reference period November 2026 is scheduled for January 29, 2027."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0004 read StatCan WDS vector v65201210 for 2025-10 through 2026-08",
+        "result": "Fetched official levels included February 2026 = 2343599.0, March 2026 = 2340035.0, April 2026 = 2354837.0, May 2026 = 2362878.0, June 2026 = 2371177.0, July 2026 = 2371788.0, and August 2026 = 2371635.0."
+      },
+      {
+        "kind": "tool",
+        "tool": "evidence.calculate",
+        "call": "calculate calls call-0018 through call-0023 transformed the fetched v65201210 levels into month-over-month percent changes",
+        "result": "Computed changes from fetched levels were March -0.1521%, April 0.6326%, May 0.3415%, June 0.3512%, July 0.0258%, and August -0.0065%."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0006 read The Daily release for Gross domestic product by industry, August 2026",
+        "result": "The captured Statistics Canada release reports August 2026 real GDP was essentially unchanged, consistent with 2371788.0 to 2371635.0 or -0.0065%, and gives an advance September 2026 estimate of -0.1%."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: I use a persistence/base rate prior from the official-source reference class of six recent monthly growth observations, March-August 2026, with mean = 0.1987% from call-0025. I adjust downward for soft late-summer momentum and the -0.1% advance September signal, using that September figure only as a directional advance estimate rather than resolved history, landing at 0.10% for November rather than the raw 0.20% mean. For the 80% interval, sigma = 0.2922 from call-0024 using the six growth values themselves; 1.28*sigma = 0.3740 from call-0026, so 0.10 +/- 0.374 gives -0.2740 to 0.4740, rounded to -0.27 to 0.47. The volatility estimate is based on a short recent sample."
+      },
+      {
+        "kind": "text",
+        "text": "Level, momentum, one-off, and policy mechanisms: the level trend is mildly positive over the six official observations, momentum is near flat after July-August and the advance September estimate, one-off rebounds in mining/manufacturing can move a monthly print but are not persistent, and there is no policy-decision mechanism in this data target."
+      },
+      {
+        "kind": "text",
+        "text": "Upside risk is a broad rebound in goods sectors or resource extraction that would land above the interval. Downside risk is another contraction in manufacturing, mining, or tariff-sensitive trade channels that would land below the interval. Outside the interval would require a roughly larger-than-0.47% expansion or worse-than--0.27% contraction, larger than the normal recent monthly dispersion except for the April rebound."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the resolver critique by making the registered StatCan WDS latest-periods endpoint the primary resolutionSourceUrl and retaining the range endpoint only as supporting historical evidence; accepted the optional clarifications that the interval uses a short recent sample and the September figure is only an advance directional update."
+      },
+      {
+        "kind": "forecast",
+        "point": 0.1,
+        "ciLow": -0.27,
+        "ciHigh": 0.47
+      }
+    ]
+  }
+]

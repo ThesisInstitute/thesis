@@ -334,9 +334,14 @@ def test_a19_takes_new_registrations_only_through_the_bls_api_template(
     # registration. They now register through the BLS API family, and only a
     # contract that carries the whole reviewed seven-key template gets there
     # (tests/test_bls_api_registrable.py admits one). Every other contract
-    # still routes to the Archive-capture leg and is refused.
+    # still routes to the Archive-capture leg and is refused. The registry has
+    # held A-19 rows registered through that template since 2026-11-10, so
+    # take a generic-url registration as the specimen.
     ref = next(
-        ref for ref in sorted(registered) if ref.startswith(resolve_pending.A19_STEM)
+        ref
+        for ref in sorted(registered)
+        if ref.startswith(resolve_pending.A19_STEM)
+        and registered[ref]["contract"]["sourceBinding"]["adapter"] == "generic-url"
     )
     contract = copy.deepcopy(registered[ref]["contract"])
     assert "generic-url" in (_refusal(contract) or "")

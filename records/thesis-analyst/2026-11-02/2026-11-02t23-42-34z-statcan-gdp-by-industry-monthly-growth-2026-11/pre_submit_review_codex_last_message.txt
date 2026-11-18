@@ -1,0 +1,15 @@
+{
+  "summary": "Draft is mostly publication-ready, but the resolver URL should be aligned with the canonical ledger binding before publication.",
+  "requiredFixes": [
+    {
+      "rubricItem": "resolver",
+      "severity": "blocking",
+      "summary": "The draft's resolutionSourceUrl uses a reference-period-range WDS endpoint, while the canonical target binding specifies the StatCan WDS latest-periods endpoint as the registered sourceUrl.",
+      "actionRequested": "Change resolutionSourceUrl to the canonical sourceBinding.sourceUrl or explicitly keep the registered resolver endpoint primary while using the range URL only as supporting evidence."
+    }
+  ],
+  "optionalSuggestions": [
+    "The six-month volatility sample is acceptable but thin; mention that interval uncertainty is based on a short recent sample.",
+    "Consider noting that the September value is only an advance estimate and is used as a directional update, not as resolved history."
+  ]
+}

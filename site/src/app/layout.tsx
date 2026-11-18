@@ -4,12 +4,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Thesis Institute — open forecasts on government data",
   description:
-    "Open forecast cells for public policy, tax, benefit, poverty, and government data, with agent reasoning traces and calibrated uncertainty.",
+    "Open forecast cells for public policy, tax, benefit, poverty, and government data, with agent reasoning traces and 80% intervals.",
   openGraph: {
     type: "website",
     title: "Thesis Institute",
     description:
-      "Open forecast cells for public policy, tax, benefit, poverty, and government data, with agent reasoning traces and calibrated uncertainty.",
+      "Open forecast cells for public policy, tax, benefit, poverty, and government data, with agent reasoning traces and 80% intervals.",
     url: "https://thesisinstitute.org",
     siteName: "Thesis Institute",
     images: [

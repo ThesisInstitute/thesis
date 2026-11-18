@@ -1,0 +1,165 @@
+{
+  "schemaVersion": "thesis_batch_manifest_v1",
+  "startedAt": "2026-11-02T23:40:53Z",
+  "finishedAt": "2026-11-02T23:46:42Z",
+  "promptMode": "fast",
+  "timeoutSeconds": 540,
+  "targets": 3,
+  "ok": 3,
+  "failed": 0,
+  "results": [
+    {
+      "target": {
+        "catalogSlug": "nonfarm-payrolls-november-2026",
+        "country": "US",
+        "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-04",
+        "expectedReleaseWindow": {
+          "end": "2026-12-04",
+          "start": "2026-12-04"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-02T23:38:32Z",
+        "registeredAtUtc": "2026-11-02T23:38:32Z",
+        "registrationCommit": "ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+        "series": "bls.ces.nonfarm_payrolls.change",
+        "sourceBinding": {
+          "adapter": "bls-api",
+          "allowedHosts": [
+            "api.bls.gov"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-04",
+            "start": "2026-12-04"
+          },
+          "field": "value",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "CES0000000001",
+          "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+          "table": "Current Employment Statistics, all employees, total nonfarm, seasonally adjusted (Employment Situation, Table B-1)",
+          "transform": {
+            "factor": 1,
+            "operation": "difference_previous_period"
+          }
+        },
+        "targetContentHash": "93d4fe16db30befd6cde1b23e3f396ab250a322bdd44b281003f42efb2977eea",
+        "targetRegistrationPath": "records/targets/2026-11-02-93d4fe16db30befd6cde1b23e3f396ab250a322bdd44b281003f42efb2977eea.json",
+        "targetUnit": "thousands",
+        "valueScale": 1
+      },
+      "startedAt": "2026-11-02T23:40:53Z",
+      "finishedAt": "2026-11-02T23:42:34Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-40-53z-bls-ces-nonfarm-payrolls-change-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-40-53z-bls-ces-nonfarm-payrolls-change-2026-11/cells.with_activity.json",
+      "stdoutTail": "2,\n      \"createdAt\": \"2026-11-02T23:40:53Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-40-53z-bls-ces-nonfarm-payrolls-change-2026-11/distribution.json\",\n      \"sha256\": \"fa502606af678a57a80548c5f9875fdbe9f229d8720a26c2acf1dcbedb6bdf0d\",\n      \"bytes\": 13461,\n      \"createdAt\": \"2026-11-02T23:40:53Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-40-53z-bls-ces-nonfarm-payrolls-change-2026-11/validation.json\",\n      \"sha256\": \"26ec314b5a8bd7685c119afabfa2f822b76304889e8e680dbc02ac7acb40f874\",\n      \"bytes\": 131,\n      \"createdAt\": \"2026-11-02T23:40:53Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-40-53z-bls-ces-nonfarm-payrolls-change-2026-11/cells.with_activity.json\",\n      \"sha256\": \"5cff3fa09423a82b5be05f9553a8c765a510303d6f720a0145d42ccc0dd61fb6\",\n      \"bytes\": 41196,\n      \"createdAt\": \"2026-11-02T23:40:53Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-40-53z-bls-ces-nonfarm-payrolls-change-2026-11/manifest.json\",\n      \"sha256\": \"3db6f6093270aaa0513bfc93ad368d10ec8b1c16cccc153f717667f20e5a8f94\",\n      \"bytes\": 16076,\n      \"createdAt\": \"2026-11-02T23:40:53Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"nonfarm-payrolls-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"8fb2c78283b32897c32c2f40e64f7315e4660318b919a0eb9671eeb31324e7ac\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "canada-monthly-gdp-growth-november-2026",
+        "country": "CA",
+        "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_11.first_print",
+        "expectedReleaseDate": "2027-01-29",
+        "expectedReleaseWindow": {
+          "end": "2027-01-29",
+          "start": "2027-01-29"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-02T23:38:32Z",
+        "registeredAtUtc": "2026-11-02T23:38:32Z",
+        "registrationCommit": "ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.gdp_by_industry.monthly_growth",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2027-01-29",
+            "start": "2027-01-29"
+          },
+          "field": "v65201210",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v65201210",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_previous_period"
+          }
+        },
+        "targetContentHash": "111fd1e947b75524e68b209315ecf54202f5b7ade7a1bebabb8f9c9ece2492b8",
+        "targetRegistrationPath": "records/targets/2026-11-02-111fd1e947b75524e68b209315ecf54202f5b7ade7a1bebabb8f9c9ece2492b8.json",
+        "targetUnit": "percent_growth",
+        "valueScale": 1
+      },
+      "startedAt": "2026-11-02T23:42:34Z",
+      "finishedAt": "2026-11-02T23:44:46Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/cells.with_activity.json",
+      "stdoutTail": "42:34Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/distribution.json\",\n      \"sha256\": \"8881dd55ecfe97641b7dbe8b5a67ce2b3ce6d5a648af8f5540d82f3108cd5c81\",\n      \"bytes\": 13792,\n      \"createdAt\": \"2026-11-02T23:42:34Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/validation.json\",\n      \"sha256\": \"743d483706324a94c440f377ddfb4c704599843bd5b47c08e4531ee0367911b2\",\n      \"bytes\": 140,\n      \"createdAt\": \"2026-11-02T23:42:34Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/cells.with_activity.json\",\n      \"sha256\": \"52d0e8cdd54e1d7554b9c7ac2afd827de2155d06867d9a0e7db011ca78be6456\",\n      \"bytes\": 42409,\n      \"createdAt\": \"2026-11-02T23:42:34Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/manifest.json\",\n      \"sha256\": \"866c6c498a7378c77c78fe18d5dd6a32966b1c5e8e38b2ccfcb91e7e87ca061b\",\n      \"bytes\": 17557,\n      \"createdAt\": \"2026-11-02T23:42:34Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"canada-monthly-gdp-growth-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"c61971214b0ecd74f2baae86098779dc8fd140f782eaa64c5bfb3ef7bc90940b\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    },
+    {
+      "target": {
+        "catalogSlug": "canada-cpi-annual-rate-november-2026",
+        "country": "CA",
+        "dataPointId": "statcan.cpi.allitems.yoy.2026_11.first_print",
+        "expectedReleaseDate": "2026-12-14",
+        "expectedReleaseWindow": {
+          "end": "2026-12-14",
+          "start": "2026-12-14"
+        },
+        "period": "2026-11",
+        "registeredAt": "2026-11-02T23:38:32Z",
+        "registeredAtUtc": "2026-11-02T23:38:32Z",
+        "registrationCommit": "ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30",
+        "registrationState": "preregistered",
+        "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+        "series": "statcan.cpi.allitems.yoy",
+        "sourceBinding": {
+          "adapter": "statcan-wds",
+          "allowedHosts": [
+            "www150.statcan.gc.ca"
+          ],
+          "expectedReleaseWindow": {
+            "end": "2026-12-14",
+            "start": "2026-12-14"
+          },
+          "field": "v41690973",
+          "releasePolicy": "first_print",
+          "sourceSeriesId": "v41690973",
+          "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+          "table": "Consumer Price Index, Table 18-10-0004-01 (all-items, Canada)",
+          "transform": {
+            "factor": 1,
+            "operation": "percent_change_year_ago"
+          }
+        },
+        "targetContentHash": "f7703adde9c7423c9f5fe951b3c627512bb952836ad6a0ee27fdffa075469aee",
+        "targetRegistrationPath": "records/targets/2026-11-02-f7703adde9c7423c9f5fe951b3c627512bb952836ad6a0ee27fdffa075469aee.json",
+        "targetUnit": "percent",
+        "valueScale": 1
+      },
+      "startedAt": "2026-11-02T23:44:46Z",
+      "finishedAt": "2026-11-02T23:46:42Z",
+      "returnCode": 0,
+      "ok": true,
+      "manifestPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-44-46z-statcan-cpi-allitems-yoy-2026-11/manifest.json",
+      "cellsPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-44-46z-statcan-cpi-allitems-yoy-2026-11/cells.with_activity.json",
+      "stdoutTail": "\",\n      \"bytes\": 25069,\n      \"createdAt\": \"2026-11-02T23:44:46Z\"\n    },\n    {\n      \"artifactType\": \"run_distribution\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-44-46z-statcan-cpi-allitems-yoy-2026-11/distribution.json\",\n      \"sha256\": \"cf5ccbcc4484e1b6ab3c395bd817053c1fba99145b09843523a08266a494c61a\",\n      \"bytes\": 13476,\n      \"createdAt\": \"2026-11-02T23:44:46Z\"\n    },\n    {\n      \"artifactType\": \"validation_report\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-44-46z-statcan-cpi-allitems-yoy-2026-11/validation.json\",\n      \"sha256\": \"c039aa73e7a0464669353ef9f37d1210a86c17671fd6d356b8f57cb892f956c9\",\n      \"bytes\": 137,\n      \"createdAt\": \"2026-11-02T23:44:46Z\"\n    },\n    {\n      \"artifactType\": \"cells_with_activity\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-44-46z-statcan-cpi-allitems-yoy-2026-11/cells.with_activity.json\",\n      \"sha256\": \"c89959c58f279c7a8ae9b9174eb3294b038ec7e7f6e915e369ed5743af182042\",\n      \"bytes\": 42211,\n      \"createdAt\": \"2026-11-02T23:44:46Z\"\n    },\n    {\n      \"artifactType\": \"manifest\",\n      \"path\": \"records/thesis-analyst/2026-11-02/2026-11-02t23-44-46z-statcan-cpi-allitems-yoy-2026-11/manifest.json\",\n      \"sha256\": \"5d87018787b4e231db522e01b2d0265df288110622bc3c7cca5a8a71538c4c68\",\n      \"bytes\": 17130,\n      \"createdAt\": \"2026-11-02T23:44:46Z\",\n      \"hashMode\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\"\n    }\n  ],\n  \"validation\": {\n    \"ok\": true,\n    \"cells\": [\n      {\n        \"slug\": \"canada-cpi-annual-rate-november-2026\",\n        \"ok\": true,\n        \"errors\": []\n      }\n    ]\n  },\n  \"checkoutSha\": \"ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30\",\n  \"custodyInventoryVersion\": 2,\n  \"runMode\": \"analyst\",\n  \"manifestHashSemantics\": \"canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256\",\n  \"custodyRootSha256\": \"87b277149aadbd0076650d7d56b647bb4c0d594b365346d6eb35624b87fe9034\"\n}\n",
+      "stderrTail": "",
+      "validationErrors": []
+    }
+  ]
+}

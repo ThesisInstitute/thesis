@@ -69,6 +69,17 @@ COUNTRY_IDS = {
 # deliberately by duplication, with tests/test_docket_ledger_containment.py:
 # the containment gate must not import the tool it audits.
 UNIT_SCALE = {"units": 1.0, "thousands": 1e3, "millions": 1e6, "billions": 1e9}
+# The base unit Chronicle stores each scaled target unit in. A copy for the same
+# reason; tests/test_ledger_units.py holds it to scripts/ledger_units.py.
+BASE_UNIT = {
+    "thousands": "count",
+    "millions": "count",
+    "usd_millions": "usd",
+    "usd_billions": "usd",
+    "billions USD": "usd",
+    "gbp_billions": "gbp",
+    "million_cubic_feet": "cubic_feet",
+}
 
 
 class StampError(ValueError):
@@ -109,15 +120,18 @@ def units_agree(
     """Whether a docket targetUnit is the catalog unit modulo valueScale.
 
     Identical units always agree (``valueScale`` describes the transform
-    from the publisher's raw feed, whose frame varies by entry). Differing
-    units agree only when both are pure magnitude units and the declared
-    ``valueScale`` converts catalog-unit values into target-unit values:
-    value_in_target = value_in_catalog * valueScale, i.e.
+    from the publisher's raw feed, whose frame varies by entry), and so does a
+    scaled target unit with the base unit Chronicle stores it in. Other
+    differing units agree only when both are pure magnitude units and the
+    declared ``valueScale`` converts catalog-unit values into target-unit
+    values: value_in_target = value_in_catalog * valueScale, i.e.
     scale(target) == scale(catalog) / valueScale.
     """
     if target_unit is None or catalog_unit is None:
         return True
     if target_unit == catalog_unit:
+        return True
+    if isinstance(target_unit, str) and BASE_UNIT.get(target_unit) == catalog_unit:
         return True
     if type(value_scale) not in (int, float) or not value_scale:
         return False

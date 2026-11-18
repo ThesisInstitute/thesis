@@ -1205,3 +1205,50 @@ def test_a_sentinel_phrase_inside_another_line_is_not_the_sentinel():
     assert not run["completed"]
     row = _status(_log((ref, "s", "2026-09-01")), text=text)["targets"][ref]
     assert row["code"] == "UNCLASSIFIED"
+
+
+RESTORE_REF = "bls.cps.employed_people_by_occupation.production.august_2026.first_print"
+RESTORE_FAULTS = [
+    "records/resolutions/2026-11-04/2026-11-04t00-00-00z-resolve-pending lacks 1 "
+    "restatement archive(s); refusing to rebuild a run directory in part",
+    "line 2 restates a row no earlier line holds",
+    f"line 2 archives 'records/x/{RESTORE_REF}: {RESTORE_REF}' outside its run, "
+    "records/resolutions/2026-11-04/2026-11-04t00-00-00z-resolve-pending",
+    f"the rebuilt archive of {RESTORE_REF} is {{'path': 'a', 'sha256': 'b'}}, not "
+    "the {'path': 'c', 'contentEncoding': 'gzip'} its row names",
+    f"{RESTORE_REF}: torn",
+    f"torn\n  resolve {RESTORE_REF} -> 1 count",
+    f"torn\u2028  release 2026-12-04 not reached: {RESTORE_REF}",
+]
+
+
+@settings(max_examples=300, deadline=None)
+@given(
+    st.lists(
+        st.one_of(
+            st.sampled_from(RESTORE_FAULTS),
+            st.text(max_size=80).map(lambda text: f"{RESTORE_REF}: {text}"),
+            st.text(max_size=80).map(lambda text: f"{text}\n  {RESTORE_REF}: x"),
+        ),
+        min_size=1,
+        max_size=4,
+    )
+)
+def test_a_restore_fault_never_sets_a_target_s_status(faults):
+    # What resolve_pending prints for restore faults: each as it happens, and
+    # the run's summary. None of it is a verdict on a target, though a fault
+    # can quote a reference and a colon, or carry a line break.
+    import contextlib
+    import io
+
+    import resolve_pending
+
+    printed = io.StringIO()
+    refusals: list[str] = []
+    with contextlib.redirect_stdout(printed):
+        for fault in faults:
+            resolve_pending._refuse_restore(ValueError(fault), refusals)
+        resolve_pending._report_run_refusals([], [], refusals)
+    for known in (None, {RESTORE_REF}):
+        targets, _run = rs.parse_resolver_log(printed.getvalue(), known)
+        assert targets == {}, (known, targets)

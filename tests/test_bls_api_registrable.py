@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import glob
+import gzip
 import hashlib
 import itertools
 import json
@@ -30,6 +31,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import register_targets  # noqa: E402
 import resolve_pending  # noqa: E402
 import roll_docket  # noqa: E402
+from verify_custody import CustodyError, verify_run  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures" / "bls_api"
 
@@ -313,15 +315,7 @@ def _refusal(contract: dict) -> str | None:
 
 
 @pytest.mark.parametrize("series", REGISTRABLE)
-def test_registrar_builds_the_contract_the_executor_admits(
-    series: str, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    spec = resolve_pending.BLS_API_ADAPTERS[series]
-    if "registration_hold" in spec:
-        # Table A-19 waits for Chronicle (decision d397). Lifting the hold is
-        # all it takes: the contract below is otherwise admitted.
-        assert "is on hold" in (_refusal(_contract(series)) or "")
-        monkeypatch.delitem(spec, "registration_hold")
+def test_registrar_builds_the_contract_the_executor_admits(series: str) -> None:
     contract = _contract(series)
     binding = contract["sourceBinding"]
     # Canonical id, not an edit of the previous target's alias.
@@ -531,6 +525,9 @@ def _run_main(
     forecast_resolution_date: str | None = None,
     registered: bool = True,
     fetch_allowed: bool = True,
+    ledger: str = "",
+    dry_run: bool = True,
+    exit_code: int = 0,
 ) -> tuple[str, str]:
     """Drive ``main()`` over one pending reference; returns (ref, stdout)."""
     spec = resolve_pending.BLS_API_ADAPTERS[series]
@@ -568,15 +565,16 @@ def _run_main(
         ],
     )
     monkeypatch.setattr(
-        resolve_pending, "ledger_state", lambda *_args: ("", "blob", "b" * 40)
+        resolve_pending, "ledger_state", lambda *_args: (ledger, "blob", "b" * 40)
     )
     monkeypatch.setattr(
         resolve_pending, "registration_contracts", lambda: registrations
     )
     monkeypatch.setattr(resolve_pending, "utc_now", lambda: now)
     monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
-    monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
-    assert resolve_pending.main() == 0
+    argv = ["resolve_pending.py", *(["--dry-run"] if dry_run else [])]
+    monkeypatch.setattr(sys, "argv", argv)
+    assert resolve_pending.main() == exit_code
     return ref, capsys.readouterr().out
 
 
@@ -943,24 +941,8 @@ def test_a19_docket_entries_commit_the_employment_situation_dates() -> None:
         assert entry["extras"]["targetUnit"] == "millions"
 
 
-def test_a19_registration_is_held_until_chronicle_can_hold_one_unit() -> None:
-    for series in A19_SERIES:
-        spec = resolve_pending.BLS_API_ADAPTERS[series]
-        assert spec["registration_hold"] == resolve_pending.A19_REGISTRATION_HOLD
-        refusal = _refusal(_contract(series)) or ""
-        assert refusal.startswith("registration of this BLS API series is on hold")
-        assert "d397" in refusal
-    # No other registrable series is held.
-    held = {
-        s
-        for s in REGISTRABLE
-        if "registration_hold" in resolve_pending.BLS_API_ADAPTERS[s]
-    }
-    assert held == set(A19_SERIES)
-
-
 @pytest.mark.parametrize("series", A19_SERIES)
-def test_the_roller_mints_an_october_target_once_the_hold_lifts(
+def test_the_roller_mints_an_a19_target_after_a_generic_url_registration(
     series: str, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     entry = _a19_docket_entries()[series]
@@ -996,10 +978,16 @@ def test_the_roller_mints_an_october_target_once_the_hold_lifts(
             "period": "2026-09",
         },
     }
-    # While the hold stands, the roller skips October with the hold as reason.
-    held = roll_docket.roll_execution_plan_refusal(target) or ""
-    assert "is on hold" in held
-    monkeypatch.delitem(resolve_pending.BLS_API_ADAPTERS[series], "registration_hold")
+
+    # The roller builds a contract as of today, and October's release date
+    # would refuse any day from 2026-11-06 on. Hold today at this test's
+    # registration date.
+    class FixedDate(dt.date):
+        @classmethod
+        def today(cls) -> FixedDate:
+            return cls(2026, 10, 1)
+
+    monkeypatch.setattr(roll_docket.dt, "date", FixedDate)
     assert roll_docket.roll_execution_plan_refusal(target) is None
     contract = register_targets.build_contract(target, dt.date(2026, 10, 1))
     assert contract["dataPointId"] == f"{series}.2026_10.first_print"
@@ -1120,29 +1108,402 @@ def test_the_guard_follows_chronicles_supersede_links() -> None:
     june = _chronicle_june_row()
     assert "assertionVersion" not in june  # written before versioning
     spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
-    millions = copy.deepcopy(june)
-    millions["value"] = 7.759
-    millions["measure"]["unit"] = "millions"
+    counted = copy.deepcopy(june)
+    counted["value"] = 7759000
+    counted["measure"]["unit"] = "count"
 
     def verdict(rows: list[dict]) -> str | None:
         return resolve_pending.bls_ledger_unit_conflict(rows, PRODUCTION, spec)
 
     # A later row with the same record id replaces nothing: Chronicle keeps
     # both, so the thousands row still counts.
-    assert verdict([june, millions])
-    # A row written before versioning cannot be superseded yet: the generator
-    # refuses the link ("supersedes unknown version"), so it keeps counting.
-    assert verdict([june, _versioned(millions, "v2", supersedes="content-address")])
+    assert verdict([june, counted])
+    # A row written before versioning drops out once a link names its av2
+    # content address, as the append gate addresses it (chronicle#306 taught
+    # the generator the same), and keeps counting for any other link.
+    address = resolve_pending.assertion_version(june)["id"]
+    assert verdict([june, _versioned(counted, "v2", supersedes="content-address")])
+    assert verdict([june, _versioned(counted, "v2", supersedes=address)]) is None
     # A versioned row drops out once a link names it, whatever record id or
     # concept the replacement carries (a split).
     v1 = _versioned(june, "v1")
     assert verdict([v1])
-    assert verdict([v1, _versioned(millions, "v2", supersedes="v1")]) is None
-    split = _versioned(millions, "v2", supersedes="v1")
+    assert verdict([v1, _versioned(counted, "v2", supersedes="v1")]) is None
+    split = _versioned(counted, "v2", supersedes="v1")
     split["source_record_id"] = "another.series.june_2026.first_print"
     split["measure"]["concept"] = "another.series.june_2026"
     split["measure"]["unit"] = "thousands"
     assert verdict([v1, split]) is None
+
+
+def test_the_guard_passes_a_lineage_in_a_unit_with_no_base_form() -> None:
+    # Three of the twelve registrable series store the unit they emit.
+    stem = "bls.cps.unemployment_rate"
+    spec = resolve_pending.BLS_API_ADAPTERS[stem]
+    row = copy.deepcopy(_chronicle_june_row())
+    row["source_record_id"] = f"{stem}.june_2026.first_print"
+    row["measure"]["concept"] = f"{stem}.june_2026"
+    row["measure"]["unit"] = "percent"
+    assert resolve_pending.bls_ledger_unit_conflict([row], stem, spec) is None
+
+
+def test_the_guard_compares_the_unit_chronicle_stores() -> None:
+    # The resolver stores a millions spec's fact in count, so the June row
+    # restated in count is the same unit and the row still in thousands is not.
+    june = _chronicle_june_row()
+    spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    restated, _ = resolve_pending.restatement_row(
+        june,
+        line,
+        run_dir=resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z"),
+        retrieved_at="2026-11-04T00:00:00Z",
+        ledger_repo_sha="f" * 40,
+    )
+    assert restated["measure"]["unit"] == "count"
+    assert restated["value"] == resolve_pending.ledger_units.to_base(
+        june["value"], "thousands"
+    )
+
+    def verdict(rows: list[dict]) -> str | None:
+        return resolve_pending.bls_ledger_unit_conflict(rows, PRODUCTION, spec)
+
+    assert verdict([june, restated]) is None
+    refusal = verdict([june])
+    assert refusal is not None and "['thousands']" in refusal
+    assert "this spec emits 'millions', which Chronicle stores as 'count'" in refusal
+
+
+def _restated_june_ledger() -> str:
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    restated, _ = resolve_pending.restatement_row(
+        _chronicle_june_row(),
+        line,
+        run_dir=resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z"),
+        retrieved_at="2026-11-04T00:00:00Z",
+        ledger_repo_sha="f" * 40,
+    )
+    return f"{line}\n{resolve_pending.ledger_line(restated)}\n"
+
+
+def _append_through_main(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    root: pathlib.Path,
+    ledger: str,
+    *,
+    exit_code: int = 0,
+) -> tuple[dict, str]:
+    """The row ``main()`` appends for an August A-19 print, and its stdout."""
+    updates: list[str] = []
+
+    def propose(*args: object, **_kwargs: object) -> str:
+        updates.append(str(args[3]))
+        return "e" * 40
+
+    monkeypatch.setattr(resolve_pending, "ROOT", root)
+    monkeypatch.setattr(resolve_pending, "propose_ledger_append", propose)
+    # Chronicle's catalog generator is not what these tests read.
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", lambda *_a, **_k: {}
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-08",
+        release="2026-09-04",
+        now="2026-09-25T13:40:00Z",
+        ledger=ledger,
+        dry_run=False,
+        exit_code=exit_code,
+    )
+    (update,) = updates
+    assert update.startswith(ledger)
+    (appended,) = update[len(ledger) :].splitlines()
+    return json.loads(appended), out
+
+
+def test_main_stores_base_units(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # The June row still reads thousands in the raw file, and its restatement
+    # is what is current, so the guard passes and the writer converts.
+    row, out = _append_through_main(
+        monkeypatch, capsys, tmp_path, _restated_june_ledger()
+    )
+    assert "LEDGER UNIT CONFLICT" not in out
+    assert row["measure"]["unit"] == "count"
+    assert row["source"]["recorded_unit"] == "millions"
+    assert row["value"] == resolve_pending.ledger_units.to_base(
+        row["source"]["recorded_value"], "millions"
+    )
+
+
+def test_a_daily_run_rebuilds_a_restatement_run_that_never_reached_thesis(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # The restatement merged into Chronicle, then its marker commit failed, so
+    # no record here holds its archive. The next daily run with pending work
+    # rebuilds that run and prints "restored", which makes the workflow commit
+    # and publish it, and still appends its own row.
+    row, out = _append_through_main(
+        monkeypatch, capsys, tmp_path, _restated_june_ledger()
+    )
+    run_dir = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    assert (
+        f"restored {run_dir.relative_to(tmp_path).as_posix()}, the records of a "
+        "restatement run that never reached Thesis"
+    ) in out.splitlines()
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    (archive,) = (run_dir / "responses").iterdir()
+    assert archive.read_bytes() == gzip.compress(line.encode(), mtime=0)
+    verify_run(run_dir)
+    assert row["measure"]["unit"] == "count"
+
+
+def test_a_records_fault_costs_the_daily_run_no_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # A run directory that exists in part is a records fault: rebuilding it
+    # would mix bytes this run wrote with bytes it did not. The daily run says
+    # so, still appends its own row, and exits EXIT_REFUSED_ROWS, so the
+    # workflow publishes that row and then fails the job.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    run_dir = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    run_dir.mkdir(parents=True)
+    row, out = _append_through_main(
+        monkeypatch,
+        capsys,
+        tmp_path,
+        _restated_june_ledger(),
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    fault = (
+        f"{run_dir.relative_to(tmp_path).as_posix()} lacks 1 restatement "
+        "archive(s); refusing to rebuild a run directory in part"
+    )
+    lines = out.splitlines()
+    assert f"{resolve_pending.RESTORE_REFUSED} {fault}" in lines
+    assert (
+        "1 RESTORE REFUSED fault(s) above kept the run from rebuilding a "
+        "restatement run's records; fix what each names, and the next run with "
+        "pending work rebuilds them"
+    ) in lines
+    # Printed once: an indented copy would read as a verdict on a target.
+    assert [line for line in lines if fault in line] == [
+        f"{resolve_pending.RESTORE_REFUSED} {fault}"
+    ]
+    assert not any(line.startswith("restored") for line in lines)
+    assert row["measure"]["unit"] == "count"
+    # The partial directory is left for a person to fix.
+    assert list(run_dir.iterdir()) == []
+
+
+def test_a_daily_dry_run_names_the_restatement_run_it_would_rebuild(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", lambda *_a, **_k: {}
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-08",
+        release="2026-09-04",
+        now="2026-09-25T13:40:00Z",
+        ledger=_restated_june_ledger(),
+    )
+    assert "dry-run: would restore records/resolutions/2026-11-04/" in out
+    assert not any(line.startswith("restored") for line in out.splitlines())
+    assert not resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z").exists()
+
+
+def _partial_restatement_run() -> pathlib.Path:
+    """The restated June row's run directory, made empty: a records fault."""
+    run_dir = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    run_dir.mkdir(parents=True)
+    return run_dir
+
+
+def _restore_refusals(out: str) -> list[str]:
+    prefix = f"{resolve_pending.RESTORE_REFUSED} "
+    return [line[len(prefix) :] for line in out.splitlines() if line.startswith(prefix)]
+
+
+def test_a_restore_fault_reds_a_run_with_nothing_new_to_record(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # November's print is not out, so the run fetches and appends nothing.
+    # The fault alone must still end it red, or no issue would name it.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    run_dir = _partial_restatement_run()
+    monkeypatch.setattr(
+        resolve_pending,
+        "propose_ledger_append",
+        lambda *_a, **_k: pytest.fail("a run with nothing new proposed an append"),
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-11",
+        release="2026-12-04",
+        now="2026-09-25T13:40:00Z",
+        fetch_allowed=False,
+        ledger=_restated_june_ledger(),
+        dry_run=False,
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    assert "nothing new to record" in out.splitlines()
+    (fault,) = _restore_refusals(out)
+    assert fault.endswith("refusing to rebuild a run directory in part")
+    assert list(run_dir.iterdir()) == []
+
+
+def test_a_restore_fault_reds_a_daily_dry_run(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # A dry run says what the daily run would do, so the same fault reds it.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    run_dir = _partial_restatement_run()
+    monkeypatch.setattr(
+        resolve_pending, "ledger_catalog_refusals", lambda *_a, **_k: {}
+    )
+    _, out = _run_main(
+        monkeypatch,
+        capsys,
+        series=PRODUCTION,
+        period="2026-08",
+        release="2026-09-04",
+        now="2026-09-25T13:40:00Z",
+        ledger=_restated_june_ledger(),
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    assert "dry-run: would append 1 row(s)" in out.splitlines()
+    (fault,) = _restore_refusals(out)
+    assert fault.endswith("refusing to rebuild a run directory in part")
+    assert list(run_dir.iterdir()) == []
+
+
+def test_a_custody_fault_in_a_rebuild_costs_the_daily_run_no_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # A rebuilt run that fails custody (a rule the old run no longer meets,
+    # say) is a records fault too. The rebuild removes what it wrote, and the
+    # run appends its own row, whose run passes custody, then exits
+    # EXIT_REFUSED_ROWS.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    restated = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    verified: list[pathlib.Path] = []
+
+    def verify(run_dir: pathlib.Path) -> object:
+        verified.append(run_dir)
+        if run_dir == restated:
+            raise CustodyError("a rule the rebuilt run does not meet")
+        return verify_run(run_dir)
+
+    monkeypatch.setattr(resolve_pending, "verify_run", verify)
+    row, out = _append_through_main(
+        monkeypatch,
+        capsys,
+        tmp_path,
+        _restated_june_ledger(),
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    assert _restore_refusals(out) == ["a rule the rebuilt run does not meet"]
+    assert not any(line.startswith("restored") for line in out.splitlines())
+    assert not restated.exists()
+    # The rebuild ran custody first, then the run's own records passed it.
+    assert verified[0] == restated and len(verified) == 2
+    assert row["measure"]["unit"] == "count"
+
+
+@pytest.mark.parametrize(
+    "retrieved_at",
+    [
+        "/2026-11-04T00:00:00Z",
+        "../2026-11-04T00:00:00Z",
+        "2026-11-04T00:00:00Z/../..",
+        "2026-11-04T00:00:00",
+        "2026-11-04T00:00:00+00:00",
+        "2026-11-04T00:00:00.5Z",
+        "2026-11-04 00:00:00Z",
+        "\u0662026-11-04T00:00:00Z",
+        20261104,
+        None,
+    ],
+)
+def test_a_restatement_whose_retrieved_at_names_no_run_directory_is_refused(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path, retrieved_at: object
+) -> None:
+    # The run directory comes from retrievedAt, so only the shape utc_now
+    # stamps may name one. "/2026-11-04T00:00:00Z" named a directory outside
+    # the repository, and the refusal then died on a ValueError the daily
+    # run does not catch.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    june_line, restated_line = _restated_june_ledger().splitlines()
+    row = json.loads(restated_line)
+    row["retrievedAt"] = retrieved_at
+    with pytest.raises(resolve_pending.ledger_units.LedgerUnitError) as info:
+        resolve_pending.restore_restatement_runs(
+            [june_line, json.dumps(row)], ledger_repo="o/r", ledger_branch="b"
+        )
+    assert str(info.value) == (
+        f"line 2 has retrievedAt {retrieved_at!r}, which names no run directory"
+    )
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_a_restatement_whose_archive_would_leave_the_repository_is_refused(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    # The archive's name starts with the row's source_record_id, and an
+    # absolute one resets the path's join. Chronicle would have to hold a
+    # hand-made row for this, since restatement_row refuses one; the rebuild
+    # refuses it as a ledger fault rather than raise a ValueError the daily
+    # run does not catch.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    june_line, restated_line = _restated_june_ledger().splitlines()
+    june, restated = json.loads(june_line), json.loads(restated_line)
+    june["source_record_id"] = restated["source_record_id"] = "/abs/x"
+    restated["assertionVersion"]["supersedes"] = resolve_pending.effective_assertion_id(
+        june
+    )
+    with pytest.raises(resolve_pending.ledger_units.LedgerUnitError) as info:
+        resolve_pending.restore_restatement_runs(
+            [json.dumps(june), json.dumps(restated)],
+            ledger_repo="o/r",
+            ledger_branch="b",
+        )
+    assert str(info.value) == "the archive of '/abs/x' would sit outside the repository"
+    assert not resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z").exists()
+
+
+def test_the_run_directory_guard_admits_what_utc_now_stamps(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    stamp = resolve_pending.utc_now()
+    assert resolve_pending._RUN_STAMP.fullmatch(stamp), stamp
+    monkeypatch.setattr(resolve_pending, "ROOT", pathlib.Path("/repo"))
+    run_dir = resolve_pending.resolution_run_dir(stamp)
+    assert run_dir.parent == pathlib.Path("/repo/records/resolutions") / stamp[:10]
 
 
 def test_the_guard_matches_the_concept_under_another_record_id() -> None:
@@ -1199,7 +1560,7 @@ def test_the_guard_ignores_other_identities_and_other_series() -> None:
     openings = copy.deepcopy(june)
     openings["source_record_id"] = "bls.jolts.job_openings.june_2026.first_print"
     openings["measure"]["concept"] = "bls.jolts.job_openings.june_2026"
-    openings["measure"]["unit"] = "millions"
+    openings["measure"]["unit"] = "count"
     assert (
         resolve_pending.bls_ledger_unit_conflict(
             [openings],
@@ -1210,12 +1571,15 @@ def test_the_guard_ignores_other_identities_and_other_series() -> None:
     )
 
 
-def test_resolver_refuses_an_a19_capture_before_spending_a_request(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
-    # The same run as the real-router test above, against a ledger that holds
-    # Chronicle's June row: the reference is refused, nothing is fetched,
-    # nothing is proposed, and the run exits EXIT_REFUSED_ROWS.
+def _dry_run_an_august_a19_print(
+    monkeypatch: pytest.MonkeyPatch, ledger: str
+) -> tuple[str, list[str]]:
+    """Set up the real-router run above against ``ledger``.
+
+    Returns the reference, and the list the run's BLS fetches land in. Each
+    fetch raises, so a caller's run must stop before it.
+    """
+
     series = PRODUCTION
     contract = register_targets.build_contract(
         _target(series, period="2026-08", release="2026-09-04"), dt.date(2026, 8, 13)
@@ -1225,7 +1589,7 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
 
     def fetch(series_id: str, start: int, end: int):
         fetched.append(series_id)
-        raise AssertionError("the guard must refuse before the keyless request")
+        raise AssertionError("the run must stop before the keyless request")
 
     log = {
         "entries": [
@@ -1240,7 +1604,6 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
             {"status": "pending", "targetFactRef": ref, "forecastSlug": "slug"}
         ],
     }
-    ledger = CHRONICLE_JUNE_ROW.read_text()
     monkeypatch.setattr(resolve_pending, "load_thesis_log", lambda _url: log)
     monkeypatch.setattr(
         resolve_pending, "ledger_state", lambda *_args: (ledger, "blob", "b" * 40)
@@ -1253,6 +1616,17 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
     monkeypatch.setattr(resolve_pending, "utc_now", lambda: "2026-09-25T13:40:00Z")
     monkeypatch.setattr(resolve_pending, "bls_series_rows", fetch)
     monkeypatch.setattr(sys, "argv", ["resolve_pending.py", "--dry-run"])
+    return ref, fetched
+
+
+def test_resolver_refuses_a_capture_before_spending_a_request(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # A June row in another plain unit: the reference is refused, nothing is
+    # fetched, nothing is proposed, and the run exits EXIT_REFUSED_ROWS.
+    june = copy.deepcopy(_chronicle_june_row())
+    june["measure"]["unit"] = "rate"
+    ref, fetched = _dry_run_an_august_a19_print(monkeypatch, json.dumps(june) + "\n")
     # A clean run that refused rows: the workflow publishes what was appended
     # and then fails the job, so the alarm fires.
     assert resolve_pending.main() == resolve_pending.EXIT_REFUSED_ROWS == 3
@@ -1261,6 +1635,25 @@ def test_resolver_refuses_an_a19_capture_before_spending_a_request(
     assert "nothing new to record" in out
     assert "1 reference(s) refused for a Chronicle unit conflict" in out
     assert fetched == []
+
+
+def test_a_scaled_row_of_any_series_stops_the_run_before_a_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    june = _chronicle_june_row()
+    other = {
+        **june,
+        "source_record_id": "bls.other_series.2026_06.first_print",
+        "measure": {**june["measure"], "concept": "bls.other_series.2026_06"},
+    }
+    for row in (june, other):
+        _, fetched = _dry_run_an_august_a19_print(monkeypatch, json.dumps(row) + "\n")
+        with pytest.raises(
+            resolve_pending.ledger_units.LedgerUnitError,
+            match="1 current ledger row",
+        ):
+            resolve_pending.main()
+        assert fetched == []
 
 
 # --- invariants, checked exhaustively over their whole realistic domain -------
@@ -1301,13 +1694,13 @@ def test_invariant_only_a_bls_api_binding_leaves_the_archive_leg() -> None:
 
 def test_invariant_the_guard_does_not_depend_on_row_order() -> None:
     # Over every ordering of a ledger with a versioned thousands row, its
-    # correction in millions, an unrelated July row and a legacy thousands
-    # row, the verdict is the same: Chronicle's current view is a set.
+    # correction in count, an unrelated July row and a legacy thousands row,
+    # the verdict is the same: Chronicle's current view is a set.
     june = _chronicle_june_row()
     spec = resolve_pending.BLS_API_ADAPTERS[PRODUCTION]
     v1 = _versioned(june, "v1")
     correction = _versioned(june, "v2", supersedes="v1")
-    correction["measure"]["unit"] = "millions"
+    correction["measure"]["unit"] = "count"
     july = copy.deepcopy(correction)
     july["assertionVersion"] = {"id": "v3"}
     july["source_record_id"] = f"{PRODUCTION}.2026_07.first_print"
@@ -1327,11 +1720,11 @@ def test_invariant_the_guard_does_not_depend_on_row_order() -> None:
                 assert refusal is not None and expected in refusal, order
 
 
-def test_every_other_registrable_lineage_already_holds_the_unit_it_emits() -> None:
+def test_every_registrable_lineage_already_holds_the_unit_it_stores() -> None:
     # The guard runs for every registrable series. In Chronicle's frozen
     # catalog each one's economy/aggregate lineage in the United States is
-    # either a placeholder or already in the unit its spec emits, so the guard
-    # refuses none of them. The six A-19 lineages are the known exception.
+    # either a placeholder or already in the unit the resolver stores for its
+    # spec, so the guard refuses none of them.
     catalog = json.loads(
         (ROOT / "tests" / "fixtures" / "ledger_series_catalog.json").read_text()
     )["series"]
@@ -1346,8 +1739,5 @@ def test_every_other_registrable_lineage_already_holds_the_unit_it_emits() -> No
             and (row.get("geography") or {}).get("id") == "0100000US"
             and row["unit"] is not None
         }
-        if "registration_hold" in spec:
-            # Held until its lineage can take the unit; lifting the hold
-            # before then makes this test fail.
-            continue
-        assert units <= {spec["unit"]}, (stem, units)
+        stored = resolve_pending.ledger_units.base_unit(spec["unit"]) or spec["unit"]
+        assert units <= {stored}, (stem, units)

@@ -1,0 +1,151 @@
+[
+  {
+    "slug": "canada-cpi-annual-rate-november-2026",
+    "country": "CA",
+    "type": "data",
+    "title": "Canada CPI Annual Rate, November 2026",
+    "question": "Statistics Canada Consumer Price Index, all-items Canada, not seasonally adjusted, November 2026 year-over-year percent change, first print.",
+    "unit": "percent",
+    "pointEstimate": 3.3,
+    "ciLow": 2.8,
+    "ciHigh": 3.8,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-14",
+    "resolutionSource": "Statistics Canada Table 18-10-0004-01 and The Daily",
+    "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+    "resolutionRule": "Resolve to the first official Statistics Canada print for Table 18-10-0004-01, vector v41690973, Consumer Price Index, all-items, Canada, not seasonally adjusted. Compute the annual rate as (November 2026 index / November 2025 index - 1) * 100 in percent, rounded to one decimal place. Use the initial release only; later revisions or corrections are not included unless they are part of the first official print.",
+    "dataPointId": "statcan.cpi.allitems.yoy.2026_11.first_print",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        },
+        "label": "2026-04",
+        "value": 2.8
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        },
+        "label": "2026-05",
+        "value": 3.2
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        },
+        "label": "2026-06",
+        "value": 2.8
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        },
+        "label": "2026-07",
+        "value": 3.0
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        },
+        "label": "2026-08",
+        "value": 3.0
+      },
+      {
+        "period": {
+          "type": "month",
+          "value": "2026-09"
+        },
+        "label": "2026-09",
+        "value": 3.1
+      }
+    ],
+    "drivers": [
+      "Recent all-items CPI annual rate near 3 percent",
+      "November 2025 base index is 165.4",
+      "Two unreleased monthly index prints remain before target",
+      "Food and shelter persistence keep upside pressure",
+      "Energy and goods volatility widen near-term risk"
+    ],
+    "sourceContext": [
+      "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+      "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=%2241690973%22&startRefPeriod=2025-01-01&endReferencePeriod=2026-09-01",
+      "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/261019/dq261019a-eng.htm?HPA=1",
+      "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/dq260914a-eng.htm?HPA=1",
+      "https://www.statcan.gc.ca/en/subjects-start/prices_and_price_indexes/consumer_price_indexes"
+    ],
+    "runAt": "2026-11-02T23:44:55Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Canada CPI all-items annual rate forecast for November 2026"
+      },
+      {
+        "kind": "text",
+        "text": "Framing and exact resolver: the target is Statistics Canada Table 18-10-0004-01, all-items CPI for Canada, not seasonally adjusted, vector v41690973. The registered transform is percent_change_year_ago, so the November 2026 value resolves from the first-print index divided by the November 2025 index, minus 1, times 100."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0010, Statistics Canada 2026-2027 release dates PDF",
+        "result": "Official release schedule includes Consumer Price Index with December 14, 2026 for reference period November 2026; source response was 158855 bytes with status 200."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0004, Statistics Canada WDS vector v41690973 from 2025-01 through 2026-09",
+        "result": "Fetched official index prints include 2025-11 = 165.4, 2026-07 = 169.9, 2026-08 = 169.8, and 2026-09 = 170.0 for vector 41690973."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0009, The Daily Consumer Price Index September 2026",
+        "result": "The Daily metadata says CPI rose 3.1% year over year in September after 3.0% in August, and seasonally adjusted monthly CPI increased 0.4% in September."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source call-0011, The Daily Consumer Price Index August 2026",
+        "result": "The Daily metadata says CPI rose 3.0% year over year in August, matching 3.0% in July, and seasonally adjusted monthly CPI increased 0.2% in August."
+      },
+      {
+        "kind": "tool",
+        "tool": "calculation",
+        "call": "calculate calls call-0023 through call-0028 using official WDS index values",
+        "result": "Computed same-variant annual rates from Table 18-10-0004-01: 2026-04 = 2.8, 2026-05 = 3.2, 2026-06 = 2.8, 2026-07 = 3.0, 2026-08 = 3.0, 2026-09 = 3.1."
+      },
+      {
+        "kind": "text",
+        "text": "Reference class and base rate: for this monthly all-items CPI annual-rate series, the recent official reference class is the sequence 2.3, 1.8, 2.4, 2.8, 3.2, 2.8, 3.0, 3.0, 3.1 from January through September 2026, centered just below 3 percent and rising modestly into September."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: persistence prior is September's 3.1% annual rate from official WDS/The Daily history; historical sample is January-September 2026 annual rates [2.3, 1.8, 2.4, 2.8, 3.2, 2.8, 3.0, 3.0, 3.1]. Level effect: September index 170.0 is already 2.8% above November 2025's 165.4 denominator. Momentum effect: two more monthly prints around a combined +0.5 index point imply a November 2026 index near 170.8. One-off/policy-mechanism effects: food and shelter persistence offset possible energy/goods disinflation. Interval method: call-0017 gives sigma = 0.389 from successive changes in the short 2026 annual-rate history, not a long-run CPI model; call-0020 gives 1.28*sigma = 0.498, so around a 3.3 point estimate the 80% interval rounds to 2.8 and 3.8 after one-decimal rounding."
+      },
+      {
+        "kind": "math",
+        "text": "Point calculation: using a November 2026 index judgment of 170.8 and the official November 2025 base index of 165.4, call-0019 computes ((170.8 / 165.4) - 1) * 100 = 3.3 after one-decimal rounding."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-consideration: upside risk is a stronger October-November rebound in gasoline, rent, mortgage interest cost, or food that would land above the interval. Downside risk is flat or falling energy plus faster goods disinflation that would land below the interval. A large tax, administered-price, or energy shock would be outside the interval rather than normal monthly noise."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the blocking resolver fix by setting resolutionSourceUrl to the canonical StatCan WDS sourceBinding endpoint while keeping Table 18-10-0004-01, vector v41690973, first-print percent_change_year_ago, and resolutionDate 2026-12-14. Also accepted the optional clarity that the 2.8 to 3.8 band is an 80% interval after one-decimal rounding and that sigma comes from recent 2026 month-to-month annual-rate changes."
+      },
+      {
+        "kind": "forecast",
+        "point": 3.3,
+        "ciLow": 2.8,
+        "ciHigh": 3.8
+      }
+    ]
+  }
+]

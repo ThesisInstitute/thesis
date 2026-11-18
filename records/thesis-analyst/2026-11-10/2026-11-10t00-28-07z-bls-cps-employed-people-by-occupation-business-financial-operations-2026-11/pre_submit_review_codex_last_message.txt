@@ -1,0 +1,8 @@
+{
+  "summary": "Draft is publication-ready on the review rubric, with resolver, unit, prior/update math, interval method, tails, and JSON fields aligned to the registered target.",
+  "requiredFixes": [],
+  "optionalSuggestions": [
+    "Consider noting that the November seasonal adjustment is judgmental and based on sparse Oct-to-Nov evidence, but the current text is sufficient.",
+    "If space permits, mention the exact latest-observation date used for the persistence prior: October 2026 first available API value."
+  ]
+}

@@ -1,6 +1,7 @@
 import { canonicalStringify, sha256Hex } from "./canonical-json";
 import {
   buildNumericCdfFromInterval,
+  validateNumericCdfDistribution,
   type PredictionDistribution,
 } from "./prediction-distribution";
 import type {
@@ -16,6 +17,11 @@ import type {
   PolicyEngineLedgerEntry,
 } from "./thesis-log";
 import type { TargetRegisteredLedgerEntry } from "./ledger-targets";
+import {
+  firstAcceptedSequence,
+  firstObservedAt,
+  observationViewAsOf,
+} from "./ledger-current-view";
 
 export const TIME_SERIES_PRIOR_VARIANT_ID = "time-series-prior";
 export const PERSISTENCE_BASELINE_AGENT = "brier.time_series_prior";
@@ -135,6 +141,23 @@ export function buildLedgerPersistenceBaseline(
     ciLow: prior.ciLow,
     ciHigh: prior.ciHigh,
   });
+  // A flat history makes the p80 half-width zero, and the interval
+  // transform then spans only +/-1.5e-9. Whether that survives depends on
+  // magnitude: at 1.5 it is a valid near-point mass; at 9.999999999, 10,
+  // 215, 1e5 or 1e7 the 201-point grid collapses under 12-significant-digit
+  // rounding, the CDF fails the scorer's own contract, and scoring would
+  // throw mid-build; from about 5e7 the 1.5e-9 spread vanishes in binary
+  // floating point and the transform's fallback widens the support to
+  // +/-10% of the value, which validates. A baseline the scorer cannot read
+  // is unavailable, with the validator's reasons.
+  const distributionErrors = validateNumericCdfDistribution(distribution);
+  if (distributionErrors.length > 0) {
+    return unavailable(
+      `persistence interval [${prior.ciLow}, ${prior.ciHigh}] is too narrow to materialize as a valid CDF: ${distributionErrors.join("; ")}`,
+      prior.observations,
+      prior.seriesId,
+    );
+  }
   const inputPayload = {
     schemaVersion: "thesis_persistence_baseline_inputs_v1",
     algorithmVersion: PERSISTENCE_BASELINE_ALGORITHM_VERSION,
@@ -416,24 +439,38 @@ export function ledgerHistoryAtCutoff(
   // observedAt but a late acceptance; admitting it would silently rewrite
   // published baselines and normalization scales (finding N5). Rows without
   // an acceptance record fail closed.
-  const observations = ledger.filter(
-    (entry): entry is ObservationRecordedLedgerEntry =>
-      entry.kind === "observation_recorded" &&
+  //
+  // The rows come from the ledger's current view as of the cutoff, taken
+  // before the unit and series filters: a row superseded by a correction
+  // accepted by then never enters, even when the correction itself fails a
+  // filter, and a correction accepted later changes nothing here.
+  const observations = observationViewAsOf(ledger, cutoffTime).filter(
+    (entry) =>
       entry.unit === forecast.unit &&
-      observationSeriesFromRegistrations(entry, registrations) ===
+      observationSeriesFromRegistrations(entry, registrations, ledger) ===
         targetSeriesId &&
-      Date.parse(entry.observedAt) <= cutoffTime &&
-      typeof entry.acceptedAtUtc === "string" &&
-      Date.parse(entry.acceptedAtUtc) <= cutoffTime,
+      Date.parse(entry.observedAt) <= cutoffTime,
   );
+  // Under the append gate the view holds one row per observationId; the
+  // map keeps the latest in ledger order if a view ever held two.
   const byObservationId = new Map(
     observations.map((observation) => [observation.observationId, observation]),
   );
-  return [...byObservationId.values()].sort((left, right) => {
-    const timeDelta =
-      Date.parse(left.observedAt) - Date.parse(right.observedAt);
-    return timeDelta || left.observationId.localeCompare(right.observationId);
-  });
+  // Each row's first print, read once: for a correction, firstObservedAt
+  // walks its chain through the whole ledger.
+  return [...byObservationId.values()]
+    .map((entry) => ({
+      entry,
+      firstPrint: Date.parse(firstObservedAt(entry, ledger)),
+    }))
+    .sort((left, right) => {
+      const timeDelta = left.firstPrint - right.firstPrint;
+      return (
+        timeDelta ||
+        left.entry.observationId.localeCompare(right.entry.observationId)
+      );
+    })
+    .map(({ entry }) => entry);
 }
 
 interface LegacyObservationSeriesIdentity {
@@ -577,6 +614,7 @@ export function registeredTargetSeriesIdentity(
 function projectionMatchesRegistration(
   observation: ObservationRecordedLedgerEntry,
   target: TargetRegisteredLedgerEntry,
+  ledger: PolicyEngineLedgerEntry[],
 ): boolean {
   const projection = observation.sourceBindingProjection;
   const binding = target.sourceBinding;
@@ -605,12 +643,16 @@ function projectionMatchesRegistration(
   ) {
     return false;
   }
-  if (
-    typeof target.ledgerPinLineCount === "number" &&
-    (typeof observation.acceptedSequence !== "number" ||
-      observation.acceptedSequence < target.ledgerPinLineCount)
-  ) {
-    return false;
+  // Membership is judged on the first acceptance in the supersede chain, so
+  // a correction cannot launder a print the registration already held.
+  if (typeof target.ledgerPinLineCount === "number") {
+    const acceptedSequence = firstAcceptedSequence(observation, ledger);
+    if (
+      acceptedSequence === null ||
+      acceptedSequence < target.ledgerPinLineCount
+    ) {
+      return false;
+    }
   }
   const allowedHosts = binding.allowedHosts;
   if (allowedHosts && allowedHosts.length > 0) {
@@ -671,17 +713,19 @@ export function registeredObservationSeriesIdentity(
   return observationSeriesFromRegistrations(
     observation,
     registrationsByDataPointId(ledger),
+    ledger,
   );
 }
 
 function observationSeriesFromRegistrations(
   observation: ObservationRecordedLedgerEntry,
   registrations: Map<string, TargetRegisteredLedgerEntry>,
+  ledger: PolicyEngineLedgerEntry[],
 ): string | null {
   const target = registrations.get(observation.dataPointId);
   const series = contractSeries(target);
   if (series) {
-    return target && projectionMatchesRegistration(observation, target)
+    return target && projectionMatchesRegistration(observation, target, ledger)
       ? series
       : null;
   }

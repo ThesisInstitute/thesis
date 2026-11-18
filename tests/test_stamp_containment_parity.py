@@ -53,7 +53,16 @@ PERIODS: list[object] = [
     ["2026"],
 ]
 POLICIES = [None, "registered_query_snapshot", "first_print"]
-UNITS = [None, "percent", "millions", "thousands", "billions USD"]
+UNITS = [
+    None,
+    "percent",
+    "millions",
+    "thousands",
+    "billions USD",
+    "count",
+    "usd",
+    "gbp",
+]
 GEOGRAPHY_IDS = ["0100000US", "CA", "GB"]
 COUNTRIES = [None, "US", "CA", "ZZ"]
 SOURCES = ["a", "b"]

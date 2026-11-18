@@ -155,6 +155,10 @@ export function formatValue(value: number, unit: Unit): string {
         return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
       }
       return `$${value.toFixed(2)}`;
+    case "gbp":
+      return `£${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    case "cubic_feet":
+      return `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })} cu ft`;
     case "usd_millions":
       return `$${value.toLocaleString(undefined, { maximumFractionDigits: 3 })}M`;
     case "usd_billions":

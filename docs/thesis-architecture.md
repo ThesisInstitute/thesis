@@ -242,6 +242,10 @@ validators, packs, adapters, scheduling, or UI. They are not reward signals.
 Before judge-derived changes become policy, they should be checked against
 held-out proper scores.
 
+The judge rows the site publishes today (`/forecasts/judges.json`) come from a
+rule-based rubric in `site/src/data/forecast-judges.ts`. No model scores them,
+and their metadata says so: `kind: "rule_based_rubric"`, `model: "none"`.
+
 ## Meta-Aggregation
 
 The canonical displayed forecast can be a meta-aggregator run. It should see:

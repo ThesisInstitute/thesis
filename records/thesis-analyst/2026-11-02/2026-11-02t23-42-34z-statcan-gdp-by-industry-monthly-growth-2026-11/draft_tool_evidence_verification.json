@@ -1,0 +1,219 @@
+{
+  "schemaVersion": "thesis_tool_evidence_verification_v1",
+  "captureMethod": "thesis-controlled-tools-v1",
+  "valid": true,
+  "errors": [],
+  "callCount": 28,
+  "succeededCount": 26,
+  "failedCount": 2,
+  "checks": [
+    {
+      "callId": "call-0001",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0002",
+      "status": "captured",
+      "checks": [
+        "response_sha256",
+        "response_bytes",
+        "fetch_result"
+      ]
+    },
+    {
+      "callId": "call-0003",
+      "status": "failed",
+      "checks": [
+        "response_sha256",
+        "response_bytes"
+      ]
+    },
+    {
+      "callId": "call-0004",
+      "status": "captured",
+      "checks": [
+        "response_sha256",
+        "response_bytes",
+        "fetch_result"
+      ]
+    },
+    {
+      "callId": "call-0005",
+      "status": "captured",
+      "checks": [
+        "response_sha256",
+        "response_bytes",
+        "fetch_result"
+      ]
+    },
+    {
+      "callId": "call-0006",
+      "status": "captured",
+      "checks": [
+        "response_sha256",
+        "response_bytes",
+        "fetch_result"
+      ]
+    },
+    {
+      "callId": "call-0007",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0008",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0009",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0010",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0011",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0012",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0013",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0014",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0015",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0016",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0017",
+      "status": "replayed",
+      "checks": [
+        "json_pointer_replay"
+      ]
+    },
+    {
+      "callId": "call-0018",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0019",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0020",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0021",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0022",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0023",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0024",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0025",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0026",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0027",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    },
+    {
+      "callId": "call-0028",
+      "status": "replayed",
+      "checks": [
+        "arithmetic_replay"
+      ]
+    }
+  ],
+  "evidenceCanonicalSha256": "7da4b719a66f8162ceb4dc3b9dc58ba5bae154446ec30c86010f3f16a6bda372",
+  "evidenceSha256": "6787b9679282baef11c52c50d2cff181f5ca6c37754ec8525a8db64062856a61"
+}

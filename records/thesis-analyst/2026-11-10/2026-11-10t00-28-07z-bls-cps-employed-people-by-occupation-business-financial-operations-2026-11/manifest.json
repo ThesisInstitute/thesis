@@ -1,0 +1,415 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-11-10T00:28:07Z",
+  "runStartedAt": "2026-11-10T00:28:07Z",
+  "sealedAt": "2026-11-10T00:29:56Z",
+  "series": "bls.cps.employed_people_by_occupation.business_financial_operations",
+  "period": "2026-11",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "cps-business-financial-employment-november-2026",
+    "country": "US",
+    "dataPointId": "bls.cps.employed_people_by_occupation.business_financial_operations.2026_11.first_print",
+    "expectedReleaseDate": "2026-12-04",
+    "expectedReleaseWindow": {
+      "end": "2026-12-04",
+      "start": "2026-12-04"
+    },
+    "period": "2026-11",
+    "registeredAt": "2026-11-10T00:21:03Z",
+    "registeredAtUtc": "2026-11-10T00:21:03Z",
+    "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+    "series": "bls.cps.employed_people_by_occupation.business_financial_operations",
+    "sourceBinding": {
+      "adapter": "bls-api",
+      "allowedHosts": [
+        "api.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-12-04",
+        "start": "2026-12-04"
+      },
+      "field": "value",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "LNU02032454",
+      "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032454",
+      "table": "Current Population Survey, employed people, Business and financial operations occupations, total 16 years and over, not seasonally adjusted, in thousands (Employment Situation, Table A-19)",
+      "transform": {
+        "factor": 0.001,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "0d76d97cc6412fa35c60f572b02c4a00c2f76ab4a3acddeeda492e79d2b815f9",
+    "targetRegistrationPath": "records/targets/2026-11-10-0d76d97cc6412fa35c60f572b02c4a00c2f76ab4a3acddeeda492e79d2b815f9.json",
+    "targetUnit": "millions",
+    "valueScale": 0.001
+  },
+  "registrationCommit": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+  "targetContentHash": "0d76d97cc6412fa35c60f572b02c4a00c2f76ab4a3acddeeda492e79d2b815f9",
+  "targetRegistrationPath": "records/targets/2026-11-10-0d76d97cc6412fa35c60f572b02c4a00c2f76ab4a3acddeeda492e79d2b815f9.json",
+  "registeredAtUtc": "2026-11-10T00:21:03Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-11-10T00:28:07Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "9e30dbdad83eebe1ca246021cca8463a2083c8a9af3fd63cb12f616c84f8caf0"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Consider noting that the November seasonal adjustment is judgmental and based on sparse Oct-to-Nov evidence, but the current text is sufficient."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "If space permits, mention the exact latest-observation date used for the persistence prior: October 2026 first available API value."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the optional clarification that the November seasonal adjustment is judgmental and based on sparse Oct-to-Nov evidence, and added the exact latest-observation date used for the persistence prior. No required fixes were raised.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the optional clarification that the November seasonal adjustment is judgmental and based on sparse Oct-to-Nov evidence, and added the exact latest-observation date used for the persistence prior. No required fixes were raised.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is publication-ready on the review rubric, with resolver, unit, prior/update math, interval method, tails, and JSON fields aligned to the registered target."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/prompt.md",
+      "sha256": "e3552cd67c39fa889265fbf6bebffd444daa9e4a671ea9345faf29d4631034c1",
+      "bytes": 12096,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_command.json",
+      "sha256": "d6290653809e23f722e93428e76536f8194c4fb5bd8e8f00a3a379ca1e413b36",
+      "bytes": 2098,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_tool_evidence.json",
+      "sha256": "bff4ff95f22e944243c67466ddc4b5d113886765d52adf4cc5556c35ff9889d8",
+      "bytes": 186707,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_tool_evidence_verification.json",
+      "sha256": "d8cae3da0c61eb2eb532c5f92e2cd9bc5fe27cbf677ab4d81cbbfe6d7f60b7d1",
+      "bytes": 2212,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_codex_stdout.jsonl",
+      "sha256": "6f19b65854c199f4e755496783296b82e8e8e4586ff258994e3f6fb73001a270",
+      "bytes": 80352,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_codex_stderr.log",
+      "sha256": "69d9c474ca3b0a91b6dc6b27bb999ac93f621c7c05c6a46184c3b9c4a0355eec",
+      "bytes": 233,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_codex_events.jsonl",
+      "sha256": "38d687487fc0412b91b5a552f0e606bee2dc85c8bcd3b500ac47190094d01d5f",
+      "bytes": 81805,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_codex_last_message.txt",
+      "sha256": "7874400347860833882890970f24696037a6145a9c3eecf3bf59813511133301",
+      "bytes": 6286,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_codex_trace.json",
+      "sha256": "c4d302f7e3dff8c580c1c0e38ae44cb306e18af0d3782ff16c11756be9978015",
+      "bytes": 560,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_stdout.txt",
+      "sha256": "7874400347860833882890970f24696037a6145a9c3eecf3bf59813511133301",
+      "bytes": 6286,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/draft_stderr.txt",
+      "sha256": "4e254f4bfd8572353551890c97059386f9ce1f1e288a254721ed68e103dbaca4",
+      "bytes": 248,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_prompt.md",
+      "sha256": "c0777ddf5679f5c47fcc1622449cde197c7b275cbebefeba56959c106e8f6fb2",
+      "bytes": 9728,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_command.json",
+      "sha256": "6650ebfa11dd4f066064270848a80dcbe52b80822ab8d6a8b525435b30db1bf6",
+      "bytes": 2021,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_tool_evidence.json",
+      "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+      "bytes": 100,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_tool_evidence_verification.json",
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+      "bytes": 406,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "2974acdb8c147586bcdf2dfd6f00938aff3c16ee1d0b5fcc30526d5a09745c0c",
+      "bytes": 862,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_codex_stderr.log",
+      "sha256": "9ca164b5228ab35df005e7f341a0102ff9c1fa894dd7ce6c3036188770f1b224",
+      "bytes": 233,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_codex_events.jsonl",
+      "sha256": "b3aed0a260f624673ad8cb280eb0c92ad8ebed75bd64592cab8b0dc535d6796c",
+      "bytes": 884,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_codex_last_message.txt",
+      "sha256": "d1b9e292e9025b1e55ffbdd56359abb209104d35c681090205d000e888b1ff00",
+      "bytes": 526,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_codex_trace.json",
+      "sha256": "11e812a4280283434e71ef4efa0d00ca30a376ef822fceefedcd4b86ca072349",
+      "bytes": 555,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_stdout.txt",
+      "sha256": "d1b9e292e9025b1e55ffbdd56359abb209104d35c681090205d000e888b1ff00",
+      "bytes": 526,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/pre_submit_review_stderr.txt",
+      "sha256": "bffb1ff656fc6e4c262143632c3e0d82feead99ee040ad8425bccce02b1976fc",
+      "bytes": 248,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/revision_prompt.md",
+      "sha256": "d5f526aff7a32cde02fdce9603023c17bd28823244d110eca1c484c4b8d02d0f",
+      "bytes": 19844,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/command.json",
+      "sha256": "4b9491e75081ac8ca8b20608f1e61c8595fa1690ce81a08894859bdfb45ff1d2",
+      "bytes": 2080,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/tool_evidence.json",
+      "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+      "bytes": 100,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/tool_evidence_verification.json",
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+      "bytes": 406,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/codex_stdout.jsonl",
+      "sha256": "f2f3cead802f03e8d806c721868ddc7b41331c280cd57f24e7e6537283b8ea84",
+      "bytes": 7279,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/codex_stderr.log",
+      "sha256": "197f2cd4dc32c12a7f32b65f43d4a1110dfe3e1915110edeac986e66b5cb83b6",
+      "bytes": 233,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/codex_events.jsonl",
+      "sha256": "e9864d6139e7c86057472388ce0816b41a4a706c8beeac20c8ee149e465755e9",
+      "bytes": 7301,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/codex_last_message.txt",
+      "sha256": "7a92ae8af8d7adc19f1fda39f8dd7cf0dbc850e86e6734606b307042a23b7e02",
+      "bytes": 6578,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/codex_trace.json",
+      "sha256": "fbb26521c60d4ff547ab2d909dc56ff041f5396ea2d549d3c8937628af937a58",
+      "bytes": 552,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/stdout.txt",
+      "sha256": "7a92ae8af8d7adc19f1fda39f8dd7cf0dbc850e86e6734606b307042a23b7e02",
+      "bytes": 6578,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/stderr.txt",
+      "sha256": "9b53a54361f23fb1b28a986b48a9a9d0d0f700e59f32bd749c5e8a23b9b20ab5",
+      "bytes": 248,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/raw_response.txt",
+      "sha256": "7a92ae8af8d7adc19f1fda39f8dd7cf0dbc850e86e6734606b307042a23b7e02",
+      "bytes": 6578,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/parsed_cells.json",
+      "sha256": "b1efd658615e48b2dec9167da020f44bc9dcd190d4900f73364531c18e738a01",
+      "bytes": 8161,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/normalized_cells.json",
+      "sha256": "b8a7379c363ed31eb5c1b00b9d4ae722ef8b048cc3327e48baa8626f028f3e38",
+      "bytes": 25449,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/distribution.json",
+      "sha256": "1252d4e533795f6d02291869efc6e71e208b6c25a093c88e37894a57609c4a06",
+      "bytes": 13504,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/validation.json",
+      "sha256": "67ed0e2bd283a458fa4de9c7eeddeb165fa34ec93a14b36a2f5a702947ee549c",
+      "bytes": 148,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/cells.with_activity.json",
+      "sha256": "fa7d73705da1d249e8ed9510b4a98e98e4291352b44b049e41ad44c3f586cb93",
+      "bytes": 42842,
+      "createdAt": "2026-11-10T00:28:07Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-11-10/2026-11-10t00-28-07z-bls-cps-employed-people-by-occupation-business-financial-operations-2026-11/manifest.json",
+      "sha256": "f0697708b7e56a29605d1fadbde02d5a9db0c9ce0c14396b1cc72c22b8b5ca59",
+      "bytes": 17838,
+      "createdAt": "2026-11-10T00:28:07Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "cps-business-financial-employment-november-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "48d10b11037d587eff33b6a8fe1deff8357a60d7",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "35edd27d171f677efb35bfc878911d2e2f47158eba92d0da04941d3370ac5076"
+}

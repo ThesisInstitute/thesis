@@ -1,0 +1,428 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-11-02T23:42:34Z",
+  "runStartedAt": "2026-11-02T23:42:34Z",
+  "sealedAt": "2026-11-02T23:44:46Z",
+  "series": "statcan.gdp_by_industry.monthly_growth",
+  "period": "2026-11",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "canada-monthly-gdp-growth-november-2026",
+    "country": "CA",
+    "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_11.first_print",
+    "expectedReleaseDate": "2027-01-29",
+    "expectedReleaseWindow": {
+      "end": "2027-01-29",
+      "start": "2027-01-29"
+    },
+    "period": "2026-11",
+    "registeredAt": "2026-11-02T23:38:32Z",
+    "registeredAtUtc": "2026-11-02T23:38:32Z",
+    "registrationCommit": "ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "series": "statcan.gdp_by_industry.monthly_growth",
+    "sourceBinding": {
+      "adapter": "statcan-wds",
+      "allowedHosts": [
+        "www150.statcan.gc.ca"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2027-01-29",
+        "start": "2027-01-29"
+      },
+      "field": "v65201210",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "v65201210",
+      "sourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+      "table": "GDP by industry, Table 36-10-0434-01 (all industries, chained 2017 dollars, SA at annual rates)",
+      "transform": {
+        "factor": 1,
+        "operation": "percent_change_previous_period"
+      }
+    },
+    "targetContentHash": "111fd1e947b75524e68b209315ecf54202f5b7ade7a1bebabb8f9c9ece2492b8",
+    "targetRegistrationPath": "records/targets/2026-11-02-111fd1e947b75524e68b209315ecf54202f5b7ade7a1bebabb8f9c9ece2492b8.json",
+    "targetUnit": "percent_growth",
+    "valueScale": 1
+  },
+  "registrationCommit": "ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30",
+  "targetContentHash": "111fd1e947b75524e68b209315ecf54202f5b7ade7a1bebabb8f9c9ece2492b8",
+  "targetRegistrationPath": "records/targets/2026-11-02-111fd1e947b75524e68b209315ecf54202f5b7ade7a1bebabb8f9c9ece2492b8.json",
+  "registeredAtUtc": "2026-11-02T23:38:32Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "gpt-5.5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ],
+    "configuredModel": "claude-fable-5"
+  },
+  "preSubmitReview": {
+    "schemaVersion": "thesis_pre_submit_review_v1",
+    "status": "completed",
+    "requestedAt": "2026-11-02T23:42:34Z",
+    "reviewer": {
+      "agent": "thesis.pre_submit_reviewer",
+      "model": "gpt-5.5",
+      "promptVersion": "pre-submit-review-v0.1",
+      "commandHash": "14d8282b98f6210c39bb92bd60f1774952fbb495450e87d65a6c6cc9f578548d"
+    },
+    "draftArtifactPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_stdout.txt",
+    "reviewArtifactPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_stdout.txt",
+    "revisionPromptPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/revision_prompt.md",
+    "findings": [
+      {
+        "findingId": "review.finding.1",
+        "severity": "blocking",
+        "rubricItem": "resolver",
+        "summary": "The draft's resolutionSourceUrl uses a reference-period-range WDS endpoint, while the canonical target binding specifies the StatCan WDS latest-periods endpoint as the registered sourceUrl.",
+        "actionRequested": "Change resolutionSourceUrl to the canonical sourceBinding.sourceUrl or explicitly keep the registered resolver endpoint primary while using the range URL only as supporting evidence."
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "The six-month volatility sample is acceptable but thin; mention that interval uncertainty is based on a short recent sample."
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "severity": "info",
+        "rubricItem": "optional_suggestion",
+        "summary": "Consider noting that the September value is only an advance estimate and is used as a directional update, not as resolved history."
+      }
+    ],
+    "dispositions": [
+      {
+        "findingId": "review.finding.1",
+        "decision": "accepted",
+        "rationale": "Review disposition: accepted the resolver critique by making the registered StatCan WDS latest-periods endpoint the primary resolutionSourceUrl and retaining the range endpoint only as supporting historical evidence; accepted the optional clarifications that the interval uses a short recent sample and the September figure is only an advance directional update.",
+        "forecastChanged": true
+      },
+      {
+        "findingId": "review.suggestion.1",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the resolver critique by making the registered StatCan WDS latest-periods endpoint the primary resolutionSourceUrl and retaining the range endpoint only as supporting historical evidence; accepted the optional clarifications that the interval uses a short recent sample and the September figure is only an advance directional update.",
+        "forecastChanged": false
+      },
+      {
+        "findingId": "review.suggestion.2",
+        "decision": "not_applicable",
+        "rationale": "Review disposition: accepted the resolver critique by making the registered StatCan WDS latest-periods endpoint the primary resolutionSourceUrl and retaining the range endpoint only as supporting historical evidence; accepted the optional clarifications that the interval uses a short recent sample and the September figure is only an advance directional update.",
+        "forecastChanged": false
+      }
+    ],
+    "summary": "Draft is mostly publication-ready, but the resolver URL should be aligned with the canonical ledger binding before publication."
+  },
+  "ok": true,
+  "cellsPath": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/cells.with_activity.json",
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/prompt.md",
+      "sha256": "9f66e856395e09a4403861ba1406b4fc97c176a9f93d36dd6c376662344d429c",
+      "bytes": 11869,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_command.json",
+      "sha256": "434026362bc6cd9486d84cad44a40746f84cb1ffda444aafa0af35f57f1d02f9",
+      "bytes": 2069,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_tool_evidence.json",
+      "sha256": "6787b9679282baef11c52c50d2cff181f5ca6c37754ec8525a8db64062856a61",
+      "bytes": 350863,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_tool_evidence_verification.json",
+      "sha256": "cf73253907c5f0ac12344c905ddf90c2ce3ae5b1b26c978ccf5eeb495ef14536",
+      "bytes": 4140,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_codex_stdout.jsonl",
+      "sha256": "bbb5bdff659e3a6af4eb37854e9f3fc8abc106423920b3936a42db9f8ef34410",
+      "bytes": 123267,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_codex_stderr.log",
+      "sha256": "aefe4193fd678e546c7da1b6330b102de6fc15d9e0fc2b255be94e9cc8ae4332",
+      "bytes": 233,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_codex_events.jsonl",
+      "sha256": "1547992ef599f75547ccddedb75438f6bd9333494e4cdbf4aa9be7a2bf9ed98d",
+      "bytes": 136449,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_codex_last_message.txt",
+      "sha256": "fd45e475e42baaca025b822bdb451b072cd407d4bfd6b2b2a1988ade59369daf",
+      "bytes": 5731,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_codex_trace.json",
+      "sha256": "6288e4f924ffa45caa05b6a5c01c8238ee883cf62707680985c478c8827b84dd",
+      "bytes": 560,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "draft_forecast",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_stdout.txt",
+      "sha256": "fd45e475e42baaca025b822bdb451b072cd407d4bfd6b2b2a1988ade59369daf",
+      "bytes": 5731,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/draft_stderr.txt",
+      "sha256": "f7ea99a28c275a604b160ab8fb4762a1f0d762620bcd83a9282bd625f1d632c3",
+      "bytes": 248,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "review_prompt",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_prompt.md",
+      "sha256": "a04cc16421c5bd0a587f676d6533fdfd9b3d499f211ead79cc3f5c378b006fb2",
+      "bytes": 9069,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_command.json",
+      "sha256": "f9c1a1ccc33371beaef964347131f44e97b7c475d10e3933693d26cada52b3a7",
+      "bytes": 1992,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_tool_evidence.json",
+      "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+      "bytes": 100,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_tool_evidence_verification.json",
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+      "bytes": 406,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_codex_stdout.jsonl",
+      "sha256": "39551fd7c270aea860713cc012351f608e8877583bdacfaa5e88a4251b799fde",
+      "bytes": 1326,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_codex_stderr.log",
+      "sha256": "4748e0ee4cdfe6f3719ebd9d0ef10870d22fa98c5f60d7a217c9fc4a11b3532b",
+      "bytes": 233,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_codex_events.jsonl",
+      "sha256": "8bef31f4ebe63bc161da0be14cbafc01f95d89560938d21d5e8b4b8eb52a3573",
+      "bytes": 1348,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_codex_last_message.txt",
+      "sha256": "4ffa2d4fd7af2e3e4360895dd392c3764b63bdd67abfad87d1cad731647dd3e2",
+      "bytes": 967,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_codex_trace.json",
+      "sha256": "e0308c22e1646b72de9e6321c4e84aa8fccd39b30dbe3c6de4c8b8f225935020",
+      "bytes": 555,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "pre_submit_review",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_stdout.txt",
+      "sha256": "4ffa2d4fd7af2e3e4360895dd392c3764b63bdd67abfad87d1cad731647dd3e2",
+      "bytes": 967,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/pre_submit_review_stderr.txt",
+      "sha256": "8f47f92a06b669815fdf8abf6f05a9ef9c4c23ebe79795ccc6d380e928570076",
+      "bytes": 248,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "revision_prompt",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/revision_prompt.md",
+      "sha256": "774369528503e602bffbf91ab503a3eb032b91e9f277e68dfd46c68ec5474efb",
+      "bytes": 19503,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/command.json",
+      "sha256": "d6948edd3f30d207e2c66d1d56f8de00d0980ab7069407cab20c920928c8b5f1",
+      "bytes": 2051,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "tool_evidence",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/tool_evidence.json",
+      "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+      "bytes": 100,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "tool_evidence_verification",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/tool_evidence_verification.json",
+      "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+      "bytes": 406,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_stdout_jsonl",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/codex_stdout.jsonl",
+      "sha256": "dd93d70a9ea8fb52ef994bc0f1784a0ae0b856d2e6ac3cf0910e897b06c96f7e",
+      "bytes": 6889,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_stderr_log",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/codex_stderr.log",
+      "sha256": "a1d07fb13542e962f4770d648f0ef1f106c6de1b05d453e0d2b9c11a5a428ba7",
+      "bytes": 233,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_events_jsonl",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/codex_events.jsonl",
+      "sha256": "d1ca56ecdf1a98da41054d30f7470a34204c33fcad9ad03cc00eeeb4b30e1dbf",
+      "bytes": 6911,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_last_message",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/codex_last_message.txt",
+      "sha256": "5a46088e751ca8d1f7770dffeec516317a40cdcfc34579fbb0016611fa0ead45",
+      "bytes": 6290,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "codex_trace",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/codex_trace.json",
+      "sha256": "6c495fff532d0914799b7f1e4ff0981e34b4156bffb9c74c0ede8a301c7953fa",
+      "bytes": 552,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/stdout.txt",
+      "sha256": "5a46088e751ca8d1f7770dffeec516317a40cdcfc34579fbb0016611fa0ead45",
+      "bytes": 6290,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/stderr.txt",
+      "sha256": "026207c5c3cdb3b691e2ec4d799f48df5e6874756905dc8b6efebde4c32bfb5e",
+      "bytes": 248,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/raw_response.txt",
+      "sha256": "5a46088e751ca8d1f7770dffeec516317a40cdcfc34579fbb0016611fa0ead45",
+      "bytes": 6290,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/parsed_cells.json",
+      "sha256": "893870bbba423365ddfdbddc7bf93e3b90f1a060aefbe480f74fc40cec4aefe0",
+      "bytes": 7384,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/normalized_cells.json",
+      "sha256": "b64d3acd8c15cb04d234f1913eba58b4276526095cebeaa279e0e44aea5ad2bf",
+      "bytes": 24960,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "run_distribution",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/distribution.json",
+      "sha256": "8881dd55ecfe97641b7dbe8b5a67ce2b3ce6d5a648af8f5540d82f3108cd5c81",
+      "bytes": 13792,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "validation_report",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/validation.json",
+      "sha256": "743d483706324a94c440f377ddfb4c704599843bd5b47c08e4531ee0367911b2",
+      "bytes": 140,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "cells_with_activity",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/cells.with_activity.json",
+      "sha256": "52d0e8cdd54e1d7554b9c7ac2afd827de2155d06867d9a0e7db011ca78be6456",
+      "bytes": 42409,
+      "createdAt": "2026-11-02T23:42:34Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/thesis-analyst/2026-11-02/2026-11-02t23-42-34z-statcan-gdp-by-industry-monthly-growth-2026-11/manifest.json",
+      "sha256": "866c6c498a7378c77c78fe18d5dd6a32966b1c5e8e38b2ccfcb91e7e87ca061b",
+      "bytes": 17557,
+      "createdAt": "2026-11-02T23:42:34Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": {
+    "ok": true,
+    "cells": [
+      {
+        "slug": "canada-monthly-gdp-growth-november-2026",
+        "ok": true,
+        "errors": []
+      }
+    ]
+  },
+  "checkoutSha": "ac152d6cd8dbb730a1f6d9e9cddf26b98c4aec30",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "c61971214b0ecd74f2baae86098779dc8fd140f782eaa64c5bfb3ef7bc90940b"
+}

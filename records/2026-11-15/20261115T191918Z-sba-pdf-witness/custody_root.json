@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "thesis_custody_root_v1",
+  "custodyInventoryVersion": 2,
+  "runMode": "sba_pdf_witness",
+  "hashAlgorithm": "sha256",
+  "canonicalJson": "UTF-16 code-unit key order; ECMAScript JSON number/string encoding",
+  "artifacts": [
+    {
+      "artifactType": "fetch_event",
+      "path": "fetch_event.json",
+      "sha256": "ce2e27968e62ecb79824687d1527dfb984287454a90f617e6caada4166ed0ee5",
+      "bytes": 2243,
+      "createdAt": "2026-11-15T19:19:18Z",
+      "canonicalJsonSha256": "a57b8893ab86f45e84fd37d08c66eaadd32c9926c03f02c4f76d3cf0e79ccf92"
+    },
+    {
+      "artifactType": "landing_archive",
+      "path": "upstream/landing-page.html.gz",
+      "sha256": "04ec80b5b0f586dfa4ad8744774832b973ce236867c050c751bfda86297e181b",
+      "bytes": 7798,
+      "createdAt": "2026-11-15T19:19:18Z"
+    }
+  ],
+  "manifestWithoutCustodyRoot": {
+    "path": "manifest.json",
+    "excludedField": "custodyRootSha256",
+    "canonicalJsonSha256": "ab5cbc0210e6bfb6640fc20f349bcbb19509edf9f49f12295da140ebfd991a45"
+  }
+}

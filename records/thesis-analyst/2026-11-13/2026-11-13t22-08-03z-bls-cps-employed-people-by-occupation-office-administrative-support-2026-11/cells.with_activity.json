@@ -1,0 +1,1282 @@
+[
+  {
+    "slug": "cps-office-admin-employment-november-2026",
+    "country": "US",
+    "type": "data",
+    "title": "US office admin employment, Nov. 2026",
+    "question": "What will BLS first print for Current Population Survey employed people in office and administrative support occupations, total 16 years and over, not seasonally adjusted, November 2026, series LNU02032207?",
+    "unit": "millions",
+    "pointEstimate": 16.323,
+    "ciLow": 16.053,
+    "ciHigh": 16.593,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-04",
+    "resolutionSource": "U.S. Bureau of Labor Statistics Employment Situation release and public API",
+    "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032207",
+    "resolutionRule": "Resolve to the first official BLS print for CPS series LNU02032207, period 2026 M11, field value in thousands, transformed by multiplying by 0.001 to millions. Use the value available in the Dec. 4, 2026 Employment Situation first release/API print; ignore later revisions, corrections, or annual rebenchmarking unless the official first-print file itself is replaced before capture.",
+    "dataPointId": "bls.cps.employed_people_by_occupation.office_administrative_support.2026_11.first_print",
+    "historicalContext": [
+      {
+        "label": "April 2026",
+        "value": 16.471,
+        "period": {
+          "type": "month",
+          "value": "2026-04"
+        }
+      },
+      {
+        "label": "May 2026",
+        "value": 16.335,
+        "period": {
+          "type": "month",
+          "value": "2026-05"
+        }
+      },
+      {
+        "label": "June 2026",
+        "value": 16.184,
+        "period": {
+          "type": "month",
+          "value": "2026-06"
+        }
+      },
+      {
+        "label": "July 2026",
+        "value": 16.457,
+        "period": {
+          "type": "month",
+          "value": "2026-07"
+        }
+      },
+      {
+        "label": "August 2026",
+        "value": 16.154,
+        "period": {
+          "type": "month",
+          "value": "2026-08"
+        }
+      },
+      {
+        "label": "September 2026",
+        "value": 16.065,
+        "period": {
+          "type": "month",
+          "value": "2026-09"
+        }
+      },
+      {
+        "label": "October 2026",
+        "value": 16.201,
+        "period": {
+          "type": "month",
+          "value": "2026-10"
+        }
+      }
+    ],
+    "drivers": [
+      "October 2026 level was 16.201 million after the registered thousands-to-millions transform",
+      "Recent April-October 2026 reference class averaged 16.267 million",
+      "Recent month-to-month changes were slightly negative on average",
+      "November NSA seasonality has upside risk, with 2024 October-to-November up 0.152 million and 2025 November at 17.102 million",
+      "2025 October was unavailable due to the lapse in appropriations, so the closest clean seasonal anchor is 2024 October-to-November"
+    ],
+    "sourceContext": [
+      "https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032207",
+      "https://blsmon1.bls.gov/schedule/2026/12_sched_list.htm"
+    ],
+    "runAt": "2026-11-13T22:09:53Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast for BLS CPS office and administrative support employment, November 2026"
+      },
+      {
+        "kind": "text",
+        "text": "The target is BLS CPS series LNU02032207, Current Population Survey employed people in office and administrative support occupations, total 16 years and over, not seasonally adjusted, Table A-19. The registered unit is millions, so each BLS API value in thousands is multiplied by 0.001."
+      },
+      {
+        "kind": "text",
+        "text": "The official BLS release calendar was checked this run: the December 2026 BLS calendar page schedules Employment Situation for November 2026 on Friday, December 4, 2026 at 8:30 AM Eastern. The direct www.bls.gov schedule fetch returned HTTP 403 in captured evidence, but the BLS blsmon1 calendar mirror fetch succeeded as call-0004; hosted search also showed the same BLS schedule text."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "fetch_source https://api.bls.gov/publicAPI/v2/timeseries/data/LNU02032207, then extract recent monthly values",
+        "result": "Captured BLS API response call-0001, sha256 55581a6c477e66f5526f094a561f86528101c59189773940f7366371a4f0bd21. Extracted values in thousands: April 2026 16471, May 2026 16335, June 2026 16184, July 2026 16457, August 2026 16154, September 2026 16065, October 2026 16201; transformed to 16.471, 16.335, 16.184, 16.457, 16.154, 16.065, 16.201 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "extract historical November and October seasonal anchors from the same BLS API response",
+        "result": "From call-0001, extracted November 2025 value 17102 thousand, November 2024 value 16066 thousand, and October 2024 value 15914 thousand. October 2025 was '-' with footnote code 9, so the clean recent October-to-November seasonal change is 16066 - 15914 = 152 thousand, or 0.152 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.calculate",
+        "call": "calculate recent base rate, momentum, sigma, point, and interval from captured BLS values",
+        "result": "Calculation receipts: call-0019 mean([16.471,16.335,16.184,16.457,16.154,16.065,16.201]) = 16.266714285714286; call-0020 mean changes [-0.136,-0.151,0.273,-0.303,-0.089,0.136] = -0.045; call-0018 sigma = stdev(diff(history)) = 0.21066656118140803; call-0021 1.28*sigma = 0.2696531983122023; call-0022 point = 16.201 + 0.152 - 0.030 = 16.323."
+      },
+      {
+        "kind": "math",
+        "text": "Prior/update/interval: base rate and reference class are the seven latest official BLS prints for this exact NSA occupation series, April-October 2026, with persistence centered on October 2026 at 16.201 million and recent-level mean 16.267 million. I update by adding the clean 2024 October-to-November seasonal change of +0.152 million, then subtract a judgmental -0.030 million for the recent soft average monthly momentum, giving 16.323 million. Interval method: realized dispersion of the six successive changes in the April-October sequence; sigma = 0.21066656118140803, and the 80% normal half-width is 1.28*sigma = 0.2696531983122023. Bounds are 16.323 - 0.2696531983122023 = 16.0533468016878 and 16.323 + 0.2696531983122023 = 16.592653198312203, rounded to 16.053 and 16.593 million."
+      },
+      {
+        "kind": "text",
+        "text": "Counter-considerations: upside risk comes from another strong November seasonal hiring/readthrough like November 2025's 17.102 million level or a broad household-survey employment rebound; above 16.593 million would land above the interval. Downside risk is a renewed decline in clerical/admin employment or weak household-survey employment after October; below 16.053 million would land below the interval. Outside the interval would mainly require a one-month swing larger than recent April-October dispersion or a repeat of the 2025 November outlier."
+      },
+      {
+        "kind": "text",
+        "text": "Review disposition: accepted the reviewer suggestions to note that the interval is mechanically tied to only six recent month-to-month changes and to state the concrete interval thresholds, below 16.053 million and above 16.593 million. No required fixes were raised."
+      },
+      {
+        "kind": "forecast",
+        "point": 16.323,
+        "ciLow": 16.053,
+        "ciHigh": 16.593
+      }
+    ],
+    "agentReportedRunAt": "2026-11-13T22:08:51Z",
+    "runStartedAt": "2026-11-13T22:08:03Z",
+    "promptMode": "fast",
+    "registrationCommit": "5cb6b72d8468fd0f460d6919a14de9921b0dcd7c",
+    "targetContentHash": "03ea7af40c5c3b6405c6aafc9e06bf5a776bba4adaff1708334c570a622f1923",
+    "targetRegistrationPath": "records/targets/2026-11-13-03ea7af40c5c3b6405c6aafc9e06bf5a776bba4adaff1708334c570a622f1923.json",
+    "registeredAtUtc": "2026-11-13T22:03:59Z",
+    "predictionDistribution": {
+      "format": "numeric_cdf_v1",
+      "pointCount": 201,
+      "support": {
+        "lower": 15.648,
+        "upper": 16.998
+      },
+      "points": [
+        {
+          "value": 15.648,
+          "probability": 0.0
+        },
+        {
+          "value": 15.65475,
+          "probability": 0.00166666666667
+        },
+        {
+          "value": 15.6615,
+          "probability": 0.00333333333333
+        },
+        {
+          "value": 15.66825,
+          "probability": 0.005
+        },
+        {
+          "value": 15.675,
+          "probability": 0.00666666666667
+        },
+        {
+          "value": 15.68175,
+          "probability": 0.00833333333333
+        },
+        {
+          "value": 15.6885,
+          "probability": 0.01
+        },
+        {
+          "value": 15.69525,
+          "probability": 0.0116666666667
+        },
+        {
+          "value": 15.702,
+          "probability": 0.0133333333333
+        },
+        {
+          "value": 15.70875,
+          "probability": 0.015
+        },
+        {
+          "value": 15.7155,
+          "probability": 0.0166666666667
+        },
+        {
+          "value": 15.72225,
+          "probability": 0.0183333333333
+        },
+        {
+          "value": 15.729,
+          "probability": 0.02
+        },
+        {
+          "value": 15.73575,
+          "probability": 0.0216666666667
+        },
+        {
+          "value": 15.7425,
+          "probability": 0.0233333333333
+        },
+        {
+          "value": 15.74925,
+          "probability": 0.025
+        },
+        {
+          "value": 15.756,
+          "probability": 0.0266666666667
+        },
+        {
+          "value": 15.76275,
+          "probability": 0.0283333333333
+        },
+        {
+          "value": 15.7695,
+          "probability": 0.03
+        },
+        {
+          "value": 15.77625,
+          "probability": 0.0316666666667
+        },
+        {
+          "value": 15.783,
+          "probability": 0.0333333333333
+        },
+        {
+          "value": 15.78975,
+          "probability": 0.035
+        },
+        {
+          "value": 15.7965,
+          "probability": 0.0366666666667
+        },
+        {
+          "value": 15.80325,
+          "probability": 0.0383333333333
+        },
+        {
+          "value": 15.81,
+          "probability": 0.04
+        },
+        {
+          "value": 15.81675,
+          "probability": 0.0416666666667
+        },
+        {
+          "value": 15.8235,
+          "probability": 0.0433333333333
+        },
+        {
+          "value": 15.83025,
+          "probability": 0.045
+        },
+        {
+          "value": 15.837,
+          "probability": 0.0466666666667
+        },
+        {
+          "value": 15.84375,
+          "probability": 0.0483333333333
+        },
+        {
+          "value": 15.8505,
+          "probability": 0.05
+        },
+        {
+          "value": 15.85725,
+          "probability": 0.0516666666667
+        },
+        {
+          "value": 15.864,
+          "probability": 0.0533333333333
+        },
+        {
+          "value": 15.87075,
+          "probability": 0.055
+        },
+        {
+          "value": 15.8775,
+          "probability": 0.0566666666667
+        },
+        {
+          "value": 15.88425,
+          "probability": 0.0583333333333
+        },
+        {
+          "value": 15.891,
+          "probability": 0.06
+        },
+        {
+          "value": 15.89775,
+          "probability": 0.0616666666667
+        },
+        {
+          "value": 15.9045,
+          "probability": 0.0633333333333
+        },
+        {
+          "value": 15.91125,
+          "probability": 0.065
+        },
+        {
+          "value": 15.918,
+          "probability": 0.0666666666667
+        },
+        {
+          "value": 15.92475,
+          "probability": 0.0683333333333
+        },
+        {
+          "value": 15.9315,
+          "probability": 0.07
+        },
+        {
+          "value": 15.93825,
+          "probability": 0.0716666666667
+        },
+        {
+          "value": 15.945,
+          "probability": 0.0733333333333
+        },
+        {
+          "value": 15.95175,
+          "probability": 0.075
+        },
+        {
+          "value": 15.9585,
+          "probability": 0.0766666666667
+        },
+        {
+          "value": 15.96525,
+          "probability": 0.0783333333333
+        },
+        {
+          "value": 15.972,
+          "probability": 0.08
+        },
+        {
+          "value": 15.97875,
+          "probability": 0.0816666666667
+        },
+        {
+          "value": 15.9855,
+          "probability": 0.0833333333333
+        },
+        {
+          "value": 15.99225,
+          "probability": 0.085
+        },
+        {
+          "value": 15.999,
+          "probability": 0.0866666666667
+        },
+        {
+          "value": 16.00575,
+          "probability": 0.0883333333333
+        },
+        {
+          "value": 16.0125,
+          "probability": 0.09
+        },
+        {
+          "value": 16.01925,
+          "probability": 0.0916666666667
+        },
+        {
+          "value": 16.026,
+          "probability": 0.0933333333333
+        },
+        {
+          "value": 16.03275,
+          "probability": 0.095
+        },
+        {
+          "value": 16.0395,
+          "probability": 0.0966666666667
+        },
+        {
+          "value": 16.04625,
+          "probability": 0.0983333333333
+        },
+        {
+          "value": 16.053,
+          "probability": 0.1
+        },
+        {
+          "value": 16.05975,
+          "probability": 0.11
+        },
+        {
+          "value": 16.0665,
+          "probability": 0.12
+        },
+        {
+          "value": 16.07325,
+          "probability": 0.13
+        },
+        {
+          "value": 16.08,
+          "probability": 0.14
+        },
+        {
+          "value": 16.08675,
+          "probability": 0.15
+        },
+        {
+          "value": 16.0935,
+          "probability": 0.16
+        },
+        {
+          "value": 16.10025,
+          "probability": 0.17
+        },
+        {
+          "value": 16.107,
+          "probability": 0.18
+        },
+        {
+          "value": 16.11375,
+          "probability": 0.19
+        },
+        {
+          "value": 16.1205,
+          "probability": 0.2
+        },
+        {
+          "value": 16.12725,
+          "probability": 0.21
+        },
+        {
+          "value": 16.134,
+          "probability": 0.22
+        },
+        {
+          "value": 16.14075,
+          "probability": 0.23
+        },
+        {
+          "value": 16.1475,
+          "probability": 0.24
+        },
+        {
+          "value": 16.15425,
+          "probability": 0.25
+        },
+        {
+          "value": 16.161,
+          "probability": 0.26
+        },
+        {
+          "value": 16.16775,
+          "probability": 0.27
+        },
+        {
+          "value": 16.1745,
+          "probability": 0.28
+        },
+        {
+          "value": 16.18125,
+          "probability": 0.29
+        },
+        {
+          "value": 16.188,
+          "probability": 0.3
+        },
+        {
+          "value": 16.19475,
+          "probability": 0.31
+        },
+        {
+          "value": 16.2015,
+          "probability": 0.32
+        },
+        {
+          "value": 16.20825,
+          "probability": 0.33
+        },
+        {
+          "value": 16.215,
+          "probability": 0.34
+        },
+        {
+          "value": 16.22175,
+          "probability": 0.35
+        },
+        {
+          "value": 16.2285,
+          "probability": 0.36
+        },
+        {
+          "value": 16.23525,
+          "probability": 0.37
+        },
+        {
+          "value": 16.242,
+          "probability": 0.38
+        },
+        {
+          "value": 16.24875,
+          "probability": 0.39
+        },
+        {
+          "value": 16.2555,
+          "probability": 0.4
+        },
+        {
+          "value": 16.26225,
+          "probability": 0.41
+        },
+        {
+          "value": 16.269,
+          "probability": 0.42
+        },
+        {
+          "value": 16.27575,
+          "probability": 0.43
+        },
+        {
+          "value": 16.2825,
+          "probability": 0.44
+        },
+        {
+          "value": 16.28925,
+          "probability": 0.45
+        },
+        {
+          "value": 16.296,
+          "probability": 0.46
+        },
+        {
+          "value": 16.30275,
+          "probability": 0.47
+        },
+        {
+          "value": 16.3095,
+          "probability": 0.48
+        },
+        {
+          "value": 16.31625,
+          "probability": 0.49
+        },
+        {
+          "value": 16.323,
+          "probability": 0.5
+        },
+        {
+          "value": 16.32975,
+          "probability": 0.51
+        },
+        {
+          "value": 16.3365,
+          "probability": 0.52
+        },
+        {
+          "value": 16.34325,
+          "probability": 0.53
+        },
+        {
+          "value": 16.35,
+          "probability": 0.54
+        },
+        {
+          "value": 16.35675,
+          "probability": 0.55
+        },
+        {
+          "value": 16.3635,
+          "probability": 0.56
+        },
+        {
+          "value": 16.37025,
+          "probability": 0.57
+        },
+        {
+          "value": 16.377,
+          "probability": 0.58
+        },
+        {
+          "value": 16.38375,
+          "probability": 0.59
+        },
+        {
+          "value": 16.3905,
+          "probability": 0.6
+        },
+        {
+          "value": 16.39725,
+          "probability": 0.61
+        },
+        {
+          "value": 16.404,
+          "probability": 0.62
+        },
+        {
+          "value": 16.41075,
+          "probability": 0.63
+        },
+        {
+          "value": 16.4175,
+          "probability": 0.64
+        },
+        {
+          "value": 16.42425,
+          "probability": 0.65
+        },
+        {
+          "value": 16.431,
+          "probability": 0.66
+        },
+        {
+          "value": 16.43775,
+          "probability": 0.67
+        },
+        {
+          "value": 16.4445,
+          "probability": 0.68
+        },
+        {
+          "value": 16.45125,
+          "probability": 0.69
+        },
+        {
+          "value": 16.458,
+          "probability": 0.7
+        },
+        {
+          "value": 16.46475,
+          "probability": 0.71
+        },
+        {
+          "value": 16.4715,
+          "probability": 0.72
+        },
+        {
+          "value": 16.47825,
+          "probability": 0.73
+        },
+        {
+          "value": 16.485,
+          "probability": 0.74
+        },
+        {
+          "value": 16.49175,
+          "probability": 0.75
+        },
+        {
+          "value": 16.4985,
+          "probability": 0.76
+        },
+        {
+          "value": 16.50525,
+          "probability": 0.77
+        },
+        {
+          "value": 16.512,
+          "probability": 0.78
+        },
+        {
+          "value": 16.51875,
+          "probability": 0.79
+        },
+        {
+          "value": 16.5255,
+          "probability": 0.8
+        },
+        {
+          "value": 16.53225,
+          "probability": 0.81
+        },
+        {
+          "value": 16.539,
+          "probability": 0.82
+        },
+        {
+          "value": 16.54575,
+          "probability": 0.83
+        },
+        {
+          "value": 16.5525,
+          "probability": 0.84
+        },
+        {
+          "value": 16.55925,
+          "probability": 0.85
+        },
+        {
+          "value": 16.566,
+          "probability": 0.86
+        },
+        {
+          "value": 16.57275,
+          "probability": 0.87
+        },
+        {
+          "value": 16.5795,
+          "probability": 0.88
+        },
+        {
+          "value": 16.58625,
+          "probability": 0.89
+        },
+        {
+          "value": 16.593,
+          "probability": 0.9
+        },
+        {
+          "value": 16.59975,
+          "probability": 0.901666666667
+        },
+        {
+          "value": 16.6065,
+          "probability": 0.903333333333
+        },
+        {
+          "value": 16.61325,
+          "probability": 0.905
+        },
+        {
+          "value": 16.62,
+          "probability": 0.906666666667
+        },
+        {
+          "value": 16.62675,
+          "probability": 0.908333333333
+        },
+        {
+          "value": 16.6335,
+          "probability": 0.91
+        },
+        {
+          "value": 16.64025,
+          "probability": 0.911666666667
+        },
+        {
+          "value": 16.647,
+          "probability": 0.913333333333
+        },
+        {
+          "value": 16.65375,
+          "probability": 0.915
+        },
+        {
+          "value": 16.6605,
+          "probability": 0.916666666667
+        },
+        {
+          "value": 16.66725,
+          "probability": 0.918333333333
+        },
+        {
+          "value": 16.674,
+          "probability": 0.92
+        },
+        {
+          "value": 16.68075,
+          "probability": 0.921666666667
+        },
+        {
+          "value": 16.6875,
+          "probability": 0.923333333333
+        },
+        {
+          "value": 16.69425,
+          "probability": 0.925
+        },
+        {
+          "value": 16.701,
+          "probability": 0.926666666667
+        },
+        {
+          "value": 16.70775,
+          "probability": 0.928333333333
+        },
+        {
+          "value": 16.7145,
+          "probability": 0.93
+        },
+        {
+          "value": 16.72125,
+          "probability": 0.931666666667
+        },
+        {
+          "value": 16.728,
+          "probability": 0.933333333333
+        },
+        {
+          "value": 16.73475,
+          "probability": 0.935
+        },
+        {
+          "value": 16.7415,
+          "probability": 0.936666666667
+        },
+        {
+          "value": 16.74825,
+          "probability": 0.938333333333
+        },
+        {
+          "value": 16.755,
+          "probability": 0.94
+        },
+        {
+          "value": 16.76175,
+          "probability": 0.941666666667
+        },
+        {
+          "value": 16.7685,
+          "probability": 0.943333333333
+        },
+        {
+          "value": 16.77525,
+          "probability": 0.945
+        },
+        {
+          "value": 16.782,
+          "probability": 0.946666666667
+        },
+        {
+          "value": 16.78875,
+          "probability": 0.948333333333
+        },
+        {
+          "value": 16.7955,
+          "probability": 0.95
+        },
+        {
+          "value": 16.80225,
+          "probability": 0.951666666667
+        },
+        {
+          "value": 16.809,
+          "probability": 0.953333333333
+        },
+        {
+          "value": 16.81575,
+          "probability": 0.955
+        },
+        {
+          "value": 16.8225,
+          "probability": 0.956666666667
+        },
+        {
+          "value": 16.82925,
+          "probability": 0.958333333333
+        },
+        {
+          "value": 16.836,
+          "probability": 0.96
+        },
+        {
+          "value": 16.84275,
+          "probability": 0.961666666667
+        },
+        {
+          "value": 16.8495,
+          "probability": 0.963333333333
+        },
+        {
+          "value": 16.85625,
+          "probability": 0.965
+        },
+        {
+          "value": 16.863,
+          "probability": 0.966666666667
+        },
+        {
+          "value": 16.86975,
+          "probability": 0.968333333333
+        },
+        {
+          "value": 16.8765,
+          "probability": 0.97
+        },
+        {
+          "value": 16.88325,
+          "probability": 0.971666666667
+        },
+        {
+          "value": 16.89,
+          "probability": 0.973333333333
+        },
+        {
+          "value": 16.89675,
+          "probability": 0.975
+        },
+        {
+          "value": 16.9035,
+          "probability": 0.976666666667
+        },
+        {
+          "value": 16.91025,
+          "probability": 0.978333333333
+        },
+        {
+          "value": 16.917,
+          "probability": 0.98
+        },
+        {
+          "value": 16.92375,
+          "probability": 0.981666666667
+        },
+        {
+          "value": 16.9305,
+          "probability": 0.983333333333
+        },
+        {
+          "value": 16.93725,
+          "probability": 0.985
+        },
+        {
+          "value": 16.944,
+          "probability": 0.986666666667
+        },
+        {
+          "value": 16.95075,
+          "probability": 0.988333333333
+        },
+        {
+          "value": 16.9575,
+          "probability": 0.99
+        },
+        {
+          "value": 16.96425,
+          "probability": 0.991666666667
+        },
+        {
+          "value": 16.971,
+          "probability": 0.993333333333
+        },
+        {
+          "value": 16.97775,
+          "probability": 0.995
+        },
+        {
+          "value": 16.9845,
+          "probability": 0.996666666667
+        },
+        {
+          "value": 16.99125,
+          "probability": 0.998333333333
+        },
+        {
+          "value": 16.998,
+          "probability": 1.0
+        }
+      ],
+      "summary": {
+        "pointEstimate": 16.323,
+        "median": 16.323,
+        "interval80": {
+          "lower": 16.053,
+          "upper": 16.593
+        }
+      },
+      "provenance": "interval_seeded",
+      "transformVersion": "interval_anchor_v1"
+    },
+    "model": "gpt-5.5",
+    "activityLog": [
+      {
+        "artifactType": "prompt",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/prompt.md",
+        "sha256": "780889323b265d8bc7b51217edf4fbbc3cd5463f7c75bb092cabae0d829d4898",
+        "bytes": 12090,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_command.json",
+        "sha256": "d2df30410b257df7ae56f9cc46d6a17b4644cb8635434ccf61ea363d630ae6fc",
+        "bytes": 2098,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_tool_evidence.json",
+        "sha256": "62e8671a6f2b51f193e3757001d4fbce6fc6d60b94b7f4abe655173d53a60354",
+        "bytes": 108439,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_tool_evidence_verification.json",
+        "sha256": "b55d917965ff632d248a884b8ac182c6cac38588d45c076d508f657a76fcd27a",
+        "bytes": 3572,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_codex_stdout.jsonl",
+        "sha256": "9eb3889dde604f9235b5139b1354b9b714f645f3ea5ef3f62d1b31fdbfa5ad6d",
+        "bytes": 67826,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_codex_stderr.log",
+        "sha256": "8818515f6d852a822abdb7378befb1ccc3e3100e34e452fcef83b3cfd5a4e6f4",
+        "bytes": 233,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_codex_events.jsonl",
+        "sha256": "faa6e2fd65bb8f06668ccb7fbc17faec911ed12dac60390f38cb900e5edd5638",
+        "bytes": 69636,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_codex_last_message.txt",
+        "sha256": "6fa8df983389aa9eecf9db4c681c428c6b2d368182725b02d7fcc4c756ed3891",
+        "bytes": 6193,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_codex_trace.json",
+        "sha256": "0ac38812bac7aef2df69f25fdce760ee1faf1f8a3086658ca7d9f20c8fd82b13",
+        "bytes": 560,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "draft_forecast",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_stdout.txt",
+        "sha256": "6fa8df983389aa9eecf9db4c681c428c6b2d368182725b02d7fcc4c756ed3891",
+        "bytes": 6193,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_stderr.txt",
+        "sha256": "ebdaed3ef8a205b96e1466fed7571d2a6b4d4414f465d43a3daa6a9bc876ba46",
+        "bytes": 248,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "review_prompt",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_prompt.md",
+        "sha256": "bb73ff3a7311ade3f1eafda9625ff532ca328323e7dad8fd150e3c432835ee20",
+        "bytes": 9629,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_command.json",
+        "sha256": "6941ed1e653f5cd6451d76e8e4497acd66638bbff46cdd57113f02dbfb6f0a59",
+        "bytes": 2021,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_codex_stdout.jsonl",
+        "sha256": "f293649ad6075ace5af36161af211e02a1c9ea9f9d9b71b38213f256869e6081",
+        "bytes": 845,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_codex_stderr.log",
+        "sha256": "98c1d49a861bb89108542eee759185bea034f4f5257d2c8f813c5769d96473d3",
+        "bytes": 233,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_codex_events.jsonl",
+        "sha256": "030092c3d1f95e66415b7a9db7ff692581cd9bdf630750746422dd8c6340d563",
+        "bytes": 867,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_codex_last_message.txt",
+        "sha256": "d179b35ae02d7405cae91f29d68e6774c98cc9c124be6345c69587e96f4e6742",
+        "bytes": 519,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_codex_trace.json",
+        "sha256": "5d385e2194491d6224a5127f2d251eb1f31a347397b200c902bf650ac040a588",
+        "bytes": 552,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "pre_submit_review",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_stdout.txt",
+        "sha256": "d179b35ae02d7405cae91f29d68e6774c98cc9c124be6345c69587e96f4e6742",
+        "bytes": 519,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_stderr.txt",
+        "sha256": "3959b7826e9bf027c782edaefc92be5ddd36a4e5d12a62e103b93a65249ddca9",
+        "bytes": 248,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "revision_prompt",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/revision_prompt.md",
+        "sha256": "50225653197dc053e413306c90073af769df054a58d01e66466ec05cf8fc6db0",
+        "bytes": 19738,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "command",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/command.json",
+        "sha256": "ba8de8883ebba35040a7d5d185ca8a2b3222ebf2fc4bdcbb28c849b9b99c7cd6",
+        "bytes": 2080,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "tool_evidence",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/tool_evidence.json",
+        "sha256": "3afbbad5a6fcdf9c19822aeb72484cd4fd46bab41c750cc3b48b587aa06c5d1f",
+        "bytes": 100,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "tool_evidence_verification",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/tool_evidence_verification.json",
+        "sha256": "53d1857b255e6d37f9f1419d390c7045165ff4e99003109c41f46b2dcffe5968",
+        "bytes": 406,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_stdout_jsonl",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/codex_stdout.jsonl",
+        "sha256": "4ecfae58a3624c0460ad47bcbdbcd717cf2bf204485b4eaf96e4d6c4494c50b8",
+        "bytes": 7094,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_stderr_log",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/codex_stderr.log",
+        "sha256": "3988e6245b115f9f6ff9695ce1ad33731833ee52d9ff2fbe411103aff2dd232d",
+        "bytes": 233,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_events_jsonl",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/codex_events.jsonl",
+        "sha256": "2024bf72d2c5e7de0ae017222c84a1626c0c264b0954463115952aeaa7204206",
+        "bytes": 7116,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_last_message",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/codex_last_message.txt",
+        "sha256": "039f9912c77427ff99d1716b9bc68c20e5ebcd064a4378ab050877688d950680",
+        "bytes": 6480,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "codex_trace",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/codex_trace.json",
+        "sha256": "207f6c357c99314c3e380d22da19d72f3d3392429f0059131fc41e28de04ce18",
+        "bytes": 555,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "stdout",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/stdout.txt",
+        "sha256": "039f9912c77427ff99d1716b9bc68c20e5ebcd064a4378ab050877688d950680",
+        "bytes": 6480,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "stderr",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/stderr.txt",
+        "sha256": "251dafe29be582179ffa253a39258c258e08acd17e6502ed6c0271f521e7d0db",
+        "bytes": 248,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "raw_response",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/raw_response.txt",
+        "sha256": "039f9912c77427ff99d1716b9bc68c20e5ebcd064a4378ab050877688d950680",
+        "bytes": 6480,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "parsed_cell",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/parsed_cells.json",
+        "sha256": "11bf869c1222d7b4516387e4b8bbdb37b86baf8f6a2373bd0f9720446949e4b7",
+        "bytes": 7637,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "normalized_cell",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/normalized_cells.json",
+        "sha256": "e09aeeda6d96dba4dae65cb36a0ab36460de158e78cf1cbb22ab1ae6642099d9",
+        "bytes": 25335,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "run_distribution",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/distribution.json",
+        "sha256": "585138c9de7d8812f140ce6f5f4056ea8413000c5db29f70b5cfa5b0066a827b",
+        "bytes": 13914,
+        "createdAt": "2026-11-13T22:08:03Z"
+      },
+      {
+        "artifactType": "validation_report",
+        "path": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/validation.json",
+        "sha256": "bef3e5bdbc509265d63470ff71a18f1bacb14d4046f9875e6a19870a801d9f83",
+        "bytes": 142,
+        "createdAt": "2026-11-13T22:08:03Z"
+      }
+    ],
+    "preSubmitReview": {
+      "schemaVersion": "thesis_pre_submit_review_v1",
+      "status": "completed",
+      "requestedAt": "2026-11-13T22:08:03Z",
+      "reviewer": {
+        "agent": "thesis.pre_submit_reviewer",
+        "model": "gpt-5.5",
+        "promptVersion": "pre-submit-review-v0.1",
+        "commandHash": "a346f1ec52fac297a9d78529eaa7dfdb8e01b854b71fe16194fd86b542eef6ef"
+      },
+      "draftArtifactPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/draft_stdout.txt",
+      "reviewArtifactPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/pre_submit_review_stdout.txt",
+      "revisionPromptPath": "records/thesis-analyst/2026-11-13/2026-11-13t22-08-03z-bls-cps-employed-people-by-occupation-office-administrative-support-2026-11/revision_prompt.md",
+      "findings": [
+        {
+          "findingId": "review.suggestion.1",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "Consider noting that the interval uses only six recent month-to-month changes, so the 80% band is mechanically tied to a small realized-volatility sample."
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "severity": "info",
+          "rubricItem": "optional_suggestion",
+          "summary": "The tail discussion could name concrete downside/upside thresholds in millions, e.g. below 16.053 or above 16.593."
+        }
+      ],
+      "dispositions": [
+        {
+          "findingId": "review.suggestion.1",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the reviewer suggestions to note that the interval is mechanically tied to only six recent month-to-month changes and to state the concrete interval thresholds, below 16.053 million and above 16.593 million. No required fixes were raised.",
+          "forecastChanged": false
+        },
+        {
+          "findingId": "review.suggestion.2",
+          "decision": "not_applicable",
+          "rationale": "Review disposition: accepted the reviewer suggestions to note that the interval is mechanically tied to only six recent month-to-month changes and to state the concrete interval thresholds, below 16.053 million and above 16.593 million. No required fixes were raised.",
+          "forecastChanged": false
+        }
+      ],
+      "summary": "The draft is publishable: it matches the registered resolver contract, states a persistence/seasonal prior, justifies the update, and keeps point, interval, unit, and JSON fields coherent."
+    }
+  }
+]

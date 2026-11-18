@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "thesis_resolution_run_v1",
+  "retrievedAt": "2026-11-05T20:49:38Z",
+  "firstPrintEvidenceRequired": true,
+  "weeklyClaimsSchedule": {
+    "source": "https://oui.doleta.gov/unemploy/claims_arch.asp",
+    "releaseExceptions": {
+      "2026-11-26": "2026-11-25"
+    }
+  },
+  "ledgerRepo": "PolicyEngine/chronicle",
+  "ledgerBranch": "codex/thesis-ledger-facts",
+  "ledgerRepoSha": "fd83eec28bf90d852d6495fd0c1f8e0fa47291d1",
+  "facts": [
+    {
+      "dataPointId": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print",
+      "sourceVintage": "2026-11-05",
+      "retrievedAt": "2026-11-05T20:52:01Z",
+      "targetContentHash": "5acb920aa1125b4d971bd7b22bdf4bd31f9a5ede261d0e7074400403a66e4391",
+      "responseArchive": {
+        "path": "records/resolutions/2026-11-05/2026-11-05t20-49-38z-resolve-pending/responses/prs85006112-2026-11-05-84eeaaa70572f719.csv.gz",
+        "sha256": "84eeaaa70572f719c9da72015b850bdd87e43c66b9816959942b440915555a80",
+        "bytes": 4911,
+        "gzipSha256": "4f7d2dc36eb7c4c5184817f12452ec5f021537717515f9b5522b5a0934107cab",
+        "gzipBytes": 1298,
+        "contentEncoding": "gzip"
+      }
+    }
+  ],
+  "custodyInventoryVersion": 2,
+  "runMode": "resolver",
+  "ok": true,
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "artifacts": [
+    {
+      "artifactType": "resolver_response",
+      "path": "records/resolutions/2026-11-05/2026-11-05t20-49-38z-resolve-pending/responses/prs85006112-2026-11-05-84eeaaa70572f719.csv.gz",
+      "sha256": "4f7d2dc36eb7c4c5184817f12452ec5f021537717515f9b5522b5a0934107cab",
+      "bytes": 1298,
+      "createdAt": "2026-11-05T20:49:38Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "records/resolutions/2026-11-05/2026-11-05t20-49-38z-resolve-pending/manifest.json",
+      "sha256": "b2cdf3247669ede5302736a47d71acfadfdc198784117b6bfc7c9aa6fa0fb852",
+      "bytes": 1495,
+      "createdAt": "2026-11-05T20:49:38Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "custodyRootSha256": "0995a6e914a3fb3a92e1640918075e632001800aabc5567d94bc2959aec99a91"
+}
