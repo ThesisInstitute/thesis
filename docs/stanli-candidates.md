@@ -257,9 +257,10 @@ We also compare the selection rule's arms on the same targets with
 | `stanli-selected-ladder` over `stanli-selected-noskip-ladder` | 1.012 (1.000, 1.036) | 1.016 (0.999, 1.049) | 1.001 (1.000, 1.002) | 1.000 (0.999, 1.002) |
 | `stanli-selected` over `stanli-selected-noskip` | 1.012 (1.000, 1.036) | 1.014 (0.999, 1.045) | 1.001 (1.000, 1.002) | 1.000 (0.999, 1.001) |
 
-`persistence-ladder` beats the site's persistence interval, scoring 0.891 with
-60 prints and 0.896 with 36. Its median adds the window's median change to the
-last print, so it also follows a trend. Against that stronger baseline,
+`persistence-ladder` scores 0.891 (0.847, 0.929) against the site's persistence
+interval with 60 prints and 0.896 (0.835, 0.947) with 36, though its 36-print
+difference interval reaches zero. Its median adds the window's median change to
+the last print, so it also follows a trend. Against that stronger baseline,
 `stanli-ar1-t-ladder` scores 0.915 (0.869, 0.967) with 60 prints and 0.904
 (0.847, 0.971) with 36. Its difference intervals reach zero in both windows:
 -0.033 (-0.065, +0.003) and -0.046 (-0.086, +0.005).
