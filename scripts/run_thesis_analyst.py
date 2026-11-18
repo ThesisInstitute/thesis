@@ -167,10 +167,9 @@ def write_artifact(
     content: str | bytes,
     created_at: str,
 ) -> dict[str, Any]:
-    out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / filename
     data = content.encode() if isinstance(content, str) else content
-    path.write_bytes(data)
+    write_run_bytes(path, data)
     return {
         "artifactType": artifact_type,
         "path": repo_relative(path),
@@ -428,7 +427,7 @@ def custody_artifact_entry(
     out_dir: pathlib.Path, ref: dict[str, Any]
 ) -> dict[str, Any]:
     path = _artifact_path(out_dir, ref)
-    raw = path.read_bytes()
+    raw = read_run_bytes(path)
     entry: dict[str, Any] = {
         "artifactType": ref["artifactType"],
         "path": path.name,
@@ -499,9 +498,11 @@ def finalize_manifest(
 
     custody_root = build_custody_root(out_dir, refs, manifest)
     custody_path = out_dir / "custody_root.json"
-    custody_path.write_text(json.dumps(custody_root, indent=2) + "\n")
+    write_run_bytes(custody_path, (json.dumps(custody_root, indent=2) + "\n").encode())
     manifest["custodyRootSha256"] = canonical_sha256(custody_root)
-    (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    write_run_bytes(
+        out_dir / "manifest.json", (json.dumps(manifest, indent=2) + "\n").encode()
+    )
     return manifest
 
 
@@ -1496,12 +1497,16 @@ def redact_stream_line(line: str) -> str:
     stripped = line.strip()
     if not stripped:
         return line
+    # Agent output: an integer past Python's digit limit is a plain
+    # ValueError, and nesting past the decoder's stack a RecursionError.
+    # Either is just a line that is not JSON the runner can redact
+    # value-wise.
     try:
         payload = json.loads(stripped)
-    except json.JSONDecodeError:
+        redacted = redact_json_value(payload)
+        return line if redacted == payload else json.dumps(redacted)
+    except (ValueError, RecursionError):
         return redact_text(line)
-    redacted = redact_json_value(payload)
-    return line if redacted == payload else json.dumps(redacted)
 
 
 def redact_stream_text(text: str) -> str:
@@ -1527,10 +1532,10 @@ def redact_response_text(text: str) -> str:
         return text
     try:
         payload = json.loads(text)
-    except json.JSONDecodeError:
+        redacted = redact_json_value(payload)
+        return text if redacted == payload else json.dumps(redacted, indent=2)
+    except (ValueError, RecursionError):
         return redact_stream_text(text)
-    redacted = redact_json_value(payload)
-    return text if redacted == payload else json.dumps(redacted, indent=2)
 
 
 def run_agent_command(
@@ -1935,6 +1940,32 @@ _DIR_NOFOLLOW = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
 
 class UnsafeRunDirError(RuntimeError):
     """The run dir could not be put back; nothing more may be written to it."""
+
+
+class RunDirIOError(Exception):
+    """The runner's own read or write in the run dir failed.
+
+    The guard fingerprints modes, not macOS file flags or ACLs, and a disk
+    can fill, so a run dir can pass the guard and still refuse the runner.
+    The run then ends as an unsafe one does: no manifest, exit 1. This is
+    deliberately not a RuntimeError, OSError or ValueError, which the
+    failure paths record as ordinary run failures; it must reach main().
+    """
+
+
+def write_run_bytes(path: pathlib.Path, data: bytes) -> None:
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+    except OSError as exc:
+        raise RunDirIOError(f"write {path.name}: {exc}") from exc
+
+
+def read_run_bytes(path: pathlib.Path) -> bytes:
+    try:
+        return path.read_bytes()
+    except OSError as exc:
+        raise RunDirIOError(f"read {path.name}: {exc}") from exc
 
 
 def _status_line_inside(line: str, run_dir_token: str) -> bool:
@@ -2383,7 +2414,19 @@ def restore_run_dir(
         if aside is not None:
             _remove_tree_at(parent_fd, aside)
     except OSError as exc:
-        raise UnsafeRunDirError(f"run directory could not be rebuilt: {exc}") from exc
+        # Name what is left beside the run dir: the operator must remove it
+        # before anything adds the date folder wholesale.
+        left = ""
+        if aside is not None:
+            try:
+                os.stat(aside, dir_fd=parent_fd, follow_symlinks=False)
+            except OSError:
+                pass
+            else:
+                left = f"; the stage's tree is left at {out_dir.parent / aside}"
+        raise UnsafeRunDirError(
+            f"run directory could not be rebuilt: {exc}{left}"
+        ) from exc
 
 
 def run_codex_agent_command(
@@ -2677,13 +2720,19 @@ def _run_codex_agent_command(
     final_text = parsed["lastAssistantText"] or parsed["assistantText"]
     last_message_text = ""
     if last_message_file.exists():
-        stripped_last_message = last_message_file.read_text(errors="replace").strip()
+        decoded_last_message = read_run_bytes(last_message_file).decode(
+            errors="replace"
+        )
+        # The universal newlines Path.read_text gave this before.
+        stripped_last_message = (
+            decoded_last_message.replace("\r\n", "\n").replace("\r", "\n").strip()
+        )
         last_message_text = redact_response_text(stripped_last_message)
         if last_message_text != stripped_last_message:
             # Codex wrote this file directly into the run dir; keep the
             # on-disk copy clean even if sealing fails before the artifact
             # write overwrites it.
-            last_message_file.write_text(last_message_text)
+            write_run_bytes(last_message_file, last_message_text.encode())
         if last_message_text:
             final_text = last_message_text
     if not final_text and parsed["lastError"]:
@@ -3326,7 +3375,35 @@ def write_failure_manifest(
     )
 
 
+AGENT_JSON_MAX_DEPTH = 200
+
+
+def _json_depth_exceeds(value: Any, limit: int) -> bool:
+    """Whether a decoded JSON value nests containers more than limit deep."""
+    pending = [(value, 1)]
+    while pending:
+        item, depth = pending.pop()
+        if isinstance(item, dict):
+            children = item.values()
+        elif isinstance(item, list):
+            children = item
+        else:
+            continue
+        if depth > limit:
+            return True
+        pending.extend((child, depth + 1) for child in children)
+    return False
+
+
 def extract_json_payload(text: str) -> list[dict]:
+    """The first object, or array of objects, in agent output.
+
+    Raises ValueError for any failure to find one, so the run records it as
+    a parse failure. That includes output the decoder cannot represent: an
+    integer past Python's digit limit, JSON nested past the decoder's stack,
+    or any value nested deeper than AGENT_JSON_MAX_DEPTH, which the
+    recursive steps after parsing could not walk.
+    """
     stripped = text.strip()
     fenced = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", stripped, flags=re.S)
     if fenced:
@@ -3340,6 +3417,20 @@ def extract_json_payload(text: str) -> list[dict]:
             payload, _end = decoder.raw_decode(stripped[index:])
         except json.JSONDecodeError:
             continue
+        except RecursionError as exc:
+            # Raise rather than try the next bracket: every bracket inside
+            # this value would be decoded again, quadratic in its depth.
+            raise ValueError("agent output nests JSON too deeply to decode") from exc
+        except ValueError as exc:
+            # Valid JSON Python will not represent, such as an integer past
+            # the digit limit.
+            raise ValueError(
+                f"agent output holds JSON the decoder cannot represent: {exc}"
+            ) from exc
+        if _json_depth_exceeds(payload, AGENT_JSON_MAX_DEPTH):
+            raise ValueError(
+                f"agent output nests JSON more than {AGENT_JSON_MAX_DEPTH} levels deep"
+            )
         if isinstance(payload, dict):
             return [payload]
         if isinstance(payload, list) and all(
@@ -4398,6 +4489,13 @@ def main() -> int:
         # failed run with no manifest and refuses it.
         print(f"run directory unsafe after agent stage: {exc}", file=sys.stderr)
         return 1
+    except RunDirIOError as exc:
+        # The runner cannot read or write its own run dir: a stage set file
+        # flags or ACLs the guard does not fingerprint, or the disk is full.
+        # Whatever was written stays; there is no manifest, so the batch
+        # refuses the run as it does an unsafe one.
+        print(f"run directory I/O failed: {exc}", file=sys.stderr)
+        return 1
 
 
 def _main() -> int:
@@ -4747,20 +4845,25 @@ def _main() -> int:
         # Normalization coerces numeric strings ("1e309") into floats
         # the parse-time gate could not see; the parsed artifact holds
         # the original strings, so failing HERE still canonicalizes.
-        for index, cell in enumerate(json.loads(normalized_path.read_text())):
+        for index, cell in enumerate(json.loads(read_run_bytes(normalized_path))):
             _reject_unencodable_numbers(cell, f"normalized cell {index}")
     except RuntimeError as exc:
         # The subprocess may have written the poisoned file before the
         # sweep rejected it; an unreferenced artifact fails the v2
         # directory inventory, so the failure record must not leave it.
-        normalized_path.unlink(missing_ok=True)
+        try:
+            normalized_path.unlink(missing_ok=True)
+        except OSError as unlink_exc:
+            raise RunDirIOError(
+                f"remove {normalized_path.name}: {unlink_exc}"
+            ) from unlink_exc
         # A malformed cell (a JSON refusal object, a cell missing
         # historicalContext) must still leave a registration-bound
         # failure manifest — the uncaught path left no run record at
         # all, which blocked whole-wave publication ("result N lacks a
         # registration-bound manifest", the B1 rescue failure shape).
         return record_failure("normalize", str(exc))
-    normalized_cells = json.loads(normalized_path.read_text())
+    normalized_cells = json.loads(read_run_bytes(normalized_path))
     # The published runAt is the harness's SEAL time — captured here,
     # after the agent finished — never the agent's claim and never the
     # harness start time. Chronology verification requires the seal to
@@ -4806,18 +4909,20 @@ def _main() -> int:
             {
                 "artifactType": "normalized_cell",
                 "path": repo_relative(normalized_path),
-                "sha256": sha256_bytes(normalized_path.read_bytes()),
+                "sha256": sha256_bytes(read_run_bytes(normalized_path)),
                 "bytes": normalized_path.stat().st_size,
                 "createdAt": run_at,
             }
         )
         return record_failure("seal", f"{type(exc).__name__}: {exc}")
-    normalized_path.write_text(json.dumps(normalized_cells, indent=2) + "\n")
+    write_run_bytes(
+        normalized_path, (json.dumps(normalized_cells, indent=2) + "\n").encode()
+    )
     refs.append(
         {
             "artifactType": "normalized_cell",
             "path": repo_relative(normalized_path),
-            "sha256": sha256_bytes(normalized_path.read_bytes()),
+            "sha256": sha256_bytes(read_run_bytes(normalized_path)),
             "bytes": normalized_path.stat().st_size,
             "createdAt": run_at,
         }
@@ -4890,12 +4995,14 @@ def _main() -> int:
         or trusted_strategy_target is not None,
     )
     cells_path = out_dir / "cells.with_activity.json"
-    cells_path.write_text(json.dumps(cells_with_activity, indent=2) + "\n")
+    write_run_bytes(
+        cells_path, (json.dumps(cells_with_activity, indent=2) + "\n").encode()
+    )
     refs.append(
         {
             "artifactType": "cells_with_activity",
             "path": repo_relative(cells_path),
-            "sha256": sha256_bytes(cells_path.read_bytes()),
+            "sha256": sha256_bytes(read_run_bytes(cells_path)),
             "bytes": cells_path.stat().st_size,
             "createdAt": run_at,
         }

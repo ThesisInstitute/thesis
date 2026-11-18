@@ -737,8 +737,9 @@ def _verify_stage_record(
     which ranks below only a tool_evidence failure. The manifest's
     workspaceHygiene, when present, is exactly the stages' recorded
     mutations. A failure recorded before parsing carries the last stage's
-    exit status in error.command. Every custody-rooted analyst record met
-    these rules when they were added (471 runs, 2026-11-18).
+    exit status in error.command; any other run parsed, so its last stage
+    exited 0. Every custody-rooted analyst record met these rules when they
+    were added (471 runs on main, 2026-11-18).
     """
 
     stages = _stage_commands(run_dir, entries)
@@ -790,6 +791,10 @@ def _verify_stage_record(
                 f"{declared_phase}-failure error disagrees with its last "
                 "invocation stage"
             )
+    elif type(last.get("returnCode")) is int and last["returnCode"] != 0:
+        # The runner parses only once the last stage exited 0: any other
+        # exit is a command failure recorded before parsing.
+        raise CustodyError("a parsed run's last invocation stage exited nonzero")
 
 
 def _verify_cells_activity(

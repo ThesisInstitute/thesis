@@ -483,6 +483,220 @@ def test_run_dir_whose_path_changed_ends_with_no_record(tmp_path):
         assert not (moved / name).exists(), name
 
 
+# Agent output Python's decoder cannot take: each used to crash the runner
+# before it wrote a record, which refused the whole batch.
+# name: (codex lines, or None for a --command run; a Python expression for
+# the --command agent's output; the message prefixes it may record)
+UNDECODABLE: dict[str, tuple[list[str] | None, str, tuple[str, ...]]] = {
+    "bare-integer-past-digit-limit": (
+        None,
+        "'1' * 5000",
+        ("No JSON object or array found in agent output",),
+    ),
+    "integer-past-digit-limit-in-array": (
+        None,
+        "'[' + '1' * 5000 + ']'",
+        ("agent output holds JSON the decoder cannot represent: ",),
+    ),
+    "array-nested-past-the-decoder": (
+        None,
+        "'[' * 1_000_000 + ']' * 1_000_000",
+        (
+            "agent output nests JSON too deeply to decode",
+            # An interpreter whose decoder takes it still bounds the depth.
+            f"agent output nests JSON more than {runner.AGENT_JSON_MAX_DEPTH} "
+            "levels deep",
+        ),
+    ),
+    "object-nested-past-the-depth-limit": (
+        None,
+        "'{\"a\":' * 300 + '1' + '}' * 300",
+        (
+            f"agent output nests JSON more than {runner.AGENT_JSON_MAX_DEPTH} "
+            "levels deep",
+        ),
+    ),
+    "codex-last-message-integer-past-digit-limit": (
+        ["text = '1' * 5000"],
+        "",
+        ("No JSON object or array found in agent output",),
+    ),
+}
+
+
+@pytest.mark.parametrize("name", sorted(UNDECODABLE))
+def test_undecodable_agent_output_is_a_parse_failure_the_publisher_retains(
+    tmp_path, monkeypatch, name
+):
+    codex_lines, output, messages = UNDECODABLE[name]
+    staged = tmp_path / "staged"
+    out_dir = staged / RUN_RELATIVE
+    if codex_lines is None:
+        agent = tmp_path / "agent.py"
+        agent.write_text(
+            f"import sys\nsys.stdin.read()\nsys.stdout.write({output} + '\\n')\n"
+        )
+        args = ["--command", f"{shlex.quote(sys.executable)} {shlex.quote(str(agent))}"]
+        env = None
+    else:
+        args = ["--codex-model", "test-model"]
+        env = _codex_env(tmp_path, codex_lines)
+    completed = _run(out_dir, args, env)
+    assert completed.returncode == 1, completed.stderr[-2000:]
+
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    assert manifest["ok"] is False
+    assert manifest["cellsPath"] is None
+    assert manifest["error"]["phase"] == "parse"
+    assert manifest["error"]["message"].startswith(messages), manifest["error"]
+    assert (out_dir / "raw_response.txt").stat().st_size > 0
+    verification = verify_run(out_dir)
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is False
+    _publish_one(monkeypatch, staged, manifest, ok=False)
+
+
+def test_undecodable_review_falls_back_to_its_summary():
+    """The reviewer's output goes through the same extraction; one it cannot
+    decode is a review with no fixes, not a crash."""
+
+    for text in ("[" + "1" * 5000 + "]", "[" * 1_000_000 + "]" * 1_000_000):
+        review = runner.parse_review_payload(text)
+        assert review["requiredFixes"] == []
+        assert review["summary"] == text[:240]
+
+
+# The runner's own reads and writes in the run dir, failed from outside the
+# guard's view (as file flags, ACLs or a full disk would fail them).
+IO_FAILURES = [
+    ("write_bytes", "command.json", "write command.json"),
+    ("write_bytes", "manifest.json", "write manifest.json"),
+    ("read_bytes", "parsed_cells.json", "read parsed_cells.json"),
+]
+
+
+@pytest.mark.parametrize(("method", "name", "expected"), IO_FAILURES)
+def test_run_dir_io_failure_ends_with_no_record(tmp_path, method, name, expected):
+    """The runner cannot record a run in a run dir it cannot read or write:
+    it exits 1 with no manifest and says why, as for an unsafe run dir."""
+
+    wrapper = tmp_path / "runner_with_io_failure.py"
+    wrapper.write_text(
+        "\n".join(
+            [
+                "import pathlib, runpy, sys",
+                f"sys.path.insert(0, {str(RUNNER.parent)!r})",
+                f"real = pathlib.Path.{method}",
+                "def failing(self, *args, **kwargs):",
+                f"    if self.name == {name!r}:",
+                "        raise PermissionError(1, 'not permitted', str(self))",
+                "    return real(self, *args, **kwargs)",
+                f"pathlib.Path.{method} = failing",
+                f"sys.argv[0] = {str(RUNNER)!r}",
+                f"runpy.run_path({str(RUNNER)!r}, run_name='__main__')",
+            ]
+        )
+        + "\n"
+    )
+    out_dir = tmp_path / "run"
+    agent = _command(tmp_path, "agent", text=OUTPUTS["valid"])
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(wrapper),
+            "--series",
+            "test.codex_rate",
+            "--period",
+            "2030-01",
+            "--command",
+            agent,
+            "--out-dir",
+            str(out_dir),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=300,
+    )
+
+    assert completed.returncode == 1
+    assert f"run directory I/O failed: {expected}: " in completed.stderr
+    assert "Traceback" not in completed.stderr
+    assert not (out_dir / "manifest.json").exists()
+
+
+def test_rebuild_that_cannot_remove_the_stage_tree_names_what_is_left(
+    tmp_path, monkeypatch
+):
+    """When the stage's tree cannot be removed, the run ends unsafe and the
+    error names the directory left beside the run dir."""
+
+    monkeypatch.setattr(runner, "git_porcelain_lines", lambda _out_dir: [])
+    out_dir = tmp_path / "run"
+    out_dir.mkdir()
+    (out_dir / "prompt.md").write_text("p")
+    pre = runner.workspace_guard_snapshot(out_dir)
+    try:
+        (out_dir / "planted.txt").write_text("x")
+        assert runner.workspace_guard_violations(pre, out_dir, {ALLOWED})
+
+        def cannot_remove(_parent_fd, name):
+            raise PermissionError(1, "Operation not permitted", name)
+
+        monkeypatch.setattr(runner, "_remove_tree_at", cannot_remove)
+        with pytest.raises(runner.UnsafeRunDirError) as raised:
+            runner.restore_run_dir(pre, out_dir, {ALLOWED})
+    finally:
+        runner.close_workspace_guard(pre)
+    left = [name for name in os.listdir(tmp_path) if name.startswith(".run.stage-")]
+    assert len(left) == 1
+    assert str(raised.value).endswith(
+        f"; the stage's tree is left at {tmp_path / left[0]}"
+    )
+    assert (tmp_path / left[0] / "planted.txt").read_text() == "x"
+
+
+MACOS_LOCKS = {
+    # Neither file flags nor ACLs are in the guard's fingerprint: the stage
+    # passes the guard and the runner's next write into the run dir fails.
+    "last-message-immutable": "os.chflags(last_message, stat.UF_IMMUTABLE)",
+    "run-dir-immutable": "os.chflags(last_message.parent, stat.UF_IMMUTABLE)",
+    "run-dir-acl-denies-new-files": (
+        "subprocess.run(['/bin/chmod', '+a', 'everyone deny add_file', "
+        "str(last_message.parent)], check=True)"
+    ),
+}
+
+
+@pytest.mark.skipif(
+    sys.platform != "darwin", reason="macOS file flags and ACLs (chflags, chmod +a)"
+)
+@pytest.mark.parametrize("name", sorted(MACOS_LOCKS))
+def test_stage_that_locks_the_run_dir_on_macos_ends_with_no_record(tmp_path, name):
+    out_dir = tmp_path / "day" / "run"
+    env = _codex_env(
+        tmp_path,
+        [
+            "import atexit, os, stat, subprocess",
+            f"atexit.register(lambda: {MACOS_LOCKS[name]})",
+        ],
+    )
+    args = ["--codex-model", "test-model", "--codex-sandbox", "workspace-write"]
+    try:
+        completed = _run(out_dir, args, env)
+    finally:
+        for path in (out_dir / ALLOWED, out_dir):
+            if path.exists():
+                os.chflags(path, 0)
+        if out_dir.exists():
+            subprocess.run(["/bin/chmod", "-N", str(out_dir)], check=True)
+
+    assert completed.returncode == 1
+    assert "run directory I/O failed: write " in completed.stderr
+    assert "Traceback" not in completed.stderr
+    assert not (out_dir / "manifest.json").exists()
+
+
 # --- Invariants over every stage-outcome combination ------------------------
 
 FLOWS = {
@@ -742,6 +956,23 @@ def _judged(observed: Any) -> Any:
     contents={"prompt.md": b"p"},
     mutations=[("hardlink", ALLOWED, b"", 0o600)],
 )
+@example(
+    # A write inside a new subdirectory, then that subdirectory locked.
+    contents={"prompt.md": b"p"},
+    mutations=[
+        ("mkdir", "nested", b"", 0o600),
+        ("nested", "nested", b"x", 0o600),
+        ("lock", "nested", b"", 0o000),
+    ],
+)
+@example(
+    # A plain stage output beside a plant: rebuilt, and the output kept.
+    contents={"prompt.md": b"p"},
+    mutations=[
+        ("write", ALLOWED, b"cells", 0o600),
+        ("write", "planted.txt", b"x", 0o600),
+    ],
+)
 def test_guard_sees_and_undoes_every_run_dir_mutation(
     tmp_path_factory, monkeypatch, contents, mutations
 ):
@@ -749,8 +980,10 @@ def test_guard_sees_and_undoes_every_run_dir_mutation(
     permission changes and replacements of the run dir itself: the guard
     reports a violation exactly when the run dir differs from the runner's
     pre-stage state plus a plain stage output file, and rebuilding returns
-    it to exactly that state. The rebuild never writes, chmods or removes
-    through a link, and leaves nothing of its own beside the run dir."""
+    it to exactly that state: the stage output kept, as a plain file the
+    runner owns, exactly when it was plain. The rebuild never writes, chmods
+    or removes through a link, and leaves nothing of its own beside the run
+    dir."""
 
     monkeypatch.setattr(runner, "git_porcelain_lines", lambda _out_dir: [])
     root = tmp_path_factory.mktemp("guard")
@@ -766,7 +999,12 @@ def test_guard_sees_and_undoes_every_run_dir_mutation(
         for mutation in mutations:
             _mutate(out_dir, outside, *mutation)
         moved = _observe(root / "moved")
-        changed = _judged(_observe(out_dir)) != pristine
+        after = _observe(out_dir)
+        changed = _judged(after) != pristine
+        output = after[2].get(ALLOWED) if after and after[0] == "dir" else None
+        plain_output = (
+            _judged(("dir", 0, {ALLOWED: output}))[2] == {} if output else False
+        )
         violations = runner.workspace_guard_violations(pre, out_dir, {ALLOWED})
         assert bool(violations) is changed, violations
         if violations:
@@ -774,6 +1012,10 @@ def test_guard_sees_and_undoes_every_run_dir_mutation(
     finally:
         runner.close_workspace_guard(pre)
     assert _judged(_observe(out_dir)) == pristine
+    if violations:
+        assert _observe(out_dir / ALLOWED) == (
+            ("file", 0o644, output[2], 1, output[4]) if plain_output else None
+        )
     assert _observe(root / "moved") == moved
     assert outside.read_bytes() == b"untouched"
     expected = {"run", "outside.txt", *(["moved"] if moved is not None else [])}
@@ -789,8 +1031,11 @@ EXIT_3 = [
     "import atexit, os",
     "atexit.register(lambda: (sys.stdout.flush(), os._exit(3)))",
 ]
-# kind: (codex lines, or None for a --command run; the phase it records)
-FAILED_RUNS: dict[str, tuple[list[str] | None, str]] = {
+# kind: (codex lines, or None for a --command run; the phase it records, or
+# None for a run that parsed: "valid" seals ok, "invalid" fails validation)
+FAILED_RUNS: dict[str, tuple[list[str] | None, str | None]] = {
+    "valid": (None, None),
+    "invalid": (None, None),
     "command": (None, "command"),
     "review_failed": (None, "command"),
     "reviewed_parse": (None, "parse"),
@@ -801,8 +1046,8 @@ FAILED_RUNS: dict[str, tuple[list[str] | None, str]] = {
 
 
 def _failed_run(root: Path, kind: str) -> Path:
-    """A freshly sealed failed run of one of the FAILED_RUNS kinds. Sealed
-    paths outside the checkout are absolute, so each forgery seals its own."""
+    """A freshly sealed run of one of the FAILED_RUNS kinds. Sealed paths
+    outside the checkout are absolute, so each forgery seals its own."""
 
     out_dir = root / "run"
     codex_lines, phase = FAILED_RUNS[kind]
@@ -810,8 +1055,10 @@ def _failed_run(root: Path, kind: str) -> Path:
     if codex_lines is not None:
         env = _codex_env(root, codex_lines)
         args = ["--codex-model", "test-model", "--codex-sandbox", "workspace-write"]
-    elif kind == "command":
-        agent = _command(root, "agent", text=OUTPUTS["valid"], exit_code=2)
+    elif kind in {"valid", "invalid", "command"}:
+        output = "invalid" if kind == "invalid" else "valid"
+        exit_code = 2 if kind == "command" else 0
+        agent = _command(root, "agent", text=OUTPUTS[output], exit_code=exit_code)
         args = ["--command", agent]
     else:
         agent = _command(
@@ -825,9 +1072,9 @@ def _failed_run(root: Path, kind: str) -> Path:
         )
         args = ["--command", agent, "--pre-submit-review-command", reviewer]
     completed = _run(out_dir, args, env)
-    assert completed.returncode == 1, completed.stderr[-2000:]
+    assert completed.returncode == int(kind != "valid"), completed.stderr[-2000:]
     manifest = json.loads((out_dir / "manifest.json").read_text())
-    assert manifest["error"]["phase"] == phase
+    assert (manifest.get("error") or {}).get("phase") == phase
     return out_dir
 
 
@@ -922,6 +1169,12 @@ def _earlier_stage_failed(out_dir, _manifest, artifacts, _refs):
     artifacts["draft_command.json"] = command
 
 
+def _last_stage_exited_2(out_dir, _manifest, artifacts, _refs):
+    command = json.loads((out_dir / "command.json").read_text())
+    command["returnCode"] = 2
+    artifacts["command.json"] = command
+
+
 FINAL_STAGE = ("command.json", "stdout.txt", "stderr.txt", "revision_prompt.md")
 
 
@@ -1011,6 +1264,18 @@ FORGERIES = [
         "reviewed_parse",
         _final_stage_dropped,
         "invocation stages disagree with the order the runner runs them in",
+    ),
+    (
+        # A run that parsed presented as one whose stage failed: the runner
+        # parses only once the last stage exited 0.
+        "valid",
+        _last_stage_exited_2,
+        "a parsed run's last invocation stage exited nonzero",
+    ),
+    (
+        "invalid",
+        _last_stage_exited_2,
+        "a parsed run's last invocation stage exited nonzero",
     ),
 ]
 
