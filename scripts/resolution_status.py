@@ -70,8 +70,9 @@ _LINE_RULES: tuple[tuple[re.Pattern[str], str, str], ...] = tuple(
             "SOURCE_UNREACHABLE",
         ),
         # resolve_pending.ALFRED_VINTAGE_*: ALFRED answered with an earlier
-        # day's vintage, the day has not begun in St. Louis, or the bytes are
-        # not a vintage CSV of the series asked for.
+        # day's vintage, the day has not begun on US Central standard time
+        # (alfred_vintage.alfred_today), or the bytes are not a vintage CSV of
+        # the series asked for.
         (
             r"^ALFRED VINTAGE LAGGED \(deferring\)$",
             "deferred",
@@ -148,9 +149,10 @@ REASONS = {
     ),
     "ALFRED_VINTAGE_LAGGED": (
         "ALFRED answered the resolver's request for this figure's release-day "
-        "vintage with an earlier day's vintage, in every spelling of the "
-        "request. An earlier day's vintage cannot show the release-day print, "
-        "so the resolver waits for one labeled the release day."
+        "vintage with an earlier day's vintage, and no spelling of the "
+        "request was answered with the release day's. An earlier day's "
+        "vintage may not show the release-day print, so the resolver waits "
+        "for one labeled the release day."
     ),
     "WINDOW_NOT_OPEN": "The registered release window for this figure has not opened.",
     "SOURCE_UNREACHABLE": (

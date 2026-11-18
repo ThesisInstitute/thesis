@@ -2823,51 +2823,73 @@ def _verify_legacy_derived_without_root(
     )
 
 
-def _verify_resolver_alfred_labels(run_dir: Path, manifest: dict[str, Any]) -> None:
+# A response whose header names an ALFRED vintage. The series token takes
+# the archive-name alphabet, so an id with digits, "_" or "." is judged too
+# (backtracking splits PAYEMS_X_20261002 at its last "_"), and
+# alfred_vintage_label then holds the header to exactly that series.
+_ALFRED_VINTAGE_HEADER = re.compile(rb"observation_date,([A-Za-z0-9._-]+)_[0-9]{8}")
+
+
+def _verify_resolver_alfred_labels(run_dir: Path, manifest: dict[str, Any]) -> int:
     """Each fact read from an ALFRED vintage holds ALFRED's vintage of its day.
 
     ALFRED sometimes answers a request for one day with an earlier day's
     vintage and names that day in the header (scripts/alfred_vintage.py).
     A fact's own response is the read its value came from: the generic leg's
-    read of the resolutionDate (ALFRED_VINTAGE_LABEL_LAG) or the claims leg's
-    release-day read (CLAIMS_LABEL_LAG["release_day"]), both lag 0. So a
-    fact's own response whose header names an ALFRED vintage must name its
-    sourceVintage, for the series its archive is named for. Responses with
-    any other header are another adapter's and are not judged here; the
-    claims leg's other reads are judge_claims_first_print's.
+    read of the resolutionDate (ALFRED_VINTAGE_LABEL_LAG) or, for a weekly
+    claims fact, the claims leg's release-day read
+    (CLAIMS_LABEL_LAG["release_day"]). So a fact's own response whose header
+    names an ALFRED vintage must name its sourceVintage, less that lag, and
+    be archived under its series and sourceVintage. Responses with any other
+    header are another adapter's and are not judged here; the claims leg's
+    other reads are judge_claims_first_print's. Returns how many facts it
+    judged.
     """
 
-    lag = timedelta(days=ALFRED_VINTAGE_LABEL_LAG)
+    judged = 0
     for fact in manifest["facts"]:
         declared = str(fact["responseArchive"].get("path", ""))
         relative = _manifest_relative(run_dir, declared, legacy=False)
         raw = gzip.decompress(_safe_artifact_path(run_dir, relative).read_bytes())
-        header = raw.split(b"\n", 1)[0].removesuffix(b"\r")
-        match = re.fullmatch(rb"observation_date,([A-Za-z0-9]+)_\d{8}", header)
+        # rstrip, as alfred_vintage_label reads the header.
+        header = raw.split(b"\n", 1)[0].rstrip(b"\r")
+        match = _ALFRED_VINTAGE_HEADER.fullmatch(header)
         if match is None:
             continue
-        series = match.group(1).decode()
-        record = fact.get("dataPointId")
+        judged += 1
+        series = match.group(1).decode("ascii")
+        record = str(fact.get("dataPointId"))
         try:
-            vintage = date.fromisoformat(str(fact.get("sourceVintage")))
+            # Exactly YYYY-MM-DD, as _verify_first_print_evidence reads it.
+            vintage = datetime.strptime(
+                str(fact.get("sourceVintage")), "%Y-%m-%d"
+            ).date()
         except ValueError as exc:
             raise CustodyError(
                 f"resolver fact {record} has no sourceVintage date for its ALFRED "
                 f"response {relative}"
             ) from exc
-        if not PurePosixPath(relative).name.startswith(f"{series.lower()}-"):
+        name = PurePosixPath(relative).name
+        if not name.startswith(f"{series.lower()}-{vintage.isoformat()}-"):
             raise CustodyError(
-                f"resolver fact {record} archives ALFRED {series} as {relative}"
+                f"resolver fact {record} archives ALFRED {series} of {vintage} "
+                f"as {relative}"
             )
         try:
             label = alfred_vintage_label(raw, series, vintage)
         except AlfredVintageError as exc:
             raise CustodyError(f"resolver fact {record}: {exc}") from exc
-        if label < vintage - lag:
+        days = (
+            CLAIMS_LABEL_LAG["release_day"][0]
+            if CLAIMS_RECORD_RE.match(record)
+            else ALFRED_VINTAGE_LABEL_LAG
+        )
+        if label < vintage - timedelta(days=days):
             raise CustodyError(
                 f"resolver fact {record} keeps ALFRED's {series} vintage of "
                 f"{label} as its vintage of {vintage}: {relative}"
             )
+    return judged
 
 
 def verify_run(run_dir: Path) -> CustodyVerification:

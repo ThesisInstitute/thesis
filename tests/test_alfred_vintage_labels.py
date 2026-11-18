@@ -10,8 +10,8 @@ bytes.
 Invariants tested here:
 
 1. alfred_vintage_label returns the header's date exactly when the header is
-   ``observation_date,<series>_<YYYYMMDD>`` with a real date no later than the
-   day asked for; anything else raises AlfredVintageError.
+   ``observation_date,<series>_<YYYYMMDD>``, in ASCII digits, with a real date
+   no later than the day asked for; anything else raises AlfredVintageError.
 2. read_alfred_vintage's rows are exactly the header's vintage's dated,
    non-missing observations; any other line is refused.
 3. The generic ALFRED leg (read_alfred_vintage_of) returns rows only from a
@@ -20,11 +20,15 @@ Invariants tested here:
    only after an earlier label; and stops at a later label, invalid bytes or
    an HTTP error.
 4. alfred_today never runs ahead of the date in US Central, US Eastern or UTC.
-5. Custody refuses a resolver fact whose own ALFRED archive is labeled other
-   than its sourceVintage, and every real resolver run on this branch passes.
+5. Custody, through verify_run, refuses a resolver fact whose own ALFRED
+   archive is labeled other than its sourceVintage or archived under another
+   series or day; it judges every ALFRED vintage header, and every real
+   resolver run on this branch passes.
 6. On a response labeled the day asked for, the new reader's rows equal the
    pre-label parser's; on a lagged one the old parser found no rows (the cell
    deferred as "not yet published") and the new reader refuses it by name.
+   On ASCII headers the claims leg's header rule accepts and refuses exactly
+   what #345's did; it refuses non-ASCII digits, which #345 took in the year.
 """
 
 from __future__ import annotations
@@ -124,6 +128,12 @@ def test_fixtures_are_the_captured_bytes() -> None:
         assert asked is not None
         if dt.date.fromisoformat(asked.group(1)) > dt.date(2026, 10, 18):
             assert "thesis_lag_probe=" in capture["url"]
+    listed = {
+        (ROOT / capture["fixture"]).name
+        for capture in captures
+        if (ROOT / capture["fixture"]).parent == LABELS
+    }
+    assert {path.name for path in LABELS.glob("*.csv.gz")} == listed
 
 
 # --- invariant 1 and 2 on real bytes -------------------------------------------
@@ -195,6 +205,10 @@ def test_a_label_after_the_day_asked_for_is_refused() -> None:
         (b"observation_date,PAYEMS_20261002,extra\n2026-09-01,1\n", "PAYEMS"),
         (b"", "PAYEMS"),
         (b"\xff\xfe", "PAYEMS"),
+        # Digits from other scripts, which int() would read.
+        ("observation_date,PAYEMS_2026100\u0662\n2026-09-01,1\n".encode(), "PAYEMS"),
+        ("observation_date,PAYEMS_\uff12026\u0661002\n".encode(), "PAYEMS"),
+        (b"\xef\xbb\xbfobservation_date,PAYEMS_20261002\n2026-09-01,1\n", "PAYEMS"),
     ],
 )
 def test_bytes_that_are_not_this_series_vintage_csv_are_refused(
@@ -218,12 +232,21 @@ def test_bytes_that_are_not_this_series_vintage_csv_are_refused(
         b"2026-09-01,1\n\n2026-10-01,2\n",  # a blank line inside
         b"2026-09-01,1,2\n",
         ("2026-09-01," + "9" * 400 + "\n").encode(),  # overflows a float
+        "2026-09-01,\u0663\n".encode(),  # an Arabic-Indic digit
+        "2026-0\u0669-01,3\n".encode(),
+        b"2026-09-01,.\n2026-08-01,2\n",  # out of order after a missing mark
+        b"2026-08-01,\n2026-08-01,2\n",  # repeated after a missing mark
     ],
 )
 def test_rows_that_are_not_dated_observations_are_refused(body: bytes) -> None:
     raw = b"observation_date,PAYEMS_20261002\n" + body
     with pytest.raises(AlfredVintageError):
         read_alfred_vintage(raw, "PAYEMS", RELEASE)
+
+
+def test_a_header_with_trailing_carriage_returns_is_read() -> None:
+    raw = b"observation_date,PAYEMS_20261002\r\r\n2026-09-01,1\n"
+    assert alfred_vintage_label(raw, "PAYEMS", RELEASE) == RELEASE
 
 
 def test_missing_marks_are_left_out_and_crlf_is_read() -> None:
@@ -343,7 +366,19 @@ def test_alfred_today_is_us_central_standard_time() -> None:
         alfred_today(dt.datetime(2026, 10, 2, 13, 40))
 
 
+def test_alfred_today_reads_the_clock_when_given_no_time() -> None:
+    # The resolver calls it with no argument. Bracketing the call keeps this
+    # true across a midnight.
+    before = dt.datetime.now(dt.timezone.utc)
+    today = alfred_today()
+    after = dt.datetime.now(dt.timezone.utc)
+    assert alfred_today(before) <= today <= alfred_today(after)
+
+
 dates = st.dates(min_value=dt.date(1990, 1, 1), max_value=dt.date(2035, 12, 31))
+
+
+HTML = b"<!DOCTYPE html><html><body>Service unavailable</body></html>"
 
 
 @settings(max_examples=300, deadline=None)
@@ -351,23 +386,32 @@ dates = st.dates(min_value=dt.date(1990, 1, 1), max_value=dt.date(2035, 12, 31))
     day=dates,
     today_offset=st.integers(min_value=-3, max_value=3),
     answers=st.lists(
-        st.one_of(st.none(), st.integers(min_value=-4, max_value=2)),
+        st.one_of(st.none(), st.just("html"), st.integers(min_value=-4, max_value=2)),
         min_size=2,
         max_size=2,
     ),
 )
 def test_rows_come_only_from_a_response_labeled_the_day(
-    day: dt.date, today_offset: int, answers: list[int | None]
+    day: dt.date, today_offset: int, answers: list[int | str | None]
 ) -> None:
-    """Invariant 3 over every pattern of answers: an HTTP error, or a label
-    ``offset`` days from the day asked for, per spelling."""
+    """Invariant 3 over every pattern of answers, per spelling: an HTTP error,
+    bytes that are no vintage CSV, or a label ``offset`` days from the day
+    asked for. Each body's one row is told apart by spelling and offset."""
     today = day + dt.timedelta(days=today_offset)
     urls = [canonical("TEST", day), reordered("TEST", day)]
+
+    def body(index: int, offset: int | str | None) -> bytes | None:
+        if offset is None:
+            return None
+        if offset == "html":
+            return HTML
+        value = str(10 * index + offset + 5)
+        return vintage_csv(
+            "TEST", day + dt.timedelta(days=offset), [("2000-01-01", value)]
+        )
+
     bodies = {
-        url: None
-        if offset is None
-        else vintage_csv("TEST", day + dt.timedelta(days=offset), [("2000-01-01", "7")])
-        for url, offset in zip(urls, answers)
+        url: body(i, offset) for i, (url, offset) in enumerate(zip(urls, answers))
     }
     fake = FakeAlfred(bodies)
     with frozen_alfred_today(today):
@@ -378,28 +422,31 @@ def test_rows_come_only_from_a_response_labeled_the_day(
         assert read.refusal is not None
         assert read.refusal[0] == resolve_pending.ALFRED_VINTAGE_NOT_REACHED
         return
+
+    def earlier(offset: int | str | None) -> bool:
+        return isinstance(offset, int) and offset < 0
+
     # Requests stop at the first answer that is not an earlier label.
     expected_requests = 0
     for offset in answers:
         expected_requests += 1
-        if offset is None or offset >= 0:
+        if not earlier(offset):
             break
     assert len(fake.requested) == expected_requests
-    exact = [
-        url for url, offset in zip(urls[:expected_requests], answers) if offset == 0
-    ]
+    asked = list(enumerate(answers[:expected_requests]))
+    exact = [i for i, offset in asked if offset == 0]
     if exact:
         assert read.refusal is None
-        assert read.rows == {"2000-01-01": 7.0}
-        assert read.source_url == exact[0]
-        assert read.raw == bodies[exact[0]]
+        assert read.rows == {"2000-01-01": float(10 * exact[0] + 5)}
+        assert read.source_url == urls[exact[0]]
+        assert read.raw == bodies[urls[exact[0]]]
     else:
         assert read.rows == {}
     last = answers[expected_requests - 1]
-    if last is not None and last > 0:
+    if last == "html" or (isinstance(last, int) and last > 0):
         assert read.refusal is not None
         assert read.refusal[0] == resolve_pending.ALFRED_READ_FAILED
-    if all(offset is not None and offset < 0 for offset in answers):
+    if all(earlier(offset) for offset in answers):
         assert read.refusal is not None
         assert read.refusal[0] == resolve_pending.ALFRED_VINTAGE_LAGGED
     if answers[0] is None:
@@ -578,7 +625,8 @@ def test_each_verdict_has_its_status(head: str, state: str, code: str) -> None:
 
 def test_a_reordered_url_passes_the_registered_host_check() -> None:
     # The registered ALFRED binding names the canonical URL without a
-    # vintage; provenance and the site compare only its host.
+    # vintage; resolver provenance compares only its host. (The site's check,
+    # site/src/data/thesis-log.ts, is host-only too, but is not tested here.)
     stem = "fed.g17.industrial_production.total_index_mom"
     spec = resolve_pending.ALFRED_ADAPTERS[stem]
     url = reordered(spec["fred"], RELEASE)
@@ -615,49 +663,118 @@ def test_a_reordered_url_passes_the_registered_host_check() -> None:
 # --- invariant 5: custody ------------------------------------------------------
 
 
-def custody_run(tmp_path: pathlib.Path, series: str, vintage: str, raw: bytes):
+def custody_run(
+    tmp_path: pathlib.Path,
+    series: str,
+    vintage: str,
+    raw: bytes,
+    *,
+    record: str = PAYROLL_REF,
+    archive_day: str | None = None,
+    fact: dict | None = None,
+):
     run_dir = tmp_path / "records" / "resolutions" / vintage / "run"
     responses = run_dir / "responses"
     responses.mkdir(parents=True)
-    name = f"{series.lower()}-{vintage}-{hashlib.sha256(raw).hexdigest()[:16]}.csv.gz"
+    day = archive_day or vintage
+    name = f"{series.lower()}-{day}-{hashlib.sha256(raw).hexdigest()[:16]}.csv.gz"
     (responses / name).write_bytes(gzip.compress(raw, mtime=0))
-    manifest = {
-        "facts": [
-            {
-                "dataPointId": PAYROLL_REF,
-                "sourceVintage": vintage,
-                "responseArchive": {"path": f"responses/{name}"},
-            }
-        ]
+    row = {
+        "dataPointId": record,
+        "sourceVintage": vintage,
+        "responseArchive": {"path": f"responses/{name}"},
     }
-    return run_dir, manifest
+    if fact is not None:
+        row = {**row, **fact}
+        row = {key: value for key, value in row.items() if value is not ABSENT}
+    return run_dir, {"facts": [row]}
+
+
+ABSENT = object()
 
 
 def test_custody_keeps_a_fact_labeled_its_vintage(tmp_path) -> None:
     run_dir, manifest = custody_run(
         tmp_path, "PAYEMS", "2026-10-02", real("payems_2026-10-02_reordered")
     )
-    verify_custody._verify_resolver_alfred_labels(run_dir, manifest)
+    assert verify_custody._verify_resolver_alfred_labels(run_dir, manifest) == 1
+
+
+LAGGED_PRS = b"observation_date,PRS85006112_20261104\n2026-07-01,2.4\n"
+LAGGED_CRLF = b"observation_date,PAYEMS_20261001\r\n2026-08-01,159015\r\n"
 
 
 @pytest.mark.parametrize(
-    ("series", "vintage", "name", "message"),
+    ("series", "vintage", "raw", "kwargs", "message"),
     [
         (
             "PAYEMS",
             "2026-10-02",
-            "payems_2026-10-01_reordered",
+            real("payems_2026-10-01_reordered"),
+            {},
             "keeps ALFRED's PAYEMS vintage of 2026-10-01 as its vintage of 2026-10-02",
         ),
-        ("PAYEMS", "2026-10-01", "payems_2026-10-02", "a later vintage"),
-        ("ICSA", "2026-10-02", "payems_2026-10-02", "archives ALFRED PAYEMS"),
+        ("PAYEMS", "2026-10-01", real("payems_2026-10-02"), {}, "a later vintage"),
+        (
+            "ICSA",
+            "2026-10-02",
+            real("payems_2026-10-02"),
+            {},
+            "archives ALFRED PAYEMS of 2026-10-02",
+        ),
+        # A series id with digits, and a CRLF answer, are judged too.
+        (
+            "PRS85006112",
+            "2026-11-05",
+            LAGGED_PRS,
+            {},
+            "keeps ALFRED's PRS85006112 vintage of 2026-11-04",
+        ),
+        (
+            "PAYEMS",
+            "2026-10-02",
+            LAGGED_CRLF,
+            {},
+            "keeps ALFRED's PAYEMS vintage of 2026-10-01",
+        ),
+        # The archive must be named for the fact's own day.
+        (
+            "PAYEMS",
+            "2026-10-02",
+            real("payems_2026-10-02"),
+            {"archive_day": "2026-10-01"},
+            "archives ALFRED PAYEMS of 2026-10-02",
+        ),
+        # A weekly claims fact's own response is its release-day read, lag 0.
+        (
+            "ICSA",
+            "2026-09-25",
+            real("icsa_2026-09-25"),
+            {"record": "us.dol.initial_claims.sa.week_2026-09-19"},
+            "keeps ALFRED's ICSA vintage of 2026-09-24 as its vintage of 2026-09-25",
+        ),
     ],
 )
 def test_custody_refuses_a_fact_labeled_otherwise(
-    tmp_path, series: str, vintage: str, name: str, message: str
+    tmp_path, series: str, vintage: str, raw: bytes, kwargs: dict, message: str
 ) -> None:
-    run_dir, manifest = custody_run(tmp_path, series, vintage, real(name))
+    run_dir, manifest = custody_run(tmp_path, series, vintage, raw, **kwargs)
     with pytest.raises(verify_custody.CustodyError, match=re.escape(message)):
+        verify_custody._verify_resolver_alfred_labels(run_dir, manifest)
+
+
+@pytest.mark.parametrize("source_vintage", [ABSENT, None, "2026-10", "20261002"])
+def test_custody_refuses_an_alfred_fact_with_no_source_vintage(
+    tmp_path, source_vintage
+) -> None:
+    run_dir, manifest = custody_run(
+        tmp_path,
+        "PAYEMS",
+        "2026-10-02",
+        real("payems_2026-10-02"),
+        fact={"sourceVintage": source_vintage},
+    )
+    with pytest.raises(verify_custody.CustodyError, match="has no sourceVintage date"):
         verify_custody._verify_resolver_alfred_labels(run_dir, manifest)
 
 
@@ -665,25 +782,92 @@ def test_custody_leaves_other_adapters_responses_alone(tmp_path) -> None:
     run_dir, manifest = custody_run(
         tmp_path, "PAYEMS", "2026-10-02", b'{"Results": {"series": []}}'
     )
-    verify_custody._verify_resolver_alfred_labels(run_dir, manifest)
+    assert verify_custody._verify_resolver_alfred_labels(run_dir, manifest) == 0
+
+
+def test_the_claims_and_generic_release_day_lags_agree() -> None:
+    # Custody picks the lag by fact; both are 0, as the resolver reads them.
+    assert verify_custody.ALFRED_VINTAGE_LABEL_LAG == 0
+    assert verify_custody.CLAIMS_LABEL_LAG["release_day"][0] == 0
+
+
+def sealed_payroll_run(tmp_path, monkeypatch, raw: bytes):
+    """A generic-leg resolver run for the payroll cell, sealed by the resolver."""
+
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    spec = resolve_pending.ALFRED_ADAPTERS[PAYROLL_STEM]
+    url = reordered("PAYEMS", RELEASE)
+    row = resolve_pending.generic_fact(
+        PAYROLL_REF, spec, "month", "2026-09", 29.0, RELEASE, url, "alfredgraph.csv"
+    )
+    run_dir = resolve_pending.resolution_run_dir("2026-10-02T13:40:00Z")
+    run_dir.mkdir(parents=True)
+    attached = resolve_pending.attach_resolution_provenance(
+        row,
+        run_dir=run_dir,
+        series_id="PAYEMS",
+        vintage=RELEASE.isoformat(),
+        raw=raw,
+        retrieved_at="2026-10-02T13:40:00Z",
+        ledger_repo_sha="a" * 40,
+        target_contracts={},
+    )
+    manifest = {
+        "schemaVersion": "thesis_resolution_run_v1",
+        "retrievedAt": "2026-10-02T13:40:00Z",
+        "ledgerRepo": "PolicyEngine/chronicle",
+        "ledgerBranch": "facts",
+        "ledgerRepoSha": "a" * 40,
+        "facts": [
+            {
+                "dataPointId": PAYROLL_REF,
+                "sourceVintage": attached["sourceVintage"],
+                "retrievedAt": attached["retrievedAt"],
+                "targetContentHash": None,
+                "responseArchive": attached["responseArchive"],
+            }
+        ],
+    }
+    return run_dir, resolve_pending.finalize_resolution_manifest(run_dir, manifest)
+
+
+def test_a_sealed_run_labeled_its_day_verifies(tmp_path, monkeypatch) -> None:
+    run_dir, _manifest = sealed_payroll_run(
+        tmp_path, monkeypatch, real("payems_2026-10-02_reordered")
+    )
+    assert verify_custody.verify_run(run_dir).run_mode == "resolver"
+
+
+def test_sealing_a_run_with_a_lagged_archive_is_refused(tmp_path, monkeypatch) -> None:
+    # finalize_resolution_manifest seals the run and then calls verify_run,
+    # which must reach the label check: a hash-only check passes these bytes.
+    with pytest.raises(
+        verify_custody.CustodyError,
+        match=re.escape("keeps ALFRED's PAYEMS vintage of 2026-10-01"),
+    ):
+        sealed_payroll_run(tmp_path, monkeypatch, real("payems_2026-10-01_reordered"))
 
 
 def test_every_real_resolver_run_keeps_alfreds_vintage_of_its_day() -> None:
     runs = sorted((ROOT / "records" / "resolutions").glob("*/*/manifest.json"))
     if not runs:
         pytest.skip("records/ is not checked out")
-    checked = 0
+    judged = vintage_headers = 0
     for manifest_path in runs:
         manifest = json.loads(manifest_path.read_text())
         if manifest.get("runMode") != "resolver":
             continue
-        verify_custody._verify_resolver_alfred_labels(manifest_path.parent, manifest)
+        judged += verify_custody._verify_resolver_alfred_labels(
+            manifest_path.parent, manifest
+        )
         for fact in manifest["facts"]:
             path = ROOT / fact["responseArchive"]["path"]
             if gzip.decompress(path.read_bytes()).startswith(b"observation_date,"):
-                checked += 1
-    # 65 ALFRED fact archives across the resolver runs on main on 2026-11-18.
-    assert checked >= 65
+                vintage_headers += 1
+    # Custody judged every archive with an ALFRED-style header: 65 across
+    # the resolver runs on main on 2026-11-18, every one a vintage.
+    assert judged == vintage_headers
+    assert judged >= 65
 
 
 # --- invariant 6: against the parsers it replaces ------------------------------
@@ -784,15 +968,15 @@ headers = st.builds(
         ),
         st.text(alphabet="0123456789", min_size=7, max_size=9),
     ),
-    st.sampled_from(["", "\r", "_x", ",ICSA"]),
+    st.sampled_from(["", "\r", "\r\r", "\r\r\r", "_x", ",ICSA"]),
 )
 
 
 @settings(max_examples=400, deadline=None)
 @given(header=headers, day=dates)
 def test_the_claims_leg_reads_labels_as_before(header: str, day: dt.date) -> None:
-    """The header rule read_alfred_claims_vintage now takes from
-    alfred_vintage_label accepts and refuses exactly what its own did."""
+    """On ASCII headers, the header rule read_alfred_claims_vintage now takes
+    from alfred_vintage_label accepts and refuses exactly what its own did."""
     raw = (header + "\n1967-01-07,1\n").encode()
     try:
         before = pre_shared_claims_label(raw, "ICSA", day.isoformat())
@@ -803,6 +987,20 @@ def test_the_claims_leg_reads_labels_as_before(header: str, day: dt.date) -> Non
     except AlfredVintageError:
         now = None
     assert now == before
+
+
+@pytest.mark.parametrize("digit", ["\u0662", "\uff12", "\u096a"])
+@pytest.mark.parametrize("position", [0, 3, 5, 7])
+def test_a_label_in_another_scripts_digits_is_refused(
+    digit: str, position: int
+) -> None:
+    # #345's strptime took such digits in the year only; the shared rule,
+    # like custody's bytes pattern, takes ASCII digits alone.
+    token = list("20260924")
+    token[position] = digit
+    raw = f"observation_date,ICSA_{''.join(token)}\n1967-01-07,1\n".encode()
+    with pytest.raises(AlfredVintageError):
+        alfred_vintage_label(raw, "ICSA", dt.date(2026, 9, 30))
 
 
 def test_the_claims_leg_reads_its_label_through_the_shared_reader() -> None:

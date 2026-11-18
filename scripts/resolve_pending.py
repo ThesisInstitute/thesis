@@ -588,16 +588,18 @@ def read_alfred_vintage_of(
     """ALFRED's vintage of ``day``, taken only from a response labeled ``day``
     (verify_custody.ALFRED_VINTAGE_LABEL_LAG).
 
-    ALFRED sometimes answers with an earlier day's vintage under that day's
-    label (scripts/alfred_vintage.py). Such a response cannot stand for
-    ``day``: a release on ``day`` is missing from it, and archived as
-    ``day``'s vintage it would misdate the record. So the request is made
-    in each spelling in turn until one is answered with ``day``'s label.
-    The read is refused, with a verdict for the caller to print, when
+    ALFRED sometimes answers with an earlier day's label, in a file
+    byte-identical to its answer for that earlier day
+    (scripts/alfred_vintage.py). Such a response cannot stand for ``day``:
+    it may lack a release made on ``day``, and archived as ``day``'s vintage
+    it would misdate the record. So the request is made in each spelling in
+    turn until one is answered with ``day``'s label. The read is refused,
+    with a verdict for the caller to print, when
 
-    - ``day`` is after alfred_today(), before anything is requested: ALFRED
-      would answer with an earlier day's vintage;
-    - every spelling is answered with an earlier day's label;
+    - ``day`` is after alfred_today(), before anything is requested;
+    - no spelling is answered with ``day``'s label, and at least the first
+      is answered with an earlier one (a later spelling may get an HTTP
+      error instead);
     - a response is not a vintage CSV of the series, or is labeled after
       ``day``.
 
