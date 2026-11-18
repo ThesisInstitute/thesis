@@ -1,0 +1,32 @@
+name: ALFRED label mutants (throwaway, PR 470)
+
+on:
+  push:
+    branches: [tmp/alfred470-mutants]
+
+permissions:
+  contents: read
+
+jobs:
+  mutants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+      - name: Install package with all extras
+        run: uv sync --all-extras
+      - name: Run the test files this PR touches
+        run: >-
+          uv run pytest -q -p no:cacheprovider
+          tests/test_resolution_status.py tests/test_alfred_vintage_labels.py
+          tests/test_claims_first_vintage.py tests/test_resolve_pending.py
+      - name: Run each mutant against the label tests
+        if: always()
+        run: uv run python .github/alfred470-mutants/run_mutants.py . mutants.json
+      - name: Summary
+        if: always()
+        run: cat mutants.json
