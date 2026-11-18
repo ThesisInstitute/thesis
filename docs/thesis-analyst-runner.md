@@ -123,21 +123,29 @@ Codex invocation (recorded in `command.json` with `networkAccess: true`) and
 injects a fetch-honesty note into the fast/full prompt: fetch with
 `curl -sS`, read values only from the echoed response, and fail honestly if
 a fetch fails. Because workspace-write also makes the checkout writable, the
-runner guards the workspace around every network-enabled agent stage: it
-fingerprints the run directory and the git tree before the stage and fails
-the run closed on any mutation beyond the agent's own last-message file
-(`workspaceMutations` in each stage's `command.json`, `workspaceHygiene` in
+runner guards the workspace around every network-enabled agent stage. It
+fingerprints the run directory and the git tree before the stage, and fails
+the run on any mutation beyond the agent's own last-message file
+(`workspaceMutations` in the stage's `command.json`, `workspaceHygiene` in
 `manifest.json`, and a `workspace_hygiene` failure; see
-[Failed runs](#failed-runs)). The run-directory fingerprint covers bytes and
-permission bits and sees links, directories and special files. The run
-directory belongs to the runner, so the guard also puts it back before
-anything reads or writes it, even when the stage removed or replaced it: whatever the stage created there is removed, and
-every artifact the stage changed or deleted is rewritten from the runner's
-own bytes. The violations name each path; the agent's bytes are not kept. The
-rest of the checkout is the operator's and is never touched. Custody
-inventory v2 independently rejects unreferenced files at promotion; the guard
-fails at run time and covers the rest of the worktree. Ladder modes keep their sealed contracts
-and do not gain the prompt note; the flag is for fast/full lanes only.
+[Failed runs](#failed-runs)). A reviewed run stops at the first stage that
+mutates the workspace. The run-directory fingerprint covers bytes, permission
+bits and link counts, and sees links, directories and special files.
+
+The run directory belongs to the runner, so after such a stage the guard
+rebuilds it before anything reads or writes it. It moves the stage's directory
+aside, makes a fresh one, and writes back the runner's own artifacts and the
+stage's last message if that is a plain file. Every step works relative to the
+run directory's parent, which the runner opened before the stage, and refuses
+to follow a link. A link the stage planted, below the run directory or in its
+place, is therefore never written, removed or chmodded through. If the run
+directory cannot be rebuilt (the path to it changed, or the stage left a tree
+the runner cannot remove), the runner writes nothing more and exits 1 with no
+manifest. The violations name each path; the agent's bytes are not kept. The
+rest of the checkout is the operator's and is never touched. Custody inventory
+v2 independently rejects unreferenced files at promotion. Ladder modes keep
+their sealed contracts and do not gain the prompt note; the flag is for
+fast/full lanes only.
 Codex runs default to the read-only sandbox and may inspect local repo context
 when useful, including prior run manifests, activity artifacts, generated
 comparison data, prediction packs, ledger targets, docs, and tests. The prompt
@@ -157,12 +165,15 @@ python3 scripts/run_thesis_analyst.py \
 ```
 
 Agent commands default to a 600 second timeout. Use `--timeout-seconds` to make
-smoke tests shorter or longer. A timeout writes `command.json`, `stdout.txt`,
-`stderr.txt`, `raw_response.txt`, `error.json`, and `manifest.json` with
-`ok: false` and a `command` failure, even when what the agent printed before
-the timeout would validate. Codex runs additionally write `codex_stdout.jsonl`,
-`codex_stderr.log`, `codex_events.jsonl`, `codex_last_message.txt`, and
-`codex_trace.json`.
+smoke tests shorter or longer. A `--command` agent that times out (exit 124)
+writes `command.json`, `stdout.txt`, `stderr.txt`, `raw_response.txt`,
+`error.json`, and `manifest.json` with `ok: false` and a `command` failure, even
+when what it printed before the timeout would validate. A Codex stage that
+times out after writing its final message is finished: its `command.json`
+records `timedOut: true` with return code 0, and its output is validated like
+any other. A Codex stage that times out with no final message is a `command`
+failure. Codex runs additionally write `codex_stdout.jsonl`, `codex_stderr.log`,
+`codex_events.jsonl`, `codex_last_message.txt`, and `codex_trace.json`.
 
 When the command names a model with `-m`, `--model`, or `--model=...`, the
 runner records that runtime model in `manifest.json` and in generated cell
@@ -179,15 +190,16 @@ agent's output is parsed, in this precedence:
 | --- | --- |
 | `tool_evidence` | A stage's tool evidence failed replay or native binding ([tool evidence](tool-evidence.md)). |
 | `workspace_hygiene` | A guarded stage mutated the workspace. |
-| `command` | A stage exited nonzero, timed out, could not start, or was refused by the ticket stream binding. In a reviewed run, the message names the stage that failed: draft forecaster, pre-submit reviewer, or revision forecaster. |
+| `command` | A stage exited nonzero, timed out without a final message, could not start, or was refused by the ticket stream binding. In a reviewed run, the message names the stage that failed: draft forecaster, pre-submit reviewer, or revision forecaster. |
 | `parse` | The output holds no JSON cells, an empty payload, or numbers custody cannot encode. |
 
-These records keep the prompt, every stage's artifacts, `stdout.txt` and
+These records keep the prompt, the artifacts of every stage that ran, and
 `raw_response.txt`, and seal nothing downstream of parsing: no parsed or
-normalized cells, distribution, validation report or cells payload. `ok` is
-false and `validation` and `cellsPath` are null. A harness failure after
-parsing (`normalize`, `seal`, `validate`) keeps the artifacts its stage had
-written.
+normalized cells, distribution, validation report or cells payload. A reviewed
+run that stopped at its draft or review has that stage's `draft_` or
+`pre_submit_review_` artifacts and no `stdout.txt`. `ok` is false and
+`validation` and `cellsPath` are null. A harness failure after parsing
+(`normalize`, `seal`, `validate`) keeps the artifacts its stage had written.
 
 A run that reaches validation seals its cells, and its `ok` is exactly the
 validation result. The publishers depend on that. `docket_publication.py` and
@@ -198,12 +210,26 @@ validated, and that one run refused every other forecast in its batch.
 
 Custody (`scripts/verify_custody.py`) verifies each pre-parse phase with the
 parse-failure inventory and refuses a record that presents as complete or
-carries post-parse artifacts. It also holds `command` to the last stage's
-`command.json`: a nonzero return code and timeout flag that match
-`error.command`, every earlier stage at zero, and no recorded workspace
-mutation. It holds `workspace_hygiene` to the mutations the stages recorded,
-in stage order. A failure cannot be relabelled or invented unless the stage
-records are rewritten to match.
+carries post-parse artifacts. It holds every analyst record to its stage
+`command.json` records:
+
+- The stages are a single forecaster, or the reviewed flow up to where it
+  stopped. Every stage before the last exited 0 and recorded no mutation, and a
+  reviewed run without its revision ends at a stage that failed.
+- A recorded mutation means the phase is `workspace_hygiene`, or
+  `tool_evidence`, which ranks above it. `workspaceHygiene`, when present, is
+  exactly the stages' recorded mutations.
+- A pre-parse failure's `error.command` is the last stage's return code and
+  timeout flag.
+- A `command` failure's last stage exited nonzero. A `workspace_hygiene`
+  failure recorded at least one mutation.
+
+So a workspace mutation cannot be relabelled as `command` or `parse`, and no
+failure can be moved to a stage that did not fail. Custody cannot tell a
+`command` failure from a `parse` failure whose stage also exited nonzero:
+records from before these rules (2026-11-18) have that shape. It does not
+check whether a `tool_evidence` label matches the stage's evidence beyond
+what [tool evidence](tool-evidence.md) verifies.
 
 ## Credential hygiene
 

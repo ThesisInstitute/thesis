@@ -16,7 +16,6 @@ from __future__ import annotations
 import json
 import os
 import shlex
-import shutil
 import stat
 import subprocess
 import sys
@@ -25,7 +24,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from hypothesis import HealthCheck, given, settings
+from hypothesis import HealthCheck, example, given, settings
 from hypothesis import strategies as st
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -188,6 +187,8 @@ def _publisher_replay_ok(out_dir: Path, manifest: dict[str, Any]) -> bool:
 # --- End to end: each failure is a failed trace the publisher retains -------
 
 PROBE = f"hygiene-probe-{uuid.uuid4().hex}.txt"
+# 100 levels of this name is a path longer than PATH_MAX on Linux and macOS.
+DEEP = "d" * 60
 
 
 def _hygiene_case(*lines: str) -> dict[str, Any]:
@@ -285,6 +286,84 @@ CASES: dict[str, dict[str, Any]] = {
         "outside = last_message.parent.parents[4] / 'outside.txt'",
         "(last_message.parent / 'stdout.txt').symlink_to(outside)",
     ),
+    "plant-then-exit-nonzero": _hygiene_case(
+        # Both a mutation and a failed exit: the mutation is what is recorded.
+        "(last_message.parent / 'planted.txt').write_text('agent wrote this')",
+        "import atexit, os",
+        "atexit.register(lambda: (sys.stdout.flush(), os._exit(3)))",
+    ),
+    "reviewed-draft-mutates": {
+        # The flow stops at the stage that mutated: the reviewer never runs on
+        # top of what the draft left.
+        **_hygiene_case(
+            "(last_message.parent / 'planted.txt').write_text('agent wrote this')"
+        ),
+        "reviewer": 0,
+        "absent": [
+            "pre_submit_review_prompt.md",
+            "pre_submit_review_command.json",
+            "command.json",
+        ],
+    },
+    "run-dir-replaced-by-link": {
+        # The run dir becomes a link to a directory outside it. The guard
+        # rebuilds a real run dir and never writes or removes through the link.
+        **_hygiene_case(
+            "import atexit, shutil",
+            "sibling = last_message.parent.parents[4] / 'sibling'",
+            "def swap():",
+            "    sibling.mkdir()",
+            "    (sibling / 'keep.txt').write_text('untouched')",
+            "    shutil.rmtree(last_message.parent)",
+            "    last_message.parent.symlink_to(sibling)",
+            "atexit.register(swap)",
+        ),
+        "mutation": "run directory replaced or removed during agent stage",
+        "sibling": ["keep.txt"],
+    },
+    "last-message-not-plain": {
+        # A stage output the runner could not rewrite as its own is not kept.
+        **_hygiene_case(
+            "import atexit",
+            "atexit.register(lambda: last_message.chmod(0o500))",
+        ),
+        "mutation": "stage output is not a plain readable file after agent stage: "
+        "codex_last_message.txt",
+    },
+    "capture-files-deleted-beside-a-link": {
+        # The stage removes the runner's stdout/stderr captures (TMPDIR is
+        # writable to it) and plants a link: the guard still runs.
+        **_hygiene_case(
+            "import os",
+            "def capture_path(fd):",
+            "    proc = f'/proc/self/fd/{fd}'",
+            "    if os.path.exists(proc):",
+            "        return os.readlink(proc)",
+            "    import fcntl",
+            "    return fcntl.fcntl(fd, fcntl.F_GETPATH, bytes(1024))"
+            ".split(b'\\0')[0].decode()",
+            "for fd in (1, 2):",
+            "    os.unlink(capture_path(fd))",
+            "outside = last_message.parent.parents[4] / 'outside.txt'",
+            "(last_message.parent / 'stdout.txt').symlink_to(outside)",
+        ),
+        "mutation": "unexpected file created in run dir during agent stage: stdout.txt",
+    },
+    "run-dir-chain-past-path-max": {
+        # Deeper than any path the runner could name: it is removed through
+        # descriptors, not paths, so the rebuild still completes.
+        **_hygiene_case(
+            "import os",
+            "fd = os.open(last_message.parent, os.O_RDONLY)",
+            "for _ in range(100):",
+            f"    os.mkdir({DEEP!r}, dir_fd=fd)",
+            f"    child = os.open({DEEP!r}, os.O_RDONLY, dir_fd=fd)",
+            "    os.close(fd)",
+            "    fd = child",
+            "os.close(fd)",
+        ),
+        "mutation": f"unexpected file created in run dir during agent stage: {DEEP}",
+    },
 }
 
 
@@ -334,6 +413,7 @@ def test_failed_stage_is_a_failed_trace_the_publisher_retains(
             f"agent stage mutated the workspace ({len(mutations)} violation(s)): "
             f"{mutations[0]}"
         )
+        assert case.get("mutation", mutations[0]) in mutations
     else:
         assert error["message"] == case["message"]
     # The stage's output survives as the raw response, cells and all; nothing
@@ -344,17 +424,63 @@ def test_failed_stage_is_a_failed_trace_the_publisher_retains(
         assert not (out_dir / artifact).exists(), artifact
     # The run dir is exactly what the runner wrote: the agent's plants are
     # gone, its edits undone, and nothing was written through a link.
+    assert out_dir.is_dir() and not out_dir.is_symlink()
     assert not (out_dir / "planted.txt").exists()
+    assert not (out_dir / DEEP).exists()
     assert not (out_dir / "prompt.md").read_text().endswith("tampered")
     assert not os.access(out_dir / "prompt.md", os.X_OK)
     assert not (out_dir / "stdout.txt").is_symlink()
     assert outside.read_text() == "untouched\n"
+    # Nothing of the stage's tree is left beside the run dir either.
+    assert not [name for name in os.listdir(out_dir.parent) if ".stage-" in name]
+    for name in case.get("absent", []):
+        assert not (out_dir / name).exists(), name
+    if "sibling" in case:
+        sibling = tmp_path / "sibling"
+        assert sorted(os.listdir(sibling)) == case["sibling"]
+        assert (sibling / "keep.txt").read_text() == "untouched"
 
     verification = verify_run(out_dir)
     assert verification.inventory_status == "complete"
     assert verification.run_succeeded is False
     assert not verification.headline_eligible
     _publish_one(monkeypatch, staged, manifest, ok=False)
+
+
+def test_run_dir_whose_path_changed_ends_with_no_record(tmp_path):
+    """The stage swaps the run dir's parent for a link elsewhere. The runner
+    cannot put the run dir back where its path leads, so it writes nothing
+    more anywhere and exits 1 with no manifest."""
+
+    out_dir = tmp_path / "day" / "run"
+    elsewhere = tmp_path / "elsewhere"
+    (elsewhere / "run").mkdir(parents=True)
+    (elsewhere / "run" / "keep.txt").write_text("untouched")
+    env = _codex_env(
+        tmp_path,
+        [
+            "import atexit",
+            "day = last_message.parent.parent",
+            "def swap():",
+            "    day.rename(day.with_name('moved'))",
+            f"    day.symlink_to({str(elsewhere)!r})",
+            "atexit.register(swap)",
+        ],
+    )
+    args = ["--codex-model", "test-model", "--codex-sandbox", "workspace-write"]
+    completed = _run(out_dir, args, env)
+
+    assert completed.returncode == 1
+    assert (
+        "run directory unsafe after agent stage: the path to the run directory "
+        "changed during the stage"
+    ) in completed.stderr
+    assert sorted(os.listdir(elsewhere / "run")) == ["keep.txt"]
+    assert (elsewhere / "run" / "keep.txt").read_text() == "untouched"
+    moved = tmp_path / "moved" / "run"
+    assert (moved / "prompt.md").is_file()
+    for name in ("manifest.json", "error.json", "command.json", "raw_response.txt"):
+        assert not (moved / name).exists(), name
 
 
 # --- Invariants over every stage-outcome combination ------------------------
@@ -462,7 +588,18 @@ def test_stage_failure_records_every_non_validation_failure(
 ARTIFACTS = ("prompt.md", "stdout.txt", "command.json", "draft_stdout.txt")
 ALLOWED = "codex_last_message.txt"
 NAMES = (*ARTIFACTS, ALLOWED, "planted.txt", "nested", ".")
-OPS = ["write", "mkdir", "link_out", "link_in", "delete", "chmod", "nested", "lock"]
+OPS = [
+    "write",
+    "mkdir",
+    "link_out",
+    "link_in",
+    "hardlink",
+    "delete",
+    "chmod",
+    "nested",
+    "lock",
+    "relink",
+]
 MUTATION = st.tuples(
     st.sampled_from(OPS),
     st.sampled_from(NAMES),
@@ -471,19 +608,43 @@ MUTATION = st.tuples(
 )
 
 
+def _remove(path: Path) -> None:
+    """Remove path the way an agent would, links themselves and not their
+    targets. The guard's own remover is what is under test."""
+
+    if path.is_symlink() or not path.is_dir():
+        path.unlink()
+        return
+    path.chmod(0o700)
+    for child in path.iterdir():
+        _remove(child)
+    path.rmdir()
+
+
 def _mutate(out_dir: Path, outside: Path, op: str, name: str, data: bytes, mode: int):
     """One agent write. A write the agent's own permissions refuse is a
     no-op, as it would be in the sandbox."""
 
     path = out_dir / name
-    real_dir = path.is_dir() and not path.is_symlink()
-    if name == "." and op != "lock":
-        return
     try:
-        if op in {"mkdir", "link_out", "link_in"} and (
+        if name == ".":
+            real_run_dir = out_dir.is_dir() and not out_dir.is_symlink()
+            moved = out_dir.with_name("moved")
+            if op == "delete" and (out_dir.is_symlink() or out_dir.exists()):
+                _remove(out_dir)
+            elif op == "relink" and real_run_dir and not moved.exists():
+                # The run dir becomes a link to the directory it was.
+                out_dir.rename(moved)
+                out_dir.symlink_to(moved)
+            elif op == "lock" and real_run_dir:
+                out_dir.chmod(mode & 0o700)
+            return
+        real_dir = path.is_dir() and not path.is_symlink()
+        if op in {"mkdir", "link_out", "link_in", "hardlink"} and (
             path.is_symlink() or path.exists()
         ):
-            runner._remove_run_dir_entry(path)
+            _remove(path)
+        prompt_md = out_dir / "prompt.md"
         if op == "write" and not real_dir:
             path.unlink(missing_ok=True)
             path.write_bytes(data)
@@ -492,21 +653,66 @@ def _mutate(out_dir: Path, outside: Path, op: str, name: str, data: bytes, mode:
         elif op == "link_out":
             path.symlink_to(outside)
         elif op == "link_in":
-            path.symlink_to(out_dir / "prompt.md")
+            path.symlink_to(prompt_md)
+        elif op == "hardlink" and prompt_md.is_file() and not prompt_md.is_symlink():
+            os.link(prompt_md, path)
         elif op == "delete" and (path.is_symlink() or path.exists()):
-            runner._remove_run_dir_entry(path)
+            _remove(path)
         elif op == "chmod" and path.is_file() and not path.is_symlink():
             path.chmod(mode)
         elif op == "nested" and real_dir:
             (path / "inner.txt").write_bytes(data)
         elif op == "lock" and real_dir:
             path.chmod(mode & 0o700)
-    except PermissionError:
+    except OSError:
         pass
 
 
-def _plain(entry: Any) -> bool:
-    return entry is not None and entry[0] is not None and entry[1] & 0o600 == 0o600
+def _observe(path: Path) -> Any:
+    """What is at path, by the test's own lstat walk that never follows a
+    link: a link's target; a file's mode, size, link count and bytes (None
+    when unreadable); a directory's mode and everything below it."""
+
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return None
+    mode = stat.S_IMODE(info.st_mode)
+    if stat.S_ISLNK(info.st_mode):
+        return ("link", os.readlink(path))
+    if stat.S_ISREG(info.st_mode):
+        try:
+            content = path.read_bytes()
+        except PermissionError:
+            content = None
+        return ("file", mode, info.st_size, info.st_nlink, content)
+    if not stat.S_ISDIR(info.st_mode):
+        return ("other", stat.S_IFMT(info.st_mode))
+    path.chmod(0o700)  # list everything, then put the mode back
+    try:
+        children = {child.name: _observe(child) for child in path.iterdir()}
+    finally:
+        path.chmod(mode)
+    return ("dir", mode, children)
+
+
+def _judged(observed: Any) -> Any:
+    """The run dir as the guard must judge it: a stage output that is a plain
+    file the runner can read and rewrite as its own is allowed."""
+
+    if observed is None or observed[0] != "dir":
+        return observed
+    children = dict(observed[2])
+    output = children.get(ALLOWED)
+    if (
+        output is not None
+        and output[0] == "file"
+        and output[4] is not None
+        and output[3] == 1
+        and output[1] & 0o600 == 0o600
+    ):
+        del children[ALLOWED]
+    return ("dir", observed[1], children)
 
 
 @settings(
@@ -520,13 +726,31 @@ def _plain(entry: Any) -> bool:
     ),
     mutations=st.lists(MUTATION, max_size=6),
 )
+@example(
+    # A stage output the runner could read but not rewrite.
+    contents={"prompt.md": b"p"},
+    mutations=[("write", ALLOWED, b"x", 0o600), ("chmod", ALLOWED, b"", 0o500)],
+)
+@example(
+    # The run dir replaced by a link to the directory it was, then written
+    # through.
+    contents={"prompt.md": b"p"},
+    mutations=[("relink", ".", b"", 0o600), ("write", "planted.txt", b"x", 0o600)],
+)
+@example(
+    # A second name for a runner artifact.
+    contents={"prompt.md": b"p"},
+    mutations=[("hardlink", ALLOWED, b"", 0o600)],
+)
 def test_guard_sees_and_undoes_every_run_dir_mutation(
     tmp_path_factory, monkeypatch, contents, mutations
 ):
-    """For any run dir and any sequence of agent writes, links and permission
-    changes: the guard reports a violation exactly when the run dir differs
-    from the runner's pre-stage state plus a plain stage output file, and
-    restoring returns it to exactly that without writing through a link."""
+    """For any run dir and any sequence of agent writes, links, hard links,
+    permission changes and replacements of the run dir itself: the guard
+    reports a violation exactly when the run dir differs from the runner's
+    pre-stage state plus a plain stage output file, and rebuilding returns
+    it to exactly that state. The rebuild never writes, chmods or removes
+    through a link, and leaves nothing of its own beside the run dir."""
 
     monkeypatch.setattr(runner, "git_porcelain_lines", lambda _out_dir: [])
     root = tmp_path_factory.mktemp("guard")
@@ -536,50 +760,74 @@ def test_guard_sees_and_undoes_every_run_dir_mutation(
     outside.write_bytes(b"untouched")
     for name, data in contents.items():
         (out_dir / name).write_bytes(data)
+    pristine = _observe(out_dir)
     pre = runner.workspace_guard_snapshot(out_dir)
-    for mutation in mutations:
-        _mutate(out_dir, outside, *mutation)
-
-    def state() -> tuple[int, dict[str, Any]]:
-        mode = stat.S_IMODE(out_dir.stat().st_mode)
-        out_dir.chmod(0o700)  # observe everything, then put the mode back
-        try:
-            visible = runner.run_dir_entries(out_dir)
-        finally:
-            out_dir.chmod(mode)
-        if _plain(visible.get(ALLOWED)):
-            del visible[ALLOWED]
-        return mode, visible
-
-    pristine = (pre["outDirMode"], pre["outDirEntries"])
-    changed = state() != pristine
-    violations = runner.workspace_guard_violations(pre, out_dir, {ALLOWED})
-    assert bool(violations) is changed, violations
-    runner.restore_run_dir(pre, out_dir, {ALLOWED})
-    assert state() == pristine
+    try:
+        for mutation in mutations:
+            _mutate(out_dir, outside, *mutation)
+        moved = _observe(root / "moved")
+        changed = _judged(_observe(out_dir)) != pristine
+        violations = runner.workspace_guard_violations(pre, out_dir, {ALLOWED})
+        assert bool(violations) is changed, violations
+        if violations:
+            runner.restore_run_dir(pre, out_dir, {ALLOWED})
+    finally:
+        runner.close_workspace_guard(pre)
+    assert _judged(_observe(out_dir)) == pristine
+    assert _observe(root / "moved") == moved
     assert outside.read_bytes() == b"untouched"
-    shutil.rmtree(root, ignore_errors=True)
+    expected = {"run", "outside.txt", *(["moved"] if moved is not None else [])}
+    assert set(os.listdir(root)) == expected
+    _remove(root)
 
 
 # --- Custody refuses forged stage-failure records ---------------------------
 
 
+PLANT = "(last_message.parent / 'planted.txt').write_text('x')"
+EXIT_3 = [
+    "import atexit, os",
+    "atexit.register(lambda: (sys.stdout.flush(), os._exit(3)))",
+]
+# kind: (codex lines, or None for a --command run; the phase it records)
+FAILED_RUNS: dict[str, tuple[list[str] | None, str]] = {
+    "command": (None, "command"),
+    "review_failed": (None, "command"),
+    "reviewed_parse": (None, "parse"),
+    "workspace_hygiene": ([PLANT], "workspace_hygiene"),
+    "hygiene_exit": ([PLANT, *EXIT_3], "workspace_hygiene"),
+    "guarded_exit": (EXIT_3, "command"),
+}
+
+
 def _failed_run(root: Path, kind: str) -> Path:
-    """A freshly sealed command-failed or workspace-failed run. Sealed paths
-    outside the checkout are absolute, so each forgery seals its own."""
+    """A freshly sealed failed run of one of the FAILED_RUNS kinds. Sealed
+    paths outside the checkout are absolute, so each forgery seals its own."""
 
     out_dir = root / "run"
-    if kind == "command":
-        agent = _command(root, "agent", text=OUTPUTS["valid"], exit_code=2)
-        completed = _run(out_dir, ["--command", agent])
-    else:
-        env = _codex_env(
-            root, ["(last_message.parent / 'planted.txt').write_text('x')"]
-        )
+    codex_lines, phase = FAILED_RUNS[kind]
+    env = None
+    if codex_lines is not None:
+        env = _codex_env(root, codex_lines)
         args = ["--codex-model", "test-model", "--codex-sandbox", "workspace-write"]
-        completed = _run(out_dir, args, env)
+    elif kind == "command":
+        agent = _command(root, "agent", text=OUTPUTS["valid"], exit_code=2)
+        args = ["--command", agent]
+    else:
+        agent = _command(
+            root,
+            "agent",
+            text=OUTPUTS["valid"],
+            revision_text=OUTPUTS["unparseable"],
+        )
+        reviewer = _command(
+            root, "reviewer", text=REVIEW, exit_code=int(kind == "review_failed")
+        )
+        args = ["--command", agent, "--pre-submit-review-command", reviewer]
+    completed = _run(out_dir, args, env)
     assert completed.returncode == 1, completed.stderr[-2000:]
-    assert json.loads((out_dir / "manifest.json").read_text())["error"]["phase"] == kind
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    assert manifest["error"]["phase"] == phase
     return out_dir
 
 
@@ -651,6 +899,38 @@ def _mutations_rewritten(_out_dir, manifest, _artifacts, _refs):
     manifest["workspaceHygiene"]["mutations"] = ["a mutation no stage recorded"]
 
 
+def _hygiene_fabricated(_out_dir, manifest, _artifacts, _refs):
+    manifest["workspaceHygiene"] = {
+        "guarded": True,
+        "mutations": ["a mutation no stage recorded"],
+    }
+
+
+def _error_timed_out(_out_dir, manifest, artifacts, _refs):
+    manifest["error"]["command"]["timedOut"] = True
+    artifacts["error.json"] = manifest["error"]
+
+
+def _error_command_dropped(_out_dir, manifest, artifacts, _refs):
+    manifest["error"]["command"] = None
+    artifacts["error.json"] = manifest["error"]
+
+
+def _earlier_stage_failed(out_dir, _manifest, artifacts, _refs):
+    command = json.loads((out_dir / "draft_command.json").read_text())
+    command["returnCode"] = 2
+    artifacts["draft_command.json"] = command
+
+
+FINAL_STAGE = ("command.json", "stdout.txt", "stderr.txt", "revision_prompt.md")
+
+
+def _final_stage_dropped(out_dir, _manifest, _artifacts, refs):
+    for name in FINAL_STAGE:
+        (out_dir / name).unlink()
+    refs[:] = [ref for ref in refs if Path(str(ref["path"])).name not in FINAL_STAGE]
+
+
 FORGERIES = [
     ("command", _presents_complete, "does not present as failed"),
     (
@@ -685,6 +965,52 @@ FORGERIES = [
         "workspace_hygiene",
         _set_phase("command"),
         "command-failure error disagrees with its failed invocation stage",
+    ),
+    (
+        # The same relabel when the mutating stage also exited nonzero: its
+        # return code fits a command failure, its recorded mutations do not.
+        "hygiene_exit",
+        _set_phase("command"),
+        "stage workspace mutations disagree with the run's failure phase",
+    ),
+    (
+        "workspace_hygiene",
+        _set_phase("parse"),
+        "stage workspace mutations disagree with the run's failure phase",
+    ),
+    (
+        # A guarded stage that exited nonzero and mutated nothing.
+        "guarded_exit",
+        _set_phase("workspace_hygiene"),
+        "workspace_hygiene-failure manifest disagrees with the stages' recorded",
+    ),
+    (
+        "command",
+        _hygiene_fabricated,
+        "manifest workspaceHygiene disagrees with the stages' recorded workspace",
+    ),
+    (
+        "command",
+        _error_timed_out,
+        "command-failure error disagrees with its last invocation stage",
+    ),
+    (
+        "workspace_hygiene",
+        _error_command_dropped,
+        "workspace_hygiene-failure error disagrees with its last invocation stage",
+    ),
+    (
+        # The runner never runs a stage after one that failed.
+        "review_failed",
+        _earlier_stage_failed,
+        "invocation stages disagree with the order the runner runs them in",
+    ),
+    (
+        # A reviewed run cut back to its clean reviewer stage: the runner
+        # stops early only at a stage that failed.
+        "reviewed_parse",
+        _final_stage_dropped,
+        "invocation stages disagree with the order the runner runs them in",
     ),
 ]
 

@@ -658,35 +658,54 @@ POST_PARSE_FAILURE_PHASES = {"normalize", "seal", "validate"}
 INVOCATION_STAGE_PREFIXES = ("draft_", "pre_submit_review_", "")
 
 
-def _verify_stage_failure(
-    run_dir: Path,
-    manifest: dict[str, Any],
-    entries: list[dict[str, Any]],
-    phase: str,
-) -> None:
-    """Hold a stage-failure phase to what its stages recorded.
+# The orders in which the runner can leave stage records: a single
+# forecaster, or the reviewed flow up to the stage where it stopped.
+INVOCATION_STAGE_ORDERS = (
+    ("",),
+    ("draft_",),
+    ("draft_", "pre_submit_review_"),
+    ("draft_", "pre_submit_review_", ""),
+)
 
-    The runner runs stages in order and stops at the first that exits
-    nonzero, so a command failure is the last stage's own return code with
-    every earlier stage at zero; it takes precedence below a workspace
-    mutation, so it cannot sit beside one. A workspace_hygiene failure is
-    exactly the stages' recorded mutations, in stage order.
-    """
 
+def _stage_commands(
+    run_dir: Path, entries: list[dict[str, Any]]
+) -> list[tuple[str, dict[str, Any], list[str]]]:
+    """Each rooted stage command.json, in run order, with its mutations."""
     present = {str(entry["path"]) for entry in entries}
-    commands = [
-        _load_object(run_dir / f"{prefix}command.json")
-        for prefix in INVOCATION_STAGE_PREFIXES
-        if f"{prefix}command.json" in present
-    ]
-    mutations: list[str] = []
-    for command in commands:
+    stages = []
+    for prefix in INVOCATION_STAGE_PREFIXES:
+        if f"{prefix}command.json" not in present:
+            continue
+        command = _load_object(run_dir / f"{prefix}command.json")
         recorded = command.get("workspaceMutations", [])
         if not isinstance(recorded, list) or not all(
             isinstance(item, str) for item in recorded
         ):
             raise CustodyError("command.json workspaceMutations must be a string list")
-        mutations.extend(recorded)
+        stages.append((prefix, command, recorded))
+    return stages
+
+
+def _stage_failed(command: dict[str, Any], mutations: list[str]) -> bool:
+    return_code = command.get("returnCode")
+    return bool(mutations) or (type(return_code) is int and return_code != 0)
+
+
+def _verify_stage_failure(
+    manifest: dict[str, Any],
+    stages: list[tuple[str, dict[str, Any], list[str]]],
+    phase: str,
+) -> None:
+    """Hold a command or workspace_hygiene failure to its failed stage.
+
+    The runner stops at the first stage that exits nonzero or records a
+    workspace mutation (_verify_stage_record holds the order). A command
+    failure is that stage's own nonzero return code; a workspace_hygiene
+    failure is exactly the mutations it recorded.
+    """
+
+    mutations = [item for _prefix, _command, recorded in stages for item in recorded]
     if phase == "workspace_hygiene":
         if not mutations or canonical_bytes(
             manifest.get("workspaceHygiene")
@@ -696,24 +715,81 @@ def _verify_stage_failure(
                 "recorded workspace mutations"
             )
         return
-    *earlier, failed = commands
-    return_code = failed.get("returnCode")
-    if (
-        mutations
-        or any(
-            type(command.get("returnCode")) is not int or command["returnCode"] != 0
-            for command in earlier
-        )
-        or type(return_code) is not int
-        or return_code == 0
-        or canonical_bytes(manifest["error"].get("command"))
-        != canonical_bytes(
-            {"returnCode": return_code, "timedOut": failed.get("timedOut", False)}
-        )
-    ):
+    return_code = stages[-1][1].get("returnCode")
+    if type(return_code) is not int or return_code == 0:
         raise CustodyError(
             "command-failure error disagrees with its failed invocation stage"
         )
+
+
+def _verify_stage_record(
+    run_dir: Path,
+    manifest: dict[str, Any],
+    entries: list[dict[str, Any]],
+    declared_phase: str | None,
+) -> None:
+    """Hold any analyst record to what its invocation stages recorded.
+
+    Stages run in order, and the runner stops at the first that exits
+    nonzero or records a workspace mutation. So every stage before the last
+    ran clean, and a reviewed run ends at its revision unless the stage it
+    stopped at failed. A recorded mutation fails the run as workspace_hygiene,
+    which ranks below only a tool_evidence failure. The manifest's
+    workspaceHygiene, when present, is exactly the stages' recorded
+    mutations. A failure recorded before parsing carries the last stage's
+    exit status in error.command. Every custody-rooted analyst record met
+    these rules when they were added (471 runs, 2026-11-18).
+    """
+
+    stages = _stage_commands(run_dir, entries)
+    if not stages:
+        return
+    order = tuple(prefix for prefix, _command, _recorded in stages)
+    *earlier, (_prefix, last, last_mutations) = stages
+    if (
+        order not in INVOCATION_STAGE_ORDERS
+        or any(
+            type(command.get("returnCode")) is not int
+            or command["returnCode"] != 0
+            or recorded
+            for _prefix, command, recorded in earlier
+        )
+        or (
+            order[0] == "draft_"
+            and order[-1] != ""
+            and not _stage_failed(last, last_mutations)
+        )
+    ):
+        raise CustodyError(
+            "invocation stages disagree with the order the runner runs them in"
+        )
+    mutations = [item for _prefix, _command, recorded in stages for item in recorded]
+    if mutations and declared_phase not in {"tool_evidence", "workspace_hygiene"}:
+        raise CustodyError(
+            "stage workspace mutations disagree with the run's failure phase"
+        )
+    hygiene = manifest.get("workspaceHygiene")
+    if hygiene is not None and canonical_bytes(hygiene) != canonical_bytes(
+        {"guarded": True, "mutations": mutations}
+    ):
+        raise CustodyError(
+            "manifest workspaceHygiene disagrees with the stages' recorded "
+            "workspace mutations"
+        )
+    if declared_phase in PRE_PARSE_FAILURE_PHASES:
+        return_code = last.get("returnCode")
+        expected = (
+            {"returnCode": return_code, "timedOut": last.get("timedOut", False)}
+            if type(return_code) is int
+            else None
+        )
+        if canonical_bytes(manifest["error"].get("command")) != canonical_bytes(
+            expected
+        ):
+            raise CustodyError(
+                f"{declared_phase}-failure error disagrees with its last "
+                "invocation stage"
+            )
 
 
 def _verify_cells_activity(
@@ -805,7 +881,12 @@ def _verify_analyst_v2(
                 + ", ".join(unexpected)
             )
         if declared_phase in {"workspace_hygiene", "command"}:
-            _verify_stage_failure(run_dir, manifest, entries, declared_phase)
+            stages = _stage_commands(run_dir, entries)
+            if not stages:
+                raise CustodyError(
+                    f"{declared_phase}-failure inventory has no invocation stage"
+                )
+            _verify_stage_failure(manifest, stages, declared_phase)
         return
 
     post_parse_failure = declared_phase in POST_PARSE_FAILURE_PHASES
@@ -3118,6 +3199,13 @@ def verify_run(run_dir: Path) -> CustodyVerification:
             )
         if run_mode == "analyst":
             _verify_analyst_v2(run_dir, manifest, manifest_entries, normalized_entries)
+            error_obj = manifest.get("error")
+            _verify_stage_record(
+                run_dir,
+                manifest,
+                normalized_entries,
+                error_obj.get("phase") if isinstance(error_obj, dict) else None,
+            )
         elif run_mode == "resolver":
             _verify_resolver_v2(run_dir, manifest, normalized_entries)
         elif run_mode == "ledger_witness":

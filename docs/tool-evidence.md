@@ -96,8 +96,9 @@ output, and a failed run whose cells still validated would refuse the whole
 docket publication as a validator status mismatch. Custody verifies the record
 with the parse-failure inventory, so a publication retains it as one failed
 trace. Workspace mutations and failed stage commands are recorded the same
-way (see [Failed runs](thesis-analyst-runner.md#failed-runs)). A failed stage may preserve an incomplete event stream (a recorded call
-with no completion event) without being promoted as a successful run. Every
+way (see [Failed runs](thesis-analyst-runner.md#failed-runs)). A failed stage
+may preserve an incomplete event stream (a recorded call with no completion
+event) without being promoted as a successful run. Every
 other binding error still applies to a failed stage: an event with no native
 ID, a repeated completion, an unknown call ID, or an event that differs from
 its call refuses custody whether or not the stage failed.

@@ -33,13 +33,16 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import codecs
 import copy
+import errno
 import hashlib
 import json
 import math
 import os
 import pathlib
 import re
+import secrets
 import shlex
 import shutil
 import stat
@@ -48,6 +51,7 @@ import sys
 import tempfile
 import time
 import unicodedata
+from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from decimal import ROUND_HALF_UP, Context
 from typing import Any
@@ -1906,13 +1910,44 @@ def enforce_ticket_codex_stream_binding(
 # manifest/custody hash mismatch; this guard fails at run time instead and
 # covers the rest of the worktree, which custody never sees.
 #
-# The run dir belongs to the runner, so the guard also puts it back: it
-# removes whatever the stage created there (files, directories, links) and
-# rewrites every artifact the stage changed or deleted from the runner's own
-# bytes and mode. The violations name each path; the agent's bytes are not
-# kept. Without this, a failed run's own directory failed custody and the
-# publisher's file inventory, and one such run refused the whole batch. The
-# rest of the checkout is the operator's and is never touched.
+# The run dir belongs to the runner, so after a stage that broke any of this
+# the guard rebuilds it rather than repairing it in place. It moves the
+# stage's directory aside as one entry, makes a fresh directory, and writes
+# back the runner's own artifacts (bytes and mode) and the stage's last
+# message when that is a plain file. Every operation is relative to the run
+# dir's parent, which the runner opened before the stage, and refuses to
+# follow a link, so a link the stage planted (anywhere below the run dir, or
+# in place of it) is never written, removed or chmodded through. The
+# moved-aside tree is then removed the same way. When the run dir cannot be
+# rebuilt (the path to it changed, or the stage's tree cannot be removed),
+# the runner writes nothing more and exits without a manifest
+# (UnsafeRunDirError). The violations name each path; the agent's bytes are not
+# kept. Without the rebuild a failed run's own directory failed custody and
+# the publisher's file inventory, and one such run refused the whole batch.
+# The rest of the checkout is the operator's and is never touched.
+
+# A regular file larger than this is fingerprinted by size and mode only.
+RUN_DIR_READ_LIMIT = 256 * 1024 * 1024
+# Directories nested deeper than this are recorded but not descended into.
+RUN_DIR_SCAN_DEPTH = 32
+_DIR_NOFOLLOW = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
+
+
+class UnsafeRunDirError(RuntimeError):
+    """The run dir could not be put back; nothing more may be written to it."""
+
+
+def _status_line_inside(line: str, run_dir_token: str) -> bool:
+    """Whether every path a porcelain v1 line names is the run dir or below it."""
+    for raw in line[3:].split(" -> "):
+        path = raw
+        if len(raw) >= 2 and raw[0] == raw[-1] == '"':
+            path = codecs.escape_decode(raw[1:-1].encode())[0].decode(
+                "utf-8", "replace"
+            )
+        if path != run_dir_token and not path.startswith(f"{run_dir_token}/"):
+            return False
+    return True
 
 
 def git_porcelain_lines(out_dir: pathlib.Path) -> list[str] | None:
@@ -1931,101 +1966,181 @@ def git_porcelain_lines(out_dir: pathlib.Path) -> list[str] | None:
     run_dir_token = repo_relative(out_dir)
     lines = []
     for line in proc.stdout.splitlines():
-        if run_dir_token and run_dir_token in line:
+        if run_dir_token and _status_line_inside(line, run_dir_token):
             continue
         lines.append(line)
     return sorted(lines)
 
 
-# A regular file maps to its bytes (None when the runner cannot read them)
-# and permission bits; any other entry maps to None.
-RunDirEntry = tuple[bytes | None, int] | None
+# What the guard records for an entry below the run dir, never following a
+# link: ("dir", mode); ("file", mode, size, links, bytes), where bytes is
+# None when the runner cannot read the file or it exceeds RUN_DIR_READ_LIMIT;
+# ("link", target); or ("other", file-type bits, or None if it vanished).
+RunDirEntry = tuple[Any, ...]
 
 
-def run_dir_entries(out_dir: pathlib.Path) -> dict[str, RunDirEntry]:
-    """Every entry under the run dir, without following links.
+def _identity(info: os.stat_result) -> tuple[int, int]:
+    return info.st_dev, info.st_ino
 
-    A directory, a symlink or a special file is an entry too, so a link
-    planted in the run dir is one the guard sees, not one it skips.
+
+def _read_regular_at(dir_fd: int, name: str, info: os.stat_result) -> bytes | None:
+    try:
+        fd = os.open(
+            name,
+            os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC,
+            dir_fd=dir_fd,
+        )
+    except OSError:
+        return None
+    try:
+        opened = os.fstat(fd)
+        if not stat.S_ISREG(opened.st_mode) or _identity(opened) != _identity(info):
+            return None
+        chunks = []
+        remaining = RUN_DIR_READ_LIMIT + 1
+        while remaining > 0:
+            chunk = os.read(fd, min(1 << 20, remaining))
+            if not chunk:
+                return b"".join(chunks)
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        return None
+    except OSError:
+        return None
+    finally:
+        os.close(fd)
+
+
+def _entry_at(
+    dir_fd: int, name: str, read: Callable[[os.stat_result], bool] | None = None
+) -> tuple[RunDirEntry, os.stat_result | None]:
+    """The entry name below dir_fd; read decides whether a file's bytes count."""
+    try:
+        info = os.stat(name, dir_fd=dir_fd, follow_symlinks=False)
+    except OSError:
+        return ("other", None), None
+    mode = stat.S_IMODE(info.st_mode)
+    if stat.S_ISDIR(info.st_mode):
+        return ("dir", mode), info
+    if stat.S_ISLNK(info.st_mode):
+        try:
+            target: str | None = os.readlink(name, dir_fd=dir_fd)
+        except OSError:
+            target = None
+        return ("link", target), info
+    if not stat.S_ISREG(info.st_mode):
+        return ("other", stat.S_IFMT(info.st_mode)), info
+    content = (
+        _read_regular_at(dir_fd, name, info)
+        if info.st_size <= RUN_DIR_READ_LIMIT and (read is None or read(info))
+        else None
+    )
+    return ("file", mode, info.st_size, info.st_nlink, content), info
+
+
+def _open_dir_at(root_fd: int, rel: str) -> int:
+    """Open the directory rel below root_fd, refusing a link at every step."""
+    fd = os.dup(root_fd)
+    try:
+        for part in rel.split("/") if rel else []:
+            child = os.open(part, _DIR_NOFOLLOW, dir_fd=fd)
+            os.close(fd)
+            fd = child
+    except BaseException:
+        os.close(fd)
+        raise
+    return fd
+
+
+def _scan_run_dir(
+    root_fd: int, read: Callable[[str, os.stat_result], bool] | None = None
+) -> dict[str, RunDirEntry]:
+    """Every entry below the directory open at root_fd.
+
+    A directory the runner cannot open, or one deeper than
+    RUN_DIR_SCAN_DEPTH, is an entry whose contents are not listed. read
+    decides which files' bytes are read; by default all of them are.
     """
     entries: dict[str, RunDirEntry] = {}
-    if out_dir.is_symlink() or not out_dir.is_dir():
-        return entries
-    for dirpath, dirnames, filenames in os.walk(out_dir):
-        base = pathlib.Path(dirpath)
-        for name in (*dirnames, *filenames):
-            path = base / name
-            entry: RunDirEntry = None
+    pending = [""]
+    while pending:
+        rel_dir = pending.pop()
+        try:
+            dir_fd = _open_dir_at(root_fd, rel_dir)
+        except OSError:
+            continue
+        try:
             try:
-                info = path.lstat()
+                names = os.listdir(dir_fd)
             except OSError:
-                # A directory listable but not searchable: the name is seen,
-                # what it names is not.
-                entries[path.relative_to(out_dir).as_posix()] = entry
                 continue
-            if stat.S_ISREG(info.st_mode):
-                try:
-                    content: bytes | None = path.read_bytes()
-                except OSError:
-                    content = None
-                entry = (content, stat.S_IMODE(info.st_mode))
-            entries[path.relative_to(out_dir).as_posix()] = entry
+            for name in names:
+                rel = f"{rel_dir}/{name}" if rel_dir else name
+                entry, _info = _entry_at(
+                    dir_fd,
+                    name,
+                    None if read is None else lambda info, rel=rel: read(rel, info),
+                )
+                entries[rel] = entry
+                if entry[0] == "dir" and rel.count("/") < RUN_DIR_SCAN_DEPTH:
+                    pending.append(rel)
+        finally:
+            os.close(dir_fd)
     return entries
 
 
 def workspace_guard_snapshot(out_dir: pathlib.Path) -> dict[str, Any]:
-    return {
-        "outDirMode": stat.S_IMODE(out_dir.lstat().st_mode),
-        "outDirEntries": run_dir_entries(out_dir),
-        "gitStatus": git_porcelain_lines(out_dir),
-    }
+    """Fingerprint the run dir before a stage, holding its parent open.
+
+    Pass the result to close_workspace_guard when the stage is done.
+    """
+    parent_fd = os.open(out_dir.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        entry, info = _entry_at(parent_fd, out_dir.name)
+        if info is None or entry[0] != "dir":
+            raise UnsafeRunDirError(f"run directory is not a directory: {out_dir}")
+        run_fd = os.open(out_dir.name, _DIR_NOFOLLOW, dir_fd=parent_fd)
+        try:
+            entries = _scan_run_dir(run_fd)
+        finally:
+            os.close(run_fd)
+        return {
+            "parentFd": parent_fd,
+            "parentId": _identity(os.fstat(parent_fd)),
+            "runName": out_dir.name,
+            "runId": _identity(info),
+            "outDirMode": entry[1],
+            "outDirEntries": entries,
+            "gitStatus": git_porcelain_lines(out_dir),
+        }
+    except BaseException:
+        os.close(parent_fd)
+        raise
 
 
-def _remove_run_dir_entry(path: pathlib.Path) -> None:
-    if path.is_symlink() or not path.is_dir():
-        path.unlink(missing_ok=True)
-        return
-    # The stage may have left directories the runner cannot list or empty.
-    # Open them first, never through a link: chmod follows links.
-    path.chmod(0o700)
-    for dirpath, dirnames, _filenames in os.walk(path):
-        for name in dirnames:
-            child = pathlib.Path(dirpath) / name
-            if not child.is_symlink():
-                child.chmod(0o700)
-    shutil.rmtree(path)
+def close_workspace_guard(pre: dict[str, Any] | None) -> None:
+    fd = pre.pop("parentFd", None) if pre is not None else None
+    if fd is not None:
+        os.close(fd)
 
 
-def restore_run_dir(
-    pre: dict[str, Any],
-    out_dir: pathlib.Path,
-    allowed_new: set[str],
-) -> None:
-    """Return the run dir to the runner's pre-stage entries plus the stage's
-    own output files (``allowed_new``) where those are plain files."""
-    before: dict[str, RunDirEntry] = pre["outDirEntries"]
-    if out_dir.is_symlink() or (out_dir.exists() and not out_dir.is_dir()):
-        out_dir.unlink()
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_dir.chmod(pre["outDirMode"])
-    after = run_dir_entries(out_dir)
-    # Shallowest first: removing a directory removes everything below it.
-    for rel in sorted(set(after) - set(before), key=lambda rel: rel.count("/")):
-        if rel not in allowed_new or not _plain_stage_output(after[rel]):
-            _remove_run_dir_entry(out_dir / rel)
-    for rel, entry in before.items():
-        if entry is None or entry[0] is None or after.get(rel) == entry:
-            continue
-        path = out_dir / rel
-        _remove_run_dir_entry(path)
-        content, mode = entry
-        path.write_bytes(content)
-        path.chmod(mode)
+def _parent_unchanged(pre: dict[str, Any], out_dir: pathlib.Path) -> bool:
+    """Whether the run dir's path still leads to the parent the guard holds."""
+    try:
+        return _identity(os.stat(out_dir.parent)) == pre["parentId"]
+    except OSError:
+        return False
 
 
-def _plain_stage_output(entry: RunDirEntry) -> bool:
-    """A stage output the runner can read and rewrite in place."""
-    return entry is not None and entry[0] is not None and entry[1] & 0o600 == 0o600
+def _plain_stage_output(entry: RunDirEntry | None) -> bool:
+    """A stage output the runner can read, and rewrite in place, as its own."""
+    return (
+        entry is not None
+        and entry[0] == "file"
+        and entry[4] is not None
+        and entry[3] == 1
+        and entry[1] & 0o600 == 0o600
+    )
 
 
 def workspace_guard_violations(
@@ -2033,31 +2148,57 @@ def workspace_guard_violations(
     out_dir: pathlib.Path,
     allowed_new: set[str],
 ) -> list[str]:
-    # Not workspace_guard_snapshot: its lstat of the run dir raises when the
-    # stage removed the run dir, and that must read as a violation.
-    pre_entries: dict[str, RunDirEntry] = pre["outDirEntries"]
-    post_entries = run_dir_entries(out_dir)
     violations = []
-    if out_dir.is_symlink() or not out_dir.is_dir():
+    parent_fd = pre["parentFd"]
+    if not _parent_unchanged(pre, out_dir):
+        violations.append("run directory's path changed during agent stage")
+    entry, info = _entry_at(parent_fd, pre["runName"])
+    if info is None or entry[0] != "dir" or _identity(info) != pre["runId"]:
         violations.append("run directory replaced or removed during agent stage")
-    elif stat.S_IMODE(out_dir.stat().st_mode) != pre["outDirMode"]:
-        violations.append("run directory permissions changed during agent stage")
-    for rel, entry in pre_entries.items():
-        if rel not in post_entries:
-            violations.append(f"run artifact deleted during agent stage: {rel}")
-        elif post_entries[rel] != entry:
-            violations.append(f"run artifact modified during agent stage: {rel}")
-    for rel, entry in post_entries.items():
-        if rel in pre_entries:
-            continue
-        if rel not in allowed_new:
-            violations.append(
-                f"unexpected file created in run dir during agent stage: {rel}"
-            )
-        elif not _plain_stage_output(entry):
-            violations.append(
-                f"stage output is not a plain readable file after agent stage: {rel}"
-            )
+    else:
+        if entry[1] != pre["outDirMode"]:
+            violations.append("run directory permissions changed during agent stage")
+        pre_entries: dict[str, RunDirEntry] = pre["outDirEntries"]
+
+        def worth_reading(rel: str, info: os.stat_result) -> bool:
+            # Only bytes that can matter: an artifact the same size as the
+            # runner's, or a stage output. A stage cannot make the runner
+            # read whatever it leaves elsewhere.
+            before = pre_entries.get(rel)
+            if before is not None:
+                return before[0] == "file" and before[2] == info.st_size
+            return rel in allowed_new
+
+        post_entries: dict[str, RunDirEntry] | None = None
+        try:
+            run_fd = os.open(pre["runName"], _DIR_NOFOLLOW, dir_fd=parent_fd)
+        except OSError:
+            violations.append("run directory unreadable after agent stage")
+        else:
+            try:
+                post_entries = _scan_run_dir(run_fd, worth_reading)
+            finally:
+                os.close(run_fd)
+        if post_entries is not None:
+            for rel, before in pre_entries.items():
+                if rel not in post_entries:
+                    violations.append(f"run artifact deleted during agent stage: {rel}")
+                elif post_entries[rel] != before:
+                    violations.append(
+                        f"run artifact modified during agent stage: {rel}"
+                    )
+            for rel, after in post_entries.items():
+                if rel in pre_entries:
+                    continue
+                if rel not in allowed_new:
+                    violations.append(
+                        f"unexpected file created in run dir during agent stage: {rel}"
+                    )
+                elif not _plain_stage_output(after):
+                    violations.append(
+                        "stage output is not a plain readable file after agent "
+                        f"stage: {rel}"
+                    )
     pre_git = pre["gitStatus"]
     post_git = git_porcelain_lines(out_dir)
     if pre_git is not None and post_git is not None:
@@ -2070,6 +2211,179 @@ def workspace_guard_violations(
                 f"workspace tree entry cleared during agent stage: {line.strip()}"
             )
     return violations
+
+
+def _chmod_dir_at(dir_fd: int, name: str, mode: int) -> None:
+    """chmod the directory name below dir_fd without following a link."""
+    try:
+        os.chmod(name, mode, dir_fd=dir_fd, follow_symlinks=False)
+        return
+    except (NotImplementedError, ValueError):
+        # Linux's fchmodat cannot refuse links on every libc: pin the entry
+        # with O_PATH and chmod the inode that descriptor names.
+        if not hasattr(os, "O_PATH"):
+            raise OSError(errno.ENOTSUP, "chmod without following links", name)
+    fd = os.open(name, os.O_PATH | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=dir_fd)
+    try:
+        if not stat.S_ISDIR(os.fstat(fd).st_mode):
+            raise OSError(errno.ENOTDIR, "not a directory", name)
+        os.chmod(f"/proc/self/fd/{fd}", mode)
+    finally:
+        os.close(fd)
+
+
+def _remove_tree_at(parent_fd: int, name: str) -> None:
+    """Remove name below parent_fd without following a link below it.
+
+    Each directory found is moved up into the top directory before it is
+    emptied, so a tree of any depth is removed with two descriptors open.
+    """
+    info = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+    if not stat.S_ISDIR(info.st_mode):
+        os.unlink(name, dir_fd=parent_fd)
+        return
+    _chmod_dir_at(parent_fd, name, 0o700)
+    top = os.open(name, _DIR_NOFOLLOW, dir_fd=parent_fd)
+    try:
+        pending: list[str | None] = [None]
+        while pending:
+            sub = pending.pop()
+            if sub is None:
+                dir_fd = os.dup(top)
+            else:
+                _chmod_dir_at(top, sub, 0o700)
+                dir_fd = os.open(sub, _DIR_NOFOLLOW, dir_fd=top)
+            try:
+                for child in os.listdir(dir_fd):
+                    child_info = os.stat(child, dir_fd=dir_fd, follow_symlinks=False)
+                    if not stat.S_ISDIR(child_info.st_mode):
+                        os.unlink(child, dir_fd=dir_fd)
+                    elif sub is None:
+                        pending.append(child)
+                    else:
+                        # Moving a directory to a new parent needs write
+                        # permission on it (Linux updates its "..").
+                        _chmod_dir_at(dir_fd, child, 0o700)
+                        flat = f".flat-{secrets.token_hex(8)}"
+                        os.rename(child, flat, src_dir_fd=dir_fd, dst_dir_fd=top)
+                        pending.append(flat)
+            finally:
+                os.close(dir_fd)
+            if sub is not None:
+                os.rmdir(sub, dir_fd=top)
+    finally:
+        os.close(top)
+    os.rmdir(name, dir_fd=parent_fd)
+
+
+def _create_file_at(dir_fd: int, name: str, content: bytes, mode: int) -> None:
+    fd = os.open(
+        name,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | os.O_CLOEXEC,
+        0o600,
+        dir_fd=dir_fd,
+    )
+    try:
+        view = memoryview(content)
+        while view:
+            view = view[os.write(fd, view) :]
+        os.fchmod(fd, mode)
+    finally:
+        os.close(fd)
+
+
+def _stage_outputs_at(
+    parent_fd: int, aside: str, allowed_new: set[str]
+) -> dict[str, bytes]:
+    """The plain stage outputs in the moved-aside run dir."""
+    _chmod_dir_at(parent_fd, aside, 0o700)
+    aside_fd = os.open(aside, _DIR_NOFOLLOW, dir_fd=parent_fd)
+    try:
+        kept = {}
+        for name in sorted(allowed_new):
+            entry, _info = _entry_at(aside_fd, name)
+            if _plain_stage_output(entry):
+                kept[name] = entry[4]
+        return kept
+    finally:
+        os.close(aside_fd)
+
+
+def _write_run_dir(parent_fd: int, pre: dict[str, Any], kept: dict[str, bytes]) -> None:
+    entries: dict[str, RunDirEntry] = pre["outDirEntries"]
+    os.mkdir(pre["runName"], 0o700, dir_fd=parent_fd)
+    run_fd = os.open(pre["runName"], _DIR_NOFOLLOW, dir_fd=parent_fd)
+    try:
+        dirs = sorted(
+            (rel for rel, entry in entries.items() if entry[0] == "dir"),
+            key=lambda rel: rel.count("/"),
+        )
+        for rel in dirs:
+            head, _, leaf = rel.rpartition("/")
+            dir_fd = _open_dir_at(run_fd, head)
+            try:
+                os.mkdir(leaf, 0o700, dir_fd=dir_fd)
+            finally:
+                os.close(dir_fd)
+        files = [
+            (rel, entry[4], entry[1])
+            for rel, entry in entries.items()
+            if entry[0] == "file"
+        ]
+        files += [(rel, content, 0o644) for rel, content in kept.items()]
+        for rel, content, mode in files:
+            head, _, leaf = rel.rpartition("/")
+            dir_fd = _open_dir_at(run_fd, head)
+            try:
+                _create_file_at(dir_fd, leaf, content, mode)
+            finally:
+                os.close(dir_fd)
+        for rel in reversed(dirs):
+            dir_fd = _open_dir_at(run_fd, rel)
+            try:
+                os.fchmod(dir_fd, entries[rel][1])
+            finally:
+                os.close(dir_fd)
+        os.fchmod(run_fd, pre["outDirMode"])
+    finally:
+        os.close(run_fd)
+
+
+def restore_run_dir(
+    pre: dict[str, Any],
+    out_dir: pathlib.Path,
+    allowed_new: set[str],
+) -> None:
+    """Rebuild the run dir from the snapshot plus the plain stage outputs.
+
+    Raises UnsafeRunDirError when it cannot: the caller must then write nothing
+    more into the run dir.
+    """
+    parent_fd = pre["parentFd"]
+    name = pre["runName"]
+    if not _parent_unchanged(pre, out_dir):
+        raise UnsafeRunDirError(
+            "the path to the run directory changed during the stage"
+        )
+    for rel, entry in pre["outDirEntries"].items():
+        if entry[0] != "dir" and (entry[0] != "file" or entry[4] is None):
+            raise UnsafeRunDirError(f"run artifact cannot be restored: {rel}")
+    entry, info = _entry_at(parent_fd, name)
+    aside: str | None = None
+    try:
+        if info is not None:
+            aside = f".{name}.stage-{secrets.token_hex(8)}"
+            os.rename(name, aside, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+        kept = (
+            _stage_outputs_at(parent_fd, aside, allowed_new)
+            if aside is not None and entry[0] == "dir"
+            else {}
+        )
+        _write_run_dir(parent_fd, pre, kept)
+        if aside is not None:
+            _remove_tree_at(parent_fd, aside)
+    except OSError as exc:
+        raise UnsafeRunDirError(f"run directory could not be rebuilt: {exc}") from exc
 
 
 def run_codex_agent_command(
@@ -2226,93 +2540,127 @@ def _run_codex_agent_command(
     stdout_text = ""
     stderr_text = ""
     process_return_code = 1
+    process: subprocess.Popen[str] | None = None
+    run_error: Exception | None = None
+    workspace_mutations: list[str] | None = None
 
     try:
-        codex_home_dir = tempfile.mkdtemp(prefix="thesis-codex-home-")
         try:
-            with (
-                tempfile.NamedTemporaryFile(mode="w+", delete=False) as stdout_file,
-                tempfile.NamedTemporaryFile(mode="w+", delete=False) as stderr_file,
-            ):
-                codex_home = prepare_codex_home(pathlib.Path(codex_home_dir))
-                codex_env = agent_subprocess_env({"CODEX_HOME": str(codex_home)})
-                stdout_path = pathlib.Path(stdout_file.name)
-                stderr_path = pathlib.Path(stderr_file.name)
-                process = subprocess.Popen(
-                    cmd,
-                    stdin=subprocess.DEVNULL,
-                    stdout=stdout_file,
-                    stderr=stderr_file,
-                    text=True,
-                    cwd=ROOT,
-                    env=codex_env,
-                )
-                try:
-                    terminated_after_output = wait_for_codex_process(
-                        process,
-                        last_message_file,
-                        timeout_seconds,
-                        heartbeat_paths=[stdout_path, stderr_path],
-                        max_idle_seconds=positive_int_env(
-                            "THESIS_CODEX_IDLE_TIMEOUT_SECONDS",
-                            min(timeout_seconds, 120),
-                        ),
-                    )
-                except subprocess.TimeoutExpired as exc:
-                    timed_out = True
-                    timeout_reason = (
-                        "idle"
-                        if exc.timeout
-                        == positive_int_env(
-                            "THESIS_CODEX_IDLE_TIMEOUT_SECONDS",
-                            min(timeout_seconds, 120),
-                        )
-                        else "wall"
-                    )
-                    process.kill()
-                    process.wait()
-                process_return_code = process.returncode or 0
-        finally:
-            shutil.rmtree(codex_home_dir, ignore_errors=True)
-
-        stdout_text = redact_stream_text(stdout_path.read_text())
-        stderr_text = redact_stream_text(stderr_path.read_text())
-        stdout_path.unlink(missing_ok=True)
-        stderr_path.unlink(missing_ok=True)
-        workspace_mutations = (
-            workspace_guard_violations(
-                guard_pre, out_dir, allowed_new={last_message_file.name}
-            )
-            if guard_pre is not None
-            else None
-        )
-        if workspace_mutations:
-            # Before anything below reads the stage's output or writes an
-            # artifact: a link the agent planted under an artifact name
-            # must not be read through or written through.
+            codex_home_dir = tempfile.mkdtemp(prefix="thesis-codex-home-")
             try:
-                restore_run_dir(
-                    guard_pre, out_dir, allowed_new={last_message_file.name}
+                with (
+                    tempfile.NamedTemporaryFile(mode="w+", delete=False) as stdout_file,
+                    tempfile.NamedTemporaryFile(mode="w+", delete=False) as stderr_file,
+                ):
+                    codex_home = prepare_codex_home(pathlib.Path(codex_home_dir))
+                    codex_env = agent_subprocess_env({"CODEX_HOME": str(codex_home)})
+                    stdout_path = pathlib.Path(stdout_file.name)
+                    stderr_path = pathlib.Path(stderr_file.name)
+                    try:
+                        process = subprocess.Popen(
+                            cmd,
+                            stdin=subprocess.DEVNULL,
+                            stdout=stdout_file,
+                            stderr=stderr_file,
+                            text=True,
+                            cwd=ROOT,
+                            env=codex_env,
+                        )
+                        try:
+                            terminated_after_output = wait_for_codex_process(
+                                process,
+                                last_message_file,
+                                timeout_seconds,
+                                heartbeat_paths=[stdout_path, stderr_path],
+                                max_idle_seconds=positive_int_env(
+                                    "THESIS_CODEX_IDLE_TIMEOUT_SECONDS",
+                                    min(timeout_seconds, 120),
+                                ),
+                            )
+                        except subprocess.TimeoutExpired as exc:
+                            timed_out = True
+                            timeout_reason = (
+                                "idle"
+                                if exc.timeout
+                                == positive_int_env(
+                                    "THESIS_CODEX_IDLE_TIMEOUT_SECONDS",
+                                    min(timeout_seconds, 120),
+                                )
+                                else "wall"
+                            )
+                            process.kill()
+                            process.wait()
+                        process_return_code = process.returncode or 0
+                    finally:
+                        # The guard below must not run beside a live stage.
+                        if process is not None and process.poll() is None:
+                            process.kill()
+                            process.wait()
+                        for capture in (stdout_path, stderr_path):
+                            try:
+                                capture.unlink(missing_ok=True)
+                            except OSError:
+                                pass
+                    # Read the captures through the runner's own handles: the
+                    # stage can remove their paths (TMPDIR is writable to it),
+                    # and that must not make the runner skip the guard.
+                    stdout_file.seek(0)
+                    stdout_text = redact_stream_text(stdout_file.read())
+                    stderr_file.seek(0)
+                    stderr_text = redact_stream_text(stderr_file.read())
+            finally:
+                shutil.rmtree(codex_home_dir, ignore_errors=True)
+        except Exception as exc:
+            run_error = exc
+        if guard_pre is not None and process is not None:
+            # Before anything below reads the stage's output or writes an
+            # artifact: a link the stage planted under an artifact name must
+            # not be read through or written through. restore_run_dir raises
+            # UnsafeRunDirError when the run dir cannot be put back, and the run
+            # then ends without writing anything more.
+            allowed_new = {last_message_file.name}
+            try:
+                workspace_mutations = workspace_guard_violations(
+                    guard_pre, out_dir, allowed_new
                 )
-            except OSError as exc:
-                workspace_mutations.append(
-                    f"run directory could not be restored after agent stage: {exc}"
-                )
-    except FileNotFoundError:
+            except Exception as exc:
+                workspace_mutations = [
+                    "run directory could not be checked after agent stage: "
+                    f"{type(exc).__name__}"
+                ]
+            if workspace_mutations:
+                restore_run_dir(guard_pre, out_dir, allowed_new)
+    finally:
+        close_workspace_guard(guard_pre)
+
+    if run_error is not None:
         finished_at = utc_now()
+        # Only a CLI that never started is "not found"; a stage that ran and
+        # then failed is an error the guard has already looked at.
+        missing = process is None and isinstance(run_error, FileNotFoundError)
+        message = (
+            "codex CLI not found"
+            if missing
+            else f"Error running codex CLI: {run_error}"
+        )
         return {
             "backend": "codex",
             "argv": logged_cmd,
             "networkAccess": network,
             "timeoutSeconds": timeout_seconds,
+            **(
+                {"workspaceMutations": workspace_mutations}
+                if workspace_mutations is not None
+                else {}
+            ),
             "startedAt": started_at,
             "finishedAt": finished_at,
-            "returnCode": 127,
+            "returnCode": 127 if missing else 1,
             "timedOut": False,
             "stdout": "",
-            "stderr": "codex CLI not found",
+            "stderr": message,
             "codexStdoutRaw": "",
-            "codexStderrRaw": "codex CLI not found",
+            "codexStderrRaw": message,
             "codexEventsJsonl": "",
             "codexLastMessage": "",
             "codexTrace": {
@@ -2320,32 +2668,7 @@ def _run_codex_agent_command(
                 "backend": "codex-exec",
                 "model": model,
                 "timeoutSeconds": timeout_seconds,
-                "error": "codex CLI not found",
-            },
-        }
-    except Exception as exc:
-        finished_at = utc_now()
-        return {
-            "backend": "codex",
-            "argv": logged_cmd,
-            "networkAccess": network,
-            "timeoutSeconds": timeout_seconds,
-            "startedAt": started_at,
-            "finishedAt": finished_at,
-            "returnCode": 1,
-            "timedOut": False,
-            "stdout": "",
-            "stderr": f"Error running codex CLI: {exc}",
-            "codexStdoutRaw": "",
-            "codexStderrRaw": f"Error running codex CLI: {exc}",
-            "codexEventsJsonl": "",
-            "codexLastMessage": "",
-            "codexTrace": {
-                "provider": "openai",
-                "backend": "codex-exec",
-                "model": model,
-                "timeoutSeconds": timeout_seconds,
-                "error": str(exc),
+                "error": message if missing else str(run_error),
             },
         }
 
@@ -2354,7 +2677,7 @@ def _run_codex_agent_command(
     final_text = parsed["lastAssistantText"] or parsed["assistantText"]
     last_message_text = ""
     if last_message_file.exists():
-        stripped_last_message = last_message_file.read_text().strip()
+        stripped_last_message = last_message_file.read_text(errors="replace").strip()
         last_message_text = redact_response_text(stripped_last_message)
         if last_message_text != stripped_last_message:
             # Codex wrote this file directly into the run dir; keep the
@@ -4066,6 +4389,18 @@ def run_pre_submit_reviewer(
 
 
 def main() -> int:
+    try:
+        return _main()
+    except UnsafeRunDirError as exc:
+        # The stage left its run dir in a state the runner cannot put back.
+        # A manifest, or any other write there, could go through what the
+        # stage planted, so the run ends with no record. The batch sees a
+        # failed run with no manifest and refuses it.
+        print(f"run directory unsafe after agent stage: {exc}", file=sys.stderr)
+        return 1
+
+
+def _main() -> int:
     args = parse_args()
     generation_ticket = parse_generation_ticket_context(args)
     if args.codex_network:
@@ -4190,7 +4525,11 @@ def main() -> int:
                 stdout_artifact_type="draft_forecast",
                 generation_ticket=generation_ticket,
             )
-            if draft_result["returnCode"] != 0:
+            # A stage that failed or touched the workspace ends the flow: the
+            # next stage would run on top of what it left.
+            if draft_result["returnCode"] != 0 or draft_result.get(
+                "workspaceMutations"
+            ):
                 review_status = "draft_failed"
                 command_result = draft_result
                 raw_response = draft_result["stdout"]
@@ -4230,7 +4569,9 @@ def main() -> int:
                     generation_ticket=generation_ticket,
                 )
                 review_payload = parse_review_payload(review_result["stdout"])
-                if review_result["returnCode"] != 0:
+                if review_result["returnCode"] != 0 or review_result.get(
+                    "workspaceMutations"
+                ):
                     review_status = "review_failed"
                     command_result = review_result
                     raw_response = draft_result["stdout"]
