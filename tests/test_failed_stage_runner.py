@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import os
 import shlex
+import shutil
 import stat
 import subprocess
 import sys
@@ -483,8 +484,52 @@ def test_run_dir_whose_path_changed_ends_with_no_record(tmp_path):
         assert not (moved / name).exists(), name
 
 
-# Agent output Python's decoder cannot take: each used to crash the runner
-# before it wrote a record, which refused the whole batch.
+@pytest.mark.skipif(os.geteuid() == 0, reason="root opens any directory")
+def test_stage_that_takes_read_permission_from_the_parent_ends_with_no_record(
+    tmp_path,
+):
+    """The draft stage takes read permission from the run dir's parent. The
+    guard cannot fingerprint the run dir before the revision stage, so the
+    run ends with no record, as for an unsafe run dir, not a traceback."""
+
+    day = tmp_path / "day"
+    out_dir = day / "run"
+    env = _codex_env(
+        tmp_path,
+        [
+            "import atexit, os",
+            "if last_message.name.startswith('draft_'):",
+            "    atexit.register(os.chmod, last_message.parent.parent, 0o300)",
+        ],
+    )
+    args = [
+        "--codex-model",
+        "test-model",
+        "--codex-sandbox",
+        "workspace-write",
+        "--pre-submit-review-command",
+        _command(tmp_path, "reviewer", text=REVIEW),
+    ]
+    try:
+        completed = _run(out_dir, args, env)
+    finally:
+        if day.exists():
+            day.chmod(0o755)
+
+    assert completed.returncode == 1
+    assert (
+        "run directory unsafe after agent stage: run directory could not be "
+        "fingerprinted before agent stage: "
+    ) in completed.stderr
+    assert "Traceback" not in completed.stderr
+    assert (out_dir / "draft_command.json").is_file()
+    assert not (out_dir / "manifest.json").exists()
+
+
+# Agent output Python's decoder cannot take, or nested past the runner's depth
+# limit. Each case but the 300-deep object used to crash the runner before it
+# wrote a record, which refused the whole batch; that one decoded and failed
+# at normalize. Each is now a recorded parse failure.
 # name: (codex lines, or None for a --command run; a Python expression for
 # the --command agent's output; the message prefixes it may record)
 UNDECODABLE: dict[str, tuple[list[str] | None, str, tuple[str, ...]]] = {
@@ -564,6 +609,57 @@ def test_undecodable_review_falls_back_to_its_summary():
         review = runner.parse_review_payload(text)
         assert review["requiredFixes"] == []
         assert review["summary"] == text[:240]
+
+
+# Agent output bytes that are not UTF-8. Decoding a --command stage's output
+# used to raise past every failure path, so the runner wrote no record. Each
+# such byte is now replaced and the run is recorded on its merits.
+# name: (statements the --command agent runs, the failure phase or None)
+NON_UTF8: dict[str, tuple[str, str | None]] = {
+    "latin-1-stderr-beside-a-valid-cell": (
+        "sys.stderr.buffer.write(b'caf\\xe9\\n')\n"
+        "sys.stdout.buffer.write(CELL + b'\\n')",
+        None,
+    ),
+    "stray-byte-after-a-valid-cell": (
+        "sys.stdout.buffer.write(CELL + b'\\n\\xff\\n')",
+        None,
+    ),
+    "only-undecodable-bytes": ("sys.stdout.buffer.write(b'\\xff\\xfe\\n')", "parse"),
+}
+
+
+@pytest.mark.parametrize("name", sorted(NON_UTF8))
+def test_non_utf8_agent_output_is_recorded(tmp_path, monkeypatch, name):
+    statements, phase = NON_UTF8[name]
+    staged = tmp_path / "staged"
+    out_dir = staged / RUN_RELATIVE
+    agent = tmp_path / "agent.py"
+    agent.write_text(
+        "import sys\n"
+        "sys.stdin.read()\n"
+        f"CELL = {json.dumps(VALID_CELL).encode()!r}\n"
+        f"{statements}\n"
+    )
+    args = ["--command", f"{shlex.quote(sys.executable)} {shlex.quote(str(agent))}"]
+    completed = _run(out_dir, args)
+
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    ok = phase is None
+    assert completed.returncode == int(not ok), completed.stderr[-2000:]
+    assert manifest["ok"] is ok
+    assert (manifest.get("error") or {}).get("phase") == phase
+    captured = (out_dir / "stdout.txt").read_text() + (
+        out_dir / "stderr.txt"
+    ).read_text()
+    assert "�" in captured
+    verification = verify_run(out_dir)
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is ok
+    if manifest["cellsPath"] is not None:
+        assert _publisher_replay_ok(out_dir, manifest) is ok
+    else:
+        _publish_one(monkeypatch, staged, manifest, ok=ok)
 
 
 # The runner's own reads and writes in the run dir, failed from outside the
@@ -685,16 +781,104 @@ def test_stage_that_locks_the_run_dir_on_macos_ends_with_no_record(tmp_path, nam
     try:
         completed = _run(out_dir, args, env)
     finally:
-        for path in (out_dir / ALLOWED, out_dir):
-            if path.exists():
-                os.chflags(path, 0)
-        if out_dir.exists():
-            subprocess.run(["/bin/chmod", "-N", str(out_dir)], check=True)
+        _clear_macos_locks(out_dir.parent)
 
     assert completed.returncode == 1
     assert "run directory I/O failed: write " in completed.stderr
     assert "Traceback" not in completed.stderr
     assert not (out_dir / "manifest.json").exists()
+
+
+def _clear_macos_locks(root: Path) -> None:
+    """Clear the file flags and ACLs a stage set anywhere under ``root``,
+    including a stage tree the runner moved aside, so pytest can remove it."""
+
+    if not root.exists():
+        return
+    for dirpath, dirnames, filenames in os.walk(root):
+        for name in [".", *dirnames, *filenames]:
+            os.chflags(os.path.join(dirpath, name), 0, follow_symlinks=False)
+    subprocess.run(["/bin/chmod", "-RN", str(root)], check=True)
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="macOS ACLs (chmod +a)")
+def test_stage_that_makes_the_tool_evidence_spool_undeletable_is_recorded(
+    tmp_path,
+):
+    """The tool-evidence spool lives in TMPDIR, which the stage can write.
+    A stage that denies the spool's deletion leaves it behind; the run is
+    recorded as usual."""
+
+    out_dir = tmp_path / "staged" / RUN_RELATIVE
+    record = tmp_path / "spool.txt"
+    env = _codex_env(
+        tmp_path,
+        [
+            "import subprocess",
+            "spool = next(",
+            "    pathlib.Path(json.loads(arg.split('=', 1)[1])[2]).parent",
+            "    for arg in args",
+            "    if '.args=' in arg and 'thesis-tool-evidence-' in arg",
+            ")",
+            f"pathlib.Path({str(record)!r}).write_text(str(spool))",
+            "subprocess.run(",
+            "    ['/bin/chmod', '+a', 'everyone deny delete', str(spool)], check=True",
+            ")",
+        ],
+    )
+    try:
+        completed = _run(out_dir, ["--codex-model", "test-model"], env)
+    finally:
+        if record.exists() and Path(record.read_text()).exists():
+            spool = Path(record.read_text())
+            subprocess.run(["/bin/chmod", "-RN", str(spool)], check=True)
+            shutil.rmtree(spool)
+
+    assert record.exists(), completed.stderr[-2000:]
+    assert completed.returncode == 0, completed.stderr[-2000:]
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    assert manifest["ok"] is True
+    assert verify_run(out_dir).inventory_status == "complete"
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="macOS ACLs (chmod +a)")
+def test_stage_that_denies_stat_on_new_run_files_is_recorded(tmp_path):
+    """The stage leaves an inherited ACL on the run dir that denies reading
+    the attributes of every file created there afterwards. The runner can
+    still read what it writes, and sizes its refs from those bytes."""
+
+    staged = tmp_path / "staged"
+    out_dir = staged / RUN_RELATIVE
+    agent = tmp_path / "agent.py"
+    agent.write_text(
+        "\n".join(
+            [
+                "import os, subprocess, sys",
+                "sys.stdin.read()",
+                "subprocess.run(['/bin/chmod', '+a',"
+                " 'everyone deny readattr,file_inherit,only_inherit',"
+                " os.path.dirname(sys.argv[1])], check=True)",
+                f"print({json.dumps(VALID_CELL)!r})",
+            ]
+        )
+        + "\n"
+    )
+    command = f"{shlex.quote(sys.executable)} {shlex.quote(str(agent))} {{prompt_path}}"
+    try:
+        completed = _run(out_dir, ["--command", command])
+        # Path.exists() stats, so a file the ACL covers looks missing.
+        hidden = not (out_dir / "normalized_cells.json").exists()
+    finally:
+        _clear_macos_locks(staged)
+
+    assert completed.returncode == 0, completed.stderr[-2000:]
+    assert hidden and (out_dir / "normalized_cells.json").is_file()
+    manifest = json.loads((out_dir / "manifest.json").read_text())
+    assert manifest["ok"] is True
+    verification = verify_run(out_dir)
+    assert verification.inventory_status == "complete"
+    assert verification.run_succeeded is True
+    assert _publisher_replay_ok(out_dir, manifest) is True
 
 
 # --- Invariants over every stage-outcome combination ------------------------
@@ -1169,31 +1353,45 @@ def _earlier_stage_failed(out_dir, _manifest, artifacts, _refs):
     artifacts["draft_command.json"] = command
 
 
-def _last_stage_exited_2(out_dir, manifest, artifacts, refs):
-    # The cells expose every earlier artifact ref as their activity log, so
-    # the forger rewrites that log too; otherwise the activity check, not
-    # the exit rule, is what refuses the edit.
-    command = json.loads((out_dir / "command.json").read_text())
-    command["returnCode"] = 2
-    index = next(
-        i for i, ref in enumerate(refs) if Path(str(ref["path"])).name == "command.json"
-    )
-    refs[index] = runner.write_artifact(
-        out_dir,
-        str(refs[index]["artifactType"]),
-        "command.json",
-        json.dumps(command, indent=2),
-        manifest["runStartedAt"],
-    )
-    activity = [
-        ref
-        for ref in refs
-        if ref.get("artifactType") not in {"cells_with_activity", "manifest"}
-    ]
-    cells = json.loads((out_dir / "cells.with_activity.json").read_text())
-    artifacts["cells.with_activity.json"] = [
-        {**cell, "activityLog": activity} for cell in cells
-    ]
+_NO_RETURN_CODE = object()
+
+
+def _last_stage_exit(value: Any, name: str):
+    """Record ``value`` as a parsed run's last-stage exit."""
+
+    def edit(out_dir, manifest, artifacts, refs):
+        command = json.loads((out_dir / "command.json").read_text())
+        if value is _NO_RETURN_CODE:
+            del command["returnCode"]
+        else:
+            command["returnCode"] = value
+        index = next(
+            i
+            for i, ref in enumerate(refs)
+            if Path(str(ref["path"])).name == "command.json"
+        )
+        refs[index] = runner.write_artifact(
+            out_dir,
+            str(refs[index]["artifactType"]),
+            "command.json",
+            json.dumps(command, indent=2),
+            manifest["runStartedAt"],
+        )
+        # The cells expose every earlier artifact ref as their activity log,
+        # so the forger rewrites that log too; otherwise the activity check,
+        # not the exit rule, is what refuses the edit.
+        activity = [
+            ref
+            for ref in refs
+            if ref.get("artifactType") not in {"cells_with_activity", "manifest"}
+        ]
+        cells = json.loads((out_dir / "cells.with_activity.json").read_text())
+        artifacts["cells.with_activity.json"] = [
+            {**cell, "activityLog": activity} for cell in cells
+        ]
+
+    edit.__name__ = f"last_stage_{name}"
+    return edit
 
 
 FINAL_STAGE = ("command.json", "stdout.txt", "stderr.txt", "revision_prompt.md")
@@ -1205,6 +1403,7 @@ def _final_stage_dropped(out_dir, _manifest, _artifacts, refs):
     refs[:] = [ref for ref in refs if Path(str(ref["path"])).name not in FINAL_STAGE]
 
 
+PARSED_RUN_EXIT = "a parsed run's last invocation stage exited nonzero"
 FORGERIES = [
     ("command", _presents_complete, "does not present as failed"),
     (
@@ -1286,18 +1485,24 @@ FORGERIES = [
         _final_stage_dropped,
         "invocation stages disagree with the order the runner runs them in",
     ),
-    (
+    *[
         # A run that parsed presented as one whose stage failed: the runner
         # parses only once the last stage exited 0.
-        "valid",
-        _last_stage_exited_2,
-        "a parsed run's last invocation stage exited nonzero",
-    ),
-    (
-        "invalid",
-        _last_stage_exited_2,
-        "a parsed run's last invocation stage exited nonzero",
-    ),
+        (kind, _last_stage_exit(2, "exited_2"), PARSED_RUN_EXIT)
+        for kind in ("valid", "invalid")
+    ],
+    *[
+        # A process stage always records its exit as an int, so a parsed
+        # run's last exit recorded as anything else is forged.
+        ("valid", _last_stage_exit(value, name), PARSED_RUN_EXIT)
+        for value, name in [
+            (True, "exit_true"),
+            (2.0, "exit_float"),
+            ("2", "exit_string"),
+            (None, "exit_null"),
+            (_NO_RETURN_CODE, "exit_missing"),
+        ]
+    ],
 ]
 
 

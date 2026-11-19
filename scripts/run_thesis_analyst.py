@@ -1555,6 +1555,9 @@ def run_agent_command(
             input=prompt,
             capture_output=True,
             text=True,
+            # Agent output: a byte that is not UTF-8 is replaced, as on the
+            # timeout path below, rather than raised past every failure path.
+            errors="replace",
             check=False,
             timeout=timeout_seconds,
             env=agent_subprocess_env(),
@@ -1968,6 +1971,24 @@ def read_run_bytes(path: pathlib.Path) -> bytes:
         raise RunDirIOError(f"read {path.name}: {exc}") from exc
 
 
+def run_file_ref(
+    artifact_type: str, path: pathlib.Path, created_at: str
+) -> dict[str, Any]:
+    """An artifact ref for a file the runner wrote, from one read of it.
+
+    The size comes from the bytes read, not a stat: a stage can leave an
+    inherited ACL that lets the runner read a file but not stat it.
+    """
+    data = read_run_bytes(path)
+    return {
+        "artifactType": artifact_type,
+        "path": repo_relative(path),
+        "sha256": sha256_bytes(data),
+        "bytes": len(data),
+        "createdAt": created_at,
+    }
+
+
 def _status_line_inside(line: str, run_dir_token: str) -> bool:
     """Whether every path a porcelain v1 line names is the run dir or below it."""
     for raw in line[3:].split(" -> "):
@@ -2123,9 +2144,18 @@ def _scan_run_dir(
 def workspace_guard_snapshot(out_dir: pathlib.Path) -> dict[str, Any]:
     """Fingerprint the run dir before a stage, holding its parent open.
 
-    Pass the result to close_workspace_guard when the stage is done.
+    Pass the result to close_workspace_guard when the stage is done. A run
+    dir the guard cannot fingerprint (an earlier stage took read permission
+    from its parent, say) is unsafe: the run ends with no record.
     """
-    parent_fd = os.open(out_dir.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        parent_fd = os.open(
+            out_dir.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC
+        )
+    except OSError as exc:
+        raise UnsafeRunDirError(
+            f"run directory could not be fingerprinted before agent stage: {exc}"
+        ) from exc
     try:
         entry, info = _entry_at(parent_fd, out_dir.name)
         if info is None or entry[0] != "dir":
@@ -2144,6 +2174,11 @@ def workspace_guard_snapshot(out_dir: pathlib.Path) -> dict[str, Any]:
             "outDirEntries": entries,
             "gitStatus": git_porcelain_lines(out_dir),
         }
+    except OSError as exc:
+        os.close(parent_fd)
+        raise UnsafeRunDirError(
+            f"run directory could not be fingerprinted before agent stage: {exc}"
+        ) from exc
     except BaseException:
         os.close(parent_fd)
         raise
@@ -2452,7 +2487,11 @@ def run_codex_agent_command(
         verify_evidence,
     )
 
-    with tempfile.TemporaryDirectory(prefix="thesis-tool-evidence-") as spool:
+    # TMPDIR is writable to the stage, which can make the spool undeletable
+    # (a macOS ACL denying delete); that must not end the run.
+    with tempfile.TemporaryDirectory(
+        prefix="thesis-tool-evidence-", ignore_cleanup_errors=True
+    ) as spool:
         output = pathlib.Path(spool) / "tool_evidence.json"
         output.write_text(json.dumps(empty_evidence()) + "\n")
         result = _run_codex_agent_command(
@@ -4483,7 +4522,8 @@ def main() -> int:
     try:
         return _main()
     except UnsafeRunDirError as exc:
-        # The stage left its run dir in a state the runner cannot put back.
+        # A stage left its run dir in a state the runner cannot put back, or
+        # cannot fingerprint before the next stage.
         # A manifest, or any other write there, could go through what the
         # stage planted, so the run ends with no record. The batch sees a
         # failed run with no manifest and refuses it.
@@ -4905,28 +4945,12 @@ def _main() -> int:
         # the uncaught path left no run record and blocked whole-wave
         # publication. normalized_cells.json exists on disk at this
         # point, so reference it before sealing the failure inventory.
-        refs.append(
-            {
-                "artifactType": "normalized_cell",
-                "path": repo_relative(normalized_path),
-                "sha256": sha256_bytes(read_run_bytes(normalized_path)),
-                "bytes": normalized_path.stat().st_size,
-                "createdAt": run_at,
-            }
-        )
+        refs.append(run_file_ref("normalized_cell", normalized_path, run_at))
         return record_failure("seal", f"{type(exc).__name__}: {exc}")
     write_run_bytes(
         normalized_path, (json.dumps(normalized_cells, indent=2) + "\n").encode()
     )
-    refs.append(
-        {
-            "artifactType": "normalized_cell",
-            "path": repo_relative(normalized_path),
-            "sha256": sha256_bytes(read_run_bytes(normalized_path)),
-            "bytes": normalized_path.stat().st_size,
-            "createdAt": run_at,
-        }
-    )
+    refs.append(run_file_ref("normalized_cell", normalized_path, run_at))
     refs.append(
         write_artifact(
             out_dir,
@@ -4998,15 +5022,7 @@ def _main() -> int:
     write_run_bytes(
         cells_path, (json.dumps(cells_with_activity, indent=2) + "\n").encode()
     )
-    refs.append(
-        {
-            "artifactType": "cells_with_activity",
-            "path": repo_relative(cells_path),
-            "sha256": sha256_bytes(read_run_bytes(cells_path)),
-            "bytes": cells_path.stat().st_size,
-            "createdAt": run_at,
-        }
-    )
+    refs.append(run_file_ref("cells_with_activity", cells_path, run_at))
 
     manifest = {
         "schemaVersion": "thesis_analyst_run_manifest_v1",

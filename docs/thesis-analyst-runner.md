@@ -175,10 +175,17 @@ when what it printed before the timeout would validate. A Codex stage's output
 is its final message, or else the stream's last assistant message, or else the
 stream's last error. A Codex stage that times out with any of these is
 finished: its `command.json` records `timedOut: true` with return code 0, and
-its output is validated like any other, so one that stalled after an
-intermediate message or an error event fails as `parse`. A Codex stage that
-times out with none of them is a `command` failure. Codex runs additionally
-write `codex_stdout.jsonl`, `codex_stderr.log`,
+its output goes on to parsing like any other. One that stalled after a
+plain-text message or error fails as `parse`, an error that embeds a JSON body
+fails as `normalize`, and an intermediate message that holds a valid cell can
+validate. In ticket mode, a stage that timed out after an assistant message but
+before writing its final message is refused by the ticket stream binding (the
+stream's last message and the empty last-message file disagree): its
+`command.json` records return code 1 and the run fails as `command`. A Codex
+stage that times out with none of these outputs is a `command` failure. A
+`--command` agent's stdout and stderr are decoded as UTF-8, and a byte that is
+not UTF-8 becomes U+FFFD, so such output is recorded like any other. Codex runs
+additionally write `codex_stdout.jsonl`, `codex_stderr.log`,
 `codex_events.jsonl`, `codex_last_message.txt`, and `codex_trace.json`.
 
 When the command names a model with `-m`, `--model`, or `--model=...`, the
@@ -214,14 +221,22 @@ directory:
   the stage, or the stage left a tree the runner cannot remove. The runner
   writes nothing more and prints `run directory unsafe after agent stage: …`;
   the message names any stage tree left beside the run directory.
+- The guard cannot fingerprint the run directory before a guarded stage: an
+  earlier stage took read permission from its parent, say. The runner prints
+  `run directory unsafe after agent stage: run directory could not be
+  fingerprinted before agent stage: …`.
 - The runner's own read or write in the run directory fails, as file flags or
   ACLs the guard does not fingerprint, or a full disk, can make it. The runner
   prints `run directory I/O failed: …`, naming the file, and leaves what it
   had already written.
 
-Either way it exits 1 with no manifest, and a trusted publication refuses the
+In each case it exits 1 with no manifest, and a trusted publication refuses the
 batch (`result N lacks a registration-bound manifest`). A stage can always
-force this, so it is a refusal, never a validator-status mismatch.
+force this, so it is a refusal, never a validator-status mismatch. A stage that
+only hides file attributes from the runner (an inherited ACL denying
+`readattr`), or makes the tool-evidence spool in `TMPDIR` undeletable, does not
+end the run: the runner sizes each file it wrote from the bytes it reads back,
+and leaves an undeletable spool behind.
 
 A run that reaches validation seals its cells, and its `ok` is exactly the
 validation result. The publishers depend on that. `docket_publication.py` and
@@ -245,7 +260,9 @@ carries post-parse artifacts. It holds every analyst record to its stage
   timeout flag.
 - A `command` failure's last stage exited nonzero. A `workspace_hygiene`
   failure recorded at least one mutation.
-- Any other run parsed its output, so its last stage exited 0.
+- Any other run parsed its output, so its last stage exited 0, recorded as an
+  int when the stage ran a process (`codex` or `external_command`; a
+  response file or mock records no return code).
 
 So a workspace mutation cannot be relabelled as `command` or `parse`, no
 failure can be moved to a stage that did not fail, and a failed stage cannot
