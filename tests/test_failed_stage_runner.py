@@ -826,15 +826,18 @@ def test_stage_that_makes_the_tool_evidence_spool_undeletable_is_recorded(
             ")",
         ],
     )
+    left_behind = False
     try:
         completed = _run(out_dir, ["--codex-model", "test-model"], env)
     finally:
         if record.exists() and Path(record.read_text()).exists():
+            left_behind = True
             spool = Path(record.read_text())
             subprocess.run(["/bin/chmod", "-RN", str(spool)], check=True)
             shutil.rmtree(spool)
 
     assert record.exists(), completed.stderr[-2000:]
+    assert left_behind  # the stage's ACL took effect: cleanup could not remove it
     assert completed.returncode == 0, completed.stderr[-2000:]
     manifest = json.loads((out_dir / "manifest.json").read_text())
     assert manifest["ok"] is True
@@ -1356,8 +1359,9 @@ def _earlier_stage_failed(out_dir, _manifest, artifacts, _refs):
 _NO_RETURN_CODE = object()
 
 
-def _last_stage_exit(value: Any, name: str):
-    """Record ``value`` as a parsed run's last-stage exit."""
+def _last_stage_exit(value: Any, name: str, backend: str | None = None):
+    """Record ``value`` as a parsed run's last-stage exit, optionally
+    relabelling that stage's backend as well."""
 
     def edit(out_dir, manifest, artifacts, refs):
         command = json.loads((out_dir / "command.json").read_text())
@@ -1365,6 +1369,8 @@ def _last_stage_exit(value: Any, name: str):
             del command["returnCode"]
         else:
             command["returnCode"] = value
+        if backend is not None:
+            command["backend"] = backend
         index = next(
             i
             for i, ref in enumerate(refs)
@@ -1502,6 +1508,16 @@ FORGERIES = [
             (None, "exit_null"),
             (_NO_RETURN_CODE, "exit_missing"),
         ]
+    ],
+    *[
+        # Relabelled as a stage that runs no process, which records no
+        # exit: a recorded exit is still an int.
+        (
+            "valid",
+            _last_stage_exit("2", f"exit_string_as_{backend}", backend),
+            PARSED_RUN_EXIT,
+        )
+        for backend in ("mock", "response_file")
     ],
 ]
 

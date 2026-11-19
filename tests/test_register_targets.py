@@ -944,7 +944,9 @@ def convert_provenance_replay_candidate(
             run_dir,
             "command",
             "command.json",
-            json.dumps({"backend": "external_command", "argv": ["agent"]}),
+            json.dumps(
+                {"backend": "external_command", "argv": ["agent"], "returnCode": 0}
+            ),
             created_at,
         ),
         analyst_runner.write_artifact(

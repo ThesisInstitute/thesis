@@ -260,9 +260,10 @@ carries post-parse artifacts. It holds every analyst record to its stage
   timeout flag.
 - A `command` failure's last stage exited nonzero. A `workspace_hygiene`
   failure recorded at least one mutation.
-- Any other run parsed its output, so its last stage exited 0, recorded as an
-  int when the stage ran a process (`codex` or `external_command`; a
-  response file or mock records no return code).
+- Any other run parsed its output, so its last stage exited 0. A recorded
+  return code is an int, and a stage that ran a process (`codex` or
+  `external_command`) always records one; a response file or mock records
+  none.
 
 So a workspace mutation cannot be relabelled as `command` or `parse`, no
 failure can be moved to a stage that did not fail, and a failed stage cannot

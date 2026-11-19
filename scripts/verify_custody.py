@@ -741,7 +741,8 @@ def _verify_stage_record(
     workspaceHygiene, when present, is exactly the stages' recorded
     mutations. A failure recorded before parsing carries the last stage's
     exit status in error.command; any other run parsed, so its last stage
-    exited 0, recorded as an int when the stage ran a process. Every
+    exited 0. A recorded exit is an int, and a stage that ran a process
+    always records one. Every
     custody-rooted analyst record met these rules when they were added (471
     runs on main, 2026-11-18).
     """
@@ -796,13 +797,13 @@ def _verify_stage_record(
                 "invocation stage"
             )
     elif (type(last.get("returnCode")) is int and last["returnCode"] != 0) or (
-        last.get("backend") in RETURN_CODE_BACKENDS
-        and type(last.get("returnCode")) is not int
+        type(last.get("returnCode")) is not int
+        and ("returnCode" in last or last.get("backend") in RETURN_CODE_BACKENDS)
     ):
         # The runner parses only once the last stage exited 0: any other
-        # exit is a command failure recorded before parsing. A process
-        # backend always records its exit as an int; a response file or
-        # mock records none.
+        # exit is a command failure recorded before parsing. A recorded exit
+        # is always an int, and a process backend always records one; a
+        # response file or mock records none.
         raise CustodyError("a parsed run's last invocation stage exited nonzero")
 
 
