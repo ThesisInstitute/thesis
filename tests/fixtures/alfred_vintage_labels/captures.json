@@ -1,0 +1,82 @@
+[
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA&vintage_date=2026-09-24",
+  "requestedAtUtc": "2026-10-18T19:12:33Z",
+  "header": "observation_date,ICSA_20260924",
+  "bytes": 56139,
+  "sha256": "f25c2200dc8282ef37c45b53f00672ab98aaccb52bfd7817ca135f07ba5df023",
+  "fixture": "tests/fixtures/alfred_icsa_2026-09-24.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=ICSA&vintage_date=2026-09-25",
+  "requestedAtUtc": "2026-10-18T19:12:34Z",
+  "header": "observation_date,ICSA_20260924",
+  "bytes": 56139,
+  "sha256": "f25c2200dc8282ef37c45b53f00672ab98aaccb52bfd7817ca135f07ba5df023",
+  "fixture": "tests/fixtures/alfred_icsa_2026-09-25.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?vintage_date=2026-09-25&id=ICSA",
+  "requestedAtUtc": "2026-10-18T19:12:34Z",
+  "header": "observation_date,ICSA_20260925",
+  "bytes": 56139,
+  "sha256": "39b7cbb171bb70958a416f36b9a71972dfb4513b7d9ca73e1da8ddf567d029f0",
+  "fixture": "tests/fixtures/alfred_vintage_labels/icsa_2026-09-25_reordered.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2026-09-29",
+  "requestedAtUtc": "2026-10-18T19:12:35Z",
+  "header": "observation_date,PAYEMS_20260928",
+  "bytes": 18396,
+  "sha256": "95a306e7124171a5951340b172cc35943c699a773ea5af133e8c8ffc9c2ced75",
+  "fixture": "tests/fixtures/alfred_vintage_labels/payems_2026-09-29.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2026-10-01",
+  "requestedAtUtc": "2026-10-18T19:12:36Z",
+  "header": "observation_date,PAYEMS_20260929",
+  "bytes": 18396,
+  "sha256": "727ac971dc221970fd4ce00b45166ea8655305c22efee3bf9d31be13a027cd7d",
+  "fixture": "tests/fixtures/alfred_vintage_labels/payems_2026-10-01.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?vintage_date=2026-10-01&id=PAYEMS",
+  "requestedAtUtc": "2026-10-18T19:12:36Z",
+  "header": "observation_date,PAYEMS_20261001",
+  "bytes": 18396,
+  "sha256": "edfb8e9337ce7f73babd81440c66a0bff36b613163895679d8c7d9214c7c59e9",
+  "fixture": "tests/fixtures/alfred_vintage_labels/payems_2026-10-01_reordered.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2026-10-02",
+  "requestedAtUtc": "2026-10-18T19:12:36Z",
+  "header": "observation_date,PAYEMS_20261002",
+  "bytes": 18414,
+  "sha256": "ff1f8a4897b5f2eaef93943cc0613a30de5bc2959b9b9bd3b49cb63ee33e5490",
+  "fixture": "tests/fixtures/alfred_vintage_labels/payems_2026-10-02.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?vintage_date=2026-10-02&id=PAYEMS",
+  "requestedAtUtc": "2026-10-18T19:12:36Z",
+  "header": "observation_date,PAYEMS_20261002",
+  "bytes": 18414,
+  "sha256": "ff1f8a4897b5f2eaef93943cc0613a30de5bc2959b9b9bd3b49cb63ee33e5490",
+  "fixture": "tests/fixtures/alfred_vintage_labels/payems_2026-10-02_reordered.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2026-10-18",
+  "requestedAtUtc": "2026-10-18T19:12:37Z",
+  "header": "observation_date,PAYEMS_20261017",
+  "bytes": 18414,
+  "sha256": "5795557df8b860f3ad97f6d5b762c0bfca5e7463cf985dbabf24f98c973a6e31",
+  "fixture": "tests/fixtures/alfred_vintage_labels/payems_2026-10-18.csv.gz"
+ },
+ {
+  "url": "https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PAYEMS&vintage_date=2026-11-06&thesis_lag_probe=fixture",
+  "requestedAtUtc": "2026-10-18T19:12:37Z",
+  "header": "observation_date,PAYEMS_20261018",
+  "bytes": 18414,
+  "sha256": "964906a2412c36599705ead216ecd0047be254478019e92b49404056fdf656f1",
+  "fixture": "tests/fixtures/alfred_vintage_labels/payems_2026-11-06_probe.csv.gz"
+ }
+]
