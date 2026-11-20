@@ -1,0 +1,91 @@
+{
+  "slug": "us-dod-new-prime-awards-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD new prime awards FY2026: forecast unavailable",
+  "question": "What is USAspending API v2 agency 097 (DoD) new_award_count for FY2026, from the exact registered query without additional filters, multiplied by 0.000001 and expressed in millions, at the registered_query_snapshot?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 new award count",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+  "resolutionRule": "Use the registered_query_snapshot response to GET https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026. Read new_award_count and multiply by 0.000001; preserve the returned integer count's precision in millions. Do not substitute agency profile totals, add award-type filters, or resolve using later updates. The supplied target context does not specify an exact snapshot date.",
+  "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/agency/toptier_code/awards/new/count.md",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026"
+  ],
+  "runAt": "2026-10-07T10:32:39Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: mandatory registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target identity and unit are retained from the supplied registration. The target is a registered query snapshot, rather than a conventional scheduled first-print release."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://api.usaspending.gov/docs/endpoints; https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/agency/toptier_code/awards/new/count.md",
+      "result": "Official API v2 documentation identifies /api/v2/agency/<TOPTIER_AGENCY_CODE>/awards/new/count/ as GET for a single fiscal year, with response field new_award_count. These are schema facts, not fetched historical award counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025",
+      "result": "Internal Error (). URL https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025 is not accessible via this tool. No new_award_count was returned. Retrying with the other available web search tool produced the same failure."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024",
+      "result": "Internal Error (). URL https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024 is not accessible via this tool. No new_award_count was returned. The other available web search tool also failed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023",
+      "result": "Internal Error (). URL https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023 is not accessible via this tool. No new_award_count was returned. The other available web search tool also failed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022; https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2021; https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2020",
+      "result": "Each exact query for FY2022, FY2021 and FY2020 returned Internal Error () and 'is not accessible via this tool.' No historical counts were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+      "result": "Internal Error (). URL https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026 is not accessible via this tool. No current target count was returned."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class unavailable: the required exact-query history was not fetched. Persistence, model candidates, sigma, interval arithmetic and tail thresholds cannot be calculated honestly. Empty historicalContext records fetch failure, not an assertion that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution timing is also incomplete: the supplied expectedReleaseWindow is 2026-10-15 through 2026-10-22, but no literal resolutionDate or resolve-by-bound basis is supplied. No official scheduled snapshot day was verified; the window endpoint cannot be promoted to a resolution date."
+    },
+    {
+      "kind": "text",
+      "text": "No forecast is issued. Null estimates and bounds explicitly mark this refusal, which cannot pass the numeric cell contract. The prompt requires refusal when the registered query cannot be executed. No substitute aggregates, remembered values, fabricated tool receipts or model outputs were used. The prohibited catalog lookup was skipped under the independence override."
+    }
+  ]
+}

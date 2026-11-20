@@ -1,0 +1,70 @@
+{
+  "status": "refused",
+  "refusalReason": "The exact registered history queries could not be fetched. The prompt requires refusal in this case. No numerical forecast is produced.",
+  "slug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+  "title": "FY2027 DoD prime award obligations",
+  "question": "What will USAspending API v2 report for agency 097 prime award obligations for fiscal year 2027 in the first registered query snapshot, converted to billions USD, conditional on the registered FY2027 NDAA nonenactment condition?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 awards summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+  "resolutionRule": "The registered target reads obligations from the exact fiscal-year query and multiplies by 1e-09. Resolution uses the first registered query snapshot, without replacement by later revisions. The snapshot date and source precision could not be verified this run.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/docs/endpoints/federal_accounts/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-06T21:51:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Registered-query forecast refused because required evidence is unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the obligations field returned by the exact USAspending agency 097 awards query for FY2027, converted to billions USD. Agency profile totals and other agencies' responses cannot supply its historical anchors."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web-tool requests to the exact registered FY2020, FY2021, and FY2022 URLs each returned Internal Error and 'URL ... is not accessible via this tool.' No obligations values were returned."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web-tool requests to the exact registered FY2023, FY2024, and FY2025 URLs each returned Internal Error and 'URL ... is not accessible via this tool.' Retrying FY2025 after official documentation discovery also failed."
+    },
+    {
+      "kind": "text",
+      "text": "The official endpoint documentation was accessible and confirmed that the agency awards endpoint uses GET. It did not supply the required historical responses. Empty historicalContext records fetch failure, not an assertion that the official source exposes fewer than six periods."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch official USAspending data-source and about-the-data documentation to check publication timing.",
+      "result": "The official data-source documentation describes daily updates after the nightly pipeline, normal contract reporting within three days, and a 90-day DoD procurement-data delay. The about-the-data documentation also confirms the 90-day delay."
+    },
+    {
+      "kind": "text",
+      "text": "No official calendar or announcement establishing this registered snapshot's resolutionDate was found. Daily updates and reporting delays do not verify a date within the supplied registration window, so resolutionDate remains null."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No numerical base rate or reference class can be established because no required historical obligations values were fetched. Sigma, the 1.28-times-sigma half-width, policy adjustments, and final bounds cannot be calculated. The explicit refusal instruction therefore applies; null estimates are unavailable values, not a forecast."
+    }
+  ]
+}

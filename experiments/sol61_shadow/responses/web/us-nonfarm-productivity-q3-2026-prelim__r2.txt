@@ -1,0 +1,177 @@
+{
+  "slug": "us-nonfarm-productivity-q3-2026-prelim",
+  "country": "US",
+  "type": "data",
+  "title": "US nonfarm productivity, Q3 2026 preliminary",
+  "question": "What will BLS first report for seasonally adjusted nonfarm business labor productivity growth in 2026 Q3, expressed as the annualized percent change from the previous quarter?",
+  "unit": "percent_growth",
+  "pointEstimate": 2.2,
+  "ciLow": 0.05,
+  "ciHigh": 4.35,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-05",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, Productivity and Costs, Table 2",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/prod2.t02.htm",
+  "resolutionRule": "Resolve to the initial preliminary Productivity and Costs publication for 2026 Q3: Table 2, nonfarm business sector, Labor productivity column, Percent change from previous quarter at annual rate, seasonally adjusted. Use the published percentage at its displayed one-decimal precision, without further transformation. Preserve the first published value and ignore subsequent corrections, revisions, and benchmark updates.",
+  "dataPointId": "bls.productivity.nonfarm_qoq_prelim.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2023-Q3"},
+      "label": "2023-Q3",
+      "value": 4.7
+    },
+    {
+      "period": {"type": "quarter", "value": "2023-Q4"},
+      "label": "2023-Q4",
+      "value": 3.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q1"},
+      "label": "2024-Q1",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q2"},
+      "label": "2024-Q2",
+      "value": 2.3
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 2.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 1.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": -0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 2.4
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 4.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 2.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 0.8
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 1.4
+    }
+  ],
+  "drivers": [
+    "Historical first-print productivity growth averages 2.12%",
+    "Latest preliminary productivity print of 1.4% tempers persistence",
+    "Fed-published Q3 GDPNow estimate of 3.7% supports stronger output",
+    "Private employee hours proxy grows 1.26% annualized",
+    "Trade composition, output coverage, and first-vintage uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/news.release/prod2.t02.htm",
+    "https://www.bls.gov/schedule/news_release/prod2.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11022023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05022024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11072024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02062025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05082025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08072025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_01082026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_03052026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05072026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08062026.htm",
+    "https://www.bls.gov/ces/data/employment-and-earnings/2026/summarytable_202609.htm",
+    "https://www.atlantafed.org/research-and-data/data/gdpnow",
+    "https://www.atlantafed.org/research-and-data/data/gdpnow/current-and-past-gdpnow-commentaries",
+    "https://www.bea.gov/index.php/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd"
+  ],
+  "runAt": "2026-10-07T11:43:46Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Q3 2026 preliminary nonfarm business productivity forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The exact resolver is BLS Productivity and Costs Table 2, nonfarm business labor productivity, seasonally adjusted annualized percent change from the previous quarter. Every productivity anchor and historical observation below uses that same variant and its original preliminary print. The currently displayed Table 2 is an updated vintage and is used to verify the field, not to replace original observations."
+    },
+    {
+      "kind": "text",
+      "text": "The official BLS calendar at https://www.bls.gov/schedule/news_release/prod2.htm lists Third Quarter 2026 (P) for November 5, 2026 at 08:30 AM Eastern. This falls within the registered October 30-November 13 window. The scheduled December 8 revision does not determine this first-print target."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original preliminary BLS releases: https://www.bls.gov/news.release/archives/prod2_11022023.htm ; https://www.bls.gov/news.release/archives/prod2_02012024.htm ; https://www.bls.gov/news.release/archives/prod2_05022024.htm ; https://www.bls.gov/news.release/archives/prod2_08012024.htm ; https://www.bls.gov/news.release/archives/prod2_11072024.htm ; https://www.bls.gov/news.release/archives/prod2_02062025.htm",
+      "result": "First-print nonfarm business productivity growth: 2023-Q3 4.7%; 2023-Q4 3.2%; 2024-Q1 0.3%; 2024-Q2 2.3%; 2024-Q3 2.2%; 2024-Q4 1.2%. All are seasonally adjusted quarter-over-quarter annualized percentages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original preliminary BLS releases: https://www.bls.gov/news.release/archives/prod2_05082025.htm ; https://www.bls.gov/news.release/archives/prod2_08072025.htm ; https://www.bls.gov/news.release/archives/prod2_01082026.htm ; https://www.bls.gov/news.release/archives/prod2_03052026.htm ; https://www.bls.gov/news.release/archives/prod2_05072026.htm ; https://www.bls.gov/news.release/archives/prod2_08062026.htm",
+      "result": "First-print productivity growth: 2025-Q1 -0.8%; 2025-Q2 2.4%; 2025-Q3 4.9%; 2025-Q4 2.8%; 2026-Q1 0.8%; 2026-Q2 1.4%. The latest preliminary release reports Q2 output growth of 1.7%, hours growth of 0.3%, and current-business-cycle productivity growth of 2.1%."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the mean of 12 consecutive original preliminary prints from 2023-Q3 through 2026-Q2: 25.4/12 = 2.1167%. This reference class ranges from -0.8% to 4.9%. It supplies the level prior before current-quarter adjustments; the latest 1.4% print supplies a modest downward momentum adjustment."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the September 2026 CES summary table at https://www.bls.gov/ces/data/employment-and-earnings/2026/summarytable_202609.htm, seasonally adjusted private aggregate weekly hours index.",
+      "result": "In one current vintage, April 116.6, May 116.7, June 116.7, July 116.7, August 117.2, and September 117.2. Derived quarterly averages are 116.6667 for Q2 and 117.0333 for Q3, implying 100*((117.0333/116.6667)^4-1) = 1.2631% annualized hours growth using unrounded averages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://www.atlantafed.org/research-and-data/data/gdpnow and its current commentary at https://www.atlantafed.org/research-and-data/data/gdpnow/current-and-past-gdpnow-commentaries.",
+      "result": "The October 6, 2026 GDPNow estimate for Q3 real GDP growth is 3.7% seasonally adjusted annualized, unchanged from October 1 after rounding. Its consumption growth nowcast is 3.4%, private domestic investment growth is 21.5%, and the net-export contribution is -2.69 percentage points. This is a Fed-published model nowcast, not realized GDP or an official Federal Reserve forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the September 30, 2026 BEA release at https://www.bea.gov/index.php/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd.",
+      "result": "Q2 real GDP growth is 2.2% annualized, revised upward by 0.7 percentage point; Q1 growth is revised to 2.5%. Q2 real final sales to private domestic purchasers grew 4.6%. These are macro context, not substitutions for preliminary productivity history."
+    },
+    {
+      "kind": "text",
+      "text": "Level and momentum enter through the historical mean and latest preliminary print. Current output and hours enter through a separate proxy. Trade and investment composition can produce one-off output movements; they are already represented in GDPNow, so no additional increment is added. The separate policy-mechanism adjustment is zero: no direct policy change is mechanically translated into productivity growth."
+    },
+    {
+      "kind": "text",
+      "text": "GDPNow covers total GDP rather than nonfarm business output, while CES private employee hours exclude self-employed workers and productivity-specific adjustments. The bridge therefore receives only partial weight. The two 2023 observations also precede the self-employed-hours method change announced in the February 2024 BLS release. These comparability limits support retaining the full historical dispersion."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a mean-reverting persistence prior and a partially weighted output-hours bridge. The historical sample is the 12 original preliminary productivity growth values listed above. Chosen prior weights give 0.75*2.1166667 + 0.25*1.4 = 1.9375%, a momentum adjustment of -0.1791667 percentage point. The bridge is 100*(1.037/1.01263081815-1) = 2.4065218%. A judgmental 50% bridge weight adds 0.5*(2.4065218-1.9375) = 0.2345109 percentage point; separate one-off and policy adjustments are zero. The combined estimate is 2.1720109%, rounded to 2.2%. For this growth series, compute dispersion from the values themselves: sum of squared deviations = 31.0766667; sigma = 1.6808187 = sqrt(31.0766667/11). The approximate normal 80% half-width is 1.28*sigma = 2.1514479 percentage points, without narrowing. Centered on the reported point, bounds are 2.2 +/- 2.1514479, rounded to [0.05%, 4.35%]."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is stronger nonfarm business output than the GDP proxy or lower productivity hours than CES suggests. Hypothetical output growth of 6.0% with hours growth of 1.3% implies approximately 4.64% productivity growth, outside the interval above 4.35%. The downside risk is flat business output despite continued hours growth; flat output with hours growth of 1.3% implies negative productivity growth, outside the interval below 0.05%. First-vintage output and hours surprises could generate either outcome."
+    },
+    {
+      "kind": "forecast",
+      "point": 2.2,
+      "ciLow": 0.05,
+      "ciHigh": 4.35
+    }
+  ]
+}

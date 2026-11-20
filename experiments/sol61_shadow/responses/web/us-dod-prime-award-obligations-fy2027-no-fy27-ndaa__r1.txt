@@ -1,0 +1,70 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+  "title": "DoD FY2027 prime award obligations: forecast refused",
+  "question": "What will the first official registered-query snapshot report for FY2027 Department of Defense prime award obligations, conditional on the registered FY2027 NDAA nonenactment condition?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+  "resolutionRule": "Use the first official registered-query snapshot for FY2027 from the specified endpoint, read obligations, and multiply by 1e-9. Preserve source precision and exclude subsequent revisions. The exact snapshot date and published rounding precision could not be verified in this run.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints/federal_accounts/",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025"
+  ],
+  "runAt": "2026-10-07T12:43:43Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refused: required registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the registered agency 097 awards query and its obligations field. Agency profile totals, budgetary obligations, and search summaries cannot substitute for this series."
+    },
+    {
+      "kind": "text",
+      "text": "Web open requests to the exact registered URLs for fiscal_year=2020, fiscal_year=2021, and fiscal_year=2022 failed. Retried requests returned Internal Error and stated that each URL is not accessible via this tool. No obligation values were retrieved."
+    },
+    {
+      "kind": "text",
+      "text": "Web open requests to the exact registered URLs for fiscal_year=2023, fiscal_year=2024, and fiscal_year=2025 also returned Internal Error and stated that each URL is not accessible via this tool. Retrying the FY2025 query did not retrieve a value."
+    },
+    {
+      "kind": "text",
+      "text": "The official API documentation confirms that the agency awards endpoint supports GET and returns award obligations. Documentation establishes the endpoint definition, but supplies none of the required historical observations. Source: https://api.usaspending.gov/docs/endpoints/federal_accounts/"
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending documentation states that DoD procurement publication is delayed 90 days. This means a registered snapshot cannot automatically be treated as a complete final fiscal-year total. Source: https://www.usaspending.gov/data/about-the-data-download.pdf"
+    },
+    {
+      "kind": "text",
+      "text": "No official schedule checked verified an exact date for this registered snapshot. Treasury lists an FY2027 DABS submission calendar, but its spreadsheet could not be read by the web tool and financial submission dates do not establish the exact award-query snapshot date. The supplied release window alone does not justify selecting resolutionDate. Source: https://tfx.treasury.gov/data-transparency/resources"
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No eligible historical reference class or base rate was fetched. A persistence prior, level and momentum adjustments, one-off and policy effects, sigma, and the 1.28*sigma interval half-width cannot be estimated audibly from the available evidence."
+    },
+    {
+      "kind": "text",
+      "text": "The registered-query instruction requires refusal when the query cannot be executed. Null forecast fields and empty historicalContext explicitly represent that refusal, not a forecast or a claim that the official source exposes fewer than six prints."
+    }
+  ]
+}

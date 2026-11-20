@@ -1,0 +1,158 @@
+{
+  "slug": "continued-claims-week-2026-09-26",
+  "country": "US",
+  "type": "data",
+  "title": "Continued claims: September 26, 2026",
+  "question": "How many millions of continued claims (insured unemployment) will the U.S. Department of Labor, Employment and Training Administration, FIRST PRINT for the week ending Saturday, September 26, 2026, in the seasonally adjusted regular-state-programs series CCSA?",
+  "unit": "millions",
+  "pointEstimate": 1.701,
+  "ciLow": 1.679,
+  "ciHigh": 1.723,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-08",
+  "resolutionSource": "U.S. Department of Labor, Employment and Training Administration, Unemployment Insurance Weekly Claims",
+  "resolutionSourceUrl": "https://www.dol.gov/ui/data.pdf",
+  "resolutionRule": "Resolve on the FIRST PRINT of the advance number of seasonally adjusted insured unemployment for the week ending 2026-09-26, in the DOL/ETA Unemployment Insurance Weekly Claims release, 'UNEMPLOYMENT INSURANCE DATA FOR REGULAR STATE PROGRAMS', row 'Insured Unemployment (SA)'. Preserve the registered alfred-fred advance_vintage resolver: at https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=CCSA use CCSA's earliest nonmissing vintage for that exact observation date, corresponding to the DOL advance print, and multiply the number of claims by 0.000001. Report millions to three decimal places, matching DOL's nearest-thousand precision. Later weekly revisions, annual seasonal revisions, corrections and revised vintages do not replace the first print. The official St. Louis Fed release calendar lists 2026-10-08; the registered 2026-10-14 through 2026-10-18 expected window is inconsistent with that calendar and the current release's continued-claims reporting period. The observation period and advance-vintage resolution policy remain the registered target.",
+  "dataPointId": "dol.eta.continued_claims.sa.week_2026-09-26.first_print",
+  "historicalContext": [
+    {"period": {"type": "week_ending", "value": "2026-04-11"}, "label": "2026-04-11", "value": 1.821},
+    {"period": {"type": "week_ending", "value": "2026-04-18"}, "label": "2026-04-18", "value": 1.785},
+    {"period": {"type": "week_ending", "value": "2026-04-25"}, "label": "2026-04-25", "value": 1.766},
+    {"period": {"type": "week_ending", "value": "2026-05-02"}, "label": "2026-05-02", "value": 1.782},
+    {"period": {"type": "week_ending", "value": "2026-05-09"}, "label": "2026-05-09", "value": 1.782},
+    {"period": {"type": "week_ending", "value": "2026-05-16"}, "label": "2026-05-16", "value": 1.786},
+    {"period": {"type": "week_ending", "value": "2026-05-23"}, "label": "2026-05-23", "value": 1.777},
+    {"period": {"type": "week_ending", "value": "2026-05-30"}, "label": "2026-05-30", "value": 1.795},
+    {"period": {"type": "week_ending", "value": "2026-06-06"}, "label": "2026-06-06", "value": 1.810},
+    {"period": {"type": "week_ending", "value": "2026-06-13"}, "label": "2026-06-13", "value": 1.821},
+    {"period": {"type": "week_ending", "value": "2026-06-20"}, "label": "2026-06-20", "value": 1.814},
+    {"period": {"type": "week_ending", "value": "2026-06-27"}, "label": "2026-06-27", "value": 1.814},
+    {"period": {"type": "week_ending", "value": "2026-07-04"}, "label": "2026-07-04", "value": 1.805},
+    {"period": {"type": "week_ending", "value": "2026-07-11"}, "label": "2026-07-11", "value": 1.796},
+    {"period": {"type": "week_ending", "value": "2026-07-18"}, "label": "2026-07-18", "value": 1.782},
+    {"period": {"type": "week_ending", "value": "2026-07-25"}, "label": "2026-07-25", "value": 1.801},
+    {"period": {"type": "week_ending", "value": "2026-08-01"}, "label": "2026-08-01", "value": 1.777},
+    {"period": {"type": "week_ending", "value": "2026-08-08"}, "label": "2026-08-08", "value": 1.799},
+    {"period": {"type": "week_ending", "value": "2026-08-15"}, "label": "2026-08-15", "value": 1.778},
+    {"period": {"type": "week_ending", "value": "2026-08-22"}, "label": "2026-08-22", "value": 1.779},
+    {"period": {"type": "week_ending", "value": "2026-08-29"}, "label": "2026-08-29", "value": 1.774},
+    {"period": {"type": "week_ending", "value": "2026-09-05"}, "label": "2026-09-05", "value": 1.730},
+    {"period": {"type": "week_ending", "value": "2026-09-12"}, "label": "2026-09-12", "value": 1.719},
+    {"period": {"type": "week_ending", "value": "2026-09-19"}, "label": "2026-09-19", "value": 1.701}
+  ],
+  "drivers": [
+    "Latest advance continued claims: 1.701 million",
+    "Persistence has the lowest walk-forward RMSE",
+    "Recent decline already reflected in the persistence prior",
+    "First-print weekly-change volatility sets interval width",
+    "Reporting catch-up and faster exits create opposite tail risks"
+  ],
+  "sourceContext": [
+    "https://alfred.stlouisfed.org/release?rd=2026-04-23&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-04-30&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-05-07&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-05-14&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-05-21&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-05-28&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-06-04&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-06-11&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-06-18&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-06-25&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-07-02&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-07-09&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-07-16&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-07-23&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-07-30&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-08-06&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-08-13&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-08-20&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-08-27&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-09-03&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-09-10&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-09-17&rid=180",
+    "https://alfred.stlouisfed.org/release?rd=2026-09-24&rid=180",
+    "https://alfred.stlouisfed.org/series?seid=CCSA",
+    "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf",
+    "https://fred.stlouisfed.org/releases/calendar?ob=rd&od=asc&rid=180&ve=2026-12-31&view=week&vs=2026-01-01",
+    "https://oui.doleta.gov/unemploy/archive.asp"
+  ],
+  "runAt": "2026-10-07T12:38:48Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "First-print forecast for seasonally adjusted continued claims, week ending September 26, 2026"
+    },
+    {
+      "kind": "text",
+      "text": "The target is national regular-state-programs insured unemployment, CCSA, seasonally adjusted, for week ending 2026-09-26, expressed in millions. It is a level, not initial claims, the insured unemployment rate, the moving average or all-programs unadjusted claims. The registered slug, unit and dataPointId are preserved. No local files, prior forecasts or Thesis catalog were consulted; the requested catalog check is excluded by this run's independence instruction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://fred.stlouisfed.org/releases/calendar?ob=rd&od=asc&rid=180&ve=2026-12-31&view=week&vs=2026-01-01 and https://oui.doleta.gov/unemploy/archive.asp; inspect https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf.",
+      "result": "The official St. Louis Fed calendar explicitly lists Thursday October 08, 2026 at 7:30 am US Central Time and October 15 at 7:30 am. DOL's archive states Thursday publication at 8:30 am and lists November 25, 2026 as an exception. The October 1, 2026 DOL release reports advance continued claims only through September 19: 1,701,000; its September 26 figure of 197,000 is INITIAL claims. October 8 is the calendar-listed next release; connecting that release to the next continued-claims observation is supported by these reporting periods."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar discrepancy: the registered expectedReleaseWindow is 2026-10-14 through 2026-10-18, one release later than the calendar-supported first print for the specified observation. No resolutionDate was supplied in the target context, so the default release-calendar branch gives 2026-10-08. The exact registered ALFRED graph CSV endpoint could not be fetched by the web tool. Historical numbers were fetched instead from date-specific ALFRED release tables for the same CCSA advance vintages; the latest CCSA page supplies the September 19 first print. This is not a claim that the registered CSV bytes were successfully inspected."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open ALFRED release-date pages; read the CCSA row's Last Observation: https://alfred.stlouisfed.org/release?rd=2026-04-23&rid=180, https://alfred.stlouisfed.org/release?rd=2026-04-30&rid=180, https://alfred.stlouisfed.org/release?rd=2026-05-07&rid=180, https://alfred.stlouisfed.org/release?rd=2026-05-14&rid=180, https://alfred.stlouisfed.org/release?rd=2026-05-21&rid=180, https://alfred.stlouisfed.org/release?rd=2026-05-28&rid=180, https://alfred.stlouisfed.org/release?rd=2026-06-04&rid=180, https://alfred.stlouisfed.org/release?rd=2026-06-11&rid=180.",
+      "result": "2026-04-11 = 1821000 claims, advance vintage 2026-04-23; 2026-04-18 = 1785000 claims, advance vintage 2026-04-30; 2026-04-25 = 1766000 claims, advance vintage 2026-05-07; 2026-05-02 = 1782000 claims, advance vintage 2026-05-14; 2026-05-09 = 1782000 claims, advance vintage 2026-05-21; 2026-05-16 = 1786000 claims, advance vintage 2026-05-28; 2026-05-23 = 1777000 claims, advance vintage 2026-06-04; 2026-05-30 = 1795000 claims, advance vintage 2026-06-11. All rows are CCSA, Number, Weekly, Seasonally Adjusted."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open ALFRED release-date pages; read the CCSA row's Last Observation: https://alfred.stlouisfed.org/release?rd=2026-06-18&rid=180, https://alfred.stlouisfed.org/release?rd=2026-06-25&rid=180, https://alfred.stlouisfed.org/release?rd=2026-07-02&rid=180, https://alfred.stlouisfed.org/release?rd=2026-07-09&rid=180, https://alfred.stlouisfed.org/release?rd=2026-07-16&rid=180, https://alfred.stlouisfed.org/release?rd=2026-07-23&rid=180, https://alfred.stlouisfed.org/release?rd=2026-07-30&rid=180, https://alfred.stlouisfed.org/release?rd=2026-08-06&rid=180.",
+      "result": "2026-06-06 = 1810000 claims, advance vintage 2026-06-18; 2026-06-13 = 1821000 claims, advance vintage 2026-06-25; 2026-06-20 = 1814000 claims, advance vintage 2026-07-02; 2026-06-27 = 1814000 claims, advance vintage 2026-07-09; 2026-07-04 = 1805000 claims, advance vintage 2026-07-16; 2026-07-11 = 1796000 claims, advance vintage 2026-07-23; 2026-07-18 = 1782000 claims, advance vintage 2026-07-30; 2026-07-25 = 1801000 claims, advance vintage 2026-08-06. All rows are CCSA, Number, Weekly, Seasonally Adjusted."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open ALFRED release-date pages; read the CCSA row's Last Observation: https://alfred.stlouisfed.org/release?rd=2026-08-13&rid=180, https://alfred.stlouisfed.org/release?rd=2026-08-20&rid=180, https://alfred.stlouisfed.org/release?rd=2026-08-27&rid=180, https://alfred.stlouisfed.org/release?rd=2026-09-03&rid=180, https://alfred.stlouisfed.org/release?rd=2026-09-10&rid=180, https://alfred.stlouisfed.org/release?rd=2026-09-17&rid=180, https://alfred.stlouisfed.org/release?rd=2026-09-24&rid=180; open https://alfred.stlouisfed.org/series?seid=CCSA for the latest observation.",
+      "result": "2026-08-01 = 1777000 claims, advance vintage 2026-08-13; 2026-08-08 = 1799000 claims, advance vintage 2026-08-20; 2026-08-15 = 1778000 claims, advance vintage 2026-08-27; 2026-08-22 = 1779000 claims, advance vintage 2026-09-03; 2026-08-29 = 1774000 claims, advance vintage 2026-09-10; 2026-09-05 = 1730000 claims, advance vintage 2026-09-17; 2026-09-12 = 1719000 claims, advance vintage 2026-09-24. All rows are CCSA, Number, Weekly, Seasonally Adjusted. Latest ALFRED CCSA page, updated October 1, 2026, reports week ending 2026-09-19 = 1,701,000 claims. Its older rows are revised values and were excluded; for example its 2026-09-12 row is 1,712,000, whereas that week's fetched September 24 advance vintage is 1,719,000."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read the seasonally adjusted insured unemployment paragraph and regular-state-programs table in https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/ui-claims/20261543.pdf.",
+      "result": "October 1, 2026 advance continued claims for September 19 = 1,701,000, consistent with ALFRED. September 12 was revised from its first print of 1,719,000 to 1,712,000. The current four-week continued-claims average is 1,723,750. Initial claims for September 26 = 197,000, versus the revised previous week's 198,000; these are a separate series, not the target outcome."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the reference class is 24 consecutive CCSA first prints, week ending 2026-04-11 through 2026-09-19, each multiplied by 0.000001. Their mean is 1.783083 million, median 1.7835, sample level standard deviation 0.030248, and range 1.701 to 1.821. The 23 successive first-print changes average -0.005217 million, with sample standard deviation 0.017490 and range -0.044 to +0.022. Last-print persistence is the prior and benchmark: 1.701 million. Level dispersion is reported as context; one-week forecast uncertainty uses successive changes."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates, generated from the fetched first-print history before selecting the agent forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":1.701,\"p10\":1.679,\"p50\":1.701,\"p90\":1.723,\"interval80\":[1.679,1.723],\"interval90\":[1.672,1.730],\"intervalMethod\":\"Normal fallback-prior wrapper using sample standard deviation of 23 successive first-print changes; 1.28 sigma and 1.645 sigma; bounds rounded to 0.001 million.\",\"calibration_n\":23,\"trainCutoff\":\"2026-09-19\",\"walkForward\":{\"method\":\"Expanding-window, one-step forecast; first six observations used before scoring; RMSE used for selection\",\"n\":18,\"rmse\":0.017363755354185335,\"mae\":0.014277777777777759}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_drift\",\"point\":1.696,\"p10\":1.673,\"p50\":1.696,\"p90\":1.718,\"interval80\":[1.673,1.718],\"interval90\":[1.667,1.725],\"intervalMethod\":\"Normal fallback-prior wrapper using sample standard deviation of 23 successive first-print changes; 1.28 sigma and 1.645 sigma; bounds rounded to 0.001 million.\",\"calibration_n\":23,\"trainCutoff\":\"2026-09-19\",\"walkForward\":{\"method\":\"Expanding-window, one-step forecast; first six observations used before scoring; RMSE used for selection\",\"n\":18,\"rmse\":0.0173837600319077,\"mae\":0.013944265225753871}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_3_mean\",\"point\":1.717,\"p10\":1.694,\"p50\":1.717,\"p90\":1.739,\"interval80\":[1.694,1.739],\"interval90\":[1.688,1.745],\"intervalMethod\":\"Normal fallback-prior wrapper using sample standard deviation of 23 successive first-print changes; 1.28 sigma and 1.645 sigma; bounds rounded to 0.001 million.\",\"calibration_n\":23,\"trainCutoff\":\"2026-09-19\",\"walkForward\":{\"method\":\"Expanding-window, one-step forecast; first six observations used before scoring; RMSE used for selection\",\"n\":18,\"rmse\":0.022143889718201054,\"mae\":0.017870370370370352}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_3_drift\",\"point\":1.677,\"p10\":1.654,\"p50\":1.677,\"p90\":1.699,\"interval80\":[1.654,1.699],\"interval90\":[1.648,1.705],\"intervalMethod\":\"Normal fallback-prior wrapper using sample standard deviation of 23 successive first-print changes; 1.28 sigma and 1.645 sigma; bounds rounded to 0.001 million.\",\"calibration_n\":23,\"trainCutoff\":\"2026-09-19\",\"walkForward\":{\"method\":\"Expanding-window, one-step forecast; first six observations used before scoring; RMSE used for selection\",\"n\":18,\"rmse\":0.017896133798624526,\"mae\":0.01462962962962961}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Candidate selection: compare unrounded one-step predictions on the same 18 walk-forward targets, using the first six observations as initial training. Persistence RMSE is 0.017364 million; expanding drift 0.017384; trailing-three mean 0.022144; trailing-three drift 0.017896. Persistence and expanding drift are effectively tied, so the simpler persistence candidate remains selected. These are elementary benchmarks computed directly from fetched observations; no external adapter or local model artifact is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: level contribution is the latest first print, 1.701 million. Momentum is a 0.073 million decline over the latest three first-print changes, but it is already reflected in that level; additional momentum adjustment = 0.000. The separate initial-claims move from revised 198,000 to 197,000 supplies no calibrated conversion to the continued-claims stock, so its adjustment = 0.000. No quantified new policy or one-off signal was fetched that justifies another adjustment; those adjustments = 0.000. Final delta from the selected benchmark = 0.000. The material-deviation threshold is max(0.001, 0.25 times the historical 80% width of 0.044775) = 0.011194 million."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected persistence candidate on 24 fetched advance first prints from 2026-04-11 through 2026-09-19; point = 1.00*1.701 + momentum 0.000 + initial-claims signal 0.000 + one-off 0.000 + policy 0.000 = 1.701 million. For the 23 successive changes d, mean(d) = -0.120/23 = -0.005217391; sum((d-mean(d))^2) = 0.006729913; sigma = 0.017490144 million = sqrt(0.006729913/22). Interval method = normal fallback-prior wrapper from realized first-print changes, with no additional widening: 80% half-width = 1.28*sigma = 0.022387384. Unrounded bounds = 1.701-0.022387384 = 1.678612616 and 1.701+0.022387384 = 1.723387384; rounded to 0.001 million, bounds = [1.679, 1.723]. For candidate reporting, 90% half-width = 1.645*sigma = 0.028771287, giving rounded [1.672, 1.730]. The first-print changes include the consequences of advance reporting noise; revised observations are excluded."
+    },
+    {
+      "kind": "text",
+      "text": "Coverage check: a rolling persistence band with this fixed 0.022387 million half-width contains 20 of the 23 historical first-print moves and 8 of the latest 10. This is an in-sample dispersion check, not independent calibration or proof of nominal coverage. Walk-forward model scores compare point predictions only. The near tie between persistence and drift and the recent downward run limit confidence in the exact center."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and tails: downside risk would land outside the interval if faster reemployment, benefit exhaustion or a further reporting shortfall produced a first print below 1.679 million. Repeating the fetched September 5 first-print decline of 0.044 million would imply 1.657. Upside risk would land outside the interval if catch-up processing or fewer claim exits raised the first print by at least 0.023 million from 1.701, implying 1.724 or higher. These are stress scenarios, not asserted current shocks; direct national advance counts supporting either mechanism would move the forecast down or up."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.701,
+      "ciLow": 1.679,
+      "ciHigh": 1.723
+    }
+  ]
+}

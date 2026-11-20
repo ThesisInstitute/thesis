@@ -1,0 +1,69 @@
+{
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD unique prime-contract recipients, FY2026 — forecast refused",
+  "question": "How many thousands of distinct non-null recipient_id values will the registered USAspending API query return for FY2026 Department of Defense prime-contract transactions, using awarding-agency filtering and award type codes A, B, C, and D, at the registered query snapshot?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered spending-by-recipient query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "Preserve the registered_query_snapshot resolver: execute the registered POST query for FY2026, filter transactions to Department of Defense as the toptier awarding agency and award type codes A, B, C, and D, paginate all results, count distinct non-null results[].recipient_id values, and convert the count to thousands. This registration specifies a query snapshot rather than an agency first-print release. The supplied context gives an expected snapshot window but no exact resolutionDate or snapshot instant; neither is inferred.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient"
+  ],
+  "runAt": "2026-10-07T12:35:48Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: exact registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target is a distinct recipient-identity count from the registered query. Agency profile totals, award counts, and search summaries cannot supply its historicalContext."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+      "result": "Failed to fetch the exact registered endpoint: HTTP 405 Method Not Allowed. No recipient records or historical counts were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/docs/endpoints",
+      "result": "The official USAspending API v2 endpoint index lists /api/v2/search/spending_by_category/recipient as POST. It does not list GET for this endpoint."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "click the spending_by_category/recipient endpoint link in https://api.usaspending.gov/docs/endpoints",
+      "result": "The linked URL without a trailing slash also failed to fetch: HTTP 405 Method Not Allowed. No recipient records or historical counts were returned."
+    },
+    {
+      "kind": "text",
+      "text": "Available web tools expose no HTTP method or request-body parameter. Shell networking is prohibited by the run instructions. The required paginated POST queries therefore could not be executed. The empty historicalContext indicates failed retrieval, not an observed recipient count or limited official history."
+    },
+    {
+      "kind": "text",
+      "text": "No base rate, persistence benchmark, model candidate, sigma, or calibrated interval can be computed without admissible query history. Null pointEstimate, ciLow, and ciHigh explicitly withhold the forecast; this object is a refusal and does not satisfy forecast-cell validation."
+    },
+    {
+      "kind": "text",
+      "text": "The target context does not supply an exact resolutionDate. Its expected window is not an official calendar date or registered resolve-by deadline. Catalog verification was omitted to honor the independence restriction against Thesis sources."
+    },
+    {
+      "kind": "text",
+      "text": "The required forecast is refused with the fetch evidence above. No remembered values, substitute aggregates, numerical adjustments, or fabricated tool receipts were used."
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "status": "refused",
+  "refusalReason": "The exact registered queries could not be fetched. No historical contract-obligation amounts were obtained, and no exact official snapshot date was verified. The prompt requires refusal under these conditions.",
+  "slug": "us-dod-prime-contract-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 prime contract obligations",
+  "question": "What will USAspending API agency 097 report for FY2026 contracts aggregated_amount at the registered query snapshot, expressed in billions USD?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097, obligations by award category",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+  "resolutionRule": "Use the registered FY2026 query snapshot: read results[category=contracts].aggregated_amount and multiply by 1e-09. Preserve that snapshot rather than replacing it with subsequent revisions. The exact snapshot date and source precision could not be verified in this run.",
+  "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints/federal_accounts/",
+    "https://api.usaspending.gov/api/v2/references/submission_periods/",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-07T12:45:13Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Registered-query forecast refused"
+    },
+    {
+      "kind": "text",
+      "text": "The target is sourceSeriesId usaspending.agency.097.obligations_by_award_category.contracts, FY2026, registered_query_snapshot. Agency profile totals and other contract aggregates cannot supply its historical anchors."
+    },
+    {
+      "kind": "text",
+      "text": "Official API documentation confirms that obligations_by_award_category supports GET requests for obligations by award category within a fiscal year. Documentation supplies no observed amounts for this target."
+    },
+    {
+      "kind": "text",
+      "text": "Exact GET attempts for fiscal_year=2025, fiscal_year=2024, and fiscal_year=2023 each returned web-tool Internal Error with 'URL ... is not accessible via this tool.' No contracts aggregated_amount was fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Exact GET attempts for fiscal_year=2022, fiscal_year=2021, and fiscal_year=2020 returned the same accessibility failure. historicalContext is empty because no admissible historical amounts were fetched; this does not claim that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "The exact fiscal_year=2026 GET also failed. Repeated and independent attempts at the exact FY2025 URL failed identically. The tool errors do not establish an HTTP status or prove that the API itself is unavailable."
+    },
+    {
+      "kind": "text",
+      "text": "The official submission-period API and Treasury reporting resources did not verify an exact registered snapshot date. Treasury's linked FY26 reporting schedule spreadsheet could not be read by the web tool, which returned '(400) Unsupported content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'. The supplied expected release window is not a verified resolution date."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory base rate or reference class cannot be established without the exact historical queries. No remembered amounts, broader aggregates, or independent forecasts were substituted."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The intended persistence prior and historical flow-value dispersion calculation require the FY2020-FY2025 registered-query observations. sigma is unavailable, so 1.28*sigma and final implied bounds cannot be calculated. Level, momentum, one-off, and policy adjustments are withheld."
+    },
+    {
+      "kind": "text",
+      "text": "No forecast is issued. Null estimates and an empty history explicitly record the refusal; they do not constitute a normalized forecast."
+    }
+  ]
+}

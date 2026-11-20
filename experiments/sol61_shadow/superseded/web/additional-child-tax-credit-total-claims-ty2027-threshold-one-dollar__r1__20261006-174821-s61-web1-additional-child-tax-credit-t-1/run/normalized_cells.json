@@ -1,0 +1,139 @@
+[
+ {
+  "status": "failed",
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "title": "ACTC claims under a one-dollar threshold",
+  "question": "Conditional on the registered legislation, how many returns claim the total refundable child tax credit or additional child tax credit for tax year 2027 in the first official IRS SOI Publication 1304 Table 3.3 print, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "Conditional on the registered legislation, use the first official tax year 2027 Publication 1304 Table 3.3 all returns total row, number of returns under the plain refundable child tax credit or additional child tax credit concept header. Multiply the published count by 0.000001 to express it in millions, preserving its precision. Exclude the separate refundable-portion and offset subsets. Ignore subsequent corrections and revisions. Retain the registered deadline without adding a release-date grace exception.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "historicalContext": [
+   {
+    "label": "2017",
+    "value": 18.341984,
+    "period": {
+     "type": "year",
+     "value": "2017"
+    }
+   },
+   {
+    "label": "2018",
+    "value": 20.450468,
+    "period": {
+     "type": "year",
+     "value": "2018"
+    }
+   },
+   {
+    "label": "2019",
+    "value": 19.867646,
+    "period": {
+     "type": "year",
+     "value": "2019"
+    }
+   },
+   {
+    "label": "2021",
+    "value": 37.771612,
+    "period": {
+     "type": "year",
+     "value": "2021"
+    }
+   }
+  ],
+  "drivers": [
+   "Lower threshold expands potential eligibility among low earners",
+   "Earnings phase-in and filing participation constrain additional claims",
+   "Accompanying legislation could change refundability",
+   "Taxpayer identification requirements affect eligibility",
+   "Official publication timing remains uncertain"
+  ],
+  "sourceContext": [
+   "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+   "https://www.irs.gov/pub/irs-prior/p1304--2019.pdf",
+   "https://www.irs.gov/pub/irs-prior/p1304--2020.pdf",
+   "https://www.irs.gov/pub/irs-prior/p1304--2021.pdf",
+   "https://www.irs.gov/pub/irs-prior/p1304--2024.pdf",
+   "https://www.irs.gov/pub/irs-pdf/p4801.pdf",
+   "https://www.irs.gov/irb/2026-38_irb",
+   "https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases",
+   "https://www.irs.gov/statistics/soi-tax-stats-whats-new"
+  ],
+  "runAt": "2026-10-06T21:50:20Z",
+  "failureReasons": [
+   "Required fetch_source, extract_irs_soi, and calculate tools are unavailable. Web attempts to read all six latest canonical workbooks failed because Excel content is unsupported.",
+   "Only four exact Table 3.3 PDF observations were verified. They do not satisfy the mandatory canonical extraction or six-print requirement.",
+   "No official release calendar or announcement fetched this run verifies the registered 2029-12-31 deadline for tax year 2027."
+  ],
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Failed validation: conditional tax year 2027 ACTC claims"
+   },
+   {
+    "kind": "text",
+    "text": "The resolver is IRS Publication 1304 Table 3.3, total claiming returns under the plain ACTC concept header. Every historical observation retained here uses that total concept rather than its refundable-portion or offset subsets. These are partial published-PDF observations; the required captured-workbook and original-vintage verification was not completed."
+   },
+   {
+    "kind": "tool",
+    "tool": "web.lookup",
+    "call": "Read official IRS Publication 1304 Table 3.3 in p1304--2019.pdf and p1304--2020.pdf.",
+    "result": "Tax year 2017: 18,341,984 total ACTC claiming returns. Tax year 2018: 20,450,468 total ACTC claiming returns. The plain ACTC header and all returns total row were verified in each PDF."
+   },
+   {
+    "kind": "tool",
+    "tool": "web.lookup",
+    "call": "Read official IRS Publication 1304 Table 3.3 in p1304--2021.pdf and p1304--2024.pdf.",
+    "result": "Tax year 2019: 19,867,646 total ACTC claiming returns. Tax year 2021: 37,771,612 total refundable child tax credit or additional child tax credit claiming returns."
+   },
+   {
+    "kind": "text",
+    "text": "The required reference class is available: the official table page lists canonical workbooks for 2018 through 2023 and earlier years. Attempts to open https://www.irs.gov/pub/irs-soi/18in33ar.xls through https://www.irs.gov/pub/irs-soi/23in33ar.xls all returned unsupported Excel content-type errors. The required captured extraction tools are absent. This is an extraction failure, not official-history unavailability; no history waiver is claimed."
+   },
+   {
+    "kind": "tool",
+    "tool": "web.lookup",
+    "call": "Read and visually inspect IRS Publication 4801, tax year 2023 Schedule 8812, line 27.",
+    "result": "Line 27 reports 17,401,584 returns. This separate line-item publication is diagnostic supporting evidence only and is not substituted for the mandatory Table 3.3 workbook extraction."
+   },
+   {
+    "kind": "tool",
+    "tool": "web.lookup",
+    "call": "Read IRS Internal Revenue Bulletin 2026-38.",
+    "result": "The bulletin describes ACTC as 15% of earned income exceeding $2,500, subject to a $1,700 refundable maximum per qualifying child for tax year 2025. The maximum CTC is $2,200 per qualifying child."
+   },
+   {
+    "kind": "math",
+    "text": "Verified PDF counts convert as follows: 18,341,984 / 1,000,000 = 18.341984; 20,450,468 / 1,000,000 = 20.450468; 19,867,646 / 1,000,000 = 19.867646; 37,771,612 / 1,000,000 = 37.771612. Holding other provisions fixed, reducing the threshold from $2,500 to $1 increases the uncapped earnings formula by 0.15 \u00d7 (2,500 \u2212 1) = $374.85. This amount does not identify additional claiming returns."
+   },
+   {
+    "kind": "text",
+    "text": "Prior/update/interval: The intended model is a persistence prior updated for momentum, the temporary refundability regime, threshold eligibility, and filing participation. The mandatory historical sample could not be extracted, so the base rate and successive-change sigma were not estimated. sigma = unavailable. The 1.28 \u00d7 sigma half-width and final implied bounds are therefore withheld. Null forecast fields record failure rather than invented estimates."
+   },
+   {
+    "kind": "text",
+    "text": "The official upcoming-release schedule does not announce the tax year 2027 release. The IRS What's New page records a revised March 26, 2026 date for tax year 2023 Publication 1304 tables, following an earlier December 11, 2025 date. The registered 2029-12-31 deadline is retained but remains unverified; a later release is a concrete resolver concern."
+   },
+   {
+    "kind": "text",
+    "text": "Upside risk would include accompanying full refundability and stronger filing participation. Downside risk would include eligibility restrictions and weak participation among newly eligible low earners. Lowering only the threshold preserves the earnings phase-in and does not by itself grant the maximum credit to zero earners. Numeric outcomes outside the interval cannot be identified because no validated interval was produced."
+   },
+   {
+    "kind": "forecast",
+    "point": null,
+    "ciLow": null,
+    "ciHigh": null
+   }
+  ]
+ }
+]

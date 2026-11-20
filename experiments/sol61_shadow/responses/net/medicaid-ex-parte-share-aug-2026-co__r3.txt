@@ -1,0 +1,185 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-co",
+  "country": "US",
+  "type": "data",
+  "title": "Colorado ex parte renewal share, August 2026",
+  "question": "What percentage of Colorado Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, using the original (O) submission row at its first official CMS publication, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 60.2,
+  "ciLow": 55.0,
+  "ciHigh": 65.4,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Colorado's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Ignore subsequent corrections and updated (U) submissions. The registered resolutionDate is retained, but December 15, 2026 could not be verified as an official public release date.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.co.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-01"},
+      "label": "2025-01",
+      "value": 56.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-02"},
+      "label": "2025-02",
+      "value": 58.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-03"},
+      "label": "2025-03",
+      "value": 55.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-04"},
+      "label": "2025-04",
+      "value": 55.6
+    },
+    {
+      "period": {"type": "month", "value": "2025-05"},
+      "label": "2025-05",
+      "value": 58.9
+    },
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "2025-06",
+      "value": 59.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 58.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 58.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 63.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 39.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 60.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 61.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 60.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 59.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 55.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 57.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 60.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 60.8
+    }
+  ],
+  "drivers": [
+    "Persistence near the latest original-submission rate",
+    "Partial reversion toward the recent six-month average",
+    "Renewal-cohort composition",
+    "Risk of another temporary processing backlog"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=50&conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=CO&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202501&conditions%5B2%5D%5Boperator%5D=%3E%3D",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf"
+  ],
+  "runAt": "2026-10-07T12:33:38Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Colorado August 2026 original-submission ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Colorado's state row for August 2026 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, original submission O, at first official publication. The ledger leaves the denominator implicit. I interpret the share as metric 5a(1), ex parte renewals, divided by metric 5, beneficiaries due for renewal, matching CMS's current state tables. These are unadjusted cohort outcomes, not a national average or a share restricted to successful renewals."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the CMS datastore API with state_abbreviation=CO, original_or_updated=O, reporting_period>=202501, limit=50; echo and inspect the raw JSON.",
+      "result": "The response contains 18 original rows through June 2026. Ex parte numerator / renewal-due denominator: 2025-01 51449/90564; 2025-02 51087/87308; 2025-03 48277/87791; 2025-04 46947/84376; 2025-05 43776/74292; 2025-06 47836/80338; 2025-07 51201/87076; 2025-08 48095/82610; 2025-09 55718/88284; 2025-10 36282/92335; 2025-11 54817/90273; 2025-12 61959/100564; 2026-01 52882/87086; 2026-02 53032/89314; 2026-03 54170/97700; 2026-04 52953/92499; 2026-05 48000/78955; 2026-06 52244/85937. Pending counts for September, October and November 2025 are 2803, 33078 and 2398."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the June 2026 CMS Eligibility Operations and Enrollment Snapshot and inspect the Colorado renewal-outcomes table on PDF page 30.",
+      "result": "Colorado has 85,937 beneficiaries due for renewal, 80% total renewed, 15% disenrolled, 4% pending and 61% renewed ex parte. The table expresses percentages against beneficiaries due for renewal. The publication is dated September 25, 2026. The API calculation 100*52244/85937=60.7934% agrees with its rounded ex parte rate."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the August 2025 CMS Eligibility Operations and Enrollment Snapshot and inspect the Colorado renewal-outcomes table on PDF page 28.",
+      "result": "Colorado has 82,610 beneficiaries due for renewal, 79% total renewed, 18% disenrolled, 3% pending and 58% renewed ex parte. The publication is dated November 28, 2025. Its rounded ex parte rate agrees with 100*48095/82610=58.2193% from the original API row."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the January-June 2026 original-row reference class: 60.7239%, 59.3770%, 55.4452%, 57.2471%, 60.7941% and 60.7934%, averaging 59.0635%. The latest level is 60.7934%. August 2025 was 58.2193%; adding the mean matched January-June year-over-year improvement of 1.6598 percentage points gives a seasonal cross-check of 59.8792%. One prior August is insufficient to fit a strong seasonal adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Every historical anchor uses Colorado's original O variant and the same due-for-renewal denominator; no updated U rows or narrower population metrics enter the calculation. The historical API rows are currently published O submissions. O status does not establish that every older count is an immutable first-publication vintage; archived snapshots provide rounded checks for June 2026 and August 2025."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification limitation: the official CMS publication page lists historical releases, latest June 2026 released September 25, 2026, but supplies no announcement confirming December 15, 2026 for August original data. CMS specifications set original state-submission deadlines on the eighth day of the following month and updated-submission deadlines on the fifteenth after three full subsequent months. Those are submission deadlines, not public release dates. I retain the ledger's 2026-12-15 date without claiming it is verified; the required release-calendar validation remains unmet."
+    },
+    {
+      "kind": "text",
+      "text": "The October 2025 original-row share fell to 39.2939% while pending renewals rose to 35.8239% of renewals due, compared with 3.1750% in September and 2.6564% in November. The share recovered to 60.7236% in November. This supports treating October as a temporary backlog episode, although recurrence remains possible. Across all 17 monthly changes, sigma is 8.3368 percentage points; excluding the two changes into and out of October gives 2.4452 points. The selected recent-window sigma of 2.8766 points is above that broader ordinary-period estimate."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior shrunk toward the six January-June 2026 original prints: point=(2*60.7933719+59.0634588)/3=60.2167342%. Level is 60.7934%; the mean-reversion adjustment is -0.5766 percentage points. Momentum adjustment is zero because the five changes average only +0.0139 points and May-June is essentially flat. One-off adjustment is zero because the October backlog recovered; policy-mechanism adjustment is zero without evidence supporting a separate August shift. For the five recent successive changes, sigma = 2.8766327 percentage points. The one-month half-width is 1.28*sigma=3.6820899 points; multiply by sqrt(2) for the two-month June-to-August horizon to obtain 5.2072614 points. Final implied bounds are 55.0094727%-65.4239956%, rounded to 55.0%-65.4%. This is a conditional ordinary-processing interval; recurrence of the October episode is an explicit tail risk."
+    },
+    {
+      "kind": "math",
+      "text": "Shares are 100*numerator/denominator, calculated before rounding. January-June successive changes are [-1.3468528,-3.9317888,1.8018648,3.5470179,-0.0007513] percentage points. Their mean is 0.0138979 and centered sum of squares is 33.1000632. Sample sigma=sqrt(33.1000632/(5-1))=2.8766327. Point=60.2167342; 80% half-width=1.28*2.8766327*sqrt(2)=5.2072614. Rounded point and bounds: 60.2, 55.0, 65.4."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is better automatic eligibility matching or a cohort with more readily verifiable beneficiaries; a sufficiently large improvement would land above 65.4%, outside the interval. Downside risk is delayed processing, an adverse cohort mix or reporting changes that shift renewals into form-based or pending categories. A recurrence resembling October 2025's backlog would land below 55.0%, outside the interval. The small recent sample and possible corrections to historical O rows limit interval calibration."
+    },
+    {
+      "kind": "forecast",
+      "point": 60.2,
+      "ciLow": 55.0,
+      "ciHigh": 65.4
+    }
+  ]
+}

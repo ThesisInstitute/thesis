@@ -1,0 +1,171 @@
+{
+  "slug": "canada-ei-regular-beneficiaries-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada EI regular beneficiaries, September 2026",
+  "question": "How many people in Canada will receive regular Employment Insurance benefits in September 2026, seasonally adjusted, in Statistics Canada's first official print?",
+  "unit": "thousands",
+  "pointEstimate": 547.53,
+  "ciLow": 531.71,
+  "ciHigh": 563.36,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-18",
+  "resolutionSource": "Statistics Canada Table 14-10-0011-01 and The Daily Employment Insurance release",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101",
+  "resolutionRule": "Resolve using the first officially published September 2026 observation for vector v64549350 in Statistics Canada Table 14-10-0011-01: Canada, regular Employment Insurance beneficiaries, both sexes, age 15 years and over, seasonally adjusted, persons. Multiply the published persons value by 0.001 to obtain thousands, preserving its published precision. Ignore subsequent revisions and corrections; apply no release-day grace period.",
+  "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 551.67
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 543.74
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 553.46
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 565.96
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 569.11
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 554.83
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 542.11
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 548
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 544.44
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 543.69
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 541.96
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 547.05
+    }
+  ],
+  "drivers": [
+    "July beneficiary level provides the persistence anchor",
+    "Small negative historical drift",
+    "August unemployment increase supports a modest upward adjustment",
+    "Existing EI measures support entry and benefit duration",
+    "First-print revisions and the two-month forecast horizon increase uncertainty"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251023/dq251023b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251120/dq251120a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251218/dq251218b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260122/dq260122a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260219/dq260219b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260325/dq260325a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260423/dq260423c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260522/dq260522b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260522/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260618/dq260618d-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260723/dq260723c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260819/dq260819d-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm",
+    "https://www.canada.ca/en/employment-social-development/news/2026/03/government-of-canada-extending-employment-insurance-temporary-measures-to-ensure-critical-income-support-continues-for-workers-impacted-by-tariffs.html",
+    "https://stats.gov.nl.ca/pdf/upcomingreleases.pdf"
+  ],
+  "runAt": "2026-10-07T11:44:01Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 Canada regular EI beneficiaries"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is Statistics Canada vector v64549350, Table 14-10-0011-01, Canada regular beneficiaries, both sexes, age 15 years and over, seasonally adjusted. All EI anchors and historical values use this same variant. Resolution uses September's first official print, converted from persons to thousands; later revisions or corrections do not alter the outcome."
+    },
+    {
+      "kind": "text",
+      "text": "The Newfoundland and Labrador Statistics Agency's official Statistics Canada release calendar at https://stats.gov.nl.ca/pdf/upcomingreleases.pdf explicitly lists Employment Insurance, September 2026, on November 18, 2026. This verifies resolutionDate from an official government calendar rather than inferred cadence. July's Statistics Canada release announces August EI data for October 22, so July remains the latest available EI observation at run time."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada Daily releases for August-November 2025 at the 251023, 251120, 251218 and 260122 URLs listed in sourceContext.",
+      "result": "Original Canada SA regular-beneficiary prints, persons: August 2025 551,670; September 543,740; October 553,460; November 565,960. Converted to thousands: 551.67, 543.74, 553.46, 565.96."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada Daily releases for December 2025-March 2026 at the 260219, 260325, 260423 and 260522 URLs; check March release Table 1.",
+      "result": "Original Canada SA regular-beneficiary prints, persons: December 2025 569,110; January 2026 554,830; February 542,110; March 548,000. March's release Table 1 independently confirms 548,000. Converted to thousands: 569.11, 554.83, 542.11, 548.00."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada Daily releases for April-July 2026 at the 260618, 260723, 260819 and 260917 URLs.",
+      "result": "Original Canada SA regular-beneficiary prints, persons: April 2026 544,440; May 543,690; June 541,960; July 547,050. Converted to thousands: 544.44, 543.69, 541.96, 547.05. July's published monthly change was +0.5%."
+    },
+    {
+      "kind": "text",
+      "text": "History provenance: the customized table and vector API did not expose a complete revised history through the web tool. The fetched reference class therefore contains 12 original-vintage Daily prints, not a single revised table vintage. June's release reports historical revisions back to January 2023; March's release table revises February to 545,670 versus its original 542,110. Successive first-print differences consequently include vintage effects as well as economic movement."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is persistence near July's 547.05 thousand. Across the 12 fetched prints, the level median is 547.525 thousand and the mean is 550.502 thousand. The 11 successive changes average -0.42 thousand per month. I shrink that drift halfway toward zero because the sample is short and crosses revision vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch Statistics Canada's August 2026 Labour Force Survey release and its seasonally adjusted Table 1 at https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm and https://www150.statcan.gc.ca/n1/daily-quotidien/260904/t001a-eng.htm.",
+      "result": "SA unemployment increased from 1,454.7 thousand in July to 1,459.5 thousand in August, a 4.8 thousand increase. Employment fell 41.7 thousand; the labour force fell 36.8 thousand. The unemployment rate remained 6.4%. The separately identified NSA August layoff rate was 0.8%, compared with 1.0% in August 2025."
+    },
+    {
+      "kind": "text",
+      "text": "Separate adjustments: level comes from July's EI stock; momentum contributes the shrunken historical drift. August's small unemployment increase warrants a modest upward nudge, while labour-force exits and the lower layoff rate limit it. No separate one-off shock is assumed. The March 20 ESDC announcement confirms that the waiting-period waiver, separation-payment suspension and 20 additional weeks for eligible long-tenured workers covered September. I assume their effects are largely embedded in July's stock and add no new policy shock, while allowing continuing duration effects as a risk."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence model with damped drift, calibrated to 12 original-vintage SA prints from August 2025-July 2026. In thousands, successive changes are [-7.93, 9.72, 12.50, 3.15, -14.28, -12.72, 5.89, -3.56, -0.75, -1.73, 5.09], with mean -0.42. sigma = 8.741518, calculated as sqrt(764.1414/(11-1)). Level prior = 547.05; two-month momentum adjustment = 2*0.5*(-0.42) = -0.42; judgmental labour adjustment = 0.5*4.8*(547.05/1454.7) = +0.902537; one-off and additional policy adjustments = 0. Point = 547.532537, rounded to 547.53. The labour adjustment is a shrunken proportional nudge, not an estimated structural relationship. Normal 80% one-month half-width = 1.28*sigma = 11.189143; for the two-month July-to-September horizon, multiply by sqrt(2), giving 15.823838. This assumes approximately independent monthly innovations and stable variance. Unrounded bounds are 531.708698 and 563.356375, yielding final bounds 531.71 and 563.36 thousand."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: tariff-related manufacturing layoffs, delayed reemployment or stronger retention from extended benefit duration could push September above 563.36 thousand. Downside risk: faster reemployment or accelerated benefit exhaustion could push it below 531.71 thousand. Either would be outside the interval. A large seasonal-adjustment revision could also defeat the small-sample, stable-variance assumptions."
+    },
+    {
+      "kind": "forecast",
+      "point": 547.53,
+      "ciLow": 531.71,
+      "ciHigh": 563.36
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "slug": "wic-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "July 2026 WIC participation",
+  "question": "What will USDA FNS report for total WIC participation in July 2026 in its first official monthly print?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official agency release",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first official USDA FNS monthly total participation value for July 2026, converted from thousands to millions by multiplying by 0.001 and retaining the published precision. Exclude subsequent revisions and corrections.",
+  "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program"
+  ],
+  "runAt": "2026-10-06T22:16:40Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast run failed: official evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The attempted fetch of https://www.fns.usda.gov/pd/wic-program failed with: Fatal error: connection failed: error sending request."
+    },
+    {
+      "kind": "text",
+      "text": "Stopped as instructed after the failed fetch. No official participation history or base rate was fetched, and the release date was not verified. Null estimates and an empty historicalContext explicitly represent a failed run; no remembered values or invented statistics have been substituted."
+    }
+  ]
+}

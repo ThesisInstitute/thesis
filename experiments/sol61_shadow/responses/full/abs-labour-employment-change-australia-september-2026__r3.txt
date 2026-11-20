@@ -1,0 +1,154 @@
+{
+  "slug": "abs-labour-employment-change-australia-september-2026",
+  "country": "AU",
+  "type": "data",
+  "title": "Australia employment change, September 2026",
+  "question": "What will be the FIRST PRINT of Australia's September 2026 month-over-month change in employed persons, all persons, seasonally adjusted, in ABS Labour Force, Australia, associated with registered dataflow LF series LF/M3.3.1599.20.AUS.M, expressed in thousands?",
+  "unit": "thousands",
+  "pointEstimate": 25.4,
+  "ciLow": -20.6,
+  "ciHigh": 71.4,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-15",
+  "resolutionSource": "Australian Bureau of Statistics, Labour Force, Australia, September 2026",
+  "resolutionSourceUrl": "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+  "resolutionRule": "Resolve to the first published September 2026 seasonally adjusted monthly change in total employed people for Australia, all persons, in Labour Force, Australia: Key statistics - Seasonally adjusted, Employed people row, Monthly change column, with underlying employment estimates in Table 001. Express the published change in thousands to one decimal place; use ABS's change calculated from unrounded levels, not subtraction of rounded displayed levels. Preserve the registered LF/M3.3.1599.20.AUS.M binding and identity factor 1. Later seasonal, population, benchmark or other revisions and later corrections do not replace the first print. The official scheduled release is 15 October 2026 at 11:30am AEDT; the registered expected window of 20-28 October conflicts with the official calendar. API mapping and exact-artifact provenance remain unverified as disclosed in reasoning.",
+  "dataPointId": "abs.labour.employment_change.australia.september_2026.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2024-09"}, "label": "2024-09", "value": 64.1},
+    {"period": {"type": "month", "value": "2024-10"}, "label": "2024-10", "value": 15.9},
+    {"period": {"type": "month", "value": "2024-11"}, "label": "2024-11", "value": 35.6},
+    {"period": {"type": "month", "value": "2024-12"}, "label": "2024-12", "value": 56.3},
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 44.0},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": -52.8},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 32.2},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 89.0},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": -2.5},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 24.5},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": -5.4},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 14.9},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 42.2},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": -21.3},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 65.2},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 17.8},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 48.9},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 17.9},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": -18.6},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 40.3},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 76.3},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": -15.8},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "2026-08", "value": 39.5}
+  ],
+  "drivers": [
+    "Walk-forward-selected historical mean",
+    "Volatile first-print employment changes",
+    "August gains concentrated in part-time work",
+    "Modest survey-transition uncertainty"
+  ],
+  "sourceContext": [
+    "https://data.api.abs.gov.au/rest/data/LF/M3.3.1599.20.AUS.M?lastNObservations=30&format=jsondata",
+    "https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_labour",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/sep-2024",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/oct-2024",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/nov-2024",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/dec-2024",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jan-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/feb-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/mar-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/apr-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/may-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jun-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/sep-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/oct-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/nov-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/dec-2025",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jan-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/feb-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/mar-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/apr-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/may-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jun-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/jul-2026",
+    "https://www.abs.gov.au/statistics/labour/employment-and-unemployment/labour-force-australia/aug-2026",
+    "https://www.abs.gov.au/articles/update-labour-force-modernisation-and-future-release-plans"
+  ],
+  "runAt": "2026-10-07T12:38:53Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 Australian employment change: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The outcome is the seasonally adjusted monthly employment change, in thousands, rather than the employment level, trend change, percentage change or unemployment rate. The registered slug, unit, dataPointId and API source URL are retained. No policy condition applies. The official calendar governs the release date because this is a release-calendar target."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_labour and https://www.abs.gov.au/articles/update-labour-force-modernisation-and-future-release-plans",
+      "result": "ABS schedules Labour Force, Australia, reference period September 2026, for 15 October 2026 at 11:30am AEDT. Its modernisation announcement independently lists 15 October 2026. This contradicts the registered expected window 20-28 October 2026; the forecast remains tied to the same September headline series."
+    },
+    {
+      "kind": "text",
+      "text": "Exact-source limitation: web.run could not fetch the pinned data.api.abs.gov.au endpoint or its format variants. Consequently I could not verify the API key's code-to-concept mapping or fetch the registered API history. The historical observations below instead come from each official ABS archived release's current-month Key statistics - Seasonally adjusted, Employed people, Monthly change column. They preserve release vintages rather than later revised history. This disclosed fallback does not meet the prompt's exact-API-artifact provenance requirement, and this cell should not be represented as having passed that requirement. No API values or mapping were invented, and the registered binding was not silently repaired. The catalog uniqueness check was omitted under the user's independence restriction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official ABS Labour Force, Australia archived release URLs /sep-2024, /oct-2024, /nov-2024, /dec-2024, /jan-2025 and /feb-2025; read current-month seasonally adjusted Employed people Monthly change",
+      "result": "Published monthly changes in persons: September 2024 +64,100; October +15,900; November +35,600; December +56,300; January 2025 +44,000; February -52,800. Divide by 1,000 for historicalContext: 64.1, 15.9, 35.6, 56.3, 44.0, -52.8 thousand."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official ABS Labour Force, Australia archived release URLs /mar-2025, /apr-2025, /may-2025, /jun-2025, /jul-2025 and /aug-2025; read the same current-month published change column",
+      "result": "Published monthly changes in persons: March 2025 +32,200; April +89,000; May -2,500; June +2,000; July +24,500; August -5,400. In thousands: 32.2, 89.0, -2.5, 2.0, 24.5, -5.4."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official ABS Labour Force, Australia archived release URLs /sep-2025, /oct-2025, /nov-2025, /dec-2025, /jan-2026 and /feb-2026; read the same current-month published change column",
+      "result": "Published monthly changes in persons: September 2025 +14,900; October +42,200; November -21,300; December +65,200; January 2026 +17,800; February +48,900. In thousands: 14.9, 42.2, -21.3, 65.2, 17.8, 48.9."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official ABS Labour Force, Australia archived release URLs /mar-2026, /apr-2026, /may-2026, /jun-2026, /jul-2026 and /aug-2026; read the same current-month published change column",
+      "result": "Published monthly changes in persons: March 2026 +17,900; April -18,600; May +40,300; June +76,300; July -15,800; August +39,500. In thousands: 17.9, -18.6, 40.3, 76.3, -15.8, 39.5. The August release reports full-time employment -6,300, part-time +45,800, trend employment +24,000 and unemployment 4.6%."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate/reference class: the 24 archived first-print seasonally adjusted monthly employment changes from September 2024 through August 2026 average +25.425 thousand, have median +28.35 thousand, sample standard deviation 34.22645 thousand and range -52.8 to +89.0 thousand. The latest 12 average +25.60833 thousand. Last-print persistence is +39.5 thousand. Candidate selection below replaces persistence only because the historical walk-forward comparison favors a mean forecast."
+    },
+    {
+      "kind": "text",
+      "text": "Generated model candidates before the agent forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"persistence\",\"point\":39.5,\"p10\":-31.3,\"p50\":39.5,\"p90\":110.3,\"interval80\":[-31.3,110.3],\"interval90\":[-51.5,130.5],\"interval_method\":\"Gaussian wrapper using sample SD of 23 one-step persistence residuals; no native intervals\",\"calibration_n\":23,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"metric\":\"RMSE\",\"value\":53.61,\"n\":12,\"periods\":\"2025-09/2026-08\"}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"expanding_mean\",\"point\":25.4,\"p10\":-18.4,\"p50\":25.4,\"p90\":69.2,\"interval80\":[-18.4,69.2],\"interval90\":[-30.9,81.7],\"interval_method\":\"Gaussian fallback-prior wrapper using sample SD of 24 first-print monthly changes; no native intervals\",\"calibration_n\":24,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"metric\":\"RMSE\",\"value\":31.78,\"n\":12,\"periods\":\"2025-09/2026-08\"}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"rolling_three_month_mean\",\"point\":33.3,\"p10\":-20.4,\"p50\":33.3,\"p90\":87.0,\"interval80\":[-20.4,87.0],\"interval90\":[-35.7,102.3],\"interval_method\":\"Gaussian wrapper using sample SD of 21 one-step rolling-mean residuals; no native intervals\",\"calibration_n\":21,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"metric\":\"RMSE\",\"value\":36.61,\"n\":12,\"periods\":\"2025-09/2026-08\"}}]"
+    },
+    {
+      "kind": "math",
+      "text": "For each of the 12 test months September 2025-August 2026, fit only to earlier first-print observations and compute one-step errors. RMSE = sqrt(sum(error^2)/12): persistence 53.61 thousand; expanding historical mean 31.78; trailing-three-month mean 36.61. Additional arithmetic checks give trailing-six-month mean RMSE 33.08 and trailing-twelve-month mean 33.57. Select expanding_mean. Its full-sample point is 610.2/24 = 25.425, rounded to 25.4 thousand. The difference from persistence is -14.1 thousand, resulting from benchmark selection rather than a news adjustment. These are in-sample model-selection diagnostics, not independent validation of future calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: the employment level is not added to this change forecast. Momentum adjustment = 0.0 thousand: the latest annual mean and August trend change do not provide an unpriced, release-specific signal. One-off signed adjustment = 0.0: ABS's August supplementary-survey change has no demonstrated direction for September. Policy adjustment = 0.0 because there is no conditional policy target. The August mix of falling full-time and rising part-time work is already observed in the history and does not move the point. The selected benchmark therefore has 100% point-estimate weight."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = expanding_mean selected by walk-forward RMSE, using 24 official archived first prints September 2024-August 2026; momentum +0.0, one-off +0.0 and policy +0.0 thousand, giving rounded point 25.4. Because the target is a change series, calculate dispersion of the changes themselves: sum((x-25.425)^2) = 26943.345; sigma = 34.22645 thousand = sqrt(26943.345/23). Use a Gaussian fallback-prior interval, not a confidence interval for the historical mean: half-width = 1.28*sigma*1.05 = 46.00035 thousand. The 1.05 widening is a modest regime allowance inferred from ABS's supplementary-survey seasonal adjustment change and August comparison-month uncertainty; ABS reports unchanged headline questions and no detected platform-transition effect, so no larger widening or signed adjustment is supported. Bounds = 25.4 +/- 46.00035, rounded to [-20.6, 71.4] thousand. This band contains 20 of the 24 historical prints and 8 of the latest 10; those retrospective checks are descriptive rather than a guarantee of 80% future coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-considerations and tails: upside risk would land above the interval at +71.4 thousand if September brings a full-time hiring rebound while August's strong part-time growth continues, or unusually high employment in incoming survey groups. Downside risk would land below the interval at -20.6 thousand if August's part-time gains reverse while full-time employment continues falling, or weaker incoming groups depress measured employment. New official payroll hiring or rotation-group evidence could move the point up or down, respectively. The exact API's unverified identity is a separate resolver uncertainty that widening a statistical interval cannot fix."
+    },
+    {
+      "kind": "forecast",
+      "point": 25.4,
+      "ciLow": -20.6,
+      "ciHigh": 71.4
+    }
+  ]
+}

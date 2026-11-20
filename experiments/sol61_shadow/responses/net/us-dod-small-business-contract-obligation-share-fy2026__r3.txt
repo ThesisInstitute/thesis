@@ -1,0 +1,125 @@
+{
+  "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD small-business contract obligation share, FY2026",
+  "question": "What percentage of FY2026 Department of Defense prime-contract transaction obligations will the exact registered USAspending query attribute to small_business recipients at its first registered snapshot?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official USAspending API registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Execute the registered POST query with group=fiscal_year, spending_level=transactions, FY2026 dates 2025-10-01 through 2026-09-30, awarding toptier agency Department of Defense, and award_type_codes A, B, C, D. Divide aggregated_amount with recipient_type_names=[small_business] by aggregated_amount without a recipient-type restriction, and multiply by 100. Use the first registered snapshot and exclude subsequent revisions. Calculate from the returned amounts without intermediate rounding. The supplied October 15–22 window does not establish an officially verified snapshot date.",
+  "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+  "status": "refused",
+  "refusalReason": "The historical registered queries succeeded, but an official resolution date for this continuously updated transaction query could not be verified. Treasury calendar fetches failed with unsupported XLSX content-type errors; those calendars also concern agency financial submissions rather than this transaction query. Null forecast and date fields explicitly indicate refusal rather than a valid forecast cell.",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 19.3686067345
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 21.8154298752
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 20.7237402080
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 20.5778121660
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 22.1007186553
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 20.8634372098
+    }
+  ],
+  "drivers": [
+    "DoD procurement publication delay",
+    "Continuously updated transaction obligations",
+    "Unverified registered snapshot date"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx",
+    "https://tfx.treasury.gov/system/files/2026-08/fy27-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-07T12:24:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Registered-query evidence fetched; forecast refused because resolution timing is unverified"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.search.spending_over_time.dod.contracts.small_business_obligation_share. Every historical observation uses the registered transaction-level query, substituting the fiscal year and applying 100 times the small_business numerator divided by the unrestricted denominator. These are current historical snapshots, not reconstructed original vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST the registered numerator and denominator queries separately for FY2020 and FY2021 to https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "Echoed aggregated_amount values in USD: FY2020 numerator 81822987287.39, denominator 422451590911.79; FY2021 numerator 84415667810.10, denominator 386953950910.16."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST the registered numerator and denominator queries separately for FY2022 and FY2023 to https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "Echoed aggregated_amount values in USD: FY2022 numerator 85872450047.89, denominator 414367528187.00; FY2023 numerator 94029848955.32, denominator 456947746420.82."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST the registered numerator and denominator queries separately for FY2024 and FY2025 to https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "Echoed aggregated_amount values in USD: FY2024 numerator 98515887838.73, denominator 445758752803.84; FY2025 numerator 102602666732.99, denominator 491782181916.41."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST the registered FY2026 numerator and denominator queries to https://api.usaspending.gov/api/v2/search/spending_over_time/.",
+      "result": "Echoed aggregated_amount values in USD: numerator 69396736991.25 and denominator 374564688285.93. Their derived current share is 18.5273036038 percent."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched FY2020–FY2025 reference class has a mean share of 20.9082908081 percent. This base rate differs from the current FY2026 snapshot because the historical years have had more time to receive delayed transactions and revisions."
+    },
+    {
+      "kind": "math",
+      "text": "Shares equal 100*N/D. The five successive historical changes are 2.4468231407, -1.0916896672, -0.1459280420, 1.5229064893, and -1.2372814456 percentage points. Their mean is 0.2989660951. Sample sigma = 1.6281301181 percentage points, calculated as sqrt(sum((change-0.2989660951)^2)/4). The diagnostic 80% half-width is 1.28*1.6281301181 = 2.0840065511 percentage points."
+    },
+    {
+      "kind": "text",
+      "text": "USAspending's official methodology states that procurement data generally appear within five days, with DoD and USACE publication delayed 90 days. Consequently, an October FY2026 query snapshot remains incomplete. The separate agency financial-submission calendar does not establish a release date for these prime-contract transactions."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Current-snapshot persistence would be the relevant near-term prior, informed by the six-year reference class. Historical annual dispersion supplies diagnostic uncertainty, but no timing-dependent adjustment or final interval is issued because the registered snapshot date could not be officially verified."
+    },
+    {
+      "kind": "text",
+      "text": "Official Treasury FY2026 and FY2027 calendar requests failed with HTTP 400 unsupported XLSX content-type errors, so no dates were read from them. Research stopped after that failure. Selecting October 22 from the supplied expected window would not satisfy the requirement to verify resolutionDate from an official calendar or announcement."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "slug": "canada-monthly-gdp-growth-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada September 2026 monthly GDP growth",
+  "question": "What will Statistics Canada first publish for September 2026 month-over-month growth in seasonally adjusted all-industries real GDP by industry, in chained 2017 dollars at annual rates?",
+  "unit": "percent_growth",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-30",
+  "resolutionSource": "Statistics Canada GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Registered resolver: percent change from August to September 2026 in vector v65201210, using both levels from the initial regular September publication and available source precision. Freeze that publication; subsequent revisions and corrections do not change resolution. The advance estimate does not resolve this target. Release-date and vector verification were incomplete when fetching stopped.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_09.first_print",
+  "status": "failed",
+  "failureReason": "Official-source fetches failed. The production instructions require stopping after a failed fetch, so no numerical forecast or interval was produced.",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 0.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "July real GDP was unchanged",
+    "August advance estimate indicated growth",
+    "Official-source fetch failures prevented forecast completion"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251031/dq251031a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251128/dq251128b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251223/dq251223a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/dq260130a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf"
+  ],
+  "runAt": "2026-10-07T12:28:53Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable following official-source fetch failures"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the registered September 2026 first regular print for Table 36-10-0434-01, vector v65201210. Historical entries are original regular-release headline monthly growth rates for seasonally adjusted all-industries real GDP, rather than advance estimates or later revisions. The vector mapping was not independently verified."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the original Statistics Canada GDP releases dated 2025-10-31, 2025-11-28, 2025-12-23, 2026-01-30, 2026-02-27 and 2026-03-31.",
+      "result": "Fetched original monthly-change headlines: August 2025 -0.3%; September 2025 0.2%; October 2025 -0.3%; November 2025 0.0%; December 2025 0.2%; January 2026 0.1%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm.",
+      "result": "Released 2026-07-31: May 2026 real GDP increased 0.3% month over month."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm.",
+      "result": "Released 2026-09-29: July 2026 real GDP monthly change was 0.0%. The August advance estimate was +0.2%. July construction increased 1.3%, manufacturing decreased 0.9%, and retail trade decreased 1.0%."
+    },
+    {
+      "kind": "text",
+      "text": "Eight distinct original prints were fetched as potential reference class evidence. This establishes available base rate evidence but does not represent a completed forecasting calculation."
+    },
+    {
+      "kind": "text",
+      "text": "Fetching the June 2026 release at https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm returned a timeout. Fetching the official release calendar at https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf also returned a timeout. The registered resolutionDate of 2026-11-30 is retained as target metadata; it was not verified from a successfully fetched calendar."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Forecast work stopped under the explicit fetch-failure instruction. No model update, sigma calculation, interval arithmetic, or implied bounds were completed. Null forecast values denote failure, not zero growth."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

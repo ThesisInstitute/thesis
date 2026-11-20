@@ -1,0 +1,274 @@
+{
+  "slug": "canada-monthly-gdp-growth-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, September 2026",
+  "question": "What month-to-month percentage growth will Statistics Canada first publish for September 2026 real GDP at basic prices, Canada, All industries [T001], Table 36-10-0434-01, vector v65201210, chained 2017 dollars, seasonally adjusted at annual rates, relative to August 2026, rounded to one decimal?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.2,
+  "ciLow": -0.1,
+  "ciHigh": 0.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-30",
+  "resolutionSource": "Statistics Canada, Gross domestic product by industry, September 2026; Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+  "resolutionRule": "Resolve on the FIRST PRINT of September 2026 monthly GDP by industry: Table 36-10-0434-01, Canada, All industries [T001], vector v65201210, chained 2017 dollars, seasonally adjusted at annual rates. The outcome is 100*(September level/August level-1), using both levels from the initial September release vintage, rounded to the agency's published one-decimal month-to-month percent change. The registered WDS endpoint supplies this vector; the corresponding frozen official release table titled Monthly gross domestic product by industry at basic prices in chained (2017) dollars - Seasonally adjusted, All industries row and September monthly-change column, records the same published outcome. This is monthly growth, without annualizing the growth rate. The advance September estimate is not the resolver. Later revisions or corrections do not replace the first print. The official calendar fetched this run schedules release on November 30, 2026.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_09.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2024-08"},
+      "label": "2024-08",
+      "value": 0
+    },
+    {
+      "period": {"type": "month", "value": "2024-09"},
+      "label": "2024-09",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2024-10"},
+      "label": "2024-10",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2024-11"},
+      "label": "2024-11",
+      "value": -0.2
+    },
+    {
+      "period": {"type": "month", "value": "2024-12"},
+      "label": "2024-12",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-01"},
+      "label": "2025-01",
+      "value": 0.4
+    },
+    {
+      "period": {"type": "month", "value": "2025-02"},
+      "label": "2025-02",
+      "value": -0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-03"},
+      "label": "2025-03",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-04"},
+      "label": "2025-04",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-05"},
+      "label": "2025-05",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "2025-06",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 0
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 0.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 0
+    }
+  ],
+  "drivers": [
+    "Recent first-print momentum",
+    "August GDP advance estimate",
+    "Trade front-loading and reversal risk",
+    "Manufacturing and energy disruptions"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm",
+    "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241031/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241129/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241223/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250131/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250228/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250328/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250430/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250530/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250627/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250731/t003a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250829/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250926/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251031/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251128/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251223/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm"
+  ],
+  "runAt": "2026-10-07T12:20:36Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 Canada GDP: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first official September monthly change of the registered all-industries GDP vector, not quarterly expenditure GDP or the earlier September advance. The supplied canonical slug, unit and dataPointId are preserved. The catalog lookup is omitted under this run's independence instruction. No local files or prior forecasts were used."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf and inspect the Gross domestic product by industry schedule.",
+      "result": "[Statistics Canada release calendar](https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf) explicitly lists November 30, 2026 for September 2026 and October 30, 2026 for August 2026. Resolution date is therefore 2026-11-30, verified rather than inferred."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm and https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm.",
+      "result": "[Official vector definition](https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm) identifies v65201210 as Canada, All industries, seasonally adjusted at annual rates, chained 2017 dollars, from cube 36100434. The [July release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm) records July 2026 preliminary monthly change -0.0% and level 2,371,771 million dollars; normalize negative zero to 0.0%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the frozen official table pages and read only the All industries row, newest reference month marked p, month-to-month % change column: https://www150.statcan.gc.ca/n1/daily-quotidien/241031/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/241129/t001b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/241223/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/250131/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/250228/t001b-eng.htm",
+      "result": "[2024-08 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/241031/t001a-eng.htm): 0.0%. [2024-09 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/241129/t001b-eng.htm): 0.1%. [2024-10 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/241223/t001a-eng.htm): 0.3%. [2024-11 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250131/t001a-eng.htm): -0.2%. [2024-12 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250228/t001b-eng.htm): 0.2%. Earlier columns marked r are excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the frozen official table pages and read only the All industries row, newest reference month marked p, month-to-month % change column: https://www150.statcan.gc.ca/n1/daily-quotidien/250328/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/250430/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/250530/t001b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/250627/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/250731/t003a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/250829/t001b-eng.htm",
+      "result": "[2025-01 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250328/t001a-eng.htm): 0.4%. [2025-02 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250430/t001a-eng.htm): -0.2%. [2025-03 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250530/t001b-eng.htm): 0.1%. [2025-04 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250627/t001a-eng.htm): -0.1%. [2025-05 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250731/t003a-eng.htm): -0.1%. [2025-06 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250829/t001b-eng.htm): -0.1%. Earlier columns marked r are excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the frozen official table pages and read only the All industries row, newest reference month marked p, month-to-month % change column: https://www150.statcan.gc.ca/n1/daily-quotidien/250926/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/251031/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/251128/t001b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/251223/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260130/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260227/t001b-eng.htm",
+      "result": "[2025-07 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/250926/t001a-eng.htm): 0.2%. [2025-08 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/251031/t001a-eng.htm): -0.3%. [2025-09 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/251128/t001b-eng.htm): 0.2%. [2025-10 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/251223/t001a-eng.htm): -0.3%. [2025-11 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260130/t001a-eng.htm): 0.0%. [2025-12 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260227/t001b-eng.htm): 0.2%. Earlier columns marked r are excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the frozen official table pages and read only the All industries row, newest reference month marked p, month-to-month % change column: https://www150.statcan.gc.ca/n1/daily-quotidien/260331/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260430/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260529/t001b-eng.htm",
+      "result": "[2026-01 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260331/t001a-eng.htm): 0.1%. [2026-02 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260430/t001a-eng.htm): 0.2%. [2026-03 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260529/t001b-eng.htm): -0.1%. Earlier columns marked r are excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the frozen official table pages and read only the All industries row, newest reference month marked p, month-to-month % change column: https://www150.statcan.gc.ca/n1/daily-quotidien/260630/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260731/t001a-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260828/t001b-eng.htm; https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm",
+      "result": "[2026-04 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260630/t001a-eng.htm): 0.5%. [2026-05 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260731/t001a-eng.htm): 0.3%. [2026-06 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260828/t001b-eng.htm): 0.3%. [2026-07 official table](https://www150.statcan.gc.ca/n1/daily-quotidien/260929/t001a-eng.htm): 0.0%. Earlier columns marked r are excluded."
+    },
+    {
+      "kind": "text",
+      "text": "History provenance: the 24 observations are the original preliminary monthly-change cells in frozen official extracts of Table 36-10-0434-01, August 2024 through July 2026. They are not the revised preceding-month columns or bulletin prose. May 2025 is in Table 3; the other fetched monthly extracts are Table 1. The WDS endpoint requires POST and returned HTTP 405 to this web tool's GET, so no successful WDS data retrieval is claimed. The frozen tables preserve the exact registered series and first-print growth transformation."
+    },
+    {
+      "kind": "math",
+      "text": "Base rate/reference class: the 24 fetched first-print monthly growth observations have sum 1.7, sum of squares 1.21, mean 1.7/24 = 0.070833%, median 0.1%, sample standard deviation 0.217654 percentage points, range -0.3% to 0.5%, and interpolated 10th/90th percentiles -0.2%/0.3%. The default persistence benchmark is the latest July first print, 0.0%. The trailing-three benchmark is (May 0.3 + June 0.3 + July 0.0)/3 = 0.2%; the trailing-six benchmark also equals 0.2%. This is a single national series, so no panel-shrinkage benchmark applies."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated in memory before selecting the forecast. All use the fetched first-print history through 2026-07, released by 2026-09-29. Each lacks native intervals and is wrapped with an explicitly labelled fallback-prior Gaussian band from the 24-print growth dispersion: 80% point +/- 1.28*sigma; 90% point +/- 1.645*sigma; bounds and forecasts rounded to one decimal. calibration_n counts dispersion observations, not held-out conformal cases. Candidate records: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"target_period\":\"2026-09\",\"horizon_months\":2,\"point\":0,\"p10\":-0.3,\"p50\":0,\"p90\":0.3,\"interval80\":[-0.3,0.3],\"interval90\":[-0.4,0.4],\"interval_method\":\"fallback_prior_gaussian_first_print_growth_sample_sd; one-decimal rounding\",\"calibration_n\":24,\"train_cutoff\":\"2026-07\",\"walk_forward\":{\"horizon_months\":2,\"min_training_n\":6,\"n\":17,\"scored_at_published_precision\":true,\"mae\":0.194118,\"rmse\":0.24132}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_mean\",\"target_period\":\"2026-09\",\"horizon_months\":2,\"point\":0.1,\"p10\":-0.2,\"p50\":0.1,\"p90\":0.4,\"interval80\":[-0.2,0.4],\"interval90\":[-0.3,0.5],\"interval_method\":\"fallback_prior_gaussian_first_print_growth_sample_sd; one-decimal rounding\",\"calibration_n\":24,\"train_cutoff\":\"2026-07\",\"walk_forward\":{\"horizon_months\":2,\"min_training_n\":6,\"n\":17,\"scored_at_published_precision\":true,\"mae\":0.182353,\"rmse\":0.218282}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_3_mean\",\"target_period\":\"2026-09\",\"horizon_months\":2,\"point\":0.2,\"p10\":-0.1,\"p50\":0.2,\"p90\":0.5,\"interval80\":[-0.1,0.5],\"interval90\":[-0.2,0.6],\"interval_method\":\"fallback_prior_gaussian_first_print_growth_sample_sd; one-decimal rounding\",\"calibration_n\":24,\"train_cutoff\":\"2026-07\",\"walk_forward\":{\"horizon_months\":2,\"min_training_n\":6,\"n\":17,\"scored_at_published_precision\":true,\"mae\":0.164706,\"rmse\":0.187867}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_6_mean\",\"target_period\":\"2026-09\",\"horizon_months\":2,\"point\":0.2,\"p10\":-0.1,\"p50\":0.2,\"p90\":0.5,\"interval80\":[-0.1,0.5],\"interval90\":[-0.2,0.6],\"interval_method\":\"fallback_prior_gaussian_first_print_growth_sample_sd; one-decimal rounding\",\"calibration_n\":24,\"train_cutoff\":\"2026-07\",\"walk_forward\":{\"horizon_months\":2,\"min_training_n\":6,\"n\":17,\"scored_at_published_precision\":true,\"mae\":0.182353,\"rmse\":0.212824}}]"
+    },
+    {
+      "kind": "math",
+      "text": "Walk-forward comparison matches the two-month gap from the latest official July observation to the September target. At each origin, train on the first n observations for n=6,...,22, then predict observation n+2 without using the intervening print: 17 common cases. Forecasts are rounded to the published 0.1 precision before scoring, with exact half ties rounded toward the higher value. Persistence MAE/RMSE = 0.194118/0.241320 percentage points; expanding mean = 0.182353/0.218282; trailing-three mean = 0.164706/0.187867; trailing-six mean = 0.182353/0.212824. Trailing-three also has the lowest RMSE without rounding, 0.208637. Select trailing_3_mean as the stronger benchmark, replacing persistence by +0.2 percentage points; this is model selection rather than a discretionary news adjustment. The small, retrospectively compared sample limits certainty."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm; search the official text of https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm; open https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm.",
+      "result": "[Latest GDP release](https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm) gives August's advance as +0.2% and says the first September advance will accompany the October 30, 2026 release. [August merchandise trade, released October 6](https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm) reports real exports +2.5% and exports to the United States +8.1%; tariffs announced July 22 took effect at end-August, with possible shipment front-loading. [August Labour Force Survey](https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm) reports employment -42,000 (-0.2%) and unemployment 6.4%. These are August observations, not measured September GDP."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: retain the selected 0.2% prior with a 100% benchmark weight and zero additive adjustment. August's 0.2% advance corroborates momentum but receives no extra increment because it measures the intervening month. Export strength is positive context, while possible front-loading reversal and weaker employment are negative context; none supplies a fetched September production effect that can be quantified. Level effects, further momentum, one-off rebounds and policy effects therefore contribute 0.0 percentage points beyond the model. The forecast is unconditional."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = trailing_3_mean = (0.3+0.3+0.0)/3 = 0.2%, trained through July 2026 on the 24 fetched August 2024-July 2026 first prints. Adjustments: additional momentum 0.0, one-offs 0.0, policy 0.0; final point = 1.00*0.2+0.0 = 0.2%. Because the target is already a growth series, use its values rather than their successive differences. sigma = sqrt((1.21-1.7^2/24)/(24-1)) = sqrt(1.089583/23) = 0.217654 percentage points. The fallback-prior Gaussian 80% half-width = 1.28*0.217654 = 0.278597, with widening factor 1.00: raw bounds 0.2-0.278597 = -0.078597 and 0.2+0.278597 = 0.478597, rounded to [-0.1%, 0.5%]. The 90% half-width = 1.645*0.217654 = 0.358041, giving rounded [-0.2%, 0.6%]. Retain full first-print dispersion instead of narrowing to the selected model's optimistic residual dispersion."
+    },
+    {
+      "kind": "math",
+      "text": "Interval sanity check: the unrounded trailing-three forecasts plus/minus the full-history 0.278597 half-width cover 8 of the last 10 walk-forward outcomes and 15 of all 17. Rounding forecasts and endpoints to the 0.1 grid raises coverage to 10/10 and 17/17; this is a rounding effect and an in-sample model-selection audit, not an independent calibration guarantee. The final fixed [-0.1%,0.5%] interval contains 20/24 historical prints and 9/10 recent prints. Its 0.3 rounded half-width is consistent with realized first-print volatility."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: simultaneous recovery from the documented refinery downtime, stronger energy extraction and continuing service growth could put September at 0.6% or higher, outside the interval above 0.5%. Downside risk: reversal of August shipments ahead of tariffs, combined with manufacturing or oil-production disruptions and weaker household activity, could put growth at -0.2% or lower, outside the interval below -0.1%. These are stress scenarios, not asserted policy effects. A September GDP advance materially above 0.2% on October 30 would move the point up; a contraction would move it down. Strong September sector volumes would challenge the upper tail, and broad sector contractions would challenge the lower tail."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.2,
+      "ciLow": -0.1,
+      "ciHigh": 0.5
+    }
+  ]
+}

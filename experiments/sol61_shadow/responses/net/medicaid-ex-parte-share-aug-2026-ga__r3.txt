@@ -1,0 +1,113 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ga",
+  "country": "US",
+  "type": "data",
+  "title": "Georgia ex parte renewal share, August 2026",
+  "question": "What percentage of Georgia beneficiaries due for Medicaid/CHIP renewal in August 2026 will have coverage renewed on an ex parte basis, computed from CMS's original (O) submission row at its first official publication?",
+  "unit": "percent",
+  "pointEstimate": 43.2,
+  "ciLow": 37.9,
+  "ciHigh": 48.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Georgia's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Operational interpretation of the unnamed denominator: 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, following CMS's monthly state-table convention. Use numerator and denominator as initially published and round the share to one decimal. Subsequent corrections and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ga.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 51.7},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": 53.6},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 50.5},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 48.5},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": 55.3},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 52.9},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 56.7},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 53.4},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 54.5},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 53.6},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 55.8},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 51.9},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 53.7},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 53.4},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 49.7},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 48.4},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 46.8},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 45.0}
+  ],
+  "drivers": [
+    "Recent decline in ex parte renewal counts",
+    "Larger renewal cohorts than at the start of 2026",
+    "Partial continuation of recent downward momentum",
+    "Georgia cohort mix includes eligibility-period resets",
+    "Original-submission renewal outcomes"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:33:39Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Georgia ex parte renewal share for August 2026"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Georgia's state row for reporting_period=202608 and original_or_updated=O in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, frozen at first official publication. Every historical anchor uses the same original-submission variant, with no seasonal adjustment. These are O rows exposed in the current official dataset; their immutable first-publication vintages were not separately reconstructed."
+    },
+    {
+      "kind": "text",
+      "text": "Contract discrepancy: the ledger does not name its denominator. I interpret the share using CMS's contemporary monthly state-table convention: ex parte renewals divided by beneficiaries due for renewal. The January 2026 snapshot's Coverage Retention and Disenrollment Rates by State table explicitly uses that denominator. CMS also publishes a distinct share among beneficiaries successfully renewed; that alternative would resolve a different numerical quantity."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS against https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0, filtering state_abbreviation=GA, original_or_updated=O, and 202501<=reporting_period<=202506; raw JSON response echoed.",
+      "result": "Fetched ex parte count / renewal-due count: 2025-01 108515/209946; 2025-02 107564/200774; 2025-03 109270/216344; 2025-04 100297/206697; 2025-05 111928/202397; 2025-06 107696/203608. Computed percentages rounded to one decimal: 51.7, 53.6, 50.5, 48.5, 55.3, 52.9."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS against https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0, filtering state_abbreviation=GA, original_or_updated=O, and 202507<=reporting_period<=202512; raw JSON response echoed.",
+      "result": "Fetched ex parte count / renewal-due count: 2025-07 106114/187204; 2025-08 112634/210782; 2025-09 114733/210677; 2025-10 110062/205312; 2025-11 103114/184750; 2025-12 109618/211117. Computed percentages rounded to one decimal: 56.7, 53.4, 54.5, 53.6, 55.8, 51.9."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS against https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0, filtering state_abbreviation=GA, original_or_updated=O, and reporting_period>=202601; raw JSON response echoed.",
+      "result": "Fetched ex parte count / renewal-due count: 2026-01 111772/208198; 2026-02 110968/207977; 2026-03 112823/226863; 2026-04 115648/239136; 2026-05 109209/233202; 2026-06 103866/231064. Computed percentages rounded to one decimal: 53.7, 53.4, 49.7, 48.4, 46.8, 45.0. The query returned six rows, with June the latest available reporting period."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is 18 consecutive Georgia O monthly observations from January 2025 through June 2026. Their unrounded mean is 51.9625%, and the latest six-month mean is 49.4859%. These establish the base rate and historical variability. The recent level shift supports a persistence prior anchored on June's 44.9512%."
+    },
+    {
+      "kind": "text",
+      "text": "Separate components: level is June's 44.9512%; momentum is the January-to-June decline of 8.7343 percentage points over five monthly changes. The decline reflects both numerator and denominator movements: January-to-June ex parte counts fell from 111772 to 103866 while renewals due rose from 208198 to 231064. April-to-June ex parte counts also fell despite a falling denominator. One-off and policy adjustments are zero because the fetched sources do not establish a quantified August event effect. CMS's Georgia caveat includes beneficiaries receiving new eligibility periods after changes in circumstances, so cohort composition remains a material uncertainty."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use June persistence with a 50%-damped January-to-June drift for the two-month horizon. The historical sample is the 18 fetched O observations, calculated from unrounded count ratios. Monthly drift = (44.951182-53.685434)/5 = -1.746850 percentage points; the momentum adjustment is 2*0.5*(-1.746850) = -1.746850, with zero one-off and policy adjustments. For the 17 successive changes, mean change = -0.396230 and the centered sum of squared changes = 136.745779; sigma = 2.923459 = sqrt(136.745779/16). The one-month 80% half-width is 1.28*sigma = 3.742027. Scaling by sqrt(2) for the two-month horizon gives 5.292026, a 1.414-fold widening. The final implied bounds are 37.912306% to 48.496358%, rounded to 37.9% and 48.5%."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 100*(103866/231064) + 2*0.5*[(100*(103866/231064)-100*(111772/208198))/5] = 43.204332%, rounded to 43.2%. Approximate 80% interval = 43.204332 +/- 1.28*2.923459*sqrt(2) = [37.912306,48.496358]%, rounded to [37.9,48.5]%."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date verification limitation: the official CMS publication page reports June 2026 released September 25, 2026, May released August 28, and April released July 31. It provides completed publication dates but no announcement verifying the August 2026 publication date. The supplied ledger resolutionDate of 2026-12-15 is retained; it is not an officially verified release date. This run therefore does not satisfy the prompt's official-calendar verification requirement."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: June-to-August 2025 increased by a computed 0.5425 percentage points, so continued decline is uncertain and the trend is damped. Upside risk is a rebound in automated renewals or a cohort mix returning toward the earlier higher shares; that could land above 48.5%, outside the interval. Downside risk is an accelerating fall in ex parte counts or a further expansion of the renewal-due cohort without matching automated completions; that could land below 37.9%, outside the interval. The interval assumes historical change dispersion remains informative."
+    },
+    {
+      "kind": "forecast",
+      "point": 43.2,
+      "ciLow": 37.9,
+      "ciHigh": 48.5
+    }
+  ]
+}

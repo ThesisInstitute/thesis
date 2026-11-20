@@ -1,0 +1,124 @@
+{
+  "slug": "nonfarm-payrolls-october-2026",
+  "country": "US",
+  "type": "data",
+  "title": "October 2026 US nonfarm payrolls",
+  "question": "What will BLS first report for the October 2026 month-over-month change in seasonally adjusted total nonfarm payroll employment, CES0000000001, Employment Situation Table B-1, in thousands?",
+  "unit": "thousands",
+  "pointEstimate": 71,
+  "ciLow": -29,
+  "ciHigh": 171,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-06",
+  "resolutionSource": "BLS Employment Situation, Table B-1; CES0000000001",
+  "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+  "resolutionRule": "Resolve to the October 2026 seasonally adjusted total nonfarm employment level minus the September 2026 level published in the same first official October release, using CES0000000001 and BLS whole-thousand precision. Preserve that initial release vintage. Ignore subsequent corrections, monthly revisions, seasonal-factor revisions, and benchmark revisions.",
+  "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 115
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 172
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 57
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": -23
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "August 2026",
+      "value": 162
+    },
+    {
+      "period": {"type": "month", "value": "2026-09"},
+      "label": "September 2026",
+      "value": 29
+    }
+  ],
+  "drivers": [
+    "Recent first-print hiring below the six-month average",
+    "Continued but slower health care hiring",
+    "Downward revisions indicate underlying softness",
+    "Education and restaurant hiring introduce monthly volatility"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/empSit.htm",
+    "https://www.bls.gov/news.release/archives/empsit_05082026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_06052026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_07022026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_08072026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_09042026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+    "https://www.bls.gov/news.release/empsit.nr0.htm",
+    "https://www.bls.gov/news.release/empsit.t17.htm",
+    "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001?startyear=2025&endyear=2026"
+  ],
+  "runAt": "2026-10-07T12:06:36Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 payroll first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is CES0000000001, seasonally adjusted total nonfarm establishment employment, Table B-1. All quantitative forecast anchors and historicalContext entries use original monthly first-print changes in this variant. The official calendar specifies November 6, 2026 at 08:30 AM for October employment; the September announcement confirms Eastern time. [BLS release calendar](https://www.bls.gov/schedule/news_release/empSit.htm), [BLS announcement](https://www.bls.gov/news.release/empsit.nr0.htm)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the original BLS April, May, and June 2026 Employment Situation releases and read their payroll headlines.",
+      "result": "First-print changes, thousands: April 115, May 172, June 57. [April release](https://www.bls.gov/news.release/archives/empsit_05082026.htm), [May release](https://www.bls.gov/news.release/archives/empsit_06052026.htm), [June release](https://www.bls.gov/news.release/archives/empsit_07022026.htm)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the original BLS July, August, and September 2026 Employment Situation releases and read their payroll headlines and relevant industry details.",
+      "result": "First-print changes, thousands: July -23, August 162, September 29. July local government education fell 50; August education rose 42 and food services rose 59. [July release](https://www.bls.gov/news.release/archives/empsit_08072026.htm), [August release](https://www.bls.gov/news.release/archives/empsit_09042026.htm), [September release](https://www.bls.gov/news.release/archives/empsit_10022026.htm)."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the mean of six distinct April–September first prints: 512/6 = 85.3333 thousand. Their recent three-print mean is (-23 + 162 + 29)/3 = 56 thousand. This supports a downward momentum adjustment while allowing a rebound from September."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS 'https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001?startyear=2025&endyear=2026'; cross-check the total nonfarm row in BLS Table B-1.",
+      "result": "The successful API response returned seasonally adjusted levels, thousands: June 158892, July 158882, August 159015, September 159044. Table B-1 confirms September minus August = 29. Revised historical levels serve only as a resolver cross-check, not quantitative forecast anchors. [BLS API response](https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001?startyear=2025&endyear=2026), [Table B-1](https://www.bls.gov/news.release/empsit.t17.htm)."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the September BLS summary for current hiring composition and revision evidence.",
+      "result": "September payrolls rose 29 thousand versus a preceding 12-month average of 45 thousand. Health care added 17 thousand versus its preceding average of 33 thousand. July and August changes were revised to -10 and 133 thousand, respectively, a combined downward revision of 60 thousand. These revised-vintage statistics provide qualitative context only. [BLS September summary](https://www.bls.gov/news.release/empsit.nr0.htm)."
+    },
+    {
+      "kind": "text",
+      "text": "The baseline growth level comes from the six first prints; momentum comes from the recent three first prints. Industry composition suggests uneven hiring and seasonal volatility. I assign zero separate one-off and policy adjustments because the fetched evidence does not establish an October-specific effect. The weights are forecasting judgments."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use an equal-weight blend of the six-month first-print mean prior and three-month first-print persistence signal. Historical sample: [115,172,57,-23,162,29] thousand. Baseline = 85.3333; momentum adjustment = 0.5*(56-85.3333) = -14.6667; one-off adjustment = 0; policy adjustment = 0. Point = 70.6667, rounded to 71. Compute dispersion from the change values themselves: sum of squared deviations = 29981.3333; sigma = 77.4356 thousand = sqrt(29981.3333/5). Approximate normal 80% half-width = 1.28*sigma = 99.1175. Around the rounded point, bounds are 71-99.1175 = -28.1175 and 71+99.1175 = 170.1175; outward integer rounding gives [-29,171] thousand. This is a small-sample normal approximation."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a broad hiring rebound across health care, restaurants, and government; a gain above 171 thousand would land outside the interval. The downside risk is layoffs spreading across finance, retail, and business services; a decline exceeding 29 thousand would land below the interval. These are conditional scenarios, not observed October events."
+    },
+    {
+      "kind": "forecast",
+      "point": 71,
+      "ciLow": -29,
+      "ciHigh": 171
+    }
+  ]
+}

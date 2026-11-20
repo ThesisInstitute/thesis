@@ -1,0 +1,66 @@
+[
+ {
+  "slug": "us-dod-unique-prime-contract-recipients-fy2026",
+  "status": "refused",
+  "country": "US",
+  "type": "data",
+  "title": "DoD unique prime-contract recipients, FY2026",
+  "question": "How many distinct non-null recipient_id values appear in the registered USAspending FY2026 DoD prime-contract transactions query snapshot, expressed in thousands?",
+  "unit": "thousands",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+  "resolutionRule": "Count distinct non-null results[].recipient_id across all pages of the registered FY2026 transactions-level query, with awarding agency Department of Defense, toptier, award types A/B/C/D, and page size 100; multiply by 0.001. Resolve using the registered query snapshot without substituting later revisions. An official snapshot date could not be verified.",
+  "dataPointId": "usaspending.dod.unique_prime_contract_recipients.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+   "https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/",
+   "https://www.usaspending.gov/data/about-the-data-download.pdf",
+   "https://www.usaspending.gov/data/data-sources-download.pdf"
+  ],
+  "runAt": "2026-10-06T22:16:28Z",
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Forecast refused: required historical query failed"
+   },
+   {
+    "kind": "text",
+    "text": "The target is the registered distinct-recipient query snapshot. Agency profile totals and broader contract aggregates cannot supply its historical reference class."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "POST https://api.usaspending.gov/api/v2/search/spending_by_category/recipient/ with body {\"filters\":{\"time_period\":[{\"start_date\":\"2024-10-01\",\"end_date\":\"2025-09-30\"}],\"agencies\":[{\"name\":\"Department of Defense\",\"tier\":\"toptier\",\"type\":\"awarding\"}],\"award_type_codes\":[\"A\",\"B\",\"C\",\"D\"]},\"spending_level\":\"transactions\",\"page\":1,\"limit\":100}",
+    "result": "Fetch failed with exit code 28 and output: curl: (28) SSL connection timeout. No response body or recipient statistics were returned."
+   },
+   {
+    "kind": "tool",
+    "tool": "official.lookup",
+    "call": "Open the official USAspending About the Data PDF, page 9.",
+    "result": "The fetched methodology states that contract data generally become available within five days and that publication of DoD and USACE data in FPDS is delayed 90 days. These timing rules do not verify a snapshot date within the registered October 15\u201322, 2026 window."
+   },
+   {
+    "kind": "text",
+    "text": "No official calendar or announcement confirming the resolution date was fetched. The registered expected window cannot establish a verified resolutionDate."
+   },
+   {
+    "kind": "text",
+    "text": "Prior/update/interval: The required six-period base rate could not be fetched. No persistence prior, historical sigma, current-period adjustment, or defensible interval can be calculated. Research stopped after the registered historical query failed."
+   },
+   {
+    "kind": "math",
+    "text": "No historical counts were returned, so sigma and 1.28*sigma are undefined. Estimates and bounds are null rather than invented."
+   },
+   {
+    "kind": "text",
+    "text": "This is a refusal record, not a normalized forecast. The required historicalContext, verified resolution date, and numerical forecast remain unavailable."
+   }
+  ]
+ }
+]

@@ -1,0 +1,120 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ma",
+  "country": "US",
+  "type": "data",
+  "title": "Massachusetts ex parte renewal share, August 2026",
+  "question": "What percentage of Massachusetts Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, using the original (O) state submission when CMS first publishes it, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 61.4,
+  "ciLow": 45.9,
+  "ciHigh": 76.9,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Massachusetts's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Interpret share consistently with CMS's standard state metric as 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published and rounding to one decimal. Subsequent corrections and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 63},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 56},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 51},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 45},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 61},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 66},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 67},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 55},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 60},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 63},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 72},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 63}
+  ],
+  "drivers": [
+    "Renewal cohort composition",
+    "Recent preliminary share near 63 percent",
+    "Weak prior-August seasonal signal",
+    "Individual-member autorenewal policy",
+    "Original-submission processing and classification variability"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://data.medicaid.gov/dataset/e6205a51-e6d7-4849-9882-4483b8a28c41",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.mass.gov/doc/eligibility-letter-252-revised-regulation-130-cmr-502000-health-care-reform-masshealth-the-eligibility-process-0/download"
+  ],
+  "runAt": "2026-10-07T11:46:07Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Massachusetts August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the Massachusetts state row for August 2026 in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, original submission O, with first-print resolution. The ledger does not explicitly name the denominator. CMS's state tables and formal share definition use ex parte renewals divided by beneficiaries due for renewal, Metric 5a1/5; this forecast adopts that interpretation explicitly. A share among successfully renewed beneficiaries, 5a1/5a, would be a different measure."
+    },
+    {
+      "kind": "text",
+      "text": "History access and precision: I could not fetch Massachusetts's raw O-row numerator and denominator counts through the official dataset table, API, or CSV link. I did fetch twelve distinct current-period state tables from the initial CMS monthly snapshot PDFs. All historicalContext values are their published, whole-percent preliminary ex parte rates, using the same due-for-renewal denominator; updated renewal tables are excluded. These are rounded proxy history for the original variant, not reconstructed exact one-decimal O-row ratios."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened the official CMS July, August, September, and October 2025 Eligibility Operations and Enrollment Snapshot PDFs and read the Massachusetts coverage-retention tables.",
+      "result": "Massachusetts ex parte rates and beneficiaries due for renewal: July 2025 63%, 50,551 due; August 2025 56%, 94,534 due; September 2025 51%, 85,211 due; October 2025 45%, 104,160 due. Each table identifies the rate denominator as total beneficiaries due for renewal."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened the official CMS November and December 2025 and January and February 2026 snapshot PDFs and read the Massachusetts current-period coverage-retention tables.",
+      "result": "Massachusetts ex parte rates and beneficiaries due for renewal: November 2025 61%, 90,667 due; December 2025 66%, 111,210 due; January 2026 67%, 87,964 due; February 2026 55%, 150,458 due."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Opened the official CMS March, April, May, and June 2026 snapshot PDFs and read the Massachusetts current-period coverage-retention tables.",
+      "result": "Massachusetts ex parte rates and beneficiaries due for renewal: March 2026 60%, 248,454 due; April 2026 63%, 153,865 due; May 2026 72%, 142,436 due; June 2026 63%, 72,366 due. June total renewed was 80%, disenrolled 17%, and pending 3%, demonstrating that the ex parte rate is a share of due renewals."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is twelve initial monthly Massachusetts preliminary prints from July 2025 through June 2026. Their base rate is an unweighted monthly mean of 60.1667%, with a 45%-72% range. The recent six-month mean is 63.3333%, and the latest June print is 63%. These are state rates, not national totals or enrollment-weighted averages."
+    },
+    {
+      "kind": "text",
+      "text": "Separate effects: the recent level supports persistence near June. Momentum is inconsistent, so no linear trend is extrapolated. May's rise to 72% reversed to 63% in June, so it receives no separate persistent uplift. The prior July-to-August decline provides a weak seasonal adjustment, heavily shrunk because only one annual transition is observed. MassHealth Eligibility Letter 252 specifies individual-member rather than household autorenewal under regulations effective February 13, 2026; operational rollout timing and an incremental August effect are not established, so no separate numerical policy uplift is added."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification limitation: the official CMS snapshot index fetched this run confirms June 2026 was released September 25, 2026 and May 2026 was released August 28, 2026. It does not announce an August 2026 release date. I could not verify December 15, 2026 from an official calendar or announcement. resolutionDate retains the supplied ledger date; this run does not satisfy the official-calendar verification requirement, and that date is not presented as inferred or verified."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: use a persistence prior anchored at June's 63%, informed by twelve initial monthly PDF prints. Shrink halfway toward the recent six-month mean, adding 0.1667 percentage points. Add a judgmental seasonal adjustment of 0.25*(56-63) = -1.75 points; momentum, separate one-off, and incremental policy adjustments are zero. The point is 61.4167%, rounded to 61.4%. For realized dispersion, the eleven successive changes are -7,-5,-6,16,5,1,-12,5,3,9,-9 points, with mean zero and squared sum 732. sigma = 8.5557 percentage points, the sample standard deviation sqrt(732/10). A Gaussian innovation interval gives 1.28*sigma = 10.9513 points; scale by sqrt(2) for the two reporting-month gap from June to August, yielding a 15.4875-point half-width and final rounded bounds 45.9%-76.9%. Calibration is approximate because history is rounded and the seasonal evidence is limited."
+    },
+    {
+      "kind": "math",
+      "text": "Point = 0.5*63 + 0.5*((67+55+60+63+72+63)/6) + 0.25*(56-63) = 61.4167 -> 61.4. Half-width = 1.28*sqrt(732/10)*sqrt(2) = 15.4875. Unrounded bounds = 45.9292 and 76.9041 -> 45.9 and 76.9."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: an easier-to-verify August cohort or broader successful individual-member autorenewal could raise the rate beyond May's 72%; a rate above 76.9% would be outside the interval. Downside risk: a return to the difficult autumn 2025 cohort mix or failures in electronic verification could reproduce October's 45%, which would land below the interval. A material change in reporting classification could also push the original print outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 61.4,
+      "ciLow": 45.9,
+      "ciHigh": 76.9
+    }
+  ]
+}

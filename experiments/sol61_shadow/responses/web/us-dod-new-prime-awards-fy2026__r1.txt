@@ -1,0 +1,84 @@
+{
+  "slug": "us-dod-new-prime-awards-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD FY2026 new prime awards",
+  "question": "What will USAspending API v2 agency 097 report as FY2026 new_award_count in the first registered-query snapshot, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 new award count",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+  "resolutionRule": "Preserve the registered_query_snapshot target: read new_award_count from the exact FY2026 registered query and multiply by 0.000001, retaining the source count's precision. Resolve on the original registered snapshot without incorporating later revisions or adding correction grace periods. The snapshot date could not be verified from an official calendar or announcement in this run.",
+  "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Registered snapshot timing",
+    "Daily data ingestion",
+    "Delayed DoD procurement reporting"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints/federal_accounts/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.usaspending.gov/data/about-the-data-download.pdf"
+  ],
+  "runAt": "2026-10-07T12:43:42Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: mandatory registered-query evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The exact registered query could not be retrieved through the web tool. No numeric forecast is issued. Null estimates and empty historicalContext explicitly record missing evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Exact-series framing: the official endpoint documentation identifies /api/v2/agency/<TOPTIER_AGENCY_CODE>/awards/new/count/ as a GET endpoint counting new awards for an agency in a single fiscal year. The registered target specifies agency 097 and field new_award_count. Documentation fetched at https://api.usaspending.gov/docs/endpoints/federal_accounts/ confirms the endpoint's purpose but supplies no historical target observations."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web.open attempted the exact registered URL separately with fiscal_year=2025, 2024, and 2023. Each result reported that its URL 'is not accessible via this tool.' No response body containing new_award_count was available."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web.open also attempted the exact registered URL separately with fiscal_year=2022, 2021, 2020, and 2026. Each returned the same accessibility error. These errors establish retrieval failure in this run; they do not establish that the official source exposes fewer historical periods."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification: https://www.usaspending.gov/data/data-sources-download.pdf describes updates after a nightly pipeline and a 90-day DoD procurement reporting delay. https://www.usaspending.gov/data/about-the-data-download.pdf confirms that delay for procurement data. No official announcement or calendar identifying this registered FY2026 snapshot date was found. The supplied October 15–22 window remains unverified."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate: the mandatory reference class would use exact-query annual observations for FY2020 through FY2025. None was retrieved, so an empirical base rate cannot be calculated. Agency profile totals, other agency queries, and search summaries were not substituted."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: An annual-flow reference-class model would anchor on fetched annual values, then assess level, momentum, one-off effects, and policy mechanisms. The historical sample is unavailable, so those adjustments, sigma, the approximately 1.28*sigma half-width, and final implied bounds cannot be estimated."
+    },
+    {
+      "kind": "math",
+      "text": "Registered transformation: value_millions = new_award_count * 0.000001. Flow-series dispersion would use the sample standard deviation of fetched annual values themselves. No source counts were fetched, so the transformation and interval arithmetic cannot be evaluated."
+    },
+    {
+      "kind": "text",
+      "text": "Potential upside risk is a backlog of awards entering the registered snapshot; potential downside risk is delayed reporting or a pipeline interruption. Whether either scenario would land outside the interval cannot be assessed because no numerical interval is issued."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "slug": "nonfarm-payrolls-october-2026",
+  "country": "US",
+  "type": "data",
+  "title": "October 2026 US nonfarm payroll change",
+  "question": "What will BLS first report for the October 2026 month-over-month change in seasonally adjusted total nonfarm payroll employment, CES0000000001, in thousands?",
+  "unit": "thousands",
+  "pointEstimate": 68,
+  "ciLow": -63,
+  "ciHigh": 199,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-06",
+  "resolutionSource": "BLS Employment Situation, Table B-1; CES0000000001",
+  "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+  "resolutionRule": "Resolve on the first official BLS publication of October 2026 seasonally adjusted total nonfarm employment. Compute the October CES0000000001 level minus the September level published in that same initial release, including the contemporaneous September revision. Use the published integer-thousands precision and freeze that first-print change. Ignore subsequent corrections, monthly revisions, seasonal-factor revisions, and benchmark revisions.",
+  "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-01"
+      },
+      "label": "January 2026",
+      "value": 130
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-02"
+      },
+      "label": "February 2026",
+      "value": -92
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 178
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 115
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 172
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-06"
+      },
+      "label": "June 2026",
+      "value": 57
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-07"
+      },
+      "label": "July 2026",
+      "value": -23
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-08"
+      },
+      "label": "August 2026",
+      "value": 162
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-09"
+      },
+      "label": "September 2026",
+      "value": 29
+    }
+  ],
+  "drivers": [
+    "Modest first-print payroll growth base rate",
+    "Weaker recent hiring momentum",
+    "Health care supports employment",
+    "Government and temporary-help employment weakness",
+    "Monthly survey and seasonal-adjustment dispersion"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/empsit.htm",
+    "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001?startyear=2025&endyear=2026",
+    "https://www.bls.gov/news.release/archives/empsit_02112026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_03062026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_04032026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_05082026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_06052026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_07022026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_08072026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_09042026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm"
+  ],
+  "runAt": "2026-10-07T12:28:46Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October payrolls: modest growth with substantial monthly uncertainty"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first-print October change in BLS CES0000000001, total nonfarm employment, seasonally adjusted, Employment Situation Table B-1. All historical payroll anchors below use that same variant and each month's original release. The first difference must use October and September levels from the initial October-data release, rather than subtracting today's September vintage."
+    },
+    {
+      "kind": "text",
+      "text": "The official BLS release calendar explicitly schedules the October 2026 Employment Situation for November 6, 2026, at 08:30 AM Eastern, verifying the registered resolution date. Source: https://www.bls.gov/schedule/news_release/empsit.htm."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original January-March releases: https://www.bls.gov/news.release/archives/empsit_02112026.htm ; https://www.bls.gov/news.release/archives/empsit_03062026.htm ; https://www.bls.gov/news.release/archives/empsit_04032026.htm.",
+      "result": "Original seasonally adjusted total nonfarm changes: January +130,000 jobs; February -92,000; March +178,000. Converted to the registered thousands unit: 130, -92, 178. The January release also states that the birth-death model now incorporates current sample information each month."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original April-June releases: https://www.bls.gov/news.release/archives/empsit_05082026.htm ; https://www.bls.gov/news.release/archives/empsit_06052026.htm ; https://www.bls.gov/news.release/archives/empsit_07022026.htm.",
+      "result": "Original seasonally adjusted total nonfarm changes: April +115,000 jobs; May +172,000; June +57,000. In thousands: 115, 172, 57. These are the current-month first prints, rather than later revised values appearing in subsequent releases."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original July-September releases: https://www.bls.gov/news.release/archives/empsit_08072026.htm ; https://www.bls.gov/news.release/archives/empsit_09042026.htm ; https://www.bls.gov/news.release/archives/empsit_10022026.htm.",
+      "result": "Original seasonally adjusted total nonfarm changes: July -23,000 jobs; August +162,000; September +29,000. In thousands: -23, 162, 29."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the mean of the nine fetched January-September 2026 first prints: 728/9 = 80.8889 thousand. This reference class uses the current year's methodology and retains weak months as well as strong months. The latest three original prints average (-23 + 162 + 29)/3 = 56 thousand."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read September 2026 seasonally adjusted establishment Summary Table B at https://www.bls.gov/news.release/archives/empsit_10022026.htm.",
+      "result": "September first-print total nonfarm change was +29 thousand, comprising private employment +46 thousand and government -17 thousand. Temporary-help employment fell 10.9 thousand; health care and social assistance rose 23.0 thousand. The private employment diffusion index was 49.0, and the average private workweek was 34.4 hours."
+    },
+    {
+      "kind": "text",
+      "text": "Separate effects: the underlying growth-level prior is 80.8889 thousand. Momentum lowers it by 12.4444 thousand through partial adjustment toward the recent mean of 56. September's narrow hiring breadth supports this direction. One-off and policy-mechanism adjustments are each zero: the fetched evidence does not quantify an October-specific strike, weather, or policy effect. These zero adjustments are modeling choices."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a shrinkage persistence model with the nine January-September original prints as the historical sample. Point = 0.5*(728/9) + 0.5*((-23+162+29)/3) + 0 one-off + 0 policy = 68.4444 thousand, rounded to 68. For this change series, calculate dispersion from the monthly change values themselves: sum(x^2) = 130720; sample variance = (130720 - 728^2/9)/8 = 8979.1111; sigma = 94.7582 thousand. The basic normal 80% half-width is 1.28*sigma = 121.2905. Under an independent, common-variance monthly approximation, the blended mean has six older weights of 1/18 and three recent weights of 2/9, so sum(weights^2) = 1/6. Including mean uncertainty gives half-width = 121.2905*sqrt(1+1/6) = 131.0087. Raw bounds are 68.4444 +/- 131.0087 = [-62.5642, 199.4531]; rounded final implied bounds are [-63, 199] thousand. This is an approximate predictive interval, not an empirically established coverage guarantee."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is a rebound in health care accompanied by unusually strong retail, hospitality, and government hiring after seasonal adjustment. Downside risk is continued temporary-help and government contraction spreading to broader private payrolls. A broad hiring surge would land above the interval at more than 199 thousand; unusually large layoffs or strike-related absences during the survey pay period could land outside the interval below -63 thousand. The forecast would also be weakened by serial dependence or an October regime change beyond the model's common-variance assumption."
+    },
+    {
+      "kind": "forecast",
+      "point": 68,
+      "ciLow": -63,
+      "ciHigh": 199
+    }
+  ]
+}

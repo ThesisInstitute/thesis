@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:33Z",
+  "runStartedAt": "2026-10-07T10:14:33Z",
+  "series": "irs.actc.total_claims",
+  "period": "2027",
+  "conditional": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "targetContext": {
+    "anchors": {
+      "2020": 19.119,
+      "2021": 37.772,
+      "2022": 18.077,
+      "2023": 17.626
+    },
+    "catalogSlug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+    "conditionDeadline": "2027-12-31",
+    "conditionId": "cond.s3596-actc-threshold.enacted",
+    "conditional": "Legislation enacted by 2027-12-31 makes the IRC \u00a724(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+    "country": "US",
+    "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+    "expectedReleaseWindow": {
+      "end": "2029-12-31",
+      "start": "2029-01-01"
+    },
+    "period": "2027",
+    "registeredAt": "2026-08-03T20:13:09Z",
+    "registeredAtUtc": "2026-08-03T20:13:09Z",
+    "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+    "registrationState": "preregistered",
+    "resolutionDate": "2029-12-31",
+    "series": "irs.actc.total_claims",
+    "sourceBinding": {
+      "adapter": "irs-soi-pub1304",
+      "allowedHosts": [
+        "www.irs.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2029-12-31",
+        "start": "2029-01-01"
+      },
+      "field": "refundable_child_tax_credit_returns",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "irs.actc.total_claims",
+      "sourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+      "table": "IRS SOI Individual Income Tax Returns Complete Report (Publication 1304), Table 3.3, all returns total row, refundable child tax credit or additional child tax credit, number of returns",
+      "transform": {
+        "factor": 1e-06,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+    "targetRegistrationPath": "records/targets/2026-08-03-6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6.json",
+    "targetUnit": "millions",
+    "valueScale": 1e-06
+  },
+  "registrationCommit": "a4f59c018641c8d772975263735424cb5d46bb25",
+  "targetContentHash": "6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6",
+  "targetRegistrationPath": "records/targets/2026-08-03-6978365a2924b850a9516b49451ed3e07b2bb14321ea908344ce17744296f5e6.json",
+  "registeredAtUtc": "2026-08-03T20:13:09Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/prompt.md",
+      "sha256": "d1721e7df95c10c9584c25d924fd20ce456eab63632ef09f590795471d02c6a5",
+      "bytes": 13257,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/command.json",
+      "sha256": "1008ffcd73f035158251089615bbd26e75dc7c7cea5aaaed7d05837df530b894",
+      "bytes": 226,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/stdout.txt",
+      "sha256": "a475787be190932f039615992bdd74e5168fc74cdafb8fcf839c9cbfa74bcb27",
+      "bytes": 3515,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/raw_response.txt",
+      "sha256": "a475787be190932f039615992bdd74e5168fc74cdafb8fcf839c9cbfa74bcb27",
+      "bytes": 3515,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/parsed_cells.json",
+      "sha256": "72b397c90240e1f6de8cd9baf7b372ded3da6f033ae5d6a1afb018a22173640b",
+      "bytes": 3645,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/normalized_cells.json",
+      "sha256": "2bb6ed62f7095a9defb66a27498c9bbd64213b904f92d90a77543d27a2ab8ac4",
+      "bytes": 3471,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar__r1/manifest.json",
+      "sha256": "80b13de573fb36adaaf850d658d4d3a3cae915c8001721a89909be1fac4912af",
+      "bytes": 5414,
+      "createdAt": "2026-10-07T10:14:33Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "c523db4ac679580e407a2f9bfe84269c9648206c1b0474228e344d7e3e4d777f"
+}

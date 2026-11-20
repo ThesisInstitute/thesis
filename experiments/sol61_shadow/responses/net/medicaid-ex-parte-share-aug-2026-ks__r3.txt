@@ -1,0 +1,48 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ks",
+  "country": "US",
+  "type": "data",
+  "title": "Kansas August 2026 ex parte renewal share",
+  "question": "What percentage of Kansas beneficiaries due for Medicaid or CHIP renewal in August 2026 were renewed on an ex parte basis, using the original (O) submission when CMS first publishes it?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Kansas's ex parte renewal share for the August 2026 reporting period, computed as 100 times beneficiaries renewed on an ex parte basis divided by beneficiaries with a renewal due, using the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Use numerator and denominator as first published, round the share to one decimal, and disregard subsequent revisions.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ks.aug_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=5",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:28:52Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld after a failed official-source fetch"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Kansas's August 2026 state row, original submission variant, in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. CMS defines the ex parte share relative to all beneficiaries due for renewal."
+    },
+    {
+      "kind": "text",
+      "text": "The initial unfiltered API request succeeded. My subsequent Kansas original-row query returned status 400 with 'JSON Schema validation failed' because its filter operator did not match the API's allowed values. The run instructions require stopping after a failed fetch."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory six-print Kansas base rate was not fetched. No point estimate, sigma, or interval was calculated; null values record the failed run without inventing evidence."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched official snapshot index lists June 2026 data released September 25, 2026, but provides no future announcement verifying December 15, 2026 for August 2026 data. The registered resolutionDate is preserved and remains unverified."
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:33Z",
+  "runStartedAt": "2026-10-07T10:14:33Z",
+  "series": "usaspending.dod.prime_award_obligations",
+  "period": "2027",
+  "conditional": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+  "targetContext": {
+    "catalogSlug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+    "conditionDeadline": "2026-12-31",
+    "conditionId": "cond.fy27-ndaa-enactment.not-enacted",
+    "conditional": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+    "country": "US",
+    "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+    "expectedReleaseWindow": {
+      "end": "2027-10-22",
+      "start": "2027-10-15"
+    },
+    "period": "2027",
+    "registeredAt": "2026-08-13T16:32:19Z",
+    "registeredAtUtc": "2026-08-13T16:32:19Z",
+    "registrationCommit": "27d485d528684bbe8281fa349cfbb9587169dd5b",
+    "registrationState": "preregistered",
+    "series": "usaspending.dod.prime_award_obligations",
+    "sourceBinding": {
+      "adapter": "usaspending-api",
+      "allowedHosts": [
+        "api.usaspending.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2027-10-22",
+        "start": "2027-10-15"
+      },
+      "field": "obligations",
+      "releasePolicy": "registered_query_snapshot",
+      "sourceSeriesId": "usaspending.agency.097.awards.obligations",
+      "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+      "table": "USAspending API v2, agency 097 (DoD) award summary, prime award obligations, fiscal year to date",
+      "transform": {
+        "factor": 1e-09,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "7d60648441d141998baeb2414745ac6c362240c575cb0c305c27ccd3c85a558b",
+    "targetRegistrationPath": "records/targets/2026-08-13-7d60648441d141998baeb2414745ac6c362240c575cb0c305c27ccd3c85a558b.json",
+    "targetUnit": "billions USD",
+    "valueScale": 1e-09
+  },
+  "registrationCommit": "27d485d528684bbe8281fa349cfbb9587169dd5b",
+  "targetContentHash": "7d60648441d141998baeb2414745ac6c362240c575cb0c305c27ccd3c85a558b",
+  "targetRegistrationPath": "records/targets/2026-08-13-7d60648441d141998baeb2414745ac6c362240c575cb0c305c27ccd3c85a558b.json",
+  "registeredAtUtc": "2026-08-13T16:32:19Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/prompt.md",
+      "sha256": "c07792d512f57906c0a7bd06462a202325212d4bce6fcec7fbc4d272ccf42003",
+      "bytes": 12132,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/command.json",
+      "sha256": "5597c780315f5a2ad9d3bba14d6211348e225574b7b69b49437b1e6ade762945",
+      "bytes": 208,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/stdout.txt",
+      "sha256": "249c33a1baea2e1c4a0e4e043fd2397dbdce801f69bdeb8480a64710bf1fc6ec",
+      "bytes": 3752,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/raw_response.txt",
+      "sha256": "249c33a1baea2e1c4a0e4e043fd2397dbdce801f69bdeb8480a64710bf1fc6ec",
+      "bytes": 3752,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/parsed_cells.json",
+      "sha256": "f5c7f69ad4ccddcb325280fb9dafd2bfe01ae2e791ef76d5e3d45bfe44869e57",
+      "bytes": 3948,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/normalized_cells.json",
+      "sha256": "07ca0e6b059f57b34b63bb0cfdf65b63ce7e244c61d83e65dda9f444ba8baaeb",
+      "bytes": 3620,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/error.json",
+      "sha256": "b7c5814706dfea750e0091c2df0da865f0d666d0df5b8a957739ee240cb5b9b5",
+      "bytes": 82,
+      "createdAt": "2026-10-07T10:14:33Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/us-dod-prime-award-obligations-fy2027-no-fy27-ndaa__r1/manifest.json",
+      "sha256": "c2606fd26634e06078f58ae2a9925f8808ad03d399d26d8bf634493aa30b0055",
+      "bytes": 5263,
+      "createdAt": "2026-10-07T10:14:33Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "KeyError: 'pointEstimate'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "c57a2b3fe169aaccfafb6f6dc41efa4d21b5dbca5c382a1a598a140f8cd6bac1"
+}

@@ -1,0 +1,127 @@
+{
+  "slug": "ssi-recipients-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 SSI recipients",
+  "question": "What will SSA first publish for September 2026 total SSI recipients in SSI Monthly Statistics, Table 2, All Federally Administered Payments, without seasonal adjustment, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 7.300611,
+  "ciLow": 7.26161,
+  "ciHigh": 7.339612,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Social Security Administration SSI Monthly Statistics, September 2026, Table 2",
+  "resolutionSourceUrl": "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-09/table02.html",
+  "resolutionRule": "Resolve using the September 2026 Number of recipients—Total entry in Table 2, All Federally Administered Payments, as first officially published by SSA. Divide the published whole-person count by 1,000,000 to express millions, preserving six decimal places. Exclude subsequent revisions and corrections, including same-day corrections. Publication delays do not change the target month or first-print policy.",
+  "dataPointId": "ssa.ssi.total_recipients.2026-09.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-08"}, "label": "August 2025", "value": 7.405735},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "September 2025", "value": 7.436689},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "October 2025", "value": 7.393406},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "November 2025", "value": 7.391176},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "December 2025", "value": 7.392201},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "January 2026", "value": 7.36951},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "February 2026", "value": 7.358913},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "March 2026", "value": 7.351825},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "April 2026", "value": 7.338132},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "May 2026", "value": 7.322937},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "June 2026", "value": 7.323731},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "July 2026", "value": 7.300297},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "August 2026", "value": 7.306182}
+  ],
+  "drivers": [
+    "August recipient level",
+    "Negative recent monthly drift",
+    "September changes with substantial variation across years",
+    "Uncertainty about recipient entries, exits, and administrative processing"
+  ],
+  "sourceContext": [
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-08/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-09/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-10/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-11/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2025-12/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-01/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-02/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-03/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-04/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-05/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-06/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-07/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2026-08/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2022-09/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2023-09/table02.html",
+    "https://www.ssa.gov/policy/docs/statcomps/ssi_monthly/2024-09/table02.html",
+    "https://www.ssa.gov/policy/pub_schedule.html",
+    "https://www.ssa.gov/policy/statistics.html?keyword=ssi"
+  ],
+  "runAt": "2026-10-07T11:51:12Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 SSI total recipients forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is Table 2, Number of recipients—Total, under All Federally Administered Payments. All anchors and historical observations use this same unadjusted, end-of-month recipient-count variant, including federally administered state supplementation. The September target page could not be fetched; no September outcome was observed."
+    },
+    {
+      "kind": "text",
+      "text": "Ledger discrepancy: Table 2 publishes whole-person recipient counts. Its raw counts require multiplication by 0.000001 for the registered unit millions. The supplied 0.001 factor would produce thousands unless an intermediate conversion occurs. The forecast retains the registered series, period, identifier, and millions unit."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official issue-specific SSA SSI Monthly Statistics Table 2 pages for August through December 2025.",
+      "result": "Total recipients: August 2025 7,405,735; September 7,436,689; October 7,393,406; November 7,391,176; December 7,392,201. Each value was fetched from its corresponding dated SSA Table 2 page listed in sourceContext."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official issue-specific SSA SSI Monthly Statistics Table 2 pages for January through April 2026.",
+      "result": "Total recipients: January 2026 7,369,510; February 7,358,913; March 7,351,825; April 7,338,132. Each value was fetched from its corresponding dated SSA Table 2 page."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official issue-specific SSA SSI Monthly Statistics Table 2 pages for May through August 2026.",
+      "result": "Total recipients: May 2026 7,322,937; June 7,323,731; July 7,300,297; August 7,306,182. The August issue also carries the preceding twelve monthly observations, agreeing with the dated issue values fetched here."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official September Table 2 issues for 2022, 2023, 2024, and 2025 to compare August-to-September changes.",
+      "result": "August to September counts: 2022 7,607,527 to 7,567,439; 2023 7,482,753 to 7,450,135; 2024 7,399,737 to 7,430,106; 2025 7,405,735 to 7,436,689. Derived September changes are -40,088, -32,618, +30,369, and +30,954 persons."
+    },
+    {
+      "kind": "text",
+      "text": "Vintage limitation: history comes from official issue-specific archive pages, with consistency checks against later issues. Immutable publication-time snapshots were not fetched, so archival consistency does not prove that every historical page remains untouched since first publication. Final resolution nevertheless remains strictly the target's first official print."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification failed at daily precision. SSA's Publishing Schedule has an empty anticipated-release-date cell for SSI Monthly Statistics. The official Statistics Archives search result states next expected October 2026, without a day. This does not verify the ledger window October 31–November 8. resolutionDate is null because no official YYYY-MM-DD was fetched; consequently this object cannot satisfy the mandatory verified-date validation rule."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is thirteen consecutive official monthly observations from August 2025 through August 2026, producing twelve successive changes. Their base rate is -8,296.083333 persons per month. The four fetched September changes average -2,845.75 persons; the two latest increases do not establish a consistently positive September pattern."
+    },
+    {
+      "kind": "text",
+      "text": "Separate components: level is August's 7.306182 million; momentum is the twelve-change average decline; the September adjustment shrinks the four-year September mean halfway toward that momentum prior. No separately evidenced September policy or one-off increment is applied. Recipient entries and exits remain scenario mechanisms rather than quantified additional adjustments."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use an equal-weight blend of persistence-with-drift and the four-year September-change model. Historical sample: thirteen August 2025–August 2026 levels and four August-to-September changes from 2022–2025. Point = 7.306182 + 0.5*(-0.008296083333) + 0.5*(-0.00284575) = 7.300611083333 million. For the twelve consecutive changes, sigma = 0.018320162 million, calculated as sqrt(3691911670.916667/11)/1000000; baseline half-width = 1.28*sigma = 0.023449807 million. September-change sample sigma is 0.038811574 million. Blend predictive variance as 0.5*(0.018320162^2) + 0.5*(0.038811574^2) + 0.25*((-0.008296083333)-(-0.00284575))^2, giving predictive sigma 0.030469818 million. The moment-matched normal 80% half-width is 1.28*0.030469818 = 0.039001367 million, 1.663185 times the baseline width, reflecting larger September dispersion and disagreement between component means. Final bounds, rounded to whole-person precision in millions, are 7.261610 and 7.339612."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: recipient additions or reinstatements could repeat the recent positive September pattern; a 40,000-person increase from August would give 7.346182 million, outside the interval above its upper bound. Downside risk: accelerated exits or a large administrative removal batch could exceed older September declines; a 45,000-person decrease would give 7.261182 million, outside the interval below its lower bound. These are conditional scenarios, not observed September statistics."
+    },
+    {
+      "kind": "forecast",
+      "point": 7.300611,
+      "ciLow": 7.26161,
+      "ciHigh": 7.339612
+    }
+  ]
+}

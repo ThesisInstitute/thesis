@@ -1,0 +1,5 @@
+{
+  "phase": "seal",
+  "message": "KeyError: 'pointEstimate'",
+  "command": null
+}

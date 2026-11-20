@@ -1,0 +1,142 @@
+{
+  "slug": "us-core-pce-mom-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 US core PCE inflation",
+  "question": "What will BEA's first published seasonally adjusted percent change from August to September 2026 in the personal consumption expenditures price index excluding food and energy be?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.23,
+  "ciLow": 0.094,
+  "ciHigh": 0.366,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "BEA Personal Income and Outlays, September 2026; NIPA Table 2.8.7",
+  "resolutionSourceUrl": "https://apps.bea.gov/iTable/?1903=84&1921=survey&isuri=1&reqid=19&step=3",
+  "resolutionRule": "Resolve to the September 2026 seasonally adjusted percent change from the preceding month in the PCE price index excluding food and energy, as first published in BEA's Personal Income and Outlays, September 2026 release. Use the monthly rate reported to one decimal place, in percent, with multiplication factor 1; do not annualize. Preserve the initial release vintage and ignore subsequent revisions or corrections. The live interactive table must not substitute a later vintage for the first print.",
+  "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 0.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 0.4
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "August 2026",
+      "value": 0.2
+    }
+  ],
+  "drivers": [
+    "Recent core PCE momentum below the January-August average",
+    "Moderate underlying consumer services inflation",
+    "Volatile travel prices and possible goods-price pass-through",
+    "September CPI and PPI inputs remain unreleased"
+  ],
+  "sourceContext": [
+    "https://www.bea.gov/news/schedule/full",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-january-2026",
+    "https://www.bea.gov/sites/default/files/2026-03/pi0126.pdf",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-february-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-march-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-april-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-may-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-june-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-august-2026",
+    "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+    "https://apps.bea.gov/iTable/?1903=84&1921=survey&isuri=1&reqid=19&step=3",
+    "https://www.bls.gov/news.release/archives/cpi_09112026.htm",
+    "https://www.bls.gov/news.release/archives/ppi_09102026.htm"
+  ],
+  "runAt": "2026-10-07T11:43:31Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September core PCE: historical average adjusted toward recent persistence"
+    },
+    {
+      "kind": "text",
+      "text": "The target is September's first-print monthly core PCE inflation. BEA's official calendar explicitly schedules Personal Income and Outlays, September 2026 for October 29, 2026 at 8:30 a.m. EDT. The relevant monthly table is NIPA 2.8.7. All historicalContext observations and quantitative PCE prior anchors are seasonally adjusted monthly first prints taken from each month's own release. January's official PDF explicitly confirms the monthly seasonal-adjustment convention. CPI and PPI figures are explanatory inputs, not interchangeable PCE observations."
+    },
+    {
+      "kind": "text",
+      "text": "Two source-binding discrepancies require disclosure: the ledger table label names August 2026 although its period and dataPointId specify September; BEA's specific monthly interactive table is hosted at apps.bea.gov, outside the listed www.bea.gov allowlist. The forecast retains the registered September target and first-print rule. The table URL identifies the exact series; resolution must preserve the initial September release on www.bea.gov rather than use subsequently revised live data."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch BEA's January and February 2026 Personal Income and Outlays release pages and January release PDF.",
+      "result": "January 2026 first-print monthly core PCE increased 0.4%; February 2026 first-print monthly core PCE increased 0.4%. January PDF Table 5 reports 0.4% under the caption specifying seasonally adjusted monthly rates."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch BEA's March, April, and May 2026 Personal Income and Outlays release pages.",
+      "result": "First-print monthly core PCE: March 2026 = 0.3%; April 2026 = 0.2%; May 2026 = 0.3%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch BEA's June, July, and August 2026 releases and official release schedule.",
+      "result": "First-print monthly core PCE: June 2026 = 0.1%; July 2026 = 0.2%; August 2026 = 0.2%. The August release reports core PCE year-over-year inflation of 3.0% and real PCE growth of 0.6%. It revises July monthly core PCE to 0.1%; that revised observation is excluded from the first-print history. Both the release and calendar confirm September's release on October 29, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class and base rate are the eight fetched January-August first prints: [0.4, 0.4, 0.3, 0.2, 0.3, 0.1, 0.2, 0.2]%. Their mean is 0.2625%, and the most frequent print is 0.2%. This historical average establishes the prior before considering current momentum. The annual update makes older first prints imperfect guides to the current estimation regime, but they remain the appropriate original-vintage reference class."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch BLS's August 2026 CPI and PPI releases, published September 11 and September 10 respectively.",
+      "result": "August seasonally adjusted CPI: core = 0.3%, goods excluding food and energy = 0.1%, services excluding energy = 0.3%, shelter = 0.3%, medical care services = -0.2%, airline fares = 2.7%, lodging away from home = 2.4%. August seasonally adjusted PPI: goods excluding foods and energy = 0.4%, final demand services = 0.1%. The CPI release schedules September CPI for October 14, after this forecast cutoff."
+    },
+    {
+      "kind": "text",
+      "text": "Level: August's 3.0% core PCE year-over-year reading supports continued positive inflation, but contributes no separate monthly adjustment. Momentum: the latest 0.2% monthly first print supports lowering the historical-average prior toward persistence. One-off effects: August travel-price increases could reverse or persist; they already informed August PCE, so no additional September adjustment is assigned. Policy mechanism: demand and pricing responses can affect inflation with lags, but the fetched evidence supplies no quantified September-specific policy effect. CPI and PPI signals are mixed and lagged, so their net additive adjustment is also zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a judgmental equal-weight blend of the January-August first-print mean and August persistence. Point before rounding = 0.2625 + 0.5*(0.2 - 0.2625) + 0 one-off adjustment + 0 policy adjustment = 0.23125%, reported as 0.23%. Because this target is a monthly change series, calculate dispersion from the eight values themselves: sum((x - 0.2625)^2) = 0.07875; sample variance = 0.07875/(8 - 1) = 0.01125; sigma = 0.106066 percentage points. An approximate normal 80% predictive half-width is 1.28*sigma = 0.135764 percentage points. Applying it to the reported point gives 0.23 - 0.135764 = 0.094236 and 0.23 + 0.135764 = 0.365764, rounded to final bounds [0.094, 0.366]%. No additional regime widening or narrowing is applied."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is continued goods-price pass-through combined with persistent services and travel inflation; a 0.4% published print would land above the interval. The downside risk is reversal of travel-price increases alongside weaker goods and medical-services prices; a 0.0% print would land below the interval. Broad simultaneous component surprises would therefore fall outside the interval. The interval is approximate and based on a small sample of rounded first prints."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.23,
+      "ciLow": 0.094,
+      "ciHigh": 0.366
+    }
+  ]
+}

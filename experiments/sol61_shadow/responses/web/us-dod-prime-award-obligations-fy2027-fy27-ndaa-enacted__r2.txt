@@ -1,0 +1,82 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "An Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress, House Report 119-698) is enacted into law on or before 2026-12-31.",
+  "title": "FY2027 DoD prime award obligations: forecast refused",
+  "question": "What will USAspending API v2 agency 097 awards report for FY2027 prime award obligations, converted to billions USD, at the initial registered query snapshot?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+  "resolutionRule": "Resolve using the obligations field from the initial registered FY2027 query snapshot, multiplied by 1e-09 to obtain billions USD. Do not substitute agency profile totals or subsequent revisions. A specific official snapshot date and source rounding precision could not be verified in this run.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints/federal_accounts/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/system/files/2026-08/fy27-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-07T11:43:05Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused because mandatory registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains usaspending.agency.097.awards.obligations for FY2027 under the registered enactment condition. The required history must come directly from the same agency awards query."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: web open requests to the exact registered URLs for FY2023, FY2024 and FY2025 returned Internal Error and stated that each URL was not accessible via this tool. Retrying FY2025 produced the same failure. No obligations values were returned."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch evidence: exact registered URLs for FY2020, FY2021 and FY2022 also returned Internal Error, including on retries. The FY2026 query returned Internal Error and URL-not-accessible evidence. No numeric historical print was obtained."
+    },
+    {
+      "kind": "text",
+      "text": "The official API endpoint index was accessible and confirms that the agency awards endpoint uses GET and returns award obligations. This documentation provides no historical obligations values. Agency profile totals and search-result summaries were not substituted."
+    },
+    {
+      "kind": "text",
+      "text": "The official USAspending Data Sources document describes daily updates and a 90-day DoD procurement reporting delay. Consequently, a later complete fiscal-year total cannot be assumed equivalent to the registered query snapshot."
+    },
+    {
+      "kind": "text",
+      "text": "No specific resolutionDate within the supplied registration window was verified from an official schedule. Treasury links an FY2027 Data Broker submission schedule, but fetching that spreadsheet failed with Unsupported content-type. Account submission timing would not independently establish this prime-awards snapshot date."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or base rate was estimated because the mandatory reference class could not be fetched. Level, momentum, one-off and policy adjustments therefore remain unestimated. Historical dispersion and final implied bounds are unavailable."
+    },
+    {
+      "kind": "math",
+      "text": "sigma = unavailable. Without fetched historical obligations, the required 1.28*sigma half-width cannot be calculated."
+    },
+    {
+      "kind": "text",
+      "text": "The prompt explicitly requires refusal when the registered history cannot be fetched. Null estimates and empty historicalContext document that refusal; this object is not a valid numeric forecast. No claim is made that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

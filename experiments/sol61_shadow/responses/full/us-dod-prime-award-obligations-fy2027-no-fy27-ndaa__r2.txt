@@ -1,0 +1,82 @@
+{
+  "slug": "us-dod-prime-award-obligations-fy2027-no-fy27-ndaa",
+  "country": "US",
+  "type": "conditional",
+  "title": "FY2027 DoD prime award obligations if no FY2027 NDAA",
+  "question": "What will the obligations field report for Department of Defense agency 097, fiscal year 2027, in the registered USAspending API v2 agency awards query snapshot, multiplied by 1e-9 and expressed in billions USD, conditional on the registered NDAA nonenactment condition?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+  "resolutionRule": "The registered resolver uses GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027, reads obligations, and multiplies by 1e-9. Preserve releasePolicy registered_query_snapshot; later query revisions do not replace the registered snapshot. The condition concerns enactment into law on or before 2026-12-31; if it fails, mark the conditional unresolved. The supplied context gives an expected snapshot window but no literal resolutionDate or verified official release-calendar date. No resolution date is inferred.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.no_fy27_ndaa",
+  "conditionalOn": "No Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress) is enacted into law on or before 2026-12-31.",
+  "historicalContext": [],
+  "drivers": [
+    "Exact registered-query history unavailable",
+    "NDAA authorization and appropriations are distinct",
+    "Snapshot resolution date unverified"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.govinfo.gov/app/details/BILLS-119hr8800rh",
+    "https://www.congress.gov/crs_external_products/R/PDF/R48057/R48057.1.pdf"
+  ],
+  "runAt": "2026-10-07T12:16:49Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refused: mandatory registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is fiscal-year DoD prime award obligations from the exact registered agency awards query, with releasePolicy registered_query_snapshot. A conventional first-print release date is not supplied. The registered identity and conditional text are preserved. The independence override prohibits checking the Thesis catalog."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+      "result": "Each attempted URL returned Internal Error and 'is not accessible via this tool.' No obligations field or historical numeric observation was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021; GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+      "result": "Each attempted URL returned Internal Error and 'is not accessible via this tool.' No obligations field or historical numeric observation was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026; retry the exact fiscal_year=2025, fiscal_year=2024, and fiscal_year=2023 URLs through mcp__codex_apps__search_service_web_run",
+      "result": "The additional query and all alternate-web retries returned Internal Error and 'is not accessible via this tool.' No award-obligations values were fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://api.usaspending.gov/docs/endpoints",
+      "result": "Official documentation lists /api/v2/agency/<TOPTIER_AGENCY_CODE>/awards/ as a GET endpoint for transaction counts and award obligations. It documents HTTP 200 for success, 400 for malformed requests, and 500 for server errors. The web failures did not expose an HTTP status or response body."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open and web.search",
+      "call": "Fetch https://www.govinfo.gov/app/details/BILLS-119hr8800rh and https://www.congress.gov/crs_external_products/R/PDF/R48057/R48057.1.pdf",
+      "result": "GovInfo identifies H.R. 8800, 119th Congress, Reported in House on June 15, 2026, as the National Defense Authorization Act for Fiscal Year 2027. CRS R48057 explains the distinction between authorization and appropriations, including 10 U.S.C. 114. These sources supply no values for the registered obligations query and do not establish the condition's eventual outcome."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. No numerical historicalContext observations were fetched from the required query. This is a retrieval failure, not evidence that the official source exposes fewer than six prints. Persistence, model candidates, sigma, and interval arithmetic cannot be computed honestly."
+    },
+    {
+      "kind": "text",
+      "text": "The policy evidence does not establish a quantitative causal effect on prime award obligations. Without the required history and a fetched effect precedent, neither a conditional adjustment nor scenarios outside the interval can be calibrated."
+    },
+    {
+      "kind": "text",
+      "text": "The registered-query instruction explicitly requires refusal when the query cannot be executed. This cell is dropped: null estimates and resolutionDate denote unavailable quantities, not a scored forecast. No alternative aggregate, remembered number, invented history, model candidate, or artifact receipt is substituted."
+    }
+  ]
+}

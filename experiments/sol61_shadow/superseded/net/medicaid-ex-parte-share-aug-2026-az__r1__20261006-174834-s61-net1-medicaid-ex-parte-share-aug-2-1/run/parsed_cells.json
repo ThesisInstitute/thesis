@@ -1,0 +1,63 @@
+[
+  {
+    "slug": "medicaid-ex-parte-share-aug-2026-az",
+    "country": "US",
+    "type": "data",
+    "title": "Arizona ex parte renewal share, August 2026",
+    "question": "What will Arizona's ex parte renewal share be for August 2026 in the original (O) submission row when CMS first publishes it?",
+    "unit": "percent",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-15",
+    "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+    "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "resolutionRule": "Resolves to Arizona's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Numerator and denominator as published; share computed to one decimal. Subsequent revisions do not change resolution.",
+    "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.az.aug_2026",
+    "historicalContext": [],
+    "drivers": [],
+    "sourceContext": [
+      "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+      "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+      "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+    ],
+    "runAt": "2026-10-06T22:17:51Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast unavailable: required evidence was not established"
+      },
+      {
+        "kind": "text",
+        "text": "The target remains Arizona's August 2026 original-submission state row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c."
+      },
+      {
+        "kind": "text",
+        "text": "The official metadata response identified the September 2026 release CSV and reported modification on September 25, 2026."
+      },
+      {
+        "kind": "text",
+        "text": "The datastore history request failed with curl exit code 16: Error in the HTTP2 framing layer. The separately requested official CSV returned successfully, but its displayed output was truncated and did not expose the Arizona history needed for this forecast."
+      },
+      {
+        "kind": "text",
+        "text": "Following the instruction to stop after a failed fetch, no further history requests were made. Six distinct usable Arizona original-submission prints were not established, so no base rate was calculated."
+      },
+      {
+        "kind": "text",
+        "text": "The official snapshot index lists June 2026 as released September 25, 2026. It does not verify a December 15, 2026 release for August. The ledger resolutionDate is retained but remains unverified."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: No persistence prior, adjustment, sigma, or 80% interval was calculated because the required fetched reference class was unavailable. Null forecast fields indicate a failed run, not a zero-percent forecast."
+      },
+      {
+        "kind": "forecast",
+        "point": null,
+        "ciLow": null,
+        "ciHigh": null
+      }
+    ]
+  }
+]

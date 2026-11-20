@@ -1,0 +1,147 @@
+{
+  "slug": "belgium-gdp-flash-q3-2026",
+  "country": "BE",
+  "type": "data",
+  "title": "Belgium GDP flash growth, Q3 2026",
+  "question": "What will the FIRST PRINT of Belgium's real GDP growth from 2026-Q2 to 2026-Q3 be, in the National Accounts Institute flash estimate published by the National Bank of Belgium, adjusted for seasonal and calendar effects and expressed as a non-annualized quarter-on-quarter percentage change?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.3,
+  "ciLow": 0.1,
+  "ciHigh": 0.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "National Bank of Belgium / National Accounts Institute, NAI - Flash estimate, 2026Q3",
+  "resolutionSourceUrl": "https://www.nbb.be/en/statistics/nationalregional-accounts",
+  "resolutionRule": "Resolve to the Belgium-wide real GDP percentage change from the previous quarter in the FIRST published NAI - Flash estimate for 2026Q3, issued by the National Bank of Belgium. Use Table 1, GDP, real quarterly growth, the 2026 III row and percentage change compared with the previous quarter column, with seasonal and calendar adjustment. This is quarter-on-quarter growth, not annualized or year-on-year growth. Use the published precision of one decimal place. The first release alone resolves the target; later corrections, quarterly aggregates and revised historical tables do not alter the outcome. NBB's official calendar fetched this run schedules the flash publication for 29 October 2026.",
+  "dataPointId": "nbb.gdp.flash_qoq.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": { "type": "quarter", "value": "2023-Q1" },
+      "label": "2023-Q1",
+      "value": 0.4
+    },
+    {
+      "period": { "type": "quarter", "value": "2023-Q4" },
+      "label": "2023-Q4",
+      "value": 0.4
+    },
+    {
+      "period": { "type": "quarter", "value": "2024-Q2" },
+      "label": "2024-Q2",
+      "value": 0.2
+    },
+    {
+      "period": { "type": "quarter", "value": "2024-Q4" },
+      "label": "2024-Q4",
+      "value": 0.2
+    },
+    {
+      "period": { "type": "quarter", "value": "2025-Q1" },
+      "label": "2025-Q1",
+      "value": 0.4
+    },
+    {
+      "period": { "type": "quarter", "value": "2025-Q3" },
+      "label": "2025-Q3",
+      "value": 0.3
+    },
+    {
+      "period": { "type": "quarter", "value": "2026-Q2" },
+      "label": "2026-Q2",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "Latest flash print showed stagnation",
+    "NBB's direct Q3 nowcast indicates a rebound",
+    "Investment recovery supports domestic demand",
+    "September services and construction sentiment weakened"
+  ],
+  "sourceContext": [
+    "https://www.nbb.be/en/statistical-updates?calendar_timestamp=2953144800&current=2955823200&date_format=custom&date_pattern=F&display_reset=0&next=2958415200&page=10&pager_type=calendar_month&previous=2953144800&scope=2&use_previous_next=1",
+    "https://www.nbb.be/doc/dq/e/dq3/histo/nefe23i.pdf",
+    "https://www.nbb.be/doc/dq/e/dq3/histo/nefe23iv.pdf",
+    "https://www.nbb.be/doc/dq/n/dq3/histo/nnfe24ii.pdf",
+    "https://www.nbb.be/doc/dq/e/dq3/histo/nefe24iv.pdf",
+    "https://www.nbb.be/de/media/17883",
+    "https://www.nbb.be/doc/dq/e/dq3/nefe.pdf",
+    "https://www.nbb.be/en/statistics/latest-figures/nai-flash-estimate-2026q2",
+    "https://www.nbb.be/fr/actualites-et-evenements/actualites/la-croissance-economique-belge-devrait-rebondir-03-au-troisieme",
+    "https://www.nbb.be/en/statistics/latest-figures/business-confidence-indicator-2026m9"
+  ],
+  "runAt": "2026-10-07T12:42:49Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Belgium 2026-Q3 real GDP flash forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is the first NAI flash estimate of seasonally and calendar-adjusted real GDP quarter-on-quarter growth. Preserve the supplied slug, country BE, unit and dataPointId. The default release-calendar branch applies because no resolve-by-bound basis or committed resolutionDate was supplied. The official scheduled date is inside the supplied release window. The independence instruction prohibits the catalog lookup, so the supplied catalogSlug is used without visiting any Thesis source."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "search_query: site.nbb.be GDP flash estimate 2026 third quarter calendar national accounts",
+      "result": "The [official NBB calendar](https://www.nbb.be/en/statistical-updates?calendar_timestamp=2953144800&current=2955823200&date_format=custom&date_pattern=F&display_reset=0&next=2958415200&page=10&pager_type=calendar_month&previous=2953144800&scope=2&use_previous_next=1) lists 2026Q3 (Flash) data and the 2026-III NAI flash publication on 29 Oct 2026. This verifies resolutionDate 2026-10-29 rather than inferring it from quarterly cadence."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Official NBB archive searches for original flash releases for 2023 Q1/Q4 and 2024 Q2/Q4; use only each release's target-quarter headline and previous-quarter column.",
+      "result": "Original first prints: [2023-Q1](https://www.nbb.be/doc/dq/e/dq3/histo/nefe23i.pdf), released 2023-04-27, +0.4%; [2023-Q4](https://www.nbb.be/doc/dq/e/dq3/histo/nefe23iv.pdf), released 2024-01-29, +0.4%; [2024-Q2](https://www.nbb.be/doc/dq/n/dq3/histo/nnfe24ii.pdf), released 2024-07-29, +0.2%; [2024-Q4](https://www.nbb.be/doc/dq/e/dq3/histo/nefe24iv.pdf), released 2025-01-29, +0.2%. All are real GDP changes adjusted for seasonal and calendar effects."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Official NBB search_query for premier trimestre de 2025 estimation flash, and searches for the 2025-III and 2026Q2 NAI flash releases.",
+      "result": "The [original French 2025-Q1 flash artifact](https://www.nbb.be/de/media/17883), dated 2025-04-29, reports +0.4%. The [original 2025-Q3 flash PDF](https://www.nbb.be/doc/dq/e/dq3/nefe.pdf), dated 2025-10-29, reports +0.3%. The [2026-Q2 flash release](https://www.nbb.be/en/statistics/latest-figures/nai-flash-estimate-2026q2), dated 2026-07-29, reports 0.0%; its first-print sector changes are industry -0.8%, construction -0.5% and services +0.2%. Older rows in these releases are revised vintages and were excluded from historicalContext."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch limitation: seven original first-print observations were recovered, with gaps. Original values for 2023-Q3, 2024-Q1, 2024-Q3, 2025-Q2, 2025-Q4 and 2026-Q1 could not be fetched; direct archive requests returned access errors or exposed only metadata. No missing value was filled from memory, subsequent quarterly estimates or revised historical tables. The recovered sample meets the six-print numerical floor but is an incomplete recent reference class."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate / reference class: the seven fetched original flash growth rates are 0.4, 0.4, 0.2, 0.2, 0.4, 0.3 and 0.0%. Their sum is 1.9, mean 0.271429%, median 0.3%, sample standard deviation 0.149603 percentage points and range 0.0-0.4%. The default prior and primary benchmark are last-print persistence: 0.0%. The alternative constant-mean benchmark is 0.271429%, or 0.3% at publication precision."
+    },
+    {
+      "kind": "math",
+      "text": "Model comparison before the current-evidence update: train on the first three recovered observations, then forecast each of the remaining four using only preceding recovered observations. Actuals = [0.2,0.4,0.3,0.0]; persistence predictions = [0.2,0.2,0.4,0.3]; expanding-mean predictions = [0.333333,0.300000,0.320000,0.316667]. Persistence MAE = 0.150000 and RMSE = 0.187083 percentage points; expanding-mean MAE = 0.142500 and RMSE = 0.179203. The holdout horizons are two, one, two and three quarters, so the tiny mean advantage does not establish superior one-quarter accuracy. Persistence remains the prior. Missing quarters preclude a defensible regularly spaced ETS or ARIMA fit."
+    },
+    {
+      "kind": "text",
+      "text": "Generated model-candidate set before the agent forecast; numerical fields are unrounded computations from the fetched first prints. calibration_n counts seven dispersion observations; walk_forward.n counts four scored holdouts. [{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"persistence\",\"point\":0,\"p10\":-0.1914913898350325,\"p50\":0,\"p90\":0.1914913898350325,\"interval80\":{\"low\":-0.1914913898350325,\"high\":0.1914913898350325},\"interval90\":{\"low\":-0.24609635646767847,\"high\":0.24609635646767847},\"interval_method\":\"fallback_prior_normal_interval_using_sample_sd_of_original_flash_growth_rates\",\"calibration_n\":7,\"train_cutoff\":\"2026-Q2\",\"walk_forward\":{\"n\":4,\"mae\":0.15000000000000002,\"rmse\":0.18708286933869708,\"method\":\"first_three_available_prints_initial_training_then_expanding_training; observed_release_holdouts_with_quarter_gaps\"}},{\"schema\":\"thesis_model_candidate_v1\",\"candidateId\":\"expanding_mean\",\"point\":0.27142857142857146,\"p10\":0.07993718159353896,\"p50\":0.27142857142857146,\"p90\":0.46291996126360396,\"interval80\":{\"low\":0.07993718159353896,\"high\":0.46291996126360396},\"interval90\":{\"low\":0.025332214960892996,\"high\":0.5175249278962499},\"interval_method\":\"fallback_prior_normal_interval_using_sample_sd_of_original_flash_growth_rates\",\"calibration_n\":7,\"train_cutoff\":\"2026-Q2\",\"walk_forward\":{\"n\":4,\"mae\":0.14250000000000002,\"rmse\":0.17920348458913654,\"method\":\"first_three_available_prints_initial_training_then_expanding_training; observed_release_holdouts_with_quarter_gaps\"}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "search_query: site:nbb.be La croissance économique belge devrait rebondir 2026",
+      "result": "The [NBB September Business Cycle Monitor release](https://www.nbb.be/fr/actualites-et-evenements/actualites/la-croissance-economique-belge-devrait-rebondir-03-au-troisieme), published 9 Sep 2026, places Q3 model nowcasts at 0.3-0.6%, identifies 0.3% as most plausible and judges risks broadly neutral. It expects broadly stable household consumption growth and modest recovery in business investment. This is a direct Q3 signal published after the Q2 flash print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "search_query: site:nbb.be business-confidence-indicator-2026m9",
+      "result": "The [24 Sep 2026 NBB business survey](https://www.nbb.be/en/statistics/latest-figures/business-confidence-indicator-2026m9) reports overall confidence improving from -13.2 to -12.1 and manufacturing from -17.8 to -12.2. Business services fell from -1.4 to -13.4, construction from -7.7 to -11.8 and trade from -5.2 to -8.6. These newer sector divergences temper the rebound signal without providing a calibrated GDP-per-confidence-point adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Select the persistence candidate as the formal prior and explicitly override its point using the direct, target-quarter NBB nowcast. Give persistence 10% and the NBB's conservative 0.3% nowcast 90%; the unusually high current-signal weight uses the release-specific exception to ordinary prior-heavy weighting. The unrounded update is +0.27 percentage points. Final rounding yields a +0.3-point departure from persistence, which is material and justified by the current Q3 signal. The reference-class mean independently supports that rounded point. Q2 weakness is already in persistence; the BCM's investment and consumption mechanisms are counted once through its aggregate nowcast. No separate numerical momentum, policy or one-off adjustment is added. The later survey supplies counter-evidence, but no unsupported conversion into GDP units is asserted."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = persistence 0.0%; historical sample = seven original flash growth prints spanning 2023-Q1 to 2026-Q2 with disclosed gaps; current update = 0.90*(0.3-0.0) = +0.27 percentage points; point = 0.10*0.0 + 0.90*0.3 = 0.27%, rounded to 0.3%. Separate additional momentum, policy and one-off adjustments = 0. This is a growth/change series, so dispersion uses print values, not successive changes. Mean = 1.9/7 = 0.271429; sum of squared deviations = 0.134286; sigma = 0.149603 percentage points, calculated as sqrt(0.134286/6). The fallback-prior normal 80% half-width = 1.28*sigma = 0.191491; widening factor = 1.0. Center on the rounded published point: 0.3-0.191491 = 0.108509 and 0.3+0.191491 = 0.491491, rounded to final bounds 0.1% and 0.5%. Candidate 90% half-width = 1.645*sigma = 0.246096. Six of the seven recovered prints fall within the final interval, an in-sample 85.7% check rather than demonstrated out-of-sample 80% coverage; ten comparable first prints were not recovered."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and stress test: downside risk would land below the interval if the September deterioration in services and construction corresponds to actual Q3 activity falling enough to offset the expected investment recovery, leaving GDP growth at 0.0% or negative. Upside risk would land above the interval if stronger manufacturing orders combine with unexpectedly strong investment or inventory rebuilding, producing 0.6% growth or more, consistent with the upper end of NBB's nowcasting model range. Stronger realized investment and services activity would move the point up; weak realized retail spending, services output or exports would move it down. Sparse, gapped first-print history and the absence of a comparable one-quarter nowcast backtest limit the interval's calibration."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.3,
+      "ciLow": 0.1,
+      "ciHigh": 0.5
+    }
+  ]
+}

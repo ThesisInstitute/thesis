@@ -1,0 +1,139 @@
+{
+  "slug": "jolts-quits-rate-october-2026",
+  "country": "US",
+  "type": "data",
+  "title": "October 2026 US quits rate",
+  "question": "What will the first BLS JOLTS print report for the October 2026 total nonfarm quits rate, seasonally adjusted, series JTS000000000000000QUR?",
+  "unit": "percent",
+  "pointEstimate": 1.9,
+  "ciLow": 1.737,
+  "ciHigh": 2.063,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-01",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, JOLTS Table 4 and public API",
+  "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+  "resolutionRule": "Resolve to the first officially published value for October 2026, year 2026 and period M10, in BLS series JTS000000000000000QUR: the total nonfarm seasonally adjusted quits rate in JOLTS Table 4. Read the API value field with multiplier 1 and retain the initially published one-decimal percentage. Subsequent monthly revisions, annual revisions, and corrections do not replace the first print.",
+  "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 2.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 1.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "August 2026",
+      "value": 1.9
+    }
+  ],
+  "drivers": [
+    "Persistence of the July-August 1.9% quits rate",
+    "August hiring rate of 3.3%",
+    "Offsetting industry changes in quits",
+    "Two-month forecast horizon and first-print uncertainty"
+  ],
+  "sourceContext": [
+    "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2025&endyear=2026",
+    "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03312026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_05052026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06022026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06302026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_08042026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09012026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09292026.htm",
+    "https://www.bls.gov/news.release/jolts.nr0.htm",
+    "https://www.bls.gov/schedule/2026/12_sched.htm"
+  ],
+  "runAt": "2026-10-07T12:32:17Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 quits rate: persistence forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The exact target is the first October 2026 total nonfarm seasonally adjusted quits-rate print, BLS series JTS000000000000000QUR, Table 4. All historical anchors below use this same variant. HistoricalContext contains original release values rather than subsequently revised estimates."
+    },
+    {
+      "kind": "text",
+      "text": "The official calendar fetched at https://www.bls.gov/schedule/2026/12_sched.htm places October 2026 JOLTS on December 1, 2026, at 10:00 AM Eastern Time. This verifies the registered resolution date."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2025&endyear=2026 to check available history and revision status.",
+      "result": "BLS returned REQUEST_SUCCEEDED. Latest August 2026 rate: 1.9%; July: 1.9%; June: 2.0%; May: 2.0%. May's current-vintage value differs from its original 1.9% print, so this API history is a revision cross-check and is not used to calibrate the interval."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original-release Table 4 from https://www.bls.gov/news.release/archives/jolts_03132026.htm, https://www.bls.gov/news.release/archives/jolts_03312026.htm, https://www.bls.gov/news.release/archives/jolts_05052026.htm, and https://www.bls.gov/news.release/archives/jolts_06022026.htm.",
+      "result": "Newest preliminary Total-row seasonally adjusted quits rates: January 2026 2.0%; February 1.9%; March 2.0%; April 1.9%. Corresponding quits levels were 3,137, 2,974, 3,171, and 2,977 thousand."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original-release Table 4 from https://www.bls.gov/news.release/archives/jolts_06302026.htm, https://www.bls.gov/news.release/archives/jolts_08042026.htm, https://www.bls.gov/news.release/archives/jolts_09012026.htm, and https://www.bls.gov/news.release/archives/jolts_09292026.htm.",
+      "result": "Newest preliminary Total-row seasonally adjusted quits rates: May 2026 1.9%; June 2.0%; July 1.9%; August 1.9%. Corresponding quits levels were 3,065, 3,232, 3,056, and 3,066 thousand."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate is the eight original monthly prints from January through August 2026: five were 1.9% and three were 2.0%, with mean 1.9375%. Both latest prints were 1.9%, supporting a persistence point estimate of 1.9%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the latest BLS release summary at https://www.bls.gov/news.release/jolts.nr0.htm for current labor-turnover conditions.",
+      "result": "August 2026 openings were 7.1 million with a 4.3% rate; hires were 5.2 million with a 3.3% rate; quits were 3.1 million with a 1.9% rate; layoffs and discharges were 1.6 million with a 1.0% rate. Quits fell by 34,000 in wholesale trade and 21,000 in state and local government education, while increasing by 28,000 in nondurable manufacturing and 13,000 in private educational services."
+    },
+    {
+      "kind": "text",
+      "text": "Level: anchor at August's 1.9%. Momentum: July and August were unchanged, so apply no extrapolated trend. One-off effects: opposing industry movements provide insufficient evidence for a persistent aggregate adjustment. Policy mechanism: effects on voluntary job changes are indirect; assign no separate policy adjustment. These judgments leave the persistence forecast unchanged."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use an August-level persistence prior of 1.9%, calibrated on eight original January-August 2026 prints. Momentum, one-off, and policy adjustments are each 0.00 percentage points. Seven successive changes are [-0.1, +0.1, -0.1, 0, +0.1, -0.1, 0]; their sum is -0.1 and squared sum is 0.05. Sample sigma = 0.08997354 percentage points, calculated as sqrt((0.05 - (-0.1)^2/7)/6). The one-month Gaussian 80% half-width is 1.28*sigma = 0.11516613. For the two-month August-to-October horizon, assuming independent monthly innovations, multiply by sqrt(2): half-width = 0.16286951. Final bounds are 1.9 +/- 0.16286951, rounded to [1.737, 2.063]."
+    },
+    {
+      "kind": "text",
+      "text": "The interval is model-based: only seven changes calibrate dispersion, and one-decimal publication makes nominal 80% coverage approximate. An upside risk is a broad hiring rebound that encourages job switching; a printed 2.1% or higher would land above the interval. A downside risk is worsening hiring opportunities that suppress voluntary departures; a printed 1.7% or lower would land outside the interval on the downside."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.9,
+      "ciLow": 1.737,
+      "ciHigh": 2.063
+    }
+  ]
+}

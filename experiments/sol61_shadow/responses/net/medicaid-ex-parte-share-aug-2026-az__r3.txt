@@ -1,0 +1,106 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-az",
+  "country": "US",
+  "type": "data",
+  "title": "Arizona ex parte renewals, August 2026",
+  "question": "What percentage of Arizona Medicaid and CHIP beneficiaries due for renewal in August 2026 will be renewed on an ex parte basis, calculated from CMS's first published original (O) state row and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 72.3,
+  "ciLow": 61.1,
+  "ciHigh": 83.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Arizona's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Calculate 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Later updated (U) submissions and subsequent revisions do not change the outcome.",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-04"}, "label": "April 2025", "value": 61.6},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "May 2025", "value": 64.2},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "June 2025", "value": 50.5},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "July 2025", "value": 65.4},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "August 2025", "value": 68.1},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "September 2025", "value": 61.2},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "October 2025", "value": 66.8},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "November 2025", "value": 70.4},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "December 2025", "value": 59.5},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "January 2026", "value": 68.1},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "February 2026", "value": 62.9},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "March 2026", "value": 70.0},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "April 2026", "value": 68.7},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "May 2026", "value": 73.5},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "June 2026", "value": 59.6}
+  ],
+  "drivers": [
+    "August renewal-cohort persistence",
+    "Damped year-over-year improvement",
+    "Large monthly cohort fluctuations",
+    "Pending renewals and renewal-form classifications"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=AZ&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&sorts%5B0%5D%5Bproperty%5D=reporting_period&sorts%5B0%5D%5Border%5D=desc&limit=15",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=AZ&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&sorts%5B0%5D%5Bproperty%5D=reporting_period&sorts%5B0%5D%5Border%5D=desc&limit=6",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:32:59Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Arizona August 2026 original-report ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Arizona's unadjusted state row for reporting period 202608 in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. All historical anchors use original (O) reports, excluding updated (U) reports. Resolution uses the first published O row, with no correction grace period."
+    },
+    {
+      "kind": "text",
+      "text": "The fetched CMS data dictionary identifies ex parte renewals as metric 5a1 and beneficiaries due for renewal as metric 5. CMS's June snapshot state table expresses ex parte renewals as a percentage of renewals due. This forecast therefore uses 100 times metric 5a1 divided by metric 5. Historical O rows were fetched from the current official archive; separate frozen publication vintages were not reconstructed."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the CMS datastore API with state_abbreviation=AZ, original_or_updated=O, reporting_period descending, limit=15; inspect April through December 2025.",
+      "result": "Fetched ex parte numerator / renewals-due denominator: 2025-04 93696/152130; 2025-05 147966/230508; 2025-06 33559/66398; 2025-07 148301/226932; 2025-08 129332/189866; 2025-09 68192/111492; 2025-10 119252/178468; 2025-11 124431/176740; 2025-12 58263/97996."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same CMS datastore API filters with limit=6 to verify the latest six Arizona original reports.",
+      "result": "Fetched ex parte numerator / renewals-due denominator: 2026-01 124915/183464; 2026-02 71538/113696; 2026-03 126345/180456; 2026-04 104097/151629; 2026-05 133459/181665; 2026-06 58656/98446. June also reports 72126 total renewed and 3949 pending."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's June 2026 Eligibility Operations and Enrollment Snapshot, state renewal-outcomes table, PDF page index 30.",
+      "result": "Arizona has 98446 beneficiaries due for renewal, 73% renewed, 23% disenrolled, 4% pending, and 60% renewed ex parte. The rounded 60% cross-check agrees with 100*58656/98446 = 59.5819% from the O row."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification limitation: the fetched official CMS release list confirms June 2026 was released September 25, 2026; May on August 28; and April on July 31. It does not provide a future August 2026 release announcement or confirm December 15, 2026. The required official-calendar verification could not be completed. resolutionDate retains the registered ledger date 2026-12-15 and must be treated as unverified, rather than inferred from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is 15 fetched Arizona O monthly reports from April 2025 through June 2026. Their equally weighted base rate is 64.6901%; the latest six average 67.1201%. August 2025 was 68.1175%. These state-cohort rates fluctuate substantially, so June's 59.5819% alone is a weak August anchor."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a damped annual seasonal-persistence model. Level prior = August 2025's 100*129332/189866 = 68.1175%. April, May, and June year-over-year gains are 7.0630, 9.2731, and 9.0397 percentage points; mean = 8.4586. Momentum adjustment = 0.5*8.4586 = 4.2293 points, with the 50% damping reflecting only one prior August and uncertain cohort comparability. Separate one-off and policy-mechanism point adjustments are both zero because no quantified additional effect is established by the fetched evidence. Point = 68.1175+4.2293 = 72.3468%, rounded to 72.3%. Using exact ratios for all 15 reports, the 14 successive monthly changes have mean -0.143395 and squared-deviation sum 1002.069307; sigma = 8.779650 percentage points, calculated as sqrt(1002.069307/13). Normal-approximation 80% half-width = 1.28*sigma = 11.237952 points. Bounds = 72.346815 +/- 11.237952 = 61.108863 to 83.584767%, rounded to 61.1% and 83.6%."
+    },
+    {
+      "kind": "text",
+      "text": "The interval uses monthly-change dispersion as a practical uncertainty estimate. The same fetched history's 13 two-month changes have sample sigma 7.827263 points, below monthly-change sigma, so the two-month forecast horizon does not justify automatic random-walk widening. The interval is approximate and is not a demonstrated out-of-sample coverage result."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk is continued improvement in automated renewals combined with an August cohort readily verified from administrative records. Downside risk is a cohort resembling June, more pending cases, or more renewals requiring forms. A major automation or classification change could push the result above 83.6%, outside the interval; persistent processing problems or an adverse cohort could push it below 61.1%, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 72.3,
+      "ciLow": 61.1,
+      "ciHigh": 83.6
+    }
+  ]
+}

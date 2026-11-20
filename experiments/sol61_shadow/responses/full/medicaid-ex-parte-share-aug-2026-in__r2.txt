@@ -1,0 +1,85 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-in",
+  "country": "US",
+  "type": "data",
+  "title": "Indiana ex parte renewal share, August 2026",
+  "question": "What percentage of Indiana Medicaid and CHIP beneficiaries due for renewal in the August 2026 reporting period were renewed on an ex parte basis, calculated as 100 times CMS Eligibility Processing Data Report metric 5a1 divided by metric 5, using the first published original (O) submission in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, without seasonal adjustment and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Indiana's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.in.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original-submission renewal outcomes",
+    "Ex parte renewals divided by beneficiaries due",
+    "Indiana history retrieval unavailable"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/sites/default/files/2025-05/eligib-oper-and-enrol-snap-january2025.pdf",
+    "https://www.medicaid.gov/medicaid/national-medicaid-chip-program-information/medicaid-chip-enrollment-data/monthly-medicaid-chip-application-eligibility-determination-and-enrollment-reports-data"
+  ],
+  "runAt": "2026-10-07T12:18:09Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official Indiana history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Indiana's August 2026 first-print original submission. Preserve the supplied slug, unit, identifier, resolution date, and resolver. Null estimates mark a dropped forecast, not a numerical prediction; this object does not satisfy the numeric forecast contract."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search official data.medicaid.gov for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The official dataset search response reports an update on September 25, 2026, 3,876 rows, and 22 columns. Its dictionary identifies O as Original and U as Updated; beneficiaries due for renewal are metric 5 and ex parte renewals are metric 5a1. Returned table observations were Alaska rows, not Indiana history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data.",
+      "result": "Official CMS catalog metadata reports modified 2026-09-25T18:00:00Z and issued 2024-11-27T19:17:56Z. It identifies the distribution https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv for the exact registered dataset."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf.",
+      "result": "The fetched specifications are updated November 2025, Version 4. Original monthly reports are due by the 8th calendar day following the reporting month. Table 10 illustrates August 2024 original data due September 8 and updated data due December 15, 2024. These are state submission deadlines, not scheduled CMS publication dates."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. Direct dataset opens returned no usable rows. The official CSV and datastore API requests, including Indiana/original filters and pagination, returned 'not accessible via this tool' or 'Cache miss'. No Indiana original-submission numerator or denominator was fetched. The official snapshot confirms that the ex parte percentage uses beneficiaries due for renewal as its denominator, but it cannot replace the exact original-row history required here."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: no fetched official calendar verifies 2026-12-15 as the first-publication date. It is retained solely because the registered target requires that exact date. No release day is inferred from monthly cadence or state submission deadlines. The prohibited catalog slug lookup was not performed."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without admissible Indiana original-submission observations, last-print persistence, the panel-shrinkage benchmark, realized dispersion, and walk-forward comparisons cannot be calculated. This is a retrieval failure, not a finding that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the resolver's share is 100 × ex parte renewals / beneficiaries due for renewal. Required history was not retrieved, so the persistence prior and sigma are unavailable; 1.28 × sigma and implied interval bounds cannot be computed. No model candidate, current-evidence adjustment, point estimate, or interval is invented."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk and downside risk cannot be quantified or tested against an interval because no grounded interval exists. The forecast is dropped under the prompt's honesty rule. The fixed confidence field is the requested contract setting, not a claim of demonstrated interval coverage. JSON syntax was validated; forecast validation cannot pass with missing history and null estimates."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+[
+ {
+  "status": "refused",
+  "slug": "us-dod-prime-award-obligations-fy2027-fy27-ndaa-enacted",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "An Act authorizing appropriations for military activities of the Department of Defense for fiscal year 2027 (the FY2027 NDAA; the House-reported bill is H.R. 8800, 119th Congress, House Report 119-698) is enacted into law on or before 2026-12-31.",
+  "title": "FY2027 DoD prime award obligations: forecast refused",
+  "question": "What will the first registered USAspending API query snapshot report for agency 097 prime award obligations in fiscal year 2027, in billions USD, conditional on the registered NDAA enactment condition?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2027",
+  "resolutionRule": "Use the first official registered-query snapshot of the specified fiscal_year=2027 endpoint, reading obligations and multiplying by 1e-09. Subsequent revisions must not replace that snapshot. The official snapshot date and response precision could not be verified in this run.",
+  "dataPointId": "usaspending.dod.prime_award_obligations.2027.registered_query_snapshot.fy27_ndaa_enacted",
+  "historicalContext": [],
+  "drivers": [
+   "Mandatory exact-query history unavailable",
+   "Official snapshot date unverified"
+  ],
+  "sourceContext": [
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+   "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+   "https://www.usaspending.gov/data/data-sources-download.pdf",
+   "https://www.fiscal.treasury.gov/files/data-transparency/gsdm-information-flow-diagram-v1.0.pdf"
+  ],
+  "runAt": "2026-10-06T22:34:45Z",
+  "reasoning": [
+   {
+    "kind": "heading",
+    "text": "Refusal: required official evidence could not be fetched"
+   },
+   {
+    "kind": "text",
+    "text": "The target is the exact agency 097 awards query and its obligations field. Agency profile totals and other aggregates cannot substitute for this registered series."
+   },
+   {
+    "kind": "text",
+    "text": "Exact web GET attempts for fiscal_year=2020, fiscal_year=2021, and fiscal_year=2022 each returned: URL https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=YEAR is not accessible via this tool, with YEAR matching the requested fiscal year. Initial batched attempts also encountered transport errors."
+   },
+   {
+    "kind": "text",
+    "text": "Exact web GET attempts for fiscal_year=2023, fiscal_year=2024, and fiscal_year=2025 each returned the same URL-specific accessibility error. An individual retry for fiscal_year=2025 also failed. No obligations payload was fetched."
+   },
+   {
+    "kind": "text",
+    "text": "The required base rate or reference class cannot be established because none of the mandatory historical observations was retrieved. The empty historicalContext records this failure; it does not claim that the official source exposes fewer observations."
+   },
+   {
+    "kind": "text",
+    "text": "Prior/update/interval: No persistence prior or historical model was fitted. Level, momentum, one-off, and policy adjustments cannot be combined without the required anchors. Sigma and the 1.28*sigma half-width cannot be calculated, so no point estimate or implied bounds are supplied."
+   },
+   {
+    "kind": "math",
+    "text": "The registered transformation is obligations multiplied by 1e-09. Without fetched obligations values, neither transformed history nor an empirical dispersion calculation is possible."
+   },
+   {
+    "kind": "text",
+    "text": "Official USAspending and Treasury documentation describes ongoing award-data updates but did not verify an exact release or snapshot date for this target. The registered expected window alone does not satisfy official date verification."
+   },
+   {
+    "kind": "text",
+    "text": "The production prompt expressly requires refusal when the exact historical query cannot be executed. Numeric estimates, fetched-statistic tool steps, and claims about outcomes outside the interval are therefore withheld rather than invented. This object is a refusal record, not a normalized forecast cell."
+   },
+   {
+    "kind": "forecast",
+    "point": null,
+    "ciLow": null,
+    "ciHigh": null
+   }
+  ]
+ }
+]

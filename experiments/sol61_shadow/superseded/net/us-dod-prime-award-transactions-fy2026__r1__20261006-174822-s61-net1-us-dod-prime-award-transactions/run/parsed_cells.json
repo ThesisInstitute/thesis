@@ -1,0 +1,151 @@
+[
+  {
+    "slug": "us-dod-prime-award-transactions-fy2026",
+    "country": "US",
+    "type": "data",
+    "status": "refused",
+    "title": "DoD FY2026 prime award transactions",
+    "question": "What will USAspending API agency 097 transaction_count for FY2026 equal, multiplied by 0.000001, at the first registered query snapshot?",
+    "unit": "millions",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": null,
+    "resolutionSource": "USAspending API v2",
+    "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "resolutionRule": "Use transaction_count from the first official response captured under the registered FY2026 query snapshot rule, multiplied by 0.000001. Preserve integer-count precision as six decimal places in millions; subsequent revisions do not replace the snapshot. The supplied registration gives an October 15\u201322, 2026 window but no exact snapshot date, and an applicable date could not be verified from official timing documentation this run.",
+    "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+    "historicalContext": [
+      {
+        "period": {
+          "type": "fiscal_year",
+          "value": "2020"
+        },
+        "label": "FY2020",
+        "value": 4.059219
+      },
+      {
+        "period": {
+          "type": "fiscal_year",
+          "value": "2021"
+        },
+        "label": "FY2021",
+        "value": 4.362094
+      },
+      {
+        "period": {
+          "type": "fiscal_year",
+          "value": "2022"
+        },
+        "label": "FY2022",
+        "value": 4.377453
+      },
+      {
+        "period": {
+          "type": "fiscal_year",
+          "value": "2023"
+        },
+        "label": "FY2023",
+        "value": 4.43008
+      },
+      {
+        "period": {
+          "type": "fiscal_year",
+          "value": "2024"
+        },
+        "label": "FY2024",
+        "value": 4.448038
+      },
+      {
+        "period": {
+          "type": "fiscal_year",
+          "value": "2025"
+        },
+        "label": "FY2025",
+        "value": 4.516581
+      }
+    ],
+    "drivers": [
+      "Daily publication of award transactions",
+      "DoD contract reporting delay",
+      "Unverified registered snapshot date"
+    ],
+    "sourceContext": [
+      "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+      "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+      "https://www.usaspending.gov/data/data-sources-download.pdf",
+      "https://api.usaspending.gov/docs/endpoints"
+    ],
+    "runAt": "2026-10-06T22:32:26Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast refused: required resolution date remains unverified"
+      },
+      {
+        "kind": "text",
+        "text": "The exact series is usaspending.agency.097.awards.transaction_count, using the registered GET query and multiplication by 0.000001. All historical anchors below come from that query executed this run. They are current historical query responses, not archived original vintages."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "GET the registered agency 097 awards query separately for fiscal_year=2020 and fiscal_year=2021.",
+        "result": "transaction_count: FY2020 4059219; FY2021 4362094. Transformed values: 4.059219 and 4.362094 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "GET the registered agency 097 awards query separately for fiscal_year=2022 and fiscal_year=2023.",
+        "result": "transaction_count: FY2022 4377453; FY2023 4430080. Transformed values: 4.377453 and 4.430080 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "GET the registered agency 097 awards query separately for fiscal_year=2024 and fiscal_year=2025.",
+        "result": "transaction_count: FY2024 4448038; FY2025 4516581. Transformed values: 4.448038 and 4.516581 million."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026.",
+        "result": "transaction_count: 3218036, equivalent to 3.218036 million; latest_action_date: 2026-09-30T00:00:00."
+      },
+      {
+        "kind": "text",
+        "text": "The outside-view reference class contains six prior fiscal-year flows. Its base rate is a mean of 4.3655775 million. The latest annual increase is 0.068543 million. These mature historical responses cannot establish the level of an unspecified near-term snapshot."
+      },
+      {
+        "kind": "math",
+        "text": "For the six annual flow values, sample sigma = sqrt(sum((value - 4.3655775)^2)/5) = 0.159856846 million. The nominal 80% half-width is 1.28 * 0.159856846 = 0.204616763 million. Centering this diagnostic on the historical mean gives 4.160961\u20134.570194 million; this is not an issued forecast interval."
+      },
+      {
+        "kind": "text",
+        "text": "Official timing documentation describes daily USAspending updates, monthly submission calendars for Files A/B/C, and a 90-day DoD contract-data delay. It does not verify an exact October 15\u201322, 2026 publication date for this transaction-count query. Inferring a date from daily cadence would violate the production instructions. Source: https://www.usaspending.gov/data/data-sources-download.pdf."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: A historical annual-flow mean prior uses FY2020\u2013FY2025. Level evidence is the current FY2026 query at 3.218036 million; momentum evidence is the latest annual increase of 0.068543 million; no quantified one-off adjustment was established; the reporting-delay mechanism makes snapshot timing material. sigma = 0.159856846 million and 1.28*sigma = 0.204616763 million. No final point or implied bounds are issued because the required resolution date could not be verified."
+      },
+      {
+        "kind": "text",
+        "text": "An upside risk is accelerated publication of delayed transactions; a downside risk is publication disruption or removals. Either could place the registered snapshot outside the interval suggested by mature annual-flow dispersion. The fetched data do not quantify these snapshot risks."
+      },
+      {
+        "kind": "text",
+        "text": "The history fetch succeeded, but a mandatory resolver requirement remains unmet. Assigning a date within the registered window would introduce an unsupported assumption, so this object records an explicit refusal rather than a fabricated compliant forecast."
+      },
+      {
+        "kind": "forecast",
+        "point": null,
+        "ciLow": null,
+        "ciHigh": null
+      }
+    ]
+  }
+]

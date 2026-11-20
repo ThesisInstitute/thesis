@@ -1,0 +1,149 @@
+{
+  "slug": "canada-monthly-gdp-growth-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, August 2026",
+  "question": "What will Statistics Canada's first official estimate show for August 2026 month-over-month real GDP growth by industry, all industries, seasonally adjusted at annual rates, chained 2017 dollars, computed from vector v65201210?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.23,
+  "ciLow": 0.07,
+  "ciHigh": 0.39,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Statistics Canada, Table 36-10-0434-01 and The Daily GDP by industry release",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Resolve on the first official August 2026 publication of vector v65201210 in Table 36-10-0434-01: 100 * (August level / July level - 1), using both levels from that publication's vintage. Preserve the table's available numerical precision when computing growth; do not substitute the rounded one-decimal Daily headline. The advance estimate does not resolve the target. Freeze the first official result and disregard subsequent revisions or corrections, with no release-day grace exception.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 0.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "Official August GDP advance estimate of +0.2%",
+    "Mining and retail gains partly offset by oil and gas weakness",
+    "Modest upward bias in recent advance-to-first-print updates",
+    "Stronger August export volumes",
+    "Wholesale weakness and uncertain refinery recovery",
+    "Possible shipments ahead of new tariffs"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260924/dq260924g-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260924/dq260924a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260925/dq260925f-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm"
+  ],
+  "runAt": "2026-10-07T11:51:41Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "August GDP: official advance estimate with a modest revision adjustment"
+    },
+    {
+      "kind": "text",
+      "text": "The registered resolver is the monthly percentage change in vector v65201210, Table 36-10-0434-01. All GDP anchors and historical prints concern all-industries real GDP, seasonally adjusted, chained 2017 dollars. HistoricalContext contains original full-release headlines rounded to one decimal, rather than subsequently revised history. Advance estimates are identified separately and used only for forecasting and error calibration; resolution retains the underlying vector calculation."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original January, February and March GDP releases: https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+      "result": "Fetched first prints: January +0.1%, February +0.2%, March -0.1%. These releases respectively give the following month's advances: February +0.2%, March essentially unchanged, April +0.4%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original April through July GDP releases: https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.pdf ; https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+      "result": "Fetched first prints: April +0.5%, May +0.3%, June +0.3%, July 0.0%. The April, May and June releases respectively give advances of May +0.1%, June +0.2%, and July essentially unchanged."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the January advance in the December release and pair all seven advances with their original first prints: https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm and the January-July release URLs above.",
+      "result": "January advance was essentially unchanged, encoded as 0.0%. Fetched advance/first-print pairs for January-July are 0.0/0.1, 0.2/0.2, 0.0/-0.1, 0.4/0.5, 0.1/0.3, 0.2/0.3, and 0.0/0.0, all in percent. Calculated first-minus-advance errors are [0.1, 0.0, -0.1, 0.1, 0.2, 0.1, 0.0] percentage points."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the seven January-July first prints average 1.3/7 = +0.185714% monthly growth; five were positive, one negative, and one flat. This reference class supports modest expansion before incorporating August-specific information."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch August's advance estimate from https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+      "result": "Statistics Canada estimated August real GDP growth at +0.2%. Mining and quarrying and retail trade increased, partly offset by declining oil and gas extraction."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification: the official calendar at https://www150.statcan.gc.ca/release-diffusion/2026-eng.pdf explicitly schedules GDP by industry for reference month August 2026 on October 30, 2026. The July GDP announcement independently confirms that date."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch August activity indicators: https://www150.statcan.gc.ca/n1/daily-quotidien/260924/dq260924g-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260924/dq260924a-eng.pdf ; https://www150.statcan.gc.ca/n1/daily-quotidien/260925/dq260925f-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm",
+      "result": "August manufacturing advance sales increased 1.1%, retail advance sales increased 1.3%, and wholesale advance sales decreased 1.5%; these are seasonally adjusted current-dollar measures, not GDP volume growth. Wholesale excludes petroleum, other hydrocarbons, oilseed and grain. Merchandise export volumes increased 2.5%, while import volumes declined 1.1%. Exports to the United States increased 8.1% in current dollars."
+    },
+    {
+      "kind": "text",
+      "text": "Components: the GDP level supplies the resolver denominator, without a separate level adjustment. Momentum favors modest growth. One-off refinery downtime and summer electricity demand make July persistence unreliable. The trade release describes possible shipments ahead of tariffs taking effect at August's end; this may support August production temporarily. Nominal sales indicators and trade balances cannot be mechanically added to GDP. These signals justify no additional point adjustment beyond the advance and revision calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: use an official-advance-plus-shrunken-bias model, starting from the January-July mean prior of 0.185714%. For the fetched growth values themselves, sigma = 0.203540 percentage points, computed as sqrt((0.49 - 1.3^2/7)/6); the unconditional normal 80% half-width is 1.28*sigma = 0.260531. Update to August's 0.2% advance and add half the historical mean advance error: 0.185714 + (0.2 - 0.185714) + 0.5*(0.4/7) = 0.228571%, rounded to 0.23%. The 50% bias shrinkage is a modeling assumption reflecting the small sample. Conditional error sigma is sqrt((0.08 - 0.4^2/7)/6) = 0.097590, giving 1.28*0.097590 = 0.124915. Add assumed headline-rounding variance 0.1^2/12 and use a small-sample Student-t predictive interval: half-width = 1.439756*sqrt(0.097590^2 + 0.1^2/12)*sqrt(1 + 1/7) = 0.156641. This is 0.601 times the unconditional half-width; narrowing is justified because the official advance already observes August activity and the fetched advance errors disperse less than unconditional growth. Final implied bounds are 0.071931% and 0.385212%, rounded outward to 0.07% and 0.39%."
+    },
+    {
+      "kind": "math",
+      "text": "Point = round(0.2 + 0.5*0.057143, 2) = 0.23%. Approximate central 80% interval = 0.228571 +/- 0.156641%, reported as [0.07%, 0.39%]. Dispersion and rounding calculations were checked with inline arithmetic."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is stronger mining recovery, refinery restarting, or tariff-related production than captured by the advance. Repeating May's +0.2-point advance error would yield +0.4%, outside the interval above 0.39%. The downside risk is deeper oil and gas weakness or a retail/wholesale deterioration; a -0.2-point advance error would yield 0.0%, outside the interval below 0.07%. The seven-month calibration remains provisional."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.23,
+      "ciLow": 0.07,
+      "ciHigh": 0.39
+    }
+  ]
+}

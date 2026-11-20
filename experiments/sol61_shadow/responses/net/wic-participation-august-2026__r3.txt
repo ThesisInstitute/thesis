@@ -1,0 +1,29 @@
+{
+  "slug": "wic-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation in August 2026",
+  "question": "What will USDA FNS report for total monthly WIC participation in August 2026 in its first official print?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first official print of total WIC participation for August 2026, applying the registered multiplication factor of 0.001 to the published table value to obtain millions. Exclude subsequent revisions.",
+  "dataPointId": "fns.wic.total_participation.2026-08.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program"
+  ],
+  "runAt": "2026-10-07T12:28:47Z",
+  "reasoning": [
+    {
+      "kind": "text",
+      "text": "The official WIC source fetch failed with HTTP 403 Forbidden. Following the instruction to stop after a failed fetch, this run stopped without producing a forecast. No historical participation values or base rate were fetched, and the release date was not verified. Null estimates indicate an unavailable forecast; they are not numerical predictions."
+    }
+  ]
+}

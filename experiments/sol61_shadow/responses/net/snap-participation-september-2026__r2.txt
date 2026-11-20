@@ -1,0 +1,41 @@
+{
+  "slug": "snap-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 SNAP participation — forecast unavailable",
+  "question": "What will USDA FNS report for national SNAP total persons participating in September 2026, without seasonal adjustment, in the first official monthly print?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service monthly SNAP participation tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve using the first official print of September 2026 national SNAP Persons in the monthly participation table, multiplying the published value in thousands by 0.001 to obtain millions. Preserve published precision and exclude subsequent revisions.",
+  "dataPointId": "usda.fns.snap.persons.september_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap"
+  ],
+  "runAt": "2026-10-07T12:03:25Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Official-source fetch failure"
+    },
+    {
+      "kind": "text",
+      "text": "The initial web fetch of the official USDA FNS SNAP source returned 'Failed to fetch: (403) Forbidden'. No participation statistics were retrieved."
+    },
+    {
+      "kind": "text",
+      "text": "Following the instruction to stop when a fetch fails, this run stopped without substituting remembered values or producing a forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The mandatory official-source base rate could not be fetched, and the resolution date could not be verified against an official release calendar. Null estimates and an empty historicalContext explicitly record this failed run."
+    }
+  ]
+}

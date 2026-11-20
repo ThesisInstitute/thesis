@@ -1,0 +1,61 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-threshold-one-dollar",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "Legislation enacted by 2027-12-31 makes the IRC §24(d)(1)(B)(i) earned-income threshold no more than $1 for tax year 2027.",
+  "title": "2027 ACTC claims: forecast unavailable",
+  "question": "Conditional on the registered legislation, how many millions of returns claim the Additional Child Tax Credit for tax year 2027 in the first official IRS SOI Publication 1304 Table 3.3 print?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+  "resolutionRule": "Use the first official tax-year-2027 Publication 1304 Table 3.3 all-returns total for the number of returns claiming the plain Additional child tax credit concept. Exclude the separate refundable-portion and used-to-offset-other-taxes subsets. Multiply the published return count by 0.000001 to express millions, preserving published precision. Subsequent revisions do not change resolution. These resolver terms are supplied by the target contract; official confirmation could not be fetched.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.threshold_one_dollar",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/credits-deductions/individuals/child-tax-credit"
+  ],
+  "runAt": "2026-10-06T22:16:23Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast run failed: official evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target identity, conditional text, unit, Table 3.3 resolver, and resolution deadline are retained from the supplied contract. They are not represented as independently fetched evidence."
+    },
+    {
+      "kind": "text",
+      "text": "The official Publication 1304 page lookup failed with: Fatal error: connection failed: error sending request. No historical statistics were obtained."
+    },
+    {
+      "kind": "text",
+      "text": "Separate official-source research encountered the same web connection failure, and curl -sS against the IRS Child Tax Credit page returned an empty body. Neither attempt provided numeric policy evidence."
+    },
+    {
+      "kind": "text",
+      "text": "The required fetch_source and extract_irs_soi tools were unavailable in this run. No canonical workbook extraction was completed, so the mandatory six-print base rate could not be established."
+    },
+    {
+      "kind": "text",
+      "text": "The contractual resolutionDate of 2029-12-31 could not be verified against an official release calendar or announcement. It remains an unverified contract field."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sample, policy adjustment, sigma, or implied bounds could be calculated from fetched evidence. The prompt requires stopping after a failed or empty fetch; remembered values and invented estimates were not substituted."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

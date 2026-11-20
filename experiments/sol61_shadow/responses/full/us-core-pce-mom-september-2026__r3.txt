@@ -1,0 +1,176 @@
+{
+  "slug": "us-core-pce-mom-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US core PCE inflation, September 2026",
+  "question": "What will the U.S. Bureau of Economic Analysis FIRST PRINT report for the seasonally adjusted, nonannualized percent change from August to September 2026 in the Personal Consumption Expenditures price index excluding food and energy, in Personal Income and Outlays, September 2026, corresponding to monthly NIPA Table 2.8.7?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.2,
+  "ciLow": 0.1,
+  "ciHigh": 0.4,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "U.S. Bureau of Economic Analysis, Personal Income and Outlays, September 2026",
+  "resolutionSourceUrl": "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+  "resolutionRule": "Resolve to the United States seasonally adjusted, nonannualized September 2026 percent change from the preceding month in the PCE price index excluding food and energy, as first published by BEA in Personal Income and Outlays, September 2026. Read the September column of the Personal Income and Related Measures table, row PCE price index excluding food and energy, corresponding to monthly NIPA Table 2.8.7, Percent Change From Preceding Period in Prices for Personal Consumption Expenditures by Major Type of Product. Use the published one-decimal percent value. The official core-PCE series page links the resolving release; the expected release URL is https://www.bea.gov/news/2026/personal-income-and-outlays-september-2026. Subsequent revisions and corrections do not change the first-print outcome. BEA's calendar fetched this run schedules the release for October 29, 2026, at 8:30 a.m. EDT.",
+  "dataPointId": "us.bea.core_pce.mom_sa.2026-09",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2024-09"}, "label": "2024-09", "value": 0.3},
+    {"period": {"type": "month", "value": "2024-10"}, "label": "2024-10", "value": 0.3},
+    {"period": {"type": "month", "value": "2024-11"}, "label": "2024-11", "value": 0.1},
+    {"period": {"type": "month", "value": "2024-12"}, "label": "2024-12", "value": 0.2},
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 0.3},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": 0.4},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 0.0},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 0.1},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": 0.2},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 0.3},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 0.3},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 0.2},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 0.2},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 0.2},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 0.2},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 0.4},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 0.4},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 0.4},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 0.3},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 0.2},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 0.3},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 0.1},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": 0.2},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "2026-08", "value": 0.2}
+  ],
+  "drivers": [
+    "August first-print core PCE: 0.2%",
+    "Trailing 24-month first-print mean: 0.24%",
+    "Recent three-month mean: 0.17%",
+    "September CPI and PPI remain pending",
+    "Annual update already incorporated in August"
+  ],
+  "sourceContext": [
+    "https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy",
+    "https://www.bea.gov/news/schedule",
+    "https://www.bea.gov/news/pio-release-additional-information",
+    "https://www.bea.gov/news/2024/personal-income-and-outlays-september-2024",
+    "https://www.bea.gov/index.php/news/2024/personal-income-and-outlays-october-2024",
+    "https://www.bea.gov/news/2024/personal-income-and-outlays-november-2024/",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-december-2024",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-january-2025",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-february-2025",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-march-2025",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-april-2025",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-may-2025",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-june-2025",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-july-2025",
+    "https://www.bea.gov/news/2025/personal-income-and-outlays-august-2025",
+    "https://bea.gov/news/2025/personal-income-and-outlays-september-2025",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-october-and-november-2025",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-december-2025",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-january-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-february-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-march-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-april-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-may-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-june-2026",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026",
+    "https://bea.gov/news/2026/personal-income-and-outlays-august-2026",
+    "https://www.bls.gov/schedule/news_release/cpi.htm",
+    "https://www.bls.gov/schedule/news_release/ppi.htm"
+  ],
+  "runAt": "2026-10-07T12:41:28Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 core PCE: first-print forecast from official release vintages"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the U.S. seasonally adjusted month-over-month core PCE price change, not the year-over-year values on the landing page. Resolve the September first publication at one-decimal precision. The supplied binding's table title names August 2026, the previous release; retain the registered September target, slug, unit, and dataPointId. [BEA's core PCE page](https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy) identifies monthly Table 2.8.7 and links the current and archived releases."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "{\"open\":[{\"ref_id\":\"https://www.bea.gov/news/schedule\"},{\"ref_id\":\"https://www.bea.gov/data/personal-consumption-expenditures-price-index-excluding-food-and-energy\"}]}",
+      "result": "BEA's official calendar lists Personal Income and Outlays, September 2026 for October 29, 2026, 8:30 AM. The series page lists current release September 30, 2026 and next release October 29, 2026. Resolution date is 2026-10-29, verified rather than inferred from cadence."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "{\"open\":[{\"ref_id\":\"https://www.bea.gov/news/2024/personal-income-and-outlays-september-2024\"},{\"ref_id\":\"https://www.bea.gov/index.php/news/2024/personal-income-and-outlays-october-2024\"},{\"ref_id\":\"https://www.bea.gov/news/2024/personal-income-and-outlays-november-2024/\"},{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-december-2024\"}]}",
+      "result": "2024-09: 0.3%; 2024-10: 0.3%; 2024-11: 0.1%; 2024-12: 0.2%; each value is the own-month first publication in BEA's Personal Income and Related Measures table, row PCE price index excluding food and energy, percent change from preceding month."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "{\"open\":[{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-january-2025\"},{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-february-2025\"},{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-march-2025\"},{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-april-2025\"},{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-may-2025\"},{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-june-2025\"}]}",
+      "result": "2025-01: 0.3%; 2025-02: 0.4%; 2025-03: 0.0%; 2025-04: 0.1%; 2025-05: 0.2%; 2025-06: 0.3%; each value is the own-month first publication in BEA's Personal Income and Related Measures table, row PCE price index excluding food and energy, percent change from preceding month."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "{\"open\":[{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-july-2025\"},{\"ref_id\":\"https://www.bea.gov/news/2025/personal-income-and-outlays-august-2025\"},{\"ref_id\":\"https://bea.gov/news/2025/personal-income-and-outlays-september-2025\"},{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-october-and-november-2025\"},{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-december-2025\"}]}",
+      "result": "2025-07: 0.3%; 2025-08: 0.2%; 2025-09: 0.2%; 2025-10: 0.2%; 2025-11: 0.2%; 2025-12: 0.4%; each value is the own-month first publication in BEA's Personal Income and Related Measures table, row PCE price index excluding food and energy, percent change from preceding month."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "{\"open\":[{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-january-2026\"},{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-february-2026\"},{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-march-2026\"},{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-april-2026\"}]}",
+      "result": "2026-01: 0.4%; 2026-02: 0.4%; 2026-03: 0.3%; 2026-04: 0.2%; each value is the own-month first publication in BEA's Personal Income and Related Measures table, row PCE price index excluding food and energy, percent change from preceding month."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "{\"open\":[{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-may-2026\"},{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-june-2026\"},{\"ref_id\":\"https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026\"},{\"ref_id\":\"https://bea.gov/news/2026/personal-income-and-outlays-august-2026\"}]}",
+      "result": "2026-05: 0.3%; 2026-06: 0.1%; 2026-07: 0.2%; 2026-08: 0.2%; each value is the own-month first publication in BEA's Personal Income and Related Measures table, row PCE price index excluding food and energy, percent change from preceding month."
+    },
+    {
+      "kind": "text",
+      "text": "First-print provenance: each historical entry comes from its own original BEA release, never a prior-month column in a later vintage. March 2025's numeric table reports 0.0 even though prose says an increase below 0.1. October and November 2025 were first published together; BEA reports October CPI inputs were imputed using September and November indexes. August 2026's annual update revises July to 0.1, whereas July's original first print was 0.2. Preserve the original 0.2 in historicalContext. These are releases of the same resolving series."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the trailing 24 official first-print core PCE monthly changes, September 2024 through August 2026, have mean 0.2416667%, median 0.2%, sample standard deviation 0.1059806 percentage points, and range 0.0%-0.4%. The default persistence benchmark is August's 0.2%. The trailing-three-month benchmark is (0.1+0.2+0.2)/3=0.1666667%. Before current evidence, compare these with an expanding historical mean."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated in memory from the fetched history using short Python arithmetic, before the agent forecast. All diagnostic points and quantiles below retain computational precision; the final forecast is rounded to BEA's precision. All models use identical rolling-origin tests, first six observations as initial training and the next eighteen as held-out outcomes, with no future information in any point forecast. Intervals are Gaussian residual wrappers, not conformal intervals. Candidate set: [{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"persistence\",\"series\":\"bea.core_pce.mom\",\"target_period\":\"2026-09\",\"point\":0.2,\"p10\":0.024996283886327797,\"p50\":0.2,\"p90\":0.3750037161136722,\"interval80\":[0.024996283886327797,0.3750037161136722],\"interval90\":[-0.02490711953671154,0.42490711953671156],\"interval_method\":\"Gaussian wrapper using sample standard deviation of expanding-window one-step forecast residuals; z80=1.28, z90=1.645; no residual-bias correction\",\"calibration_n\":18,\"train_cutoff\":\"2026-08\",\"walk_forward_score\":{\"n\":18,\"initial_train_n\":6,\"first_test_period\":\"2025-03\",\"last_test_period\":\"2026-08\",\"mae\":0.08888888888888889,\"rmse\":0.13333333333333333}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"expanding_mean\",\"series\":\"bea.core_pce.mom\",\"target_period\":\"2026-09\",\"point\":0.24166666666666667,\"p10\":0.09425212372869646,\"p50\":0.24166666666666667,\"p90\":0.3890812096046369,\"interval80\":[0.09425212372869646,0.3890812096046369],\"interval90\":[0.0522159454690409,0.43111738786429243],\"interval_method\":\"Gaussian wrapper using sample standard deviation of expanding-window one-step forecast residuals; z80=1.28, z90=1.645; no residual-bias correction\",\"calibration_n\":18,\"train_cutoff\":\"2026-08\",\"walk_forward_score\":{\"n\":18,\"initial_train_n\":6,\"first_test_period\":\"2025-03\",\"last_test_period\":\"2026-08\",\"mae\":0.08749578183163344,\"rmse\":0.1119294733912388}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"trailing_3_mean\",\"series\":\"bea.core_pce.mom\",\"target_period\":\"2026-09\",\"point\":0.16666666666666669,\"p10\":-0.0009931195719201369,\"p50\":0.16666666666666669,\"p90\":0.33432645290525353,\"interval80\":[-0.0009931195719201369,0.33432645290525353],\"interval90\":[-0.04880235549151718,0.38213568882485055],\"interval_method\":\"Gaussian wrapper using sample standard deviation of expanding-window one-step forecast residuals; z80=1.28, z90=1.645; no residual-bias correction\",\"calibration_n\":18,\"train_cutoff\":\"2026-08\",\"walk_forward_score\":{\"n\":18,\"initial_train_n\":6,\"first_test_period\":\"2025-03\",\"last_test_period\":\"2026-08\",\"mae\":0.09814814814814815,\"rmse\":0.12838022231434826}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select expanding_mean: held-out RMSE 0.1119295 percentage points versus persistence 0.1333333 and trailing-three mean 0.1283802. MAE is 0.0874958 versus persistence 0.0888889, so the advantage is modest and depends on the chosen loss. The selected unrounded prior is 0.2416667%; its published-precision forecast is 0.2%, equal to persistence. No panel shrinkage applies to this national aggregate."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "{\"open\":[{\"ref_id\":\"https://www.bls.gov/schedule/news_release/cpi.htm\"},{\"ref_id\":\"https://www.bls.gov/schedule/news_release/ppi.htm\"}]}",
+      "result": "BLS schedules September 2026 CPI for October 14, 2026, 08:30 AM, and September 2026 PPI for October 15, 2026, 08:30 AM. Both are after this run's October 7 information cutoff, so no published target-month CPI/PPI input was available to justify a September-specific adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: the historical mean supplies the level prior; recent momentum is weaker, but the trailing-three rule did not beat it in the common walk-forward comparison. Momentum adjustment = 0.0 percentage points. The annual update is already incorporated in August's latest first print; one-off adjustment = 0.0. No fetched release-specific policy or price signal supplies a decomposed September effect; policy adjustment = 0.0. Final weighting is 100% selected benchmark and 0% additional current evidence. The change from the strongest benchmark is zero."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = expanding_mean trained on 24 own-month BEA first prints, 2024-09 through 2026-08. Sum = 5.8; mean = 5.8/24 = 0.2416666667%. Point = 1.00*0.2416666667 + 0.00 momentum + 0.00 one-off + 0.00 policy = 0.2416666667%, rounded to 0.2%. Because the target is already a change series, use its values rather than successive differences: sigma = 0.1059805834 percentage points = sqrt(0.2583333333/(24-1)). Basic 80% half-width = 1.28*sigma = 0.1356551468. The selected model's eighteen rolling-origin forecast errors have sample standard deviation 0.1151676117; widen by 0.1151676117/0.1059805834 = 1.0866859568 to reflect observed prediction error. Residual-Gaussian 80% half-width = 1.28*0.1059805834*1.0866859568 = 0.1474145429. Unrounded bounds = 0.2416666667 +/- 0.1474145429 = [0.0942521237, 0.3890812096]%; rounding each bound to 0.1 gives [0.1, 0.4]%. The corresponding 90% bounds use 1.645*0.1151676117 = 0.1894507212, giving [0.0522159455, 0.4311173879]%. No extra annual-update multiplier is imposed: the update already occurred in the latest release and its uncertain direction does not justify an invented shift."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: the unrounded final 80% band contains 19 of 24 historical prints and 7 of the latest 10. The rounded inclusive band contains 23 of 24 and 10 of the latest 10. This is a nominal Gaussian 80% prediction interval; BEA's coarse reporting precision makes the displayed band conservative. These are descriptive checks against past prints, not independent walk-forward interval coverage, and the eighteen errors give limited calibration evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: September CPI/PPI showing broad acceleration in core goods, medical services, or transport prices would move the point upward; sufficiently broad acceleration producing a published core PCE print of 0.5% or more would land above the interval. Downside risk: broad core-goods discounting combined with declines in medical or transport services would move it downward; a published 0.0% or negative core PCE print would land below the interval. Annual-update vintage differences and the shutdown-imputed October observation are counter-considerations to treating this small reference class as a stable Gaussian regime. These are falsification scenarios, not assumed quantified effects."
+    },
+    {
+      "kind": "text",
+      "text": "The slug and other identity fields are copied from the supplied registered target. The run's independence override prohibits the requested Thesis catalog check, so no Thesis or Brier forecast, trace, or record was accessed. No files were created or modified; activityLog is empty because artifact receipts are runner-owned."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.2,
+      "ciLow": 0.1,
+      "ciHigh": 0.4
+    }
+  ]
+}

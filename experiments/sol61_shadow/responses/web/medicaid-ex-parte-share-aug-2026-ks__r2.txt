@@ -1,0 +1,128 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ks",
+  "country": "US",
+  "type": "data",
+  "title": "Kansas ex parte renewal share, August 2026",
+  "question": "What percentage of Kansas Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, using CMS's original (O) submission row at first publication?",
+  "unit": "percent",
+  "pointEstimate": 47.6,
+  "ciLow": 40.3,
+  "ciHigh": 54.9,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Kansas's August 2026 original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published, and round to one decimal. Subsequent revisions and updated (U) submissions do not change the outcome.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ks.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 45
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 46
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 51
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 47
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 46
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 48
+    }
+  ],
+  "drivers": [
+    "Recent Kansas original-outcome rates centered near 47 percent",
+    "June persistence with modest mean reversion",
+    "Renewal cohort composition and income-data matching",
+    "Existing passive-renewal policy already reflected in history",
+    "Two-month forecast horizon and limited historical precision"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf",
+    "https://www.kancare.ks.gov/home/showpublisheddocument/6046/638937856600070000"
+  ],
+  "runAt": "2026-10-07T11:44:48Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Kansas August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the Kansas state row for August 2026 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, using original monthly outcomes at first publication. The official dictionary identifies original_updated=O, numerator metric 5a1, and denominator metric 5, covering beneficiaries due for renewal. The target is an unadjusted state percentage."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch CMS January and February 2026 snapshot PDFs and locate Kansas in Coverage Retention and Disenrollment Rates by State.",
+      "result": "January 2026: Kansas had 33,796 beneficiaries due for renewal and a published ex parte rate of 45%. February 2026: 25,992 due and an ex parte rate of 46%. Both are current-month original-outcome tables."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch CMS March and April 2026 snapshot PDFs and locate the Kansas renewal-outcome rows.",
+      "result": "March 2026: Kansas had 30,165 beneficiaries due for renewal and a published ex parte rate of 51%. April 2026: 36,241 due and an ex parte rate of 47%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch CMS May and June 2026 snapshot PDFs and locate the Kansas renewal-outcome rows.",
+      "result": "May 2026: Kansas had 38,980 beneficiaries due for renewal and a published ex parte rate of 46%. June 2026: 40,362 due and an ex parte rate of 48%."
+    },
+    {
+      "kind": "text",
+      "text": "All six historical anchors use the snapshots' original current-month renewal outcomes. CMS separately identifies updated outcomes for previously pending renewals. The fetched snapshot percentages are rounded to whole percentage points. Raw CSV/API counts could not be retrieved this run, so exact one-decimal historical shares and ex parte numerators are unavailable; no counts were reconstructed."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is six consecutive Kansas original monthly prints from January through June 2026. Their arithmetic mean, the outside-view base rate, is 47.1667%, with observed levels ranging from 45% to 51%. June's 48% is close to that center, supporting persistence with modest mean reversion."
+    },
+    {
+      "kind": "text",
+      "text": "Level adjustment: move June's 48% halfway toward the six-print mean, subtracting 0.4167 percentage points. Momentum adjustment: zero, because the March increase reversed in April and May. One-off adjustment: zero, because no August-specific operational shock was established. Policy adjustment: zero; Kansas memo PM2025-09-01 expanded passive review after the September 20, 2025 KEES release for qualifying households with no returned income-interface data and income on file below 100% FPL, so the fetched 2026 history already reflects that mechanism."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence-with-mean-reversion prior based on the six fetched January-June 2026 original-outcome rates. Point = 0.5*48 + 0.5*(45+46+51+47+46+48)/6 = 47.5833%, rounded to 47.6%. Successive changes are [1,5,-4,-1,2] percentage points, with mean 0.6; sigma = 3.3615, computed as sqrt(45.2/4). The normal one-month 80% half-width is 1.28*sigma = 4.3028 points. For the two-month June-to-August horizon, assume independent monthly increments and add a uniform half-point rounding-error variance: predictive scale = sqrt(2*3.3615^2 + 1/12) = 4.7627. A Student-t 80% central quantile of 1.5332 with four degrees of freedom accounts for the small change sample, giving half-width 7.3022 points. This is 1.70 times the one-month normal half-width. Final implied bounds are 47.5833 +/- 7.3022 = [40.2811,54.8855], rounded to [40.3,54.9] percent."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: stronger automated income matching or a cohort with more readily verifiable eligibility raises ex parte completion. Downside risk: a cohort requiring more manual verification or an income-interface disruption lowers it. An automation improvement large enough to exceed 54.9%, or a disruption lowering the share below 40.3%, would land outside the interval."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification gap: the official CMS announcement page lists June 2026 released September 25, 2026, but provides no announcement or forward calendar verifying December 15, 2026 for August's first publication. CMS specifications distinguish original-report submission deadlines from updated-report deadlines; their December 15 example concerns an updated August submission. The registered resolutionDate 2026-12-15 is retained, but the requirement to verify that exact public-release date could not be satisfied this run."
+    },
+    {
+      "kind": "forecast",
+      "point": 47.6,
+      "ciLow": 40.3,
+      "ciHigh": 54.9
+    }
+  ]
+}

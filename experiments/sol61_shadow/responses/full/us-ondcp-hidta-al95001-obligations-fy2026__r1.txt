@@ -1,0 +1,85 @@
+{
+  "slug": "us-ondcp-hidta-al95001-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "ONDCP HIDTA obligations, FY2026",
+  "question": "What will FY2026 unadjusted financial-assistance transaction obligations for Assistance Listing 95.001 be, in USD millions, in the registered first USAspending API v2 Spending Over Time query snapshot?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "U.S. Department of the Treasury, USAspending API v2 Spending Over Time",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Preserve registered_query_snapshot resolution: POST the registered filters for Assistance Listing 95.001 and award_type_codes [\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\"], spending_level transactions, group fiscal_year, and the target fiscal year. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 1e-06. Use the registered first snapshot, not later database revisions. The supplied context does not specify a literal resolutionDate, exact snapshot execution time, or rounding convention; these cannot be invented from its expected window.",
+  "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://api.usaspending.gov/docs/intro-tutorial"
+  ],
+  "runAt": "2026-10-07T10:33:11Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refused: exact registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "This object records a fetch refusal, not a publishable forecast. The target is the registered financial-assistance transaction query, so agency totals, appropriations, and search summaries cannot supply its historicalContext."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "The web fetch returned HTTP 405 Method Not Allowed. No aggregated_amount or historical obligation values were returned. This was a web-open attempt, not an executed POST query."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/docs/endpoints/",
+      "result": "The official endpoint index lists /api/v2/search/spending_over_time/ with method POST and describes transaction aggregation. This establishes the required API v2 method, not an obligation value. Source: [USAspending endpoint index](https://api.usaspending.gov/docs/endpoints/)."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/docs/intro-tutorial",
+      "result": "The official API v2 tutorial explains that advanced filters use POST request bodies. Its sample award_type_codes [\"10\"] is illustrative documentation, not HIDTA history. Source: [USAspending API tutorial](https://api.usaspending.gov/docs/intro-tutorial)."
+    },
+    {
+      "kind": "text",
+      "text": "The available web tools expose no HTTP method or request-body parameters, and tool discovery found no callable POST-capable public fetch tool. Shell networking is prohibited by the run instructions. Consequently the exact registered query could not be executed for any prior fiscal year."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable because no exact-query historical obligations were fetched. Last-print persistence and thesis_model_candidate_v1 candidates cannot be computed without inventing data. Documentation examples and HTTP status codes are not economic observations."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no admissible prior or historical sample was obtained; no adjustments were applied, and sigma and interval bounds cannot be computed. Numeric forecast fields are null to avoid fabricating a point estimate or uncertainty band. The required confidence field does not establish calibrated uncertainty for this refusal."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date limitation: the supplied registration provides an expected window but no literal resolutionDate or exact snapshot-selection timestamp. Its window end cannot be substituted for a verified release date."
+    },
+    {
+      "kind": "text",
+      "text": "No outside-the-interval scenario can be quantified because no interval exists. Mandatory numeric history and forecast validation requirements remain unmet; this refusal must not be normalized or scored as a completed forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "exec_command",
+      "call": "date -u +%Y-%m-%dT%H:%M:%SZ",
+      "result": "2026-10-07T10:33:11Z"
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}
