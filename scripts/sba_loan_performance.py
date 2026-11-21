@@ -9,6 +9,7 @@ family design note.
 from __future__ import annotations
 
 import datetime as dt
+import functools
 import hashlib
 import io
 import math
@@ -797,9 +798,12 @@ def _reviewed_clip(clip: tuple[_PdfRectangle, ...] | None) -> bool:
     )
 
 
+@functools.lru_cache(maxsize=32)
 def _sba_pdf_geometry(
     raw: bytes, *, series: str
 ) -> tuple[_SbaPdfGeometry | None, str | None]:
+    # A pure function of the PDF bytes, and the answer is immutable. One timeline
+    # extraction on 2026-11-02 asked for 258 parses, and only 3 PDFs differed.
     spec = _spec(series)
     if not raw.startswith(b"%PDF-"):
         return _layout_refusal("response does not start with %PDF-")

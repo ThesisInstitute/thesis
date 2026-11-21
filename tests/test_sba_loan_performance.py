@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import dataclasses
 import hashlib
 import io
 import pathlib
@@ -836,3 +837,50 @@ def test_text_parser_refuses_changed_recovery_definition() -> None:
         "SBA PDF LAYOUT DRIFT (refusing): expected one exact unit definition "
         "statement, found 0"
     )
+
+
+# --- One verification replay parses the same three PDFs many times ---
+
+
+@pytest.mark.parametrize("series", FIXTURES)
+def test_a_kept_geometry_equals_a_fresh_parse(series: str) -> None:
+    raw = fixture_bytes(series)
+    fresh = sba._sba_pdf_geometry.__wrapped__(raw, series=series)
+    assert fresh[0] is not None and fresh[1] is None
+    assert sba._sba_pdf_geometry(raw, series=series) == fresh
+    assert sba._sba_pdf_geometry(raw, series=series) == fresh
+
+
+def test_a_kept_refusal_equals_a_fresh_refusal() -> None:
+    series = next(iter(FIXTURES))
+    raw = adversarial_fixture_bytes()
+    fresh = sba._sba_pdf_geometry.__wrapped__(raw, series=series)
+    assert fresh[0] is None and fresh[1]
+    assert sba._sba_pdf_geometry(raw, series=series) == fresh
+    assert sba._sba_pdf_geometry(raw, series=series) == fresh
+
+
+def test_one_pdf_is_parsed_once_per_series() -> None:
+    first, second = list(FIXTURES)[:2]
+    raw = fixture_bytes(first)
+    sba._sba_pdf_geometry.cache_clear()
+    sba._sba_pdf_geometry(raw, series=first)
+    for _replay in range(5):
+        sba._sba_pdf_geometry(raw, series=first)
+    assert sba._sba_pdf_geometry.cache_info().hits == 5
+    assert sba._sba_pdf_geometry.cache_info().misses == 1
+    # The same bytes under another series get that series' own answer.
+    assert sba._sba_pdf_geometry(
+        raw, series=second
+    ) == sba._sba_pdf_geometry.__wrapped__(raw, series=second)
+    assert sba._sba_pdf_geometry.cache_info().misses == 2
+
+
+def test_a_kept_geometry_cannot_be_changed() -> None:
+    series = next(iter(FIXTURES))
+    geometry, _refusal = sba._sba_pdf_geometry(fixture_bytes(series), series=series)
+    assert geometry is not None
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        geometry.text = "changed"
+    assert isinstance(geometry.header_years, tuple)
+    assert isinstance(geometry.printed_values, tuple)

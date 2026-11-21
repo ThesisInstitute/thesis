@@ -55,11 +55,23 @@ class VerificationMemo:
     rather than reusing a result computed from other bytes. The
     per-commitment checks (paths, root and manifest file digests and sizes,
     root identity, inventory version) still run against every commitment.
+
+    Snapshots also share most of their log chunks: 7,219 chunk reads of 2,133
+    distinct chunks on 2026-11-02, 4.07 GB of JSON to parse, hash and walk per
+    call. Every read still opens the archive and checks both its digests and
+    sizes. `chunks` then keeps, per raw digest, the expectation those bytes
+    last passed and the custody references they hold. Equal bytes and an equal
+    expectation pass the same checks, so only those two together skip the
+    parse. Anything else runs every check again.
+
     A memo lives for one call only; nothing is cached across calls.
     """
 
     runs: dict[tuple[Path, str, str], CustodyVerification] = field(default_factory=dict)
     registrations: set[tuple[str, Any, Any, Any]] = field(default_factory=set)
+    chunks: dict[str, tuple[tuple[Any, ...], tuple[tuple[str, str], ...]]] = field(
+        default_factory=dict
+    )
 
 
 @dataclass(frozen=True)
@@ -302,7 +314,7 @@ def _walk_objects(value: Any) -> Iterable[dict[str, Any]]:
             yield from _walk_objects(child)
 
 
-def _archive_json(records: Path, record: dict[str, Any]) -> Any:
+def _archive_raw(records: Path, record: dict[str, Any]) -> bytes:
     logical = str(record.get("archivePath", ""))
     _safe_logical(logical)
     path = physical_path(records, logical)
@@ -321,20 +333,84 @@ def _archive_json(records: Path, record: dict[str, Any]) -> Any:
         raw
     ) != record.get("bytes"):
         raise TimelineError(f"covered recorder raw body mismatch: {logical}")
+    return raw
+
+
+def _parsed_archive(raw: bytes, record: dict[str, Any]) -> Any:
     try:
         return json.loads(raw)
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        logical = str(record.get("archivePath", ""))
         raise TimelineError(f"invalid recorder JSON body {logical}: {exc}") from exc
 
 
+def _custody_references(document: Any) -> list[tuple[str, str]]:
+    """The (custody root hash, manifest path) of each run a log document names."""
+
+    references: list[tuple[str, str]] = []
+    for value in _walk_objects(document):
+        root_hash = value.get("custodyRootSha256")
+        if not isinstance(root_hash, str):
+            continue
+        activity = value.get("activityLog")
+        if not isinstance(activity, list):
+            continue
+        manifest_refs = [
+            ref
+            for ref in activity
+            if isinstance(ref, dict) and ref.get("artifactType") == "manifest"
+        ]
+        if len(manifest_refs) != 1:
+            continue
+        references.append((root_hash, str(manifest_refs[0].get("path", ""))))
+    return references
+
+
+def _chunk_references(
+    records: Path,
+    record: dict[str, Any],
+    key: str,
+    collection: str,
+    index: int,
+    reference: dict[str, Any],
+    memo: VerificationMemo | None,
+) -> tuple[tuple[str, str], ...]:
+    raw = _archive_raw(records, record)
+    # _archive_raw just matched record["sha256"] against these bytes.
+    raw_digest = str(record.get("sha256"))
+    expectation = (collection, index, reference.get("count"), reference.get("sha256"))
+    passed = memo.chunks.get(raw_digest) if memo is not None else None
+    if passed is not None and passed[0] == expectation:
+        return passed[1]
+    chunk = _parsed_archive(raw, record)
+    expected_fields = {
+        "schemaVersion": "thesis_log_chunk_v1",
+        "logSchemaVersion": "thesis_log_v3",
+        "collection": collection,
+        "chunkIndex": index,
+        "count": reference.get("count"),
+    }
+    if any(chunk.get(name) != value for name, value in expected_fields.items()):
+        raise TimelineError(f"recorder v3 log chunk {key} metadata mismatch")
+    if len(chunk.get("rows", [])) != reference.get("count"):
+        raise TimelineError(f"recorder v3 log chunk {key} row count mismatch")
+    if canonical_sha256(chunk) != reference.get("sha256"):
+        raise TimelineError(f"recorder v3 log chunk {key} canonical hash mismatch")
+    references = tuple(_custody_references(chunk))
+    if memo is not None:
+        memo.chunks[raw_digest] = (expectation, references)
+    return references
+
+
 def _root_commitments_from_log(
-    records: Path, digest: dict[str, Any]
+    records: Path, digest: dict[str, Any], memo: VerificationMemo | None = None
 ) -> list[dict[str, Any]]:
     surfaces = digest.get("surfaces")
     if not isinstance(surfaces, dict) or not isinstance(surfaces.get("log"), dict):
         return []
-    log_manifest = _archive_json(records, surfaces["log"])
-    documents = [log_manifest]
+    log_record = surfaces["log"]
+    log_manifest = _parsed_archive(_archive_raw(records, log_record), log_record)
+    custody_references = _custody_references(log_manifest)
     log_chunks = digest.get("logChunks") or {}
     if not isinstance(log_chunks, dict):
         raise TimelineError("recorder logChunks is not an object")
@@ -378,72 +454,43 @@ def _root_commitments_from_log(
                 raise TimelineError(
                     f"recorder v3 log chunk {key} manifest link mismatch"
                 )
-            chunk = _archive_json(records, record)
-            expected_fields = {
-                "schemaVersion": "thesis_log_chunk_v1",
-                "logSchemaVersion": "thesis_log_v3",
-                "collection": collection,
-                "chunkIndex": index,
-                "count": reference.get("count"),
-            }
-            if any(chunk.get(name) != value for name, value in expected_fields.items()):
-                raise TimelineError(f"recorder v3 log chunk {key} metadata mismatch")
-            if len(chunk.get("rows", [])) != reference.get("count"):
-                raise TimelineError(f"recorder v3 log chunk {key} row count mismatch")
-            if canonical_sha256(chunk) != reference.get("sha256"):
-                raise TimelineError(
-                    f"recorder v3 log chunk {key} canonical hash mismatch"
+            custody_references.extend(
+                _chunk_references(
+                    records, record, key, collection, index, reference, memo
                 )
-            documents.append(chunk)
+            )
     elif log_chunks:
         raise TimelineError("non-v3 recorder log unexpectedly has chunks")
     commitments: list[dict[str, Any]] = []
-    for document in documents:
-        for value in _walk_objects(document):
-            root_hash = value.get("custodyRootSha256")
-            if not isinstance(root_hash, str):
-                continue
-            activity = value.get("activityLog")
-            if not isinstance(activity, list):
-                continue
-            manifest_refs = [
-                ref
-                for ref in activity
-                if isinstance(ref, dict) and ref.get("artifactType") == "manifest"
-            ]
-            if len(manifest_refs) != 1:
-                continue
-            manifest_logical = str(manifest_refs[0].get("path", ""))
-            _safe_logical(manifest_logical)
-            manifest_path = physical_path(records, manifest_logical)
-            run_dir = manifest_path.parent
-            root_path = run_dir / "custody_root.json"
-            if not root_path.is_file():
-                raise TimelineError(
-                    f"log commits a custody root with no local root: {manifest_logical}"
-                )
-            commitments.append(
-                {
-                    "runDirectory": run_dir.relative_to(records.parent).as_posix(),
-                    "custodyRootPath": root_path.relative_to(records.parent).as_posix(),
-                    "custodyRootSha256": root_hash,
-                    "custodyRootFileSha256": hashlib.sha256(
-                        root_path.read_bytes()
-                    ).hexdigest(),
-                    "custodyRootSize": root_path.stat().st_size,
-                    "custodyInventoryVersion": (
-                        json.loads(root_path.read_bytes()).get(
-                            "custodyInventoryVersion"
-                        )
-                        or 1
-                    ),
-                    "manifestPath": manifest_logical,
-                    "manifestSha256": hashlib.sha256(
-                        manifest_path.read_bytes()
-                    ).hexdigest(),
-                    "manifestSize": manifest_path.stat().st_size,
-                }
+    for root_hash, manifest_logical in custody_references:
+        _safe_logical(manifest_logical)
+        manifest_path = physical_path(records, manifest_logical)
+        run_dir = manifest_path.parent
+        root_path = run_dir / "custody_root.json"
+        if not root_path.is_file():
+            raise TimelineError(
+                f"log commits a custody root with no local root: {manifest_logical}"
             )
+        commitments.append(
+            {
+                "runDirectory": run_dir.relative_to(records.parent).as_posix(),
+                "custodyRootPath": root_path.relative_to(records.parent).as_posix(),
+                "custodyRootSha256": root_hash,
+                "custodyRootFileSha256": hashlib.sha256(
+                    root_path.read_bytes()
+                ).hexdigest(),
+                "custodyRootSize": root_path.stat().st_size,
+                "custodyInventoryVersion": (
+                    json.loads(root_path.read_bytes()).get("custodyInventoryVersion")
+                    or 1
+                ),
+                "manifestPath": manifest_logical,
+                "manifestSha256": hashlib.sha256(
+                    manifest_path.read_bytes()
+                ).hexdigest(),
+                "manifestSize": manifest_path.stat().st_size,
+            }
+        )
     unique: dict[tuple[str, str], dict[str, Any]] = {}
     for commitment in commitments:
         unique[(commitment["runDirectory"], commitment["custodyRootSha256"])] = (
@@ -570,7 +617,7 @@ def extract_timeline(records: Path) -> dict[str, Any]:
                     )
                     _put(registrations, logical, container_proof)
 
-        for commitment in _root_commitments_from_log(records, digest):
+        for commitment in _root_commitments_from_log(records, digest, memo=memo):
             _commit_root(
                 records,
                 commitment,

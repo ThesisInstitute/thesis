@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import json
 import os
@@ -428,12 +429,29 @@ def _run_openssl(
 
 
 def _certificate_identity(path: Path) -> dict[str, str]:
+    try:
+        pem = path.read_bytes()
+    except OSError as exc:
+        raise ChainError(f"cannot read certificate {path}: {exc}") from exc
+    return dict(_identity_of_certificate(pem))
+
+
+@functools.lru_cache(maxsize=64)
+def _identity_of_certificate(pem: bytes) -> dict[str, str]:
+    """The identity fields of one certificate, a pure function of its bytes.
+
+    One verify_chain on 2026-11-02 read 1,220 identities from 5 certificates at
+    four openssl runs each: 4,880 of its 6,468 openssl runs. All four read these
+    bytes from stdin, so they cannot see different files. A failed run raises
+    and is not kept.
+    """
+
     certificate_der = _run_openssl(
-        ["x509", "-in", str(path), "-outform", "DER"], binary=True
+        ["x509", "-outform", "DER"], input_bytes=pem, binary=True
     )
     assert isinstance(certificate_der, bytes)
     public_key_pem = _run_openssl(
-        ["x509", "-in", str(path), "-pubkey", "-noout"], binary=True
+        ["x509", "-pubkey", "-noout"], input_bytes=pem, binary=True
     )
     assert isinstance(public_key_pem, bytes)
     public_key_der = _run_openssl(
@@ -445,14 +463,13 @@ def _certificate_identity(path: Path) -> dict[str, str]:
     description = _run_openssl(
         [
             "x509",
-            "-in",
-            str(path),
             "-noout",
             "-serial",
             "-subject",
             "-nameopt",
             "RFC2253",
-        ]
+        ],
+        input_bytes=pem,
     )
     assert isinstance(description, str)
     fields: dict[str, str] = {}

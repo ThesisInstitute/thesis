@@ -10,6 +10,8 @@ describe("Python/TypeScript canonical JSON parity", () => {
       "\ud7ff": 1,
       nested: {
         quote: 'a"b\\c\n',
+        controls: "\u0000\u001f\b\t\n\f\r\u007f",
+        loneSurrogates: "\ud83d \udfff \ud7ff \ue000",
         negativeZero: -0,
         fixedSmall: 1e-6,
         scientificSmall: 1e-7,

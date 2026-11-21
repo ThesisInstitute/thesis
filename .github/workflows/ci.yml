@@ -70,6 +70,8 @@ jobs:
 
   python-tests:
     runs-on: ubuntu-latest
+    # Stops a hung setup step. A hung test hits the shorter limit on its own step.
+    timeout-minutes: 40
     steps:
       # Full history: the chain verifier binds the genesis enumeration to its
       # source commit's Git tree, which a depth-1 checkout does not contain.
@@ -94,8 +96,14 @@ jobs:
       - name: Install package with all extras
         run: uv sync --all-extras
 
+      # loadgroup schedules test by test and keeps each xdist_group on one worker.
+      # This step took about 4 minutes in November 2026 on an EPYC 7763, the slowest
+      # runner CPU measured. A step limit reports "failure", which trips
+      # alert-on-main-failure; a job limit reports "cancelled", which skips it.
+      # faulthandler prints the stack of any test still running after 20 minutes.
       - name: Run tests
-        run: uv run pytest tests/ -q
+        timeout-minutes: 30
+        run: uv run pytest tests/ -q -n auto --dist loadgroup --durations=50 -o faulthandler_timeout=1200
 
   # Give the bill extraction and paired-publication boundary fast feedback
   # while the complete Python suite continues to verify the entire archive.

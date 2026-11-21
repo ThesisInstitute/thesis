@@ -299,6 +299,7 @@ def test_merge_happens_only_when_every_required_gate_passed(
 _REQUIRED_NAMES = ("Append gate", "Trusted base append gate")
 # Outcomes of the stateful gate-wait property in this process, so the test
 # after it can tell that its oracle really ran on merges under each policy.
+# xdist_group keeps both on one worker, in this order.
 _GATE_WAIT_OUTCOMES: Counter = Counter()
 
 
@@ -361,6 +362,7 @@ def _listing_runs(pool, variant: int) -> list[dict]:
     return listing
 
 
+@pytest.mark.xdist_group("gate_wait_outcomes")
 @settings(max_examples=400, deadline=None)
 @given(
     pool=_listing_pool(),
@@ -497,6 +499,7 @@ def test_a_required_rerun_needs_a_fresh_confirmed_pass(monkeypatch) -> None:
         )
 
 
+@pytest.mark.xdist_group("gate_wait_outcomes")
 def test_the_gate_wait_property_checked_merges_under_both_policies() -> None:
     """The property above checks its invariant only when a wait ends in a
     merge, so require that a fair share of its examples did, under each

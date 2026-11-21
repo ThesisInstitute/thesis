@@ -6,6 +6,10 @@ from pathlib import Path
 
 import pytest
 
+# generate_figures rewrites paper/figures in place, so under xdist these tests
+# share one worker: another worker's fixture could rewrite a PNG mid-read.
+pytestmark = pytest.mark.xdist_group("paper_figures")
+
 PAPER_DIR = Path(__file__).resolve().parent.parent / "paper"
 FIG_DIR = PAPER_DIR / "figures"
 GENERATE_SCRIPT = PAPER_DIR / "generate_figures.py"
