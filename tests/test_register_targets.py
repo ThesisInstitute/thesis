@@ -1406,6 +1406,17 @@ def test_bea_release_successor_cannot_invent_release_slot_literal() -> None:
         register_targets.validate_committed_calendar_contract(contract, target, entry)
 
     assert str(caught.value) == (
+        "target release window disagrees with the committed docket calendar"
+    )
+
+    undated = copy.deepcopy(entry)
+    del undated["releaseDates"]["2026-Q4"]
+    with pytest.raises(register_targets.RegistrationError) as caught:
+        register_targets.validate_committed_calendar_contract(
+            contract, target, undated
+        )
+
+    assert str(caught.value) == (
         "committed dated docket entry lacks the target period's release date "
         "or calendar URL"
     )

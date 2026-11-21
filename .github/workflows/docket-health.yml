@@ -1,0 +1,100 @@
+name: Docket health
+
+# A roll with nothing to register exits green, so a failed run cannot be the
+# only signal that the docket has stopped. This job checks once a day for the
+# stalls scripts/docket_health.py describes and keeps one standing issue
+# current: open while anything is wrong, closed when it clears.
+#
+# It holds a read-only contents token, commits nothing, and stays off the
+# records attestation allowlist.
+on:
+  schedule:
+    # Clear of the roll: its Monday and Friday 16:30 runs start hours late and
+    # generate for up to 150 minutes, so this reads each one after it lands.
+    - cron: "15 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write # the standing issue is this job's only output
+
+concurrency:
+  group: docket-health
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: astral-sh/setup-uv@v5
+      # The check asks the site's own orphan rule, under bun, which registered
+      # targets have no forecast (scripts/dump_unforecast_targets.ts).
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Check the docket
+        run: |
+          uv run --locked python scripts/docket_health.py \
+            --report "$RUNNER_TEMP/docket-health/report.json" \
+            --issue-body "$RUNNER_TEMP/docket-health/issue.md" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      # A changed set of findings turns the run red once and comments on the
+      # issue, so it notifies. The same findings on a later day only refresh
+      # the issue body.
+      - name: Keep the standing issue current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          REPORT="$RUNNER_TEMP/docket-health/report.json"
+          BODY="$RUNNER_TEMP/docket-health/issue.md"
+          count=$(jq '.findings | length' "$REPORT")
+          marker="docket-health:$(jq -r .fingerprint "$REPORT")"
+          existing=$(gh issue list --state open --search '"Docket health" in:title' --json number,title \
+            --jq '[.[] | select(.title == "Docket health")][0].number // empty')
+          if [ "$count" = "0" ]; then
+            if [ -n "$existing" ]; then
+              gh issue close "$existing" --comment "Clear on $(date -u +%F)."
+            fi
+            exit 0
+          fi
+          if [ -z "$existing" ]; then
+            gh issue create --title "Docket health" --body-file "$BODY"
+            echo "New findings: see the Docket health issue." >&2
+            exit 1
+          fi
+          previous=$(gh issue view "$existing" --json body --jq .body)
+          gh issue edit "$existing" --body-file "$BODY"
+          if ! grep -qF "$marker" <<< "$previous"; then
+            gh issue comment "$existing" --body "The findings changed on $(date -u +%F). The issue body lists them."
+            echo "Changed findings: see the Docket health issue." >&2
+            exit 1
+          fi
+
+      # A check that cannot read its state says nothing about the docket, so it
+      # must not pass for a clear one. A report on disk means the check ran and
+      # the step above went red on purpose.
+      - name: Alert when the check itself fails
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          report="$RUNNER_TEMP/docket-health/report.json"
+          if [ -f "$report" ]; then
+            exit 0
+          fi
+          note="The docket health check could not run on $(date -u +%F): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          existing=$(gh issue list --state open --search '"Docket health" in:title' --json number,title \
+            --jq '[.[] | select(.title == "Docket health")][0].number // empty' || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$note"
+          else
+            gh issue create --title "Docket health" --body "$note"
+          fi

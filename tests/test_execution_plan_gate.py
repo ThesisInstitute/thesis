@@ -699,9 +699,20 @@ def test_roller_never_splits_a_pair_whose_arm_has_no_plan(
     assert "initial-claims-week-2030-01-12: conditional pair-mate has no" in out
 
 
-def test_roller_leaves_an_unbuildable_target_to_registration() -> None:
+def test_roller_refuses_a_target_it_cannot_build() -> None:
     target = {"series": "agency.test.rate", "period": "2030-01", "catalogSlug": "x"}
-    assert roll_docket.roll_execution_plan_refusal(target) is None
+    refusal = roll_docket.roll_execution_plan_refusal(target)
+    assert refusal is not None
+    assert refusal.startswith("the contract cannot be built: ")
+
+
+def test_roller_gives_an_unbuildable_target_no_slot(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    target = {"series": "agency.test.rate", "period": "2030-01", "catalogSlug": "x"}
+    assert _append(target, frozenset()) == []
+    out = capsys.readouterr().out
+    assert "the contract cannot be built: x has no target unit" in out
 
 
 def test_prospect_validation_refuses_a_proposal_without_a_plan(
