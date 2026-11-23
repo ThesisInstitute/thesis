@@ -20,10 +20,15 @@ import hashlib
 import itertools
 import json
 import pathlib
+import shutil
 import sys
+import tempfile
 from decimal import Decimal
+from unittest import mock
 
 import pytest
+from hypothesis import example, given, settings
+from hypothesis import strategies as st
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -1137,7 +1142,7 @@ def test_the_guard_follows_chronicles_supersede_links() -> None:
 
 
 def test_the_guard_passes_a_lineage_in_a_unit_with_no_base_form() -> None:
-    # Three of the twelve registrable series store the unit they emit.
+    # A series whose unit holds no scale stores the unit it emits.
     stem = "bls.cps.unemployment_rate"
     spec = resolve_pending.BLS_API_ADAPTERS[stem]
     row = copy.deepcopy(_chronicle_june_row())
@@ -1435,6 +1440,30 @@ def test_a_custody_fault_in_a_rebuild_costs_the_daily_run_no_resolution(
     assert row["measure"]["unit"] == "count"
 
 
+def test_a_restatement_that_leaves_a_scaled_row_current_is_reported_then_stops(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # Its supersedes names no row, so the June row stays current in thousands.
+    # The rebuild's fault prints first, and the guard then stops the run: a new
+    # row in base units would give that series a second unit.
+    june, restated = _restated_june_rows()
+    restated["assertionVersion"]["supersedes"] = "av2:" + "0" * 64
+    with pytest.raises(
+        resolve_pending.ledger_units.LedgerUnitError, match="carry a scale word"
+    ):
+        _append_through_main(
+            monkeypatch,
+            capsys,
+            tmp_path,
+            f"{json.dumps(june)}\n{json.dumps(restated)}\n",
+        )
+    assert _restore_refusals(capsys.readouterr().out) == [
+        "line 2 restates a row no earlier line holds"
+    ]
+
+
 @pytest.mark.parametrize(
     "retrieved_at",
     [
@@ -1471,29 +1500,554 @@ def test_a_restatement_whose_retrieved_at_names_no_run_directory_is_refused(
     assert list(tmp_path.iterdir()) == []
 
 
-def test_a_restatement_whose_archive_would_leave_the_repository_is_refused(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
-) -> None:
-    # The archive's name starts with the row's source_record_id, and an
-    # absolute one resets the path's join. Chronicle would have to hold a
-    # hand-made row for this, since restatement_row refuses one; the rebuild
-    # refuses it as a ledger fault rather than raise a ValueError the daily
-    # run does not catch.
-    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+def _restated_june_rows() -> tuple[dict, dict]:
     june_line, restated_line = _restated_june_ledger().splitlines()
-    june, restated = json.loads(june_line), json.loads(restated_line)
-    june["source_record_id"] = restated["source_record_id"] = "/abs/x"
+    return json.loads(june_line), json.loads(restated_line)
+
+
+def _with_record_id(
+    june: dict, restated: dict, record_id: object, *, rearchive: bool
+) -> None:
+    """Give both rows the id, and the restatement the June row's new id and,
+    with ``rearchive``, the archive the new id rebuilds to."""
+    june["source_record_id"] = restated["source_record_id"] = record_id
     restated["assertionVersion"]["supersedes"] = resolve_pending.effective_assertion_id(
         june
     )
+    if rearchive:
+        restated["responseArchive"], _ = resolve_pending.response_archive_reference(
+            resolve_pending.resolution_run_dir(restated["retrievedAt"]),
+            series_id=str(record_id),
+            vintage=str(restated["sourceVintage"]),
+            raw=json.dumps(june).encode("utf-8"),
+            extension="json",
+        )
+
+
+def _archive_name(restated: dict) -> str:
+    return pathlib.PurePosixPath(restated["responseArchive"]["path"]).name
+
+
+ELSEWHERE = "would put its archive in another directory"
+MISSHAPEN = [
+    "absolute record id",
+    "record id with a directory",
+    "vintage with a directory",
+    "record id that is not text",
+    "no vintage",
+    "no ledger sha",
+    "NUL in the archive name",
+    "archive name past 255 bytes",
+    "archive name that is not UTF-8",
+    "archive named ..",
+    "target hash that is not text",
+    "target hash that is not UTF-8",
+    "supersedes that is not text",
+    "record id holding a surrogate",
+]
+
+
+def _misshapen(kind: str, june: dict, restated: dict) -> str:
+    """Give the June restatement a shape the rebuild cannot use; its fault."""
+    if kind == "absolute record id":
+        _with_record_id(june, restated, "/abs/x", rearchive=False)
+        return f"line 2 has source_record_id '/abs/x', whose '/' {ELSEWHERE}"
+    if kind == "record id with a directory":
+        _with_record_id(june, restated, "a/b", rearchive=False)
+        return f"line 2 has source_record_id 'a/b', whose '/' {ELSEWHERE}"
+    if kind == "vintage with a directory":
+        restated["sourceVintage"] = "2026/06"
+        return f"line 2 has sourceVintage '2026/06', whose '/' {ELSEWHERE}"
+    if kind == "record id that is not text":
+        _with_record_id(june, restated, 7, rearchive=False)
+        return "line 2 has source_record_id 7, which is not text"
+    if kind == "no vintage":
+        del restated["sourceVintage"]
+        return "line 2 has sourceVintage None, which is not text"
+    if kind == "no ledger sha":
+        del restated["ledgerRepoSha"]
+        return "line 2 has ledgerRepoSha None, which is not text"
+    if kind == "NUL in the archive name":
+        _with_record_id(june, restated, "x\x00y", rearchive=True)
+        name = _archive_name(restated)
+        return f"line 2 archives {name!r}, a name that holds a NUL byte"
+    if kind == "archive name past 255 bytes":
+        _with_record_id(june, restated, "a" * 300, rearchive=True)
+        name = _archive_name(restated)
+        return (
+            f"line 2 archives {name!r}, a name that runs to {len(name)} bytes, "
+            "past the 255 one file name may hold"
+        )
+    if kind == "target hash that is not text":
+        restated["targetContentHash"] = float("inf")
+        return "line 2 has targetContentHash inf, which is not text"
+    if kind == "target hash that is not UTF-8":
+        restated["targetContentHash"] = chr(0xD800)
+        return f"line 2 has targetContentHash {chr(0xD800)!r}, which is not valid UTF-8"
+    if kind == "supersedes that is not text":
+        restated["assertionVersion"]["supersedes"] = 7
+        return "line 2 has assertionVersion.supersedes 7, which is not text"
+    if kind == "record id holding a surrogate":
+        _with_record_id(june, restated, chr(0xD800), rearchive=False)
+        reference, _ = resolve_pending.response_archive_reference(
+            resolve_pending.resolution_run_dir(restated["retrievedAt"]),
+            series_id=chr(0xD800),
+            vintage=restated["sourceVintage"],
+            raw=json.dumps(june).encode("utf-8"),
+            extension="json",
+        )
+        return (
+            f"the rebuilt archive of {chr(0xD800)!r} is {reference}, not the "
+            f"{restated['responseArchive']} its row names"
+        )
+    run = pathlib.PurePosixPath(restated["responseArchive"]["path"]).parent
+    if kind == "archive named ..":
+        restated["responseArchive"]["path"] = f"{run}/.."
+        return "line 2 archives '..', a name that means a directory"
+    assert kind == "archive name that is not UTF-8"
+    name = chr(0xD800) + ".json.gz"
+    restated["responseArchive"]["path"] = f"{run}/{name}"
+    return f"line 2 archives {name!r}, a name that is not valid UTF-8"
+
+
+@pytest.mark.parametrize("kind", MISSHAPEN)
+def test_a_rebuild_refuses_a_restatement_it_could_not_use_before_it_writes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path, kind: str
+) -> None:
+    # Chronicle would have to hold a hand-made row for any of these: the
+    # writer stamps sourceVintage and ledgerRepoSha itself, and raises on the
+    # record ids and vintages that would name a bad archive (below). The
+    # rebuild refuses each as a ledger fault before it writes a file, rather
+    # than stop the daily run with an error that run does not catch.
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    june, restated = _restated_june_rows()
+    fault = _misshapen(kind, june, restated)
     with pytest.raises(resolve_pending.ledger_units.LedgerUnitError) as info:
         resolve_pending.restore_restatement_runs(
             [json.dumps(june), json.dumps(restated)],
             ledger_repo="o/r",
             ledger_branch="b",
         )
-    assert str(info.value) == "the archive of '/abs/x' would sit outside the repository"
-    assert not resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z").exists()
+    assert str(info.value) == fault
+    assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "absolute record id",
+        "NUL in the archive name",
+        "no ledger sha",
+        "target hash that is not text",
+        "record id holding a surrogate",
+    ],
+)
+def test_a_misshapen_restatement_costs_the_daily_run_no_resolution(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+    kind: str,
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    june, restated = _restated_june_rows()
+    fault = _misshapen(kind, june, restated)
+    row, out = _append_through_main(
+        monkeypatch,
+        capsys,
+        tmp_path,
+        f"{json.dumps(june)}\n{json.dumps(restated)}\n",
+        exit_code=resolve_pending.EXIT_REFUSED_ROWS,
+    )
+    lines = out.splitlines()
+    assert [
+        line for line in lines if line.startswith(resolve_pending.RESTORE_REFUSED)
+    ] == [f"{resolve_pending.RESTORE_REFUSED} {fault}"]
+    assert not any(line.startswith("restored") for line in lines)
+    assert not resolve_pending.resolution_run_dir(restated["retrievedAt"]).exists()
+    # The run still appends the August print it came for.
+    assert row["source_record_id"] != restated["source_record_id"]
+    assert row["measure"]["unit"] == "count"
+
+
+@pytest.mark.parametrize(
+    ("record_id", "vintage"),
+    [("/abs/x", None), ("a/b", None), ("a" * 300, None), (None, "2026/06")],
+)
+def test_the_writer_refuses_a_restatement_the_rebuild_would_refuse(
+    record_id: str | None, vintage: str | None
+) -> None:
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    prior = _chronicle_june_row()
+    if record_id is not None:
+        prior["source_record_id"] = record_id
+    if vintage is not None:
+        prior["sourceVintage"] = vintage
+    run_dir = resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z")
+    with pytest.raises(resolve_pending.ledger_units.LedgerUnitError) as info:
+        resolve_pending.restatement_row(
+            prior,
+            line,
+            run_dir=run_dir,
+            retrieved_at="2026-11-04T00:00:00Z",
+            ledger_repo_sha="f" * 40,
+        )
+    named = prior["source_record_id"]
+    if vintage is not None:
+        assert str(info.value) == (
+            f"{named!r} has sourceVintage {vintage!r}, whose '/' {ELSEWHERE}"
+        )
+    elif "/" in named:
+        assert str(info.value) == (
+            f"{named!r} has source_record_id {named!r}, whose '/' {ELSEWHERE}"
+        )
+    else:
+        reference, _ = resolve_pending.response_archive_reference(
+            run_dir,
+            series_id=named,
+            vintage=str(prior.get("sourceVintage") or prior["observed_at"]),
+            raw=line.encode("utf-8"),
+            extension="json",
+        )
+        name = pathlib.PurePosixPath(reference["path"]).name
+        assert str(info.value) == (
+            f"{named!r} would archive as {name!r}, a name that runs to "
+            f"{len(name)} bytes, past the 255 one file name may hold"
+        )
+
+
+@pytest.mark.parametrize("sha", [None, 7, chr(0xD800)])
+def test_the_writer_refuses_a_ledger_sha_the_rebuild_would_refuse(sha: object) -> None:
+    (line,) = CHRONICLE_JUNE_ROW.read_bytes().decode().splitlines()
+    with pytest.raises(
+        resolve_pending.ledger_units.LedgerUnitError, match="ledgerRepoSha"
+    ):
+        resolve_pending.restatement_row(
+            _chronicle_june_row(),
+            line,
+            run_dir=resolve_pending.resolution_run_dir("2026-11-04T00:00:00Z"),
+            retrieved_at="2026-11-04T00:00:00Z",
+            ledger_repo_sha=sha,
+        )
+
+
+@pytest.mark.parametrize(
+    ("name", "fault"),
+    [
+        ("a" * 255, None),
+        ("\u00e9" * 127 + "a", None),
+        ("a" * 256, "runs to 256 bytes, past the 255 one file name may hold"),
+        ("\u00e9" * 128, "runs to 256 bytes, past the 255 one file name may hold"),
+        ("x\x00y", "holds a NUL byte"),
+        (chr(0xD800), "is not valid UTF-8"),
+        ("..", "means a directory"),
+    ],
+)
+def test_a_file_name_fault_counts_the_bytes_a_file_system_counts(
+    name: str, fault: str | None
+) -> None:
+    assert resolve_pending._file_name_fault(name) == fault
+
+
+def _restated_record(record_id: str, stamp: str) -> tuple[str, dict]:
+    """A ledger line for this record and the writer's restatement of it."""
+    prior = _chronicle_june_row()
+    prior["source_record_id"] = record_id
+    line = json.dumps(prior)
+    restated, _ = resolve_pending.restatement_row(
+        prior,
+        line,
+        run_dir=resolve_pending.resolution_run_dir(stamp),
+        retrieved_at=stamp,
+        ledger_repo_sha="f" * 40,
+    )
+    return line, restated
+
+
+# The fields of a restatement the rebuild reads. "archive name" replaces the
+# last part of the archive's path, to reach the file-name checks.
+_REBUILD_READS = (
+    "source_record_id",
+    "sourceVintage",
+    "ledgerRepoSha",
+    "retrievedAt",
+    "targetContentHash",
+    "responseArchive",
+    "responseArchive.path",
+    "responseArchive.sha256",
+    "responseArchive.gzipBytes",
+    "assertionVersion.supersedes",
+    "archive name",
+)
+# The generated text stays in the Latin blocks: APFS refuses some code points
+# Unicode leaves unassigned (EILSEQ), which the workflow's Linux runner accepts,
+# so wider text would fail only where no rebuild runs. "\u00e9" * 130 names a
+# file under 255 characters and over 255 bytes.
+_JUNK = st.one_of(
+    st.sampled_from(
+        [
+            "/abs/x",
+            "a/b",
+            "..",
+            "",
+            "x\x00y",
+            "a" * 300,
+            "\u00e9" * 130,
+            chr(0xD800),
+            "2026-07-02",
+            "a" * 40,
+            None,
+            True,
+            7,
+            10**400,
+            float("inf"),
+            float("nan"),
+            [],
+            {},
+        ]
+    ),
+    st.text(st.characters(max_codepoint=0x024F), max_size=40),
+    st.integers(),
+)
+
+
+def _spoil(row: dict, field: str, value: object) -> None:
+    if field == "archive name":
+        archive = row["responseArchive"]
+        if isinstance(archive, dict) and isinstance(archive.get("path"), str):
+            run = pathlib.PurePosixPath(archive["path"]).parent
+            archive["path"] = f"{run}/{value}"
+        return
+    *parents, leaf = field.split(".")
+    target = row
+    for parent in parents:
+        target = target[parent]
+    if isinstance(target, dict):
+        # A copy: sampled_from hands out one shared object, and a later spoil
+        # may write into this one.
+        target[leaf] = copy.deepcopy(value)
+
+
+@settings(max_examples=200, deadline=None)
+@given(spoils=st.lists(st.tuples(st.sampled_from(_REBUILD_READS), _JUNK), max_size=3))
+@example(spoils=[])
+def test_a_rebuild_writes_every_run_inside_it_or_refuses_and_writes_nothing(
+    spoils: list[tuple[str, object]],
+) -> None:
+    # Whatever the fields it reads hold in the later of two runs, the rebuild
+    # writes both runs, every file inside them, or refuses with a fault the
+    # daily run catches (LedgerUnitError or CustodyError) and leaves no file
+    # from either run. Two untouched runs must rebuild.
+    with (
+        tempfile.TemporaryDirectory() as tmp,
+        mock.patch.object(resolve_pending, "ROOT", pathlib.Path(tmp)),
+    ):
+        root = pathlib.Path(tmp)
+        first_line, first = _restated_record("bls.ok-1", "2026-11-04T00:00:00Z")
+        second_line, second = _restated_record("bls.ok-2", "2026-11-05T00:00:00Z")
+        runs = [
+            resolve_pending.resolution_run_dir(row["retrievedAt"])
+            for row in (first, second)
+        ]
+        for field, value in spoils:
+            _spoil(second, field, value)
+        try:
+            rebuilt = resolve_pending.restore_restatement_runs(
+                [first_line, json.dumps(first), second_line, json.dumps(second)],
+                ledger_repo="o/r",
+                ledger_branch="b",
+            )
+        except (resolve_pending.ledger_units.LedgerUnitError, CustodyError):
+            assert spoils, "the rebuild refused two untouched runs"
+            assert [path for path in root.rglob("*") if path.is_file()] == []
+        else:
+            assert rebuilt == runs
+            written = [path for path in root.rglob("*") if path.is_file()]
+            assert len(written) == 6
+            assert all(any(run in path.parents for run in runs) for path in written)
+
+
+# What the writer carries from the row it restates into the fields the rebuild
+# reads. A row with no sourceVintage takes its observed_at.
+_WRITER_CARRIES = (
+    "source_record_id",
+    "sourceVintage",
+    "observed_at",
+    "targetContentHash",
+    "assertionVersion.id",
+)
+
+
+@settings(max_examples=200, deadline=None)
+@given(spoils=st.lists(st.tuples(st.sampled_from(_WRITER_CARRIES), _JUNK), max_size=3))
+@example(spoils=[])
+@example(spoils=[("targetContentHash", 7)])
+@example(spoils=[("assertionVersion.id", chr(0xD800))])
+@example(spoils=[("observed_at", float("inf"))])
+def test_a_run_the_writer_finishes_rebuilds_from_its_rows_to_the_byte(
+    spoils: list[tuple[str, object]],
+) -> None:
+    # Whatever the row it restates holds in those fields, the writer refuses
+    # with a fault its run reports, or the rebuild reproduces the writer's run
+    # from the ledger's lines, byte for byte. An untouched row must rebuild.
+    stamp = "2026-11-04T00:00:00Z"
+    with (
+        tempfile.TemporaryDirectory() as tmp,
+        mock.patch.object(resolve_pending, "ROOT", pathlib.Path(tmp)),
+    ):
+        prior = _chronicle_june_row()
+        prior["assertionVersion"] = {"id": "av2:prior", "supersedes": None}
+        for field, value in spoils:
+            _spoil(prior, field, value)
+        line = json.dumps(prior)
+        run_dir = resolve_pending.resolution_run_dir(stamp)
+
+        def restate() -> tuple[dict, bytes]:
+            return resolve_pending.restatement_row(
+                prior,
+                line,
+                run_dir=run_dir,
+                retrieved_at=stamp,
+                ledger_repo_sha="f" * 40,
+            )
+
+        try:
+            resolve_pending.assertion_version(dict(prior))
+        except ValueError:
+            # The writer content-addresses the row it writes, so a field no
+            # content address can hold stops its run there, before any write.
+            with pytest.raises(ValueError):
+                restate()
+            return
+        try:
+            restated, compressed = restate()
+            archive = resolve_pending.ROOT / restated["responseArchive"]["path"]
+            archive.parent.mkdir(parents=True)
+            archive.write_bytes(compressed)
+            resolve_pending.finalize_resolution_manifest(
+                run_dir,
+                resolve_pending.restatement_manifest(
+                    [restated], ledger_repo="o/r", ledger_branch="b"
+                ),
+            )
+        except (resolve_pending.ledger_units.LedgerUnitError, CustodyError):
+            assert spoils, "the writer refused an untouched row"
+            return
+
+        def files() -> dict[pathlib.Path, bytes]:
+            return {p: p.read_bytes() for p in run_dir.rglob("*") if p.is_file()}
+
+        written = files()
+        shutil.rmtree(run_dir)
+        rebuilt = resolve_pending.restore_restatement_runs(
+            [line, resolve_pending.ledger_line(restated)],
+            ledger_repo="o/r",
+            ledger_branch="b",
+        )
+        assert rebuilt == [run_dir]
+        assert files() == written
+
+
+@pytest.mark.parametrize(
+    "fault", ["archive differs", "run in part", "manifest refused", "disk full"]
+)
+def test_a_fault_in_a_later_run_leaves_no_earlier_run(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path, fault: str
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    first_line, first = _restated_record("bls.ok-1", "2026-11-04T00:00:00Z")
+    second_line, second = _restated_record("bls.ok-2", "2026-11-05T00:00:00Z")
+    second_run = resolve_pending.resolution_run_dir(second["retrievedAt"])
+    # A run this call did not write, in the dated directory of one it did.
+    sibling = (
+        second_run.parent / "2026-11-05t09-00-00z-resolve-pending" / "manifest.json"
+    )
+    sibling.parent.mkdir(parents=True)
+    sibling.write_text("{}")
+    kept: list[pathlib.Path] = []
+    if fault == "disk full":
+        write_bytes = pathlib.Path.write_bytes
+        calls: list[pathlib.Path] = []
+
+        def full_on_the_second(path: pathlib.Path, data: bytes) -> int:
+            calls.append(path)
+            if len(calls) == 2:
+                raise OSError(28, "No space left on device")
+            return write_bytes(path, data)
+
+        monkeypatch.setattr(pathlib.Path, "write_bytes", full_on_the_second)
+    elif fault == "archive differs":
+        second["responseArchive"]["gzipBytes"] += 1
+    elif fault == "run in part":
+        second_run.mkdir(parents=True)
+        kept.append(second_run / "stray")
+        kept[0].write_text("x")
+    else:
+        finalize = resolve_pending.finalize_resolution_manifest
+
+        def refuse_the_second(run_dir: pathlib.Path, manifest: dict) -> dict:
+            if run_dir == second_run:
+                raise CustodyError("refused")
+            return finalize(run_dir, manifest)
+
+        monkeypatch.setattr(
+            resolve_pending, "finalize_resolution_manifest", refuse_the_second
+        )
+    with pytest.raises(
+        (resolve_pending.ledger_units.LedgerUnitError, CustodyError, OSError)
+    ):
+        resolve_pending.restore_restatement_runs(
+            [first_line, json.dumps(first), second_line, json.dumps(second)],
+            ledger_repo="o/r",
+            ledger_branch="b",
+        )
+    left = {path for path in tmp_path.rglob("*") if path.is_file()}
+    assert left == {sibling, *kept}
+
+
+def test_a_dry_run_refuses_an_archive_a_rebuild_would_refuse(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    monkeypatch.setattr(resolve_pending, "ROOT", tmp_path)
+    june, restated = _restated_june_rows()
+    restated["responseArchive"]["gzipBytes"] += 1
+    with pytest.raises(
+        resolve_pending.ledger_units.LedgerUnitError, match="the rebuilt archive of"
+    ):
+        resolve_pending.restore_restatement_runs(
+            [json.dumps(june), json.dumps(restated)],
+            ledger_repo="o/r",
+            ledger_branch="b",
+            write=False,
+        )
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_a_restore_fault_prints_a_surrogate_it_quotes(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    refusals: list[str] = []
+    resolve_pending._refuse_restore(
+        resolve_pending.ledger_units.LedgerUnitError(f"bad {chr(0xD800)} id"), refusals
+    )
+    assert refusals == ["bad \\ud800 id"]
+    assert capsys.readouterr().out == (
+        f"{resolve_pending.RESTORE_REFUSED} bad \\ud800 id\n"
+    )
+
+
+def test_a_daily_run_reads_a_ledger_row_holding_a_line_separator(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: pathlib.Path,
+) -> None:
+    # JSON lets a string hold a raw U+2028, where str.splitlines would cut it.
+    other = _chronicle_june_row()
+    other["source_record_id"] = "bls.other.first_print"
+    other["measure"] = {"concept": "bls.other", "unit": "percent"}
+    other["source"]["method_notes"] = "before\u2028after"
+    ledger = _restated_june_ledger() + json.dumps(other, ensure_ascii=False) + "\n"
+    row, _ = _append_through_main(monkeypatch, capsys, tmp_path, ledger)
+    assert row["measure"]["unit"] == "count"
 
 
 def test_the_run_directory_guard_admits_what_utc_now_stamps(
