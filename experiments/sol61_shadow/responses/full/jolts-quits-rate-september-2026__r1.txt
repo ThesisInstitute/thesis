@@ -1,0 +1,127 @@
+{
+  "slug": "jolts-quits-rate-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 JOLTS quits rate",
+  "question": "What will be the FIRST PRINT of the September 2026 U.S. total nonfarm seasonally adjusted quits rate, BLS JOLTS series JTS000000000000000QUR, reported in Table 4, Total row, Rates column, as a percent of employment?",
+  "unit": "percent",
+  "pointEstimate": 1.9,
+  "ciLow": 1.8,
+  "ciHigh": 2.0,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-03",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, Job Openings and Labor Turnover Survey, Table 4",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/jolts.t04.htm",
+  "resolutionRule": "Resolve on the first published September 2026 value in BLS Job Openings and Labor Turnover Survey Table 4, Quits levels and rates by industry and region, seasonally adjusted: Total row, September 2026 Rates column, corresponding to series JTS000000000000000QUR for U.S. total nonfarm employment. The quits rate is monthly quits as a percent of employment. Use the rate exactly as initially printed to one decimal place, including its preliminary status; ignore every subsequent revision or correction. The official BLS calendar schedules this release for November 3, 2026, at 10:00 a.m. Eastern Time.",
+  "dataPointId": "bls.jolts.quits_rate.2026-09.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 1.8},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 2.0},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 1.9},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 1.9},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 1.9},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 2.0},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": 1.9},
+    {"period": {"type": "month", "value": "2026-08"}, "label": "2026-08", "value": 1.9}
+  ],
+  "drivers": [
+    "August first-print persistence at 1.9%",
+    "Flat July-August quits rate",
+    "September payroll growth remains subdued",
+    "Offsetting sector changes already reflected in August",
+    "First-print sampling and seasonal-adjustment dispersion"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/jolts.htm",
+    "https://www.bls.gov/schedule/2026/11_sched.htm",
+    "https://www.bls.gov/news.release/jolts.t04.htm",
+    "https://www.bls.gov/news.release/jolts.htm",
+    "https://www.bls.gov/bls/news-release/jolts.htm",
+    "https://download.bls.gov/pub/time.series/jt/jt.series",
+    "https://download.bls.gov/pub/time.series/jt/jt.industry",
+    "https://download.bls.gov/pub/time.series/jt/jt.seasonal",
+    "https://www.bls.gov/news.release/archives/jolts_12092025.htm",
+    "https://www.bls.gov/news.release/archives/jolts_01072026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_02052026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03312026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_05052026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06022026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06302026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_08042026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09012026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09292026.htm",
+    "https://www.bls.gov/news.release/empsit.htm"
+  ],
+  "runAt": "2026-10-07T10:37:40Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 U.S. JOLTS quits rate: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the national total nonfarm seasonally adjusted quits RATE in Table 4, rather than the quits level, private-sector rate, or unadjusted Table 11. Preserve the supplied registered slug, percent unit, identifier, and first-print resolver. The release-calendar branch applies. The verified official release date is 2026-11-03, one day after the supplied expectedReleaseWindow ends on 2026-11-02; this is a concrete timing discrepancy, not a change of target. The prohibited catalog lookup was skipped under the run's independence restriction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/schedule/news_release/jolts.htm and https://www.bls.gov/schedule/2026/11_sched.htm; inspect https://www.bls.gov/news.release/jolts.t04.htm and official jt.series, jt.industry, jt.seasonal metadata.",
+      "result": "BLS calendar: September 2026 reference month, November 3, 2026 release, 10:00 AM Eastern Time. Table 4 is seasonally adjusted; its Total row shows August 2026 preliminary quits rate 1.9%. Official metadata identifies JTS000000000000000QUR with seasonal code S and industry code 000000; the official mapping files define S as Seasonally Adjusted and 000000 as Total nonfarm."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read Table 4, Total row, Rates columns in https://www.bls.gov/news.release/archives/jolts_12092025.htm, jolts_01072026.htm, jolts_02052026.htm, jolts_03132026.htm, and jolts_03312026.htm, all under the same official archive directory.",
+      "result": "Original published monthly rates: September 2025 2.0% and October 2025 1.8% in the December 9, 2025 release; November 2025 2.0% in the January 7, 2026 release; December 2025 2.0% in the February 5, 2026 release; January 2026 2.0% in the March 13, 2026 release; February 2026 1.9% in the March 31, 2026 release. BLS states September 2025 publication was canceled and its estimates first appeared in the October release, making that September column its first available print. October 2025 preliminary estimates temporarily suspended monthly alignment; the later revised October rate of 1.9% is excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read Table 4, Total row, latest preliminary Rates column in https://www.bls.gov/news.release/archives/jolts_05052026.htm, https://www.bls.gov/news.release/archives/jolts_06022026.htm, and https://www.bls.gov/news.release/archives/jolts_06302026.htm.",
+      "result": "First prints: March 2026 2.0%, released May 5; April 2026 1.9%, released June 2; May 2026 1.9%, released June 30. The subsequent August release lists May at 2.0%, but this forecast preserves its original 1.9%."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read Table 4, Total row, latest preliminary Rates column in https://www.bls.gov/news.release/archives/jolts_08042026.htm, https://www.bls.gov/news.release/archives/jolts_09012026.htm, and https://www.bls.gov/news.release/archives/jolts_09292026.htm.",
+      "result": "First prints: June 2026 2.0%, released August 4; July 2026 1.9%, released September 1; August 2026 1.9%, released September 29. August Table 4 reports total quits 3,066 thousand versus revised July 3,089 thousand, a change of -23 thousand. August professional and business services quits rose 62 thousand while leisure and hospitality quits fell 33 thousand; these offsets are already included in the aggregate."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the 12 first available monthly Table 4 prints from September 2025 through August 2026 are [2.0,1.8,2.0,2.0,2.0,1.9,2.0,1.9,1.9,2.0,1.9,1.9] percent. Calculated mean = 1.941667%, median = 1.95%, sample level standard deviation = 0.066856 percentage point, range = 1.8%-2.0%; six prints are 2.0%, five are 1.9%, and one is 1.8%. The outside-view prior is August persistence at 1.9%. A trailing-three-month mean gives (2.0+1.9+1.9)/3 = 1.933333%, also 1.9% at the published precision."
+    },
+    {
+      "kind": "math",
+      "text": "Model candidates computed in memory from the fetched first-print history before the agent forecast: {\"candidates\":[{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"last_print_persistence\",\"target_period\":\"2026-09\",\"unit\":\"percent\",\"point\":1.9,\"unrounded_point\":1.9,\"p10\":1.8,\"p50\":1.9,\"p90\":2.0,\"interval80\":{\"low\":1.8,\"high\":2.0},\"interval90\":{\"low\":1.7,\"high\":2.1},\"interval_method\":\"first-print successive-change sample standard deviation; symmetric normal wrapper with z80=1.28 and z90=1.645, endpoints rounded to the published 0.1 percentage-point grid\",\"calibration_n\":11,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"start\":\"2025-12\",\"end\":\"2026-08\",\"n\":9,\"mae\":0.055556,\"rmse\":0.074536,\"scoring_precision\":\"0.1 percentage point\"}},{\"schema\":\"thesis_model_candidate_v1\",\"candidate_id\":\"trailing_three_month_mean\",\"target_period\":\"2026-09\",\"unit\":\"percent\",\"point\":1.9,\"unrounded_point\":1.933333,\"p10\":1.8,\"p50\":1.9,\"p90\":2.0,\"interval80\":{\"low\":1.8,\"high\":2.0},\"interval90\":{\"low\":1.7,\"high\":2.1},\"interval_method\":\"first-print successive-change sample standard deviation; symmetric normal wrapper with z80=1.28 and z90=1.645, endpoints rounded to the published 0.1 percentage-point grid\",\"calibration_n\":11,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"start\":\"2025-12\",\"end\":\"2026-08\",\"n\":9,\"mae\":0.055556,\"rmse\":0.074536,\"scoring_precision\":\"0.1 percentage point\"}}],\"selected\":\"last_print_persistence\"}. Common one-step walk-forward evaluation uses December 2025-August 2026, with each prediction using only earlier monthly first prints. Both candidates have rounded MAE = 0.055556 percentage point and RMSE = 0.074536. Before rounding, the trailing-three mean has MAE = 0.055556 and RMSE = 0.059835, versus persistence RMSE = 0.074536. Select persistence because the published-precision scores tie and both next points are 1.9%; the short sample does not establish a stronger rounded rule. Candidate uncertainty is a historical-change wrapper, not a claimed native model interval."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/news.release/empsit.htm, the September 2026 Employment Situation released October 2, 2026.",
+      "result": "BLS reports September 2026 nonfarm payroll growth +29,000 and unemployment 4.2%, both described as little changed. Payroll growth averaged +45,000 per month over the preceding 12 months; unemployment has ranged from 4.1% to 4.3% since March. These are current official September signals, but neither directly measures gross quits."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update test: level = the 1.9% August first print; momentum adjustment = 0.0 percentage point because July and August rates are flat and the rounded trailing-three forecast agrees. September employment evidence adds 0.0: subdued net payroll growth gives no calibrated, quits-specific reason to depart from persistence. August sector offsets add 0.0 because they are already in the aggregate. Historical shutdown and alignment anomalies affect dispersion, not a new directional adjustment. No target-specific one-off or decomposed policy effect is established. The final point puts 100% weight on persistence; delta from that benchmark = 0.0."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = last_print_persistence at 1.9%; historical sample = 12 fetched first prints, September 2025-August 2026. Momentum, current employment signal, sector offsets, and new one-off/policy adjustments each equal 0.0 percentage point, so point = 1.9 + 0.0 = 1.9%. For this rate series use the 11 successive first-print changes [-0.2,0.2,0.0,0.0,-0.1,0.1,-0.1,0.0,0.1,-0.1,0.0] percentage point. Mean change = -0.1/11 = -0.009091; sum of squared changes = 0.13. sigma = 0.113618 percentage point = sqrt((0.13 - 11*(-0.009091)^2)/10). The normal-wrapper 80% half-width = 1.28*sigma = 0.145431, giving 1.9 +/- 0.145431 = [1.754569,2.045431]%. Round endpoints to the agency's 0.1-point publication grid: [1.8,2.0]%. The displayed half-width contracts to 0.1 solely because of this grid; empirical change p10/p90 = -0.1/+0.1 independently gives the same bounds, covering 9/11 observed changes. Retain the shutdown-affected October changes rather than trimming their volatility; apply no additional regime multiplier. The 90% wrapper uses 1.645*sigma = 0.186902: raw [1.713098,2.086902]%, rounded [1.7,2.1]%."
+    },
+    {
+      "kind": "text",
+      "text": "Calibration and counter-considerations: an interval of each prior monthly first print +/-0.1 percentage point covers 9 of the latest 10 monthly first-print moves. This is an in-sample sanity check, not proof of 80% future coverage; the small calibration sample and printed-rate discretization limit precision. The September-October 2025 release disruption is an imperfect comparable regime, and the interval retains its realized noise. Upside risk: a broad rebound in voluntary switching, particularly in leisure and hospitality and professional services, could produce 2.1% or higher, outside the interval. Downside risk: broad hiring freezes that reduce workers' ability to move to another employer could produce 1.7% or lower, outside the interval. A September-specific official gross-flow signal showing more voluntary switching would move the point up; evidence of fewer voluntary departures would move it down. Net payroll growth alone cannot distinguish these mechanisms."
+    },
+    {
+      "kind": "forecast",
+      "point": 1.9,
+      "ciLow": 1.8,
+      "ciHigh": 2.0
+    }
+  ]
+}

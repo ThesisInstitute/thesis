@@ -1,0 +1,167 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-de",
+  "country": "US",
+  "type": "data",
+  "title": "Delaware ex parte renewals, August 2026",
+  "question": "What percentage of Delaware Medicaid/CHIP beneficiaries due for renewal in August 2026 will be renewed ex parte, using CMS's first-published original (O) submission and rounding to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 39.0,
+  "ciLow": 28.3,
+  "ciHigh": 49.7,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Delaware's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Following CMS's published rate definition, compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published and rounding to one decimal. Later corrections and updated (U) submissions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.de.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 45
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 52
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 43
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 45
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 46
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 41
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 40
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 49
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 41
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 43
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 43
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 36
+    }
+  ],
+  "drivers": [
+    "Recent decline in Delaware's original ex parte rate",
+    "Partial reversion toward the recent historical level",
+    "Renewal cohort composition and automated eligibility matching",
+    "Two unobserved reporting months after the latest release"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T11:57:37Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Delaware August 2026 ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Delaware's original reporting-month state row, rather than a national aggregate or updated renewal outcome. The ledger does not explicitly identify the denominator. This forecast interprets share using CMS's published snapshot definition: ex parte renewals divided by all beneficiaries due for renewal. Table 6 of the official specifications identifies these as metrics 5a(1) and 5. Dataset identifier: 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. The denominator ambiguity is a target-contract limitation."
+    },
+    {
+      "kind": "text",
+      "text": "All historical anchors come from the corresponding original reporting-month outcome tables in CMS's archived monthly snapshots, excluding updated outcome tables. These published percentages are rounded to whole percentage points. Exact Delaware numerator counts and one-decimal O-row ratios could not be retrieved through the web tool; historicalContext therefore contains fetched snapshot rates, not reconstructed precise ratios."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS July, August, and September 2025 monthly snapshot PDFs; inspect Delaware in Coverage Retention and Disenrollment Rates by State.",
+      "result": "July 2025: 16,416 beneficiaries due, 45% renewed ex parte. August 2025: 18,495 due, 52% ex parte. September 2025: 18,176 due, 43% ex parte. Percentages use all renewals due as denominator and are rounded as published."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS October, November, and December 2025 monthly snapshot PDFs; inspect Delaware's original reporting-month renewal outcomes.",
+      "result": "October 2025: 19,316 beneficiaries due, 45% renewed ex parte. November 2025: 17,430 due, 46% ex parte. December 2025: 18,591 due, 41% ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS January, February, and March 2026 monthly snapshot PDFs; inspect Delaware's original reporting-month renewal outcomes.",
+      "result": "January 2026: 16,538 beneficiaries due, 40% renewed ex parte. February 2026: 19,732 due, 49% ex parte. March 2026: 19,890 due, 41% ex parte."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS April, May, and June 2026 monthly snapshot PDFs; inspect Delaware's original reporting-month renewal outcomes.",
+      "result": "April 2026: 20,186 beneficiaries due, 43% renewed ex parte. May 2026: 16,265 due, 43% ex parte, 71% total renewed, and 27% disenrolled. June 2026: 15,157 due, 36% ex parte, 61% total renewed, and 36% disenrolled."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is twelve consecutive Delaware original monthly snapshot prints from July 2025 through June 2026. Their unweighted base rate is 43.67%, with a range of 36% to 52%. The latest six average 42.0%; the latest three average 40.67%. This state-specific history supplies the outside-view anchor."
+    },
+    {
+      "kind": "text",
+      "text": "Level: anchor at the recent six-month mean. Momentum: give the lower latest print equal weight, reducing the forecast without extrapolating its entire monthly fall. One-off effects: apply no separate adjustment because no fetched evidence establishes whether June's weakness was temporary. Policy mechanisms: cohort composition, data matching, and classification between ex parte and form-based renewals can move the rate; no fetched Delaware-specific August implementation warrants a numerical adjustment. One prior August observation is insufficient to estimate a seasonal correction."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior shrunk equally toward the six-month mean: point = 0.5*36 + 0.5*42 = 39.0%. The momentum update is -3.0 percentage points from the 42.0% level; separate one-off, policy, and seasonal adjustments are zero. For the twelve fetched prints, eleven successive changes are [7,-9,2,1,-5,-1,9,-8,2,0,-7], averaging -0.81818. sigma = 5.92989 percentage points, computed as sqrt(351.63636/10), using sample dispersion of successive changes. The one-month 80% half-width is 1.28*sigma = 7.59026. Allowing two unobserved months from June to August gives half-width = 1.28*sigma*sqrt(2) = 10.73425. Final bounds are 39.0 +/- 10.73425 = [28.26575,49.73425], rounded to [28.3,49.7]. This assumes approximately independent monthly innovations; rounded history limits calibration precision."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a renewal cohort with more readily verified eligibility or stronger automated matching: a repeat of August 2025's published 52% would land above the interval. The downside risk is weaker matching or a shift toward form-based processing; an original ex parte rate below 28.3% would land outside the interval. A major processing or reporting change could defeat the historical-dispersion model."
+    },
+    {
+      "kind": "text",
+      "text": "Official publication-date verification failed. CMS's release page lists June 2026 as released September 25, 2026, but no prospective calendar or announcement confirming December 15 for August 2026 was found. The registered resolutionDate of 2026-12-15 is preserved as an unverified ledger date. State submission deadlines in the specifications are not public-release dates. Resolution remains tied to the first official publication of the August Delaware O row."
+    },
+    {
+      "kind": "forecast",
+      "point": 39.0,
+      "ciLow": 28.3,
+      "ciHigh": 49.7
+    }
+  ]
+}

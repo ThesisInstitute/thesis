@@ -1,0 +1,91 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-id",
+  "country": "US",
+  "type": "data",
+  "title": "Idaho ex parte renewal share, August 2026",
+  "question": "What percentage of Idaho Medicaid and CHIP beneficiaries due for renewal in August 2026 were renewed on an ex parte basis, calculated as 100 times Metric 5a1 divided by Metric 5 from the FIRST PRINT of the original (O), non-seasonally-adjusted Idaho submission in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Idaho's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal. Select state_abbreviation=ID, reporting_period=202608, original_updated=O. Compute 100 * beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis / beneficiaries_with_a_renewal_due. Later updated submissions and corrections do not resolve this first-print target.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.id.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Required Idaho original-submission history could not be fetched",
+    "Original and updated submissions measure different vintages",
+    "Registered resolution date lacks official calendar verification"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://data.medicaid.gov/dataset/e6205a51-e6d7-4849-9882-4483b8a28c41",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv"
+  ],
+  "runAt": "2026-10-07T10:40:47Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official Idaho history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Idaho's August 2026 original-submission ex parte renewal share. Target identity and resolutionDate are preserved from the supplied ledger. No local files or Thesis/Brier records were accessed; the prohibited catalog check was skipped under the independence override."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Search the exact official CMS dataset and its data.gov catalog entry.",
+      "result": "The official dataset lists 3,876 rows and 22 columns, modified September 25, 2026. The catalog identifies https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv as its distribution. Search results expose Alaska rows, not Idaho history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch the official data dictionary and Eligibility Processing Data Report specifications.",
+      "result": "The dictionary identifies original_updated as O=Original or U=Updated, beneficiaries_with_a_renewal_due as Metric 5, and beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis as Metric 5a1. The specifications are Version 4, updated November 2025; original reports are due on the 8th calendar day of the following month and pending-renewal updates on the 15th. These are submission deadlines."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Fetch the official CMS renewal percentage definition and monthly snapshot publication history.",
+      "result": "CMS's renewal percentage definition is Metric 5a1 / 5. The publication history lists May 2026 released August 28, 2026; April 2026 released July 31, 2026; March 2026 released June 26, 2026. No scheduled August 2026 publication date was verified."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed: the exact official CSV returned 'Cache miss'; datastore queries and Idaho/O filtered pages returned 'not accessible via this tool'; opening the base dataset returned an empty page. Correct field names from the official dictionary were also tried. No admissible Idaho original-submission observations were retrieved. This is a retrieval failure, not a claim that CMS exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: December 15, 2026 remains the registered resolutionDate, but it could not be verified as an official scheduled release date. State submission deadlines and historical publication lags do not establish that date."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable because the exact official Idaho history could not be fetched. Last-print persistence, persistence-plus-panel-shrinkage, walk-forward comparisons, and thesis_model_candidate_v1 candidates cannot be grounded. Adjacent updated data and national summaries were not substituted for the required history."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: The persistence prior and historical sample are unavailable; adjustment components are not estimated. The required computation is share = 100 * Metric 5a1 / Metric 5, with sigma estimated from successive original-print share changes and an initial half-width of 1.28 * sigma. sigma cannot be computed from the fetched evidence, so no point estimate or implied interval bounds are reported."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would be more renewals completed automatically; downside risk would be fewer renewals completed automatically relative to beneficiaries due. Their sizes and outcomes outside the interval cannot be quantified without the required history."
+    },
+    {
+      "kind": "text",
+      "text": "The cell is dropped under the honesty rule. Null estimates and an empty historicalContext explicitly record the failure; this object is not a valid publishable numeric forecast and does not satisfy the history or interval validation requirements. No activity receipts were manufactured."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "slug": "us-ondcp-hidta-al95001-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 HIDTA obligations: forecast withheld",
+  "question": "What will the first registered USAspending query snapshot report for FY2026 financial-assistance transaction obligations under Assistance Listing 95.001, expressed in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Execute the registered POST query with group fiscal_year, spending_level transactions, program_numbers [\"95.001\"], award_type_codes [\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"10\",\"11\"], and dates 2025-10-01 through 2026-09-30. Read aggregated_amount for fiscal_year 2026 and multiply by 0.000001, preserving returned precision. Resolve on the first registered snapshot without subsequent revisions or correction grace periods. An official scheduled resolution date was not verified in this run.",
+  "dataPointId": "usaspending.ondcp.hidta_al95001_obligations.fy2026.registered_query_snapshot",
+  "status": "refused_unverified_resolution_date",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2020"
+      },
+      "label": "FY2020",
+      "value": 270.27144368
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2021"
+      },
+      "label": "FY2021",
+      "value": 268.60530517
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2022"
+      },
+      "label": "FY2022",
+      "value": 252.76050027
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2023"
+      },
+      "label": "FY2023",
+      "value": 266.41544691
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2024"
+      },
+      "label": "FY2024",
+      "value": 273.95994611
+    },
+    {
+      "period": {
+        "type": "fiscal_year",
+        "value": "2025"
+      },
+      "label": "FY2025",
+      "value": 271.6576756
+    }
+  ],
+  "drivers": [
+    "Unverified official snapshot date",
+    "Large discrepancy between current query and announced allocations",
+    "Agency-controlled financial-assistance publication",
+    "Continued enacted ONDCP HIDTA funding"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://api.usaspending.gov/api/v2/awards/last_updated/",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://www.whitehouse.gov/releases/2026/07/white-house-announces-additional-277-million-to-fight-cartels-and-drug-traffickers/",
+    "https://www.govinfo.gov/content/pkg/PLAW-119publ75/html/PLAW-119publ75.htm"
+  ],
+  "runAt": "2026-10-07T11:58:07Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld because the required official resolution date could not be verified"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the registered financial-assistance transaction query for Assistance Listing 95.001, not agency totals, appropriations, allocations, or outlays. Historical entries are current official query responses fetched separately for each fiscal year; they are not reconstructed original vintages. The supplied October 15–22 window is registration context, not verified official scheduling evidence."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "POST https://api.usaspending.gov/api/v2/search/spending_over_time/ separately for FY2020 and FY2021, with group=fiscal_year, spending_level=transactions, program_numbers=[95.001], registered award_type_codes, and each fiscal year's October 1–September 30 dates.",
+      "result": "FY2020 aggregated_amount=270271443.68 USD; FY2021=268605305.17 USD. Multiplication by 0.000001 produces the historicalContext values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Repeat the exact registered POST query separately for FY2022 and FY2023, substituting their fiscal-year dates.",
+      "result": "FY2022 aggregated_amount=252760500.27 USD; FY2023=266415446.91 USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Repeat the exact registered POST query separately for FY2024 and FY2025, substituting their fiscal-year dates.",
+      "result": "FY2024 aggregated_amount=273959946.11 USD; FY2025=271657675.6 USD."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Execute the registered FY2026 POST query using 2025-10-01 through 2026-09-30; GET the official awards last_updated endpoint.",
+      "result": "FY2026 aggregated_amount=264863.53 USD, equivalent to 0.26486353 USD million. The update endpoint returned last_updated=10/07/2026; this does not certify completeness."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the White House July 9, 2026 HIDTA allocation announcement and the enacted appropriation in Public Law 119-75.",
+      "result": "The announcement's FY2026 Base Allocation table totals 277491415 USD. The enacted law appropriates 298579000 USD for ONDCP HIDTA, available through September 30, 2027. Neither number is the registered transaction-obligations outcome."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the six fetched FY2020–FY2025 annual query totals. Their mean is 267.27838629 USD million. The current FY2026 query differs sharply from this reference class and from announced allocations. Reporting incompleteness is a plausible inference, but its correction before the registered snapshot is unverified."
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending documentation describes nightly updates. Treasury's reporting manual makes financial-assistance publication dependent on agency action after validation. Neither establishes a scheduled FY2026 registered-query snapshot during the supplied window. The required resolutionDate therefore cannot be verified without treating registration context or inferred cadence as official evidence."
+    },
+    {
+      "kind": "math",
+      "text": "For these annual flow totals, sample sigma = sqrt(sum((x - 267.27838629)^2) / 5) = 7.563784788135089 USD million. The conventional 80% half-width is 1.28 × sigma = 9.681644528812914 USD million. These are descriptive reference-class calculations, not issued forecast bounds."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: An annual-flow persistence prior would use the six fetched fiscal years. Level evidence supports continued funding; historical momentum is modest; one-off transaction adjustments remain possible; publication timing creates a separate reporting mechanism. sigma = 7.563784788135089 and 1.28*sigma = 9.681644528812914 USD million. A conventional historical interval would omit the material near-zero-versus-delayed-publication uncertainty. No final implied bounds are issued because the mandatory official resolution date remains unverified."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a large batch of delayed FY2026 grant transactions appearing before the snapshot. The downside risk is continued absence of those records. A near-zero snapshot would land outside the interval produced by a conventional historical-total model; substantial grant publication would land outside the interval produced by a narrow current-snapshot persistence model."
+    },
+    {
+      "kind": "text",
+      "text": "Refusal: The required historical query evidence was fetched successfully, but an official scheduled resolution date was not verified. Estimates and bounds are unset rather than presenting an unverifiable cell as compliant."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "slug": "jolts-openings-october-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US job openings in October 2026",
+  "question": "What will the FIRST PRINT of US BLS JOLTS total nonfarm job openings, seasonally adjusted, series JTS000000000000000JOL, be for October 2026, in millions?",
+  "unit": "millions",
+  "pointEstimate": 7.079,
+  "ciLow": 6.349,
+  "ciHigh": 7.809,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-01",
+  "resolutionSource": "US Bureau of Labor Statistics, Job Openings and Labor Turnover Survey, Table 1",
+  "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000JOL",
+  "resolutionRule": "Resolve on the FIRST PRINT of October 2026 job openings level, United States total nonfarm, all establishment size classes, seasonally adjusted, BLS JOLTS series JTS000000000000000JOL. Use the October 2026 preliminary level in JOLTS news release Table 1, Total row, corresponding to field value in the registered BLS public API series. Multiply the published thousands value by 0.001 to obtain millions; preserve precision of 0.001 million. BLS schedules this release for December 1, 2026, at 10:00 a.m. Eastern Time. Later revisions or corrections do not replace the first print.",
+  "dataPointId": "bls.jolts.job_openings.2026_10.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 7.658
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 7.67
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 7.146
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 6.542
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 6.946
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 6.882
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 6.866
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 7.618
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 7.594
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 7.359
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "2026-07",
+      "value": 7.271
+    },
+    {
+      "period": {"type": "month", "value": "2026-08"},
+      "label": "2026-08",
+      "value": 7.079
+    }
+  ],
+  "drivers": [
+    "August first-print level anchors persistence",
+    "Persistence has lowest two-month benchmark error",
+    "September payroll weakness is an indirect downside signal",
+    "Two-month first-print volatility determines interval width"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/jolts.htm",
+    "https://www.bls.gov/schedule/2026/12_sched.htm",
+    "https://data.bls.gov/timeseries/JTS000000000000000JOL",
+    "https://www.bls.gov/bls/news-release/jolts.htm",
+    "https://www.bls.gov/news.release/archives/jolts_12092025.htm",
+    "https://www.bls.gov/news.release/archives/jolts_01072026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_02052026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03132026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_03312026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_05052026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06022026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_06302026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_08042026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09012026.htm",
+    "https://www.bls.gov/news.release/archives/jolts_09292026.htm",
+    "https://www.bls.gov/news.release/jolts.htm",
+    "https://www.bls.gov/news.release/jolts.t01.htm",
+    "https://www.bls.gov/news.release/empsit.htm"
+  ],
+  "runAt": "2026-10-07T12:44:51Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "October 2026 JOLTS: first-print forecast from official vintage history"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the October total nonfarm seasonally adjusted job openings level, not the openings rate or monthly change. Preserve the supplied registered slug, unit, dataPointId and API resolver. The independence override prohibits the catalog lookup, so no catalog or prior forecast was consulted."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/schedule/news_release/jolts.htm and https://www.bls.gov/schedule/2026/12_sched.htm.",
+      "result": "The official release calendar explicitly lists October 2026 JOLTS on December 1, 2026, at 10:00 AM; the December calendar states Eastern Time. September 2026 JOLTS is scheduled for November 3, 2026. The registered December 1 date agrees with BLS."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open and find series metadata at https://data.bls.gov/timeseries/JTS000000000000000JOL; read https://www.bls.gov/news.release/jolts.t01.htm.",
+      "result": "BLS identifies JTS000000000000000JOL as seasonally adjusted, Total nonfarm, Total US, all areas, all size classes, Job openings, Level - In Thousands. August 2026 is 7,079 thousand, preliminary, or 7.079 million. Table 1 reports the same 7,079; its July value of 7,335 is revised and is excluded from first-print history."
+    },
+    {
+      "kind": "text",
+      "text": "The exact registered API endpoint was attempted but the web tool returned inaccessible. Official archived JOLTS Table 1 releases supplied the same series' first-published values. The live database supplied series identity only; revised historical values were not substituted. No files were read or created."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch official JOLTS archived Table 1 Total SA levels at https://www.bls.gov/news.release/archives/jolts_12092025.htm, https://www.bls.gov/news.release/archives/jolts_01072026.htm, https://www.bls.gov/news.release/archives/jolts_02052026.htm, https://www.bls.gov/news.release/archives/jolts_03132026.htm and https://www.bls.gov/news.release/archives/jolts_03312026.htm.",
+      "result": "Fetched first-published levels in thousands: September 2025 7,658; October 2025 7,670; November 2025 7,146; December 2025 6,542; January 2026 6,946; February 2026 6,882. Multiplication by 0.001 yields 7.658, 7.670, 7.146, 6.542, 6.946 and 6.882 million. September and October were initially published together on December 9, 2025; the archive records cancellation of September's standalone release."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read the latest preliminary month in Table 1 Total row at https://www.bls.gov/news.release/archives/jolts_05052026.htm, https://www.bls.gov/news.release/archives/jolts_06022026.htm and https://www.bls.gov/news.release/archives/jolts_06302026.htm.",
+      "result": "First prints in thousands: March 2026 6,866; April 2026 7,618; May 2026 7,594. These equal 6.866, 7.618 and 7.594 million. The April release reports an increase of 668,000 openings in professional and business services; the total first-print-to-first-print March-April change is 752,000, distinct from the release's comparison with revised March."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read Table 1 Total, latest preliminary month, at https://www.bls.gov/news.release/archives/jolts_08042026.htm, https://www.bls.gov/news.release/archives/jolts_09012026.htm and https://www.bls.gov/news.release/archives/jolts_09292026.htm.",
+      "result": "First prints in thousands: June 2026 7,359; July 2026 7,271; August 2026 7,079, equivalent to 7.359, 7.271 and 7.079 million. August was released September 29, 2026. The August release reports hires of 5.192 million and total separations of 5.070 million; BLS describes openings and hires as little changed."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: the 12 consecutive reference-month first-published levels from September 2025 through August 2026 have mean 7.219250 million, median 7.208500, sample level SD 0.371020 and range 6.542-7.670. The 11 successive changes average -0.052636 million with sample SD 0.379808. Default prior: August first-print persistence at 7.079 million. These are original release vintages, including disrupted September-October 2025 collection/alignment and the January 2026 annual updates, rather than a retrospectively revised series."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmark/model candidates generated in memory before selecting the agent forecast. All use only the fetched first-print history. At each expanding origin with at least three observations, forecast two months ahead; eight origins have observed outcomes. Persistence holds the latest value; trailing3_mean holds the latest three-print average; expanding_drift adds twice the mean historical monthly change to the latest value. Candidate set: [{\"schema\":\"thesis_model_candidate_v1\",\"modelId\":\"persistence\",\"targetPeriod\":\"2026-10\",\"horizonMonths\":2,\"unit\":\"millions\",\"point\":7.079,\"p10\":6.349,\"p50\":7.079,\"p90\":7.809,\"interval80\":{\"low\":6.349,\"high\":7.809},\"interval90\":{\"low\":6.142,\"high\":8.016},\"intervalMethod\":\"normal approximation using sample SD of all overlapping two-month first-print changes\",\"calibration_n\":10,\"trainCutoff\":\"2026-08\",\"walkForwardScore\":{\"horizonMonths\":2,\"minTrainingPrints\":3,\"n\":8,\"mae\":0.36825,\"rmse\":0.430623}},{\"schema\":\"thesis_model_candidate_v1\",\"modelId\":\"trailing3_mean\",\"targetPeriod\":\"2026-10\",\"horizonMonths\":2,\"unit\":\"millions\",\"point\":7.236,\"p10\":6.593,\"p50\":7.236,\"p90\":7.879,\"interval80\":{\"low\":6.593,\"high\":7.879},\"interval90\":{\"low\":6.411,\"high\":8.062},\"intervalMethod\":\"normal approximation using sample SD of two-month expanding-origin forecast residuals\",\"calibration_n\":8,\"trainCutoff\":\"2026-08\",\"walkForwardScore\":{\"horizonMonths\":2,\"minTrainingPrints\":3,\"n\":8,\"mae\":0.386083,\"rmse\":0.472435}},{\"schema\":\"thesis_model_candidate_v1\",\"modelId\":\"expanding_drift\",\"targetPeriod\":\"2026-10\",\"horizonMonths\":2,\"unit\":\"millions\",\"point\":6.974,\"p10\":6.201,\"p50\":6.974,\"p90\":7.747,\"interval80\":{\"low\":6.201,\"high\":7.747},\"interval90\":{\"low\":5.982,\"high\":7.966},\"intervalMethod\":\"normal approximation using sample SD of two-month expanding-origin forecast residuals\",\"calibration_n\":8,\"trainCutoff\":\"2026-08\",\"walkForwardScore\":{\"horizonMonths\":2,\"minTrainingPrints\":3,\"n\":8,\"mae\":0.559816,\"rmse\":0.673493}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select the persistence candidate. Its two-month walk-forward MAE is 0.368250 million and RMSE 0.430623, versus 0.386083 and 0.472435 for the three-print mean, and 0.559816 and 0.673493 for drift. The score advantage is modest in a small overlapping sample, so it supports retaining the default persistence prior without establishing strong model superiority. A complex fitted adapter is not justified by this short mixed-vintage sample."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bls.gov/news.release/empsit.htm, September 2026 Employment Situation, released October 2, 2026.",
+      "result": "BLS reports September payroll growth of 29,000 and unemployment of 4.2%; payroll growth averaged 45,000 over the preceding 12 months. July payroll growth was revised to -10,000 and August to +133,000, a combined downward revision of 60,000. The private-sector workweek remained 34.4 hours."
+    },
+    {
+      "kind": "text",
+      "text": "Updates by component: level is the persistence prior, 7.079 million. Momentum since May is -0.515 million through August, already reflected in the latest print, so additional momentum adjustment is 0.000. The newer September payroll report supplies a mildly negative labor-demand signal, but no fetched calibrated mapping from payrolls to October vacancies, so its quantitative adjustment is 0.000. The April industry surge remains a historical volatility observation, not a reason to repeat it. Seasonal adjustment is already in the target series; no additional seasonal, one-off or policy adjustment is supported. Final deviation from the selected benchmark is 0.000 million."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = persistence using the 12 first prints September 2025-August 2026; weights = 100% prior and 0% unsupported updates; point = 7.079 + 0.000 momentum + 0.000 current-signal adjustment = 7.079 million. Successive changes are [0.012,-0.524,-0.604,0.404,-0.064,-0.016,0.752,-0.024,-0.235,-0.088,-0.192]; mean change = -0.052636; sigma = 0.379808 million, computed as sqrt(sum((change-mean change)^2)/10). October is two months beyond August. The 10 overlapping two-month changes [-0.512,-1.128,-0.200,0.340,-0.080,0.736,0.728,-0.259,-0.323,-0.280] have sample SD 0.569831. Use their empirical horizon factor 0.569831320/0.379807918 = 1.500314483. This widening reflects the two-month horizon and includes observed first-print collection/alignment and annual-update noise. Normal-approximation 80% half-width = 1.281551566*0.379807918*1.500314483 = 0.730268 million; bounds = 7.079 +/- 0.730268 = [6.348732,7.809268], rounded to [6.349,7.809]. The 90% half-width is 1.644853627*0.569831320 = 0.937289, giving [6.142,8.016]. Eight of the ten historical two-month persistence errors lie within the 80% band. That is a descriptive in-sample check, not independent out-of-sample calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: September payroll weakness could accompany continued vacancy contraction, while concentrated industry surges make persistence vulnerable to a rebound. Downside risk outside the interval: employers broadly freeze recruitment and cancel openings; a two-month fall matching October-December 2025's first-print drop of 1.128 million would imply 5.951 million, below 6.349. Upside risk outside the interval: professional and business services rebuild vacancies and other employers join; a net August-October rise matching the March-April first-print gain of 0.752 million would imply 7.831, above 7.809. These are stress scenarios, not asserted current effects. The September JOLTS first print with stronger openings and hires would move the next forecast up; weaker openings and hires would move it down."
+    },
+    {
+      "kind": "forecast",
+      "point": 7.079,
+      "ciLow": 6.349,
+      "ciHigh": 7.809
+    }
+  ]
+}

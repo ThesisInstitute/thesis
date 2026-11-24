@@ -1,0 +1,81 @@
+{
+  "slug": "us-dod-prime-contract-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD prime contract obligations FY2026: forecast refused",
+  "question": "What will USAspending API v2 agency 097 report for results[category=contracts].aggregated_amount with fiscal_year=2026 at the registered_query_snapshot, multiplied by 1e-9 into billions USD, with no seasonal adjustment applied?",
+  "unit": "billions USD",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 obligations by award category",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+  "resolutionRule": "Preserve the registered_query_snapshot policy: GET https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026, select the results entry whose category is contracts, and multiply aggregated_amount by 1e-9. Use the registered snapshot rather than a later revised total. The supplied target context does not specify the snapshot date or a rounding convention; neither is invented here.",
+  "dataPointId": "usaspending.dod.prime_contract_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Exact registered-query history unavailable",
+    "Target snapshot date unspecified",
+    "Forecast withheld under evidence requirements"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://api.usaspending.gov/docs/endpoints/federal_accounts/"
+  ],
+  "runAt": "2026-10-07T12:36:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: mandatory registered-query evidence could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The series is defined exclusively by agency 097, the contracts category, the requested fiscal year, and the registered query snapshot. Agency totals, documentation examples, and eventual fiscal-year totals cannot substitute for it. The sourceContext query URLs below were attempted unsuccessfully; they provide no numerical evidence."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the exact registered GET URLs with fiscal_year=2025, fiscal_year=2024, and fiscal_year=2023.",
+      "result": "URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2025 is not accessible via this tool. URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2024 is not accessible via this tool. URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2023 is not accessible via this tool. No response JSON or obligation amounts were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the exact registered GET URLs with fiscal_year=2022, fiscal_year=2021, and fiscal_year=2020.",
+      "result": "URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2022 is not accessible via this tool. URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2021 is not accessible via this tool. URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2020 is not accessible via this tool. No response JSON or obligation amounts were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "search_service.web_run",
+      "call": "Retry the exact registered historical GET URLs for FY2020 through FY2025 through the alternate available web search tool.",
+      "result": "Each requested URL returned 'not accessible via this tool.' No contracts aggregated_amount was fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026",
+      "result": "URL https://api.usaspending.gov/api/v2/agency/097/obligations_by_award_category/?fiscal_year=2026 is not accessible via this tool. No current-period obligation amount was returned."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate unavailable: no admissible numerical history was fetched. The empty historicalContext records fetch failure, not a claim that the official source exposes fewer than six prints. Persistence, model candidates, sigma, and interval bounds cannot be computed honestly."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target context gives an expectedReleaseWindow of 2026-10-15 through 2026-10-22, but no resolutionDate or resolutionDateBasis. A window endpoint cannot be promoted into an official release date or registered outer deadline. The target's registered_query_snapshot policy is preserved."
+    },
+    {
+      "kind": "text",
+      "text": "Forecast refused as required when the registered query cannot be executed. Null estimates and resolutionDate are intentional missing values, not numerical predictions. This refusal record parses as JSON but cannot satisfy the valid forecast-cell requirements; producing a compliant numerical cell would require fabricating evidence."
+    }
+  ]
+}

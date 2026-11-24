@@ -1,0 +1,148 @@
+{
+  "slug": "us-unit-labor-costs-q3-2026-prelim",
+  "country": "US",
+  "type": "data",
+  "title": "US unit labor costs, Q3 2026 preliminary",
+  "question": "What will the FIRST PRINT of BLS nonfarm business sector unit labor costs (PRS85006112) show for 2026-Q3, as the seasonally adjusted percent change from the previous quarter at a compound annual rate, in the preliminary Productivity and Costs release?",
+  "unit": "percent_growth",
+  "pointEstimate": 2.2,
+  "ciLow": -0.7,
+  "ciHigh": 5.1,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-05",
+  "resolutionSource": "U.S. Bureau of Labor Statistics, Productivity and Costs, preliminary",
+  "resolutionSourceUrl": "https://www.bls.gov/news.release/prod2.htm",
+  "resolutionRule": "Resolve on the first published 2026-Q3 observation for BLS PRS85006112, nonfarm business sector unit labor costs, seasonally adjusted percent change from previous quarter at a compound annual rate. The official counterpart is the preliminary Productivity and Costs release, Table 2, row 2026 III, Unit labor costs column within Percent change from previous quarter at annual rate; Table A1 reports the same current-quarter measure. Preserve the registered alfred-fred first_print resolver: use the earliest original-vintage numeric observation for 2026-Q3 in https://alfred.stlouisfed.org/graph/alfredgraph.csv?id=PRS85006112, corresponding to that BLS preliminary print. Use the agency's published one-decimal percentage precision. Later revisions and corrections do not change resolution. November 5, 2026 is the preliminary release date verified this run from the BLS calendar.",
+  "dataPointId": "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim.2026_q3.first_print",
+  "historicalContext": [
+    {"period": {"type": "quarter", "value": "2022-Q3"}, "label": "2022-Q3", "value": 3.5},
+    {"period": {"type": "quarter", "value": "2022-Q4"}, "label": "2022-Q4", "value": 1.1},
+    {"period": {"type": "quarter", "value": "2023-Q1"}, "label": "2023-Q1", "value": 6.3},
+    {"period": {"type": "quarter", "value": "2023-Q2"}, "label": "2023-Q2", "value": 1.6},
+    {"period": {"type": "quarter", "value": "2023-Q3"}, "label": "2023-Q3", "value": -0.8},
+    {"period": {"type": "quarter", "value": "2023-Q4"}, "label": "2023-Q4", "value": 0.5},
+    {"period": {"type": "quarter", "value": "2024-Q1"}, "label": "2024-Q1", "value": 4.7},
+    {"period": {"type": "quarter", "value": "2024-Q2"}, "label": "2024-Q2", "value": 0.9},
+    {"period": {"type": "quarter", "value": "2024-Q3"}, "label": "2024-Q3", "value": 1.9},
+    {"period": {"type": "quarter", "value": "2024-Q4"}, "label": "2024-Q4", "value": 3.0},
+    {"period": {"type": "quarter", "value": "2025-Q1"}, "label": "2025-Q1", "value": 5.7},
+    {"period": {"type": "quarter", "value": "2025-Q2"}, "label": "2025-Q2", "value": 1.6},
+    {"period": {"type": "quarter", "value": "2025-Q3"}, "label": "2025-Q3", "value": -1.9},
+    {"period": {"type": "quarter", "value": "2025-Q4"}, "label": "2025-Q4", "value": 2.8},
+    {"period": {"type": "quarter", "value": "2026-Q1"}, "label": "2026-Q1", "value": 2.3},
+    {"period": {"type": "quarter", "value": "2026-Q2"}, "label": "2026-Q2", "value": 1.3}
+  ],
+  "drivers": [
+    "Mean baseline beats persistence on walk-forward RMSE",
+    "Subdued wage growth lacks a complete Q3 compensation/output signal",
+    "Productivity and compensation ratio drives quarterly volatility",
+    "November annual revisions create two-sided first-print risk"
+  ],
+  "sourceContext": [
+    "https://www.bls.gov/schedule/news_release/prod2.htm",
+    "https://alfred.stlouisfed.org/series?seid=PRS85006112",
+    "https://www.bls.gov/bls/news-release/prod.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11032022.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02022023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05042023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08032023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11022023.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05022024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08012024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_11072024.htm",
+    "https://www.bls.gov/news.release/archives/prod2_02062025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05082025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08072025.htm",
+    "https://www.bls.gov/news.release/archives/prod2_01082026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_03052026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_05072026.htm",
+    "https://www.bls.gov/news.release/archives/prod2_08062026.htm",
+    "https://www.bls.gov/news.release/prod2.htm",
+    "https://www.bls.gov/news.release/prod2.nr0.htm",
+    "https://www.bls.gov/news.release/prod2.tn.htm",
+    "https://www.bls.gov/news.release/archives/prod2_09032026.htm",
+    "https://www.bls.gov/news.release/archives/empsit_10022026.htm",
+    "https://www.bls.gov/news.release/archives/eci_07312026.htm",
+    "https://www.bea.gov/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd",
+    "https://www.bls.gov/opub/hom/opt/presentation.htm",
+    "https://www.bea.gov/information-updates-national-regional-economic-accounts"
+  ],
+  "runAt": "2026-10-07T10:37:57Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Q3 2026 preliminary nonfarm business unit labor costs: first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is BLS PRS85006112, nonfarm business sector unit labor costs, seasonally adjusted percent change from the previous quarter at a compound annual rate, for 2026-Q3, FIRST PRINT. Slug, unit and dataPointId are copied exactly from the supplied target. The catalog lookup is omitted under the run's independence restriction. Historical values below come from original preliminary BLS releases for this exact measure, not subsequently revised series values."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://www.bls.gov/schedule/news_release/prod2.htm and https://alfred.stlouisfed.org/series?seid=PRS85006112",
+      "result": "BLS schedules Third Quarter 2026 (P) for November 5, 2026, at 08:30 ET, and the revised release for December 8. ALFRED identifies PRS85006112 as BLS nonfarm business unit labor costs, quarterly, seasonally adjusted, percent change at annual rate; its latest Q2 2026 observation is 1.2, updated September 3, 2026. This latest observation is a revision, not the preliminary print."
+    },
+    {
+      "kind": "text",
+      "text": "The registered ALFRED CSV URL and a vintage-parameter CSV request were inaccessible through the web tool. I therefore fetched original BLS preliminary releases and their exact nonfarm business unit-labor-cost cells. I do not claim to have downloaded or validated ALFRED CSV bytes. The resolution rule preserves the registered earliest-vintage PRS85006112 outcome, with the original BLS preliminary table as its official counterpart."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open original BLS preliminary releases: https://www.bls.gov/news.release/archives/prod2_11032022.htm, https://www.bls.gov/news.release/archives/prod2_02022023.htm, https://www.bls.gov/news.release/archives/prod2_05042023.htm, https://www.bls.gov/news.release/archives/prod2_08032023.htm",
+      "result": "Fetched nonfarm business, previous-quarter annualized percent change, Unit labor costs, in the preliminary release headline/Table A1 and corresponding Table 2: 2022-Q3 = 3.5; 2022-Q4 = 1.1; 2023-Q1 = 6.3; 2023-Q2 = 1.6. These are each quarter's original preliminary values."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open original BLS preliminary releases: https://www.bls.gov/news.release/archives/prod2_11022023.htm, https://www.bls.gov/news.release/archives/prod2_02012024.htm, https://www.bls.gov/news.release/archives/prod2_05022024.htm, https://www.bls.gov/news.release/archives/prod2_08012024.htm",
+      "result": "Fetched nonfarm business, previous-quarter annualized percent change, Unit labor costs, in the preliminary release headline/Table A1 and corresponding Table 2: 2023-Q3 = -0.8; 2023-Q4 = 0.5; 2024-Q1 = 4.7; 2024-Q2 = 0.9. These are each quarter's original preliminary values."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open original BLS preliminary releases: https://www.bls.gov/news.release/archives/prod2_11072024.htm, https://www.bls.gov/news.release/archives/prod2_02062025.htm, https://www.bls.gov/news.release/archives/prod2_05082025.htm, https://www.bls.gov/news.release/archives/prod2_08072025.htm",
+      "result": "Fetched nonfarm business, previous-quarter annualized percent change, Unit labor costs, in the preliminary release headline/Table A1 and corresponding Table 2: 2024-Q3 = 1.9; 2024-Q4 = 3.0; 2025-Q1 = 5.7; 2025-Q2 = 1.6. These are each quarter's original preliminary values."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open original BLS preliminary releases: https://www.bls.gov/news.release/archives/prod2_01082026.htm, https://www.bls.gov/news.release/archives/prod2_03052026.htm, https://www.bls.gov/news.release/archives/prod2_05072026.htm, https://www.bls.gov/news.release/archives/prod2_08062026.htm",
+      "result": "Fetched nonfarm business, previous-quarter annualized percent change, Unit labor costs, in the preliminary release headline/Table A1 and corresponding Table 2: 2025-Q3 = -1.9; 2025-Q4 = 2.8; 2026-Q1 = 2.3; 2026-Q2 = 1.3. These are each quarter's original preliminary values."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://www.bls.gov/news.release/archives/prod2_09032026.htm, https://www.bls.gov/news.release/archives/empsit_10022026.htm, https://www.bls.gov/news.release/archives/eci_07312026.htm and https://www.bea.gov/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd",
+      "result": "September 3 BLS release: Q2 2026 productivity 1.4%, output 1.7%, hours 0.3%, hourly compensation 2.6%, ULC 1.2%; Table B1 explicitly gives previously published ULC 1.3% and compensation 2.7%. October 2 CES release: July/August/September hourly earnings $37.64/$37.76/$37.81, weekly hours 34.3/34.4/34.4, and September earnings +0.1% monthly and +3.0% yearly. June private ECI compensation rose 0.9% quarterly. September 30 BEA release: Q2 GDP revised from 1.5% to 2.2%; Q3 advance GDP scheduled October 29, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate / reference class: 16 original preliminary prints, 2022-Q3 through 2026-Q2, sum 34.5, mean 2.15625%, median 1.75%, sample standard deviation 2.178675 percentage points, range -1.9% to 6.3%. The November 2022 BLS release introduced the current hours-worked methodology; starting there avoids combining original prints under different hours methods. Last-print persistence is 1.3%; the trailing-four-quarter mean is (-1.9+2.8+2.3+1.3)/4 = 1.125%. Both are published before selecting the agent forecast."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated with Python statistics/arithmetic from the fetched first-print history, before selecting the forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":1.3,\"p10\":-2.6,\"p50\":1.3,\"p90\":5.2,\"interval80\":{\"low\":-2.6,\"high\":5.2},\"interval90\":{\"low\":-3.7,\"high\":6.3},\"interval_method\":\"gaussian_walk_forward_residual_dispersion\",\"calibration_n\":12,\"train_cutoff\":\"2026-08-06\",\"train_end_period\":\"2026-Q2\",\"walk_forward_score\":{\"n\":12,\"rmse\":2.907318,\"mae\":2.525}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing_four_mean\",\"point\":1.1,\"p10\":-1.9,\"p50\":1.1,\"p90\":4.1,\"interval80\":{\"low\":-1.9,\"high\":4.1},\"interval90\":{\"low\":-2.8,\"high\":5.0},\"interval_method\":\"gaussian_walk_forward_residual_dispersion\",\"calibration_n\":12,\"train_cutoff\":\"2026-08-06\",\"train_end_period\":\"2026-Q2\",\"walk_forward_score\":{\"n\":12,\"rmse\":2.300091,\"mae\":1.733333}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_mean\",\"point\":2.2,\"p10\":-0.7,\"p50\":2.2,\"p90\":5.1,\"interval80\":{\"low\":-0.7,\"high\":5.1},\"interval90\":{\"low\":-1.5,\"high\":5.9},\"interval_method\":\"gaussian_first_print_dispersion_with_finite_mean_uncertainty\",\"calibration_n\":16,\"train_cutoff\":\"2026-08-06\",\"train_end_period\":\"2026-Q2\",\"walk_forward_score\":{\"n\":12,\"rmse\":2.278490,\"mae\":1.794878}}]. Walk-forward forecasts use only earlier observations, begin after four training quarters, and score the same 12 target quarters, 2023-Q3 through 2026-Q2. No external model library or native fitted-model intervals were used. Select expanding_mean because it has the lowest walk-forward RMSE. The four-quarter mean has slightly lower MAE and nearly equal RMSE, so this small-sample ranking is uncertain. The selected point is the benchmark itself."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view updates: current compensation proxies suggest restrained wage growth, but CES wages and ECI do not measure complete nonfarm compensation; GDP revisions concern Q2 and cannot identify Q3 nonfarm output. Thus compensation, productivity momentum, one-off and policy adjustments are each zero. The selected rounded mean is 0.9 percentage point above persistence solely because the simple mean outperformed persistence in walk-forward RMSE. Upcoming Q3 GDP and ECI could move the forecast down if output per hour strengthens relative to compensation, or up if compensation accelerates relative to output."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = expanding_mean of the 16 fetched first prints from 2022-Q3 through 2026-Q2; weight = 100%, all discretionary adjustments = 0. Point = round(34.5/16, 1) = 2.2%. This is a growth/flow series, so dispersion uses the printed growth values themselves: sigma = 2.178675 percentage points, computed as sqrt(sum((x-2.15625)^2)/(16-1)) = sqrt(71.199375/15). Gaussian fallback-prior prediction intervals include finite-mean uncertainty: effective sigma = 2.178675*sqrt(1+1/16) = 2.245727. The 80% half-width = 1.2815516*2.245727 = 2.878015, yielding round(2.2-2.878015,1) = -0.7 and round(2.2+2.878015,1) = 5.1. The 90% half-width = 1.6448536*2.245727 = 3.693892, giving [-1.5,5.9]. The mean-uncertainty factor is 1.030776; no extra regime multiplier is applied. The BLS handbook says BEA annual revisions enter the November publication, and BEA confirms its September 30, 2026 annual update. Annual-update first prints are represented in the quarterly sample; no fetched evidence establishes an additional variance increment. The final 80% interval contains 8 of the last 10 and 12 of all 16 prints; this is a descriptive sanity check, not independent validation of 80% coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and tails: unit labor costs equal hourly compensation divided by productivity, so weaker wages do not by themselves imply lower unit costs. Downside risk outside the interval below -0.7%: a Q3 productivity surge from stronger real output and flat hours, together with subdued total compensation or a downward compensation revision. Upside risk outside the interval above 5.1%: stalled or falling productivity while compensation remains strong, or an upward NIPA compensation revision incorporated in the preliminary release. The sample contains both negative prints and compensation-related spikes, and its normal approximation may understate extreme tails. The four-quarter mean's lower MAE is evidence against treating the selected mean as decisively superior."
+    },
+    {
+      "kind": "forecast",
+      "point": 2.2,
+      "ciLow": -0.7,
+      "ciHigh": 5.1
+    }
+  ]
+}

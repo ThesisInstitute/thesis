@@ -1,0 +1,72 @@
+{
+  "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DHS Title VI award transaction obligations, FY2026",
+  "question": "What is the FY2026 aggregated award transaction obligation amount, in nominal US dollars without seasonal adjustment, returned by the exact registered USAspending API v2 spending_over_time query for the named DHS Treasury accounts, resolved on the registered query snapshot?",
+  "unit": "usd",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered DHS Title VI award transaction query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Use the registered_query_snapshot release policy. POST the exact sourceBinding.transform query to the registered endpoint with fiscalYear=2026, group=fiscal_year, spendingLevel=transactions, and the registered awardTypeCodes and treasuryAccountComponents. Read results[time_period.fiscal_year=2026].aggregated_amount and apply the registered multiply operation with factor 1, in USD. A literal resolution date and complete snapshot-selection rule were not supplied or independently verified.",
+  "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints"
+  ],
+  "runAt": "2026-10-07T10:33:36Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refused: exact registered-query history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The target is defined by the supplied registered query and its snapshot policy. The registered slug, unit and dataPointId are preserved. Broad DHS obligations and agency profile totals cannot establish this target's history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "Failed to fetch https://api.usaspending.gov/api/v2/search/spending_over_time/: (405) Method Not Allowed. This was a failed GET access attempt, not an executed registered POST query; no obligation amount was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/docs/endpoints; find spending_over_time",
+      "result": "Official USAspending API v2 documentation lists /api/v2/search/spending_over_time/ with method POST and describes aggregated transaction amounts. Its documented general status codes are 200 for success, 400 for malformed requests and 500 for server errors. These are diagnostic numbers, not historical obligation values. [Official endpoint documentation](https://api.usaspending.gov/docs/endpoints)."
+    },
+    {
+      "kind": "tool",
+      "tool": "exec_command",
+      "call": "date -u +%Y-%m-%dT%H:%M:%SZ",
+      "result": "2026-10-07T10:33:36Z"
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. Both available web-tool schemas lack an HTTP method or request-body parameter, so the exact registered POST cannot be executed through the authorized web tools. No historicalContext values were fetched. Empty history records missing evidence, not an official short-history exception."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without exact-query observations, persistence, model candidates, realized sigma, a point estimate and an interval cannot be computed honestly."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no admissible prior or historical sample was fetched; no adjustments or interval bounds are asserted. Null forecast fields indicate refusal, not a numeric forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The target context gives an expected snapshot window but no literal resolutionDate or explicit resolve-by-bound designation. No official release-calendar date was verified, so resolutionDate is null. The prohibited catalog and prior forecasts were not consulted."
+    },
+    {
+      "kind": "text",
+      "text": "The cell is dropped under the registered-query instruction to refuse when its query cannot be executed. This JSON is a failure report in the requested field layout, not a valid forecast cell. No forecast confidence is asserted; confidence retains the contract's fixed value. Required numeric evidence and forecast validation remain unmet. JSON parsing was verified."
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ma",
+  "country": "US",
+  "type": "data",
+  "title": "Massachusetts August 2026 ex parte renewal share",
+  "question": "What percentage of Massachusetts Medicaid and CHIP beneficiaries due for renewal in August 2026 will be renewed on an ex parte basis, calculated from the first published original (O) submission in CMS State Medicaid and CHIP Eligibility Processing Data, without seasonal adjustment?",
+  "unit": "percent",
+  "pointEstimate": 61.6,
+  "ciLow": 46.2,
+  "ciHigh": 77.1,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=MA&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202608&conditions%5B2%5D%5Boperator%5D=%3D&limit=1&schema=false",
+  "resolutionRule": "Resolves to Massachusetts's ex parte renewal share for the August 2026 reporting period from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using numerator and denominator as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not change the resolution. The registered December 15, 2026 resolution date is retained but could not be verified as an official publication date.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ma.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 57.6},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": 60.5},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 59.9},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 65.3},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": 75.2},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 54.4},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 62.6},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 56.0},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 50.8},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 45.0},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 60.7},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 65.6},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 67.4},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 55.3},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 60.3},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 62.9},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 72.3},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 63.1}
+  ],
+  "drivers": [
+    "Persistence around June's 63.1% share",
+    "Recent 12-month base rate of 60.2%",
+    "Volatile monthly renewal cohort composition",
+    "Ex parte processing and reporting classification",
+    "Two-month gap from latest published reporting period"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=MA&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202601&conditions%5B2%5D%5Boperator%5D=%3E%3D&limit=20&schema=false",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=MA&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202507&conditions%5B2%5D%5Boperator%5D=%3E%3D&conditions%5B3%5D%5Bproperty%5D=reporting_period&conditions%5B3%5D%5Bvalue%5D=202512&conditions%5B3%5D%5Boperator%5D=%3C%3D&limit=20&schema=false",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=MA&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202501&conditions%5B2%5D%5Boperator%5D=%3E%3D&conditions%5B3%5D%5Bproperty%5D=reporting_period&conditions%5B3%5D%5Bvalue%5D=202506&conditions%5B3%5D%5Boperator%5D=%3C%3D&limit=20&schema=false",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=MA&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202608&conditions%5B2%5D%5Boperator%5D=%3D&limit=1&schema=false",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:28:52Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Massachusetts August 2026 original-submission ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the Massachusetts state row for reporting_period 202608 and original_or_updated O in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. The exact target query returned count 0, confirming that the row was unavailable when fetched. Resolve on its first public appearance, without a correction grace period."
+    },
+    {
+      "kind": "text",
+      "text": "The ledger does not explicitly name the denominator. CMS's June 2026 snapshot table defines ex parte retention percentages using all beneficiaries due for renewal: numerator Metric 5a1 divided by denominator Metric 5. This forecast follows that published convention. All historical anchors use original O submissions; no updated U values, national averages, or seasonal adjustments are used. Historical O rows were fetched from the current official dataset and were not independently checked against archived publication vintages."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification limitation: CMS's official release list reports June 2026 released September 25, 2026, May released August 28, and April released July 31, but provides no announced August 2026 publication date. The specifications' December 15 example concerns an updated state report submission deadline for August 2024, not public first publication. The registered resolutionDate 2026-12-15 is retained, but this run cannot satisfy the requirement to verify that date from an official publication announcement."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and echo CMS datastore JSON for Massachusetts, original O submissions, reporting periods 202501 through 202506.",
+      "result": "Fetched ex parte numerator / renewals-due denominator: January 2025 71,950/125,006; February 44,528/73,609; March 46,271/77,216; April 81,813/125,320; May 69,844/92,833; June 55,516/102,098. Computed one-decimal shares: 57.6%, 60.5%, 59.9%, 65.3%, 75.2%, 54.4%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and echo CMS datastore JSON for Massachusetts, original O submissions, reporting periods 202507 through 202512.",
+      "result": "Fetched ex parte numerator / renewals-due denominator: July 2025 31,639/50,551; August 52,938/94,534; September 43,282/85,211; October 46,919/104,160; November 55,076/90,667; December 72,961/111,210. Computed one-decimal shares: 62.6%, 56.0%, 50.8%, 45.0%, 60.7%, 65.6%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch and echo CMS datastore JSON for Massachusetts, original O submissions, reporting periods beginning 202601.",
+      "result": "The query returned six rows, ending June 2026. Fetched ex parte numerator / renewals-due denominator: January 2026 59,329/87,964; February 83,169/150,458; March 149,701/248,454; April 96,715/153,865; May 102,985/142,436; June 45,670/72,366. Computed one-decimal shares: 67.4%, 55.3%, 60.3%, 62.9%, 72.3%, 63.1%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the official June 2026 Medicaid and CHIP Eligibility Operations and Enrollment Snapshot and inspect its state renewal-outcomes table.",
+      "result": "The Massachusetts row reports 72,366 beneficiaries due for renewal, 80% renewed, 17% disenrolled, 3% pending, and 63% renewed ex parte. The exact dataset calculation, 100*45,670/72,366 = 63.1097477%, agrees with the snapshot's whole-percent ex parte figure."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the 12 distinct original-submission observations from July 2025 through June 2026 average 60.1687223%, with a range of 45.0451229% to 72.3026482%. The full 18-month fetched reference class averages 60.8274042%. These similar averages support anchoring near 60% and shrinking June's 63.1097477% toward the recent annual mean."
+    },
+    {
+      "kind": "text",
+      "text": "Level: give equal weight to the latest share and the recent 12-month mean. Momentum: apply zero additional trend offset because successive changes oscillate and their recent mean is only 0.0474064 percentage points. Seasonality: apply zero offset because the single fetched prior August observation, 55.9988999%, does not establish a repeatable seasonal effect. One-off and policy mechanism adjustments are zero because no target-specific dated change was verified. CMS notes that cohort composition and classification of renewals completed after forms are sent can affect reported ex parte outcomes."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: use an equal-weight persistence and recent-mean prior from 12 Massachusetts O reports, July 2025 through June 2026. Level = 0.5*63.1097477 + 0.5*60.1687223 = 61.6392350%; additional momentum, seasonal, one-off, and policy adjustments are each 0. For the 11 successive unrounded monthly changes, mean change = 0.0474064 percentage points and centered sum of squares = 730.4206316. sigma = 8.546465 percentage points, calculated as sqrt(730.4206316/10). The normal 80% one-month half-width is 1.28*sigma = 10.9394751 points. Multiply by sqrt(2) for the two-month June-to-August horizon, giving 15.4707541 points. Final unrounded bounds are 46.1684809% and 77.1099891%; round the point and bounds to 61.6%, 46.2%, and 77.1%. This is an approximate predictive interval based on realized monthly dispersion."
+    },
+    {
+      "kind": "math",
+      "text": "Share_t = 100*ex_parte_t/renewals_due_t. Point = (63.1097477 + 60.1687223)/2 = 61.6392350 -> 61.6. Sample change variance = 730.4206316/(11-1) = 73.0420632. Half-width = 1.28*sqrt(73.0420632)*sqrt(2) = 15.4707541. Bounds = 61.6392350 +/- 15.4707541 = [46.1684809,77.1099891] -> [46.2,77.1]."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: improved automated matching or an unusually easy renewal cohort could lift the share above 77.1%, outside the interval. Downside risk: a difficult cohort, processing disruption, or reporting classification change could lower it below 46.2%, outside the interval; October 2025's fetched 45.0% demonstrates that such a low level has occurred. These are scenarios, not claims of an announced Massachusetts policy change."
+    },
+    {
+      "kind": "forecast",
+      "point": 61.6,
+      "ciLow": 46.2,
+      "ciHigh": 77.1
+    }
+  ]
+}

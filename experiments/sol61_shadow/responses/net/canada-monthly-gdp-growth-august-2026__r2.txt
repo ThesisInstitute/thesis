@@ -1,0 +1,91 @@
+{
+  "slug": "canada-monthly-gdp-growth-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada August 2026 GDP: failed forecast run",
+  "question": "What will Statistics Canada's first official print report for August 2026 month-over-month real GDP growth by industry, all industries, seasonally adjusted, in chained 2017 dollars?",
+  "unit": "percent_growth",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-30",
+  "resolutionSource": "Statistics Canada, GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Resolve using the first official August 2026 publication of all-industries real GDP by industry, seasonally adjusted at annual rates, chained 2017 dollars, vector v65201210. Calculate the percentage change from July using both levels in that first publication, preserving official reporting precision. Exclude subsequent revisions; the August advance estimate does not resolve this target.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_08.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 0.3
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-07"
+      },
+      "label": "July 2026",
+      "value": 0.0
+    }
+  ],
+  "drivers": [
+    "August advance estimate of 0.2%",
+    "Mining and quarrying and retail increases partly offset by oil and gas extraction decreases"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/release-diffusion/2026-eng.pdf"
+  ],
+  "runAt": "2026-10-07T11:58:08Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast run stopped after an official-source fetch failure"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first official August monthly print for Table 36-10-0434-01, vector v65201210. Historical headline prints and the advance estimate concern seasonally adjusted real GDP by industry; the advance estimate is evidence, not the resolving print."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's July 2026 GDP release, published September 29, 2026.",
+      "result": "The fetched headline reports July 2026 monthly growth of 0.0%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read the August advance-estimate paragraph in the fetched July 2026 release.",
+      "result": "The August advance estimate is +0.2%. Mining and quarrying and retail increases were partly offset by oil and gas extraction decreases."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's May 2026 GDP release, published July 31, 2026.",
+      "result": "The fetched headline reports May 2026 monthly growth of +0.3%."
+    },
+    {
+      "kind": "text",
+      "text": "The official annual release calendar lists October 30, 2026 for August 2026 GDP by industry. The fetched July release independently confirms this date."
+    },
+    {
+      "kind": "text",
+      "text": "Fetching https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm failed with '400 Timeout fetching'. The production prompt explicitly requires stopping after a failed fetch. This is a failed run, not a valid forecast; null values indicate that no estimate or interval was issued."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The run stopped before combining a historical base rate with the August advance estimate or calculating sigma and an 80% interval. No remembered or invented history was substituted, and no implied bounds are asserted."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

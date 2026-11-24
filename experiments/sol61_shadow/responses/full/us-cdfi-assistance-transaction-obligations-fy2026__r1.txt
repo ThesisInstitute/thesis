@@ -1,0 +1,76 @@
+{
+  "slug": "us-cdfi-assistance-transaction-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "FY2026 CDFI assistance transaction obligations",
+  "question": "What is the FY2026 aggregated_amount in the registered USAspending API v2 spending_over_time query for Community Development Financial Institutions Fund awarding-subagency financial-assistance transactions, award type codes 02 through 11, grouped by fiscal_year at spending_level transactions, expressed in USD millions without seasonal adjustment, resolving on the registered query snapshot?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered spending_over_time query",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Preserve releasePolicy registered_query_snapshot. POST the registered query to the resolutionSourceUrl, with agency name Community Development Financial Institutions Fund, tier subtier, type awarding; award_type_codes 02, 03, 04, 05, 06, 07, 08, 09, 10, 11; group fiscal_year; spending_level transactions; and the FY2026 time-period filter. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001 to express USD millions. Resolve against the registered snapshot rather than later database updates. The supplied context does not specify an exact snapshot date or rounding convention; no additional rule is invented.",
+  "dataPointId": "usaspending.cdfi.assistance_transaction_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Required registered-query history unavailable",
+    "Available web tools cannot submit POST bodies",
+    "Exact resolution date absent from target context"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints/",
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/"
+  ],
+  "runAt": "2026-10-07T10:33:34Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target is the exact CDFI awarding-subagency assistance-transaction query, not an agency profile total, appropriation, program announcement, or broader award aggregate. Its registered_query_snapshot resolver takes precedence over generic first-print instructions."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "The initial web open returned Internal Error and no query results. This was an endpoint open, not execution of the registered POST query."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/docs/endpoints/",
+      "result": "Official API v2 documentation lists /api/v2/search/spending_over_time/ as POST and describes it as returning transaction aggregated amounts. No CDFI fiscal-year values were returned by this documentation fetch."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "click the spending_over_time endpoint link in https://api.usaspending.gov/docs/endpoints/",
+      "result": "The web tool reported: Failed to fetch https://api.usaspending.gov/api/v2/search/spending_over_time/: (405) Method Not Allowed. No registered POST request body was submitted and no historical values were fetched."
+    },
+    {
+      "kind": "text",
+      "text": "Available-tool inspection found no arbitrary HTTP POST capability. Shell networking is prohibited by the run instructions. Consequently the mandatory historical query cannot be executed with the available authorized tools."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. No admissible historical observations were fetched, so persistence, alternative model candidates, walk-forward scores, sigma, and interval arithmetic cannot be computed. Missing history is not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no numerical prior, update, or interval is issued. Null estimates and empty historicalContext record the fetch failure; they are not zero obligations or a valid forecast."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target context provides an expected window of 2026-10-15 through 2026-10-22 but no resolutionDate or resolutionDateBasis. The window endpoint is not an authorized resolution date, so resolutionDate remains null. Catalog checking was skipped under the independence override."
+    },
+    {
+      "kind": "text",
+      "text": "Forecast withheld under the explicit registered-query refusal rule. This JSON is a refusal record and cannot satisfy numeric-cell validation or be scored as a forecast. No substitute aggregates, invented history, model candidates, or artifact receipts are supplied."
+    }
+  ]
+}

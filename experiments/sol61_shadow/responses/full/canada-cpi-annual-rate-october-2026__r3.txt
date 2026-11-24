@@ -1,0 +1,187 @@
+{
+  "slug": "canada-cpi-annual-rate-october-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada CPI annual rate, October 2026",
+  "question": "What will Statistics Canada's FIRST PRINT of the October 2026 Canada all-items Consumer Price Index year-over-year percentage change be, using the not seasonally adjusted index in Table 18-10-0004-01, vector v41690973, rounded to one decimal place?",
+  "unit": "percent",
+  "pointEstimate": 2.9,
+  "ciLow": 2.3,
+  "ciHigh": 3.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-16",
+  "resolutionSource": "Statistics Canada, Consumer Price Index, Table 18-10-0004-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+  "resolutionRule": "Resolve on the original November 16, 2026 publication of Statistics Canada's Consumer Price Index for October 2026. Use Table 18-10-0004-01, Canada, All-items, not seasonally adjusted, index base 2002=100, WDS vector v41690973. Calculate 100*(October 2026 index/October 2025 index - 1) and round to one decimal place, matching the first release's Table 1 All-items row, October 2025 to October 2026 percentage-change column. The registered WDS source is https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods; the official release Table 1 at https://www150.statcan.gc.ca/n1/daily-quotidien/YYMMDD/t001a-eng.htm, or the identical table embedded in its release PDF, records the resolving first-print values. Ignore all later revisions and corrections, including same-day corrections. The release date was verified from the official Statistics Canada calendar.",
+  "dataPointId": "statcan.cpi.allitems.yoy.2026_10.first_print",
+  "historicalContext": [
+    {"period":{"type":"month","value":"2024-09"},"label":"2024-09","value":1.6},
+    {"period":{"type":"month","value":"2024-10"},"label":"2024-10","value":2.0},
+    {"period":{"type":"month","value":"2024-11"},"label":"2024-11","value":1.9},
+    {"period":{"type":"month","value":"2024-12"},"label":"2024-12","value":1.8},
+    {"period":{"type":"month","value":"2025-01"},"label":"2025-01","value":1.9},
+    {"period":{"type":"month","value":"2025-02"},"label":"2025-02","value":2.6},
+    {"period":{"type":"month","value":"2025-03"},"label":"2025-03","value":2.3},
+    {"period":{"type":"month","value":"2025-04"},"label":"2025-04","value":1.7},
+    {"period":{"type":"month","value":"2025-05"},"label":"2025-05","value":1.7},
+    {"period":{"type":"month","value":"2025-06"},"label":"2025-06","value":1.9},
+    {"period":{"type":"month","value":"2025-07"},"label":"2025-07","value":1.7},
+    {"period":{"type":"month","value":"2025-08"},"label":"2025-08","value":1.9},
+    {"period":{"type":"month","value":"2025-09"},"label":"2025-09","value":2.4},
+    {"period":{"type":"month","value":"2025-10"},"label":"2025-10","value":2.2},
+    {"period":{"type":"month","value":"2025-11"},"label":"2025-11","value":2.2},
+    {"period":{"type":"month","value":"2025-12"},"label":"2025-12","value":2.4},
+    {"period":{"type":"month","value":"2026-01"},"label":"2026-01","value":2.3},
+    {"period":{"type":"month","value":"2026-02"},"label":"2026-02","value":1.8},
+    {"period":{"type":"month","value":"2026-03"},"label":"2026-03","value":2.4},
+    {"period":{"type":"month","value":"2026-04"},"label":"2026-04","value":2.8},
+    {"period":{"type":"month","value":"2026-05"},"label":"2026-05","value":3.2},
+    {"period":{"type":"month","value":"2026-06"},"label":"2026-06","value":2.8},
+    {"period":{"type":"month","value":"2026-07"},"label":"2026-07","value":3.0},
+    {"period":{"type":"month","value":"2026-08"},"label":"2026-08","value":3.0}
+  ],
+  "drivers": [
+    "Recent headline inflation near 3%",
+    "Trailing-three mean wins the simple backtest",
+    "Fuel-supply and refining pressure",
+    "New Alberta and PEI fuel-tax reductions",
+    "Limited measured non-energy spillover"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/en/release-diffusion/2026-eng.pdf?st=JwXqPj0_",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "https://www.statcan.gc.ca/en/subjects-start/prices_and_price_indexes/consumer_price_indexes/faq",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241015/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241119/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241217/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250121/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250218/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250318/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250415/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250520/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250624/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250715/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250819/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250916/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251215/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260119/dq260119a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260217/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260316/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260519/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260720/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260817/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm",
+    "https://www.bankofcanada.ca/2026/09/fad-press-release-2026-09-02/",
+    "https://www.bankofcanada.ca/2026/09/navigating-uncertainty-and-adapting-to-change/",
+    "https://www.alberta.ca/alberta-energy-rebate",
+    "https://www.princeedwardisland.ca/en/news/province-suspends-provincial-fuel-tax-to-ease-cost-of-living"
+  ],
+  "runAt": "2026-10-07T12:46:00Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Canada October 2026 headline CPI: official first-print forecast"
+    },
+    {
+      "kind": "text",
+      "text": "Target: Statistics Canada Table 18-10-0004-01, Canada, All-items, not seasonally adjusted, vector v41690973; October 2026 year-over-year percentage change, first publication only. Preserve the supplied slug, unit and dataPointId. August 2026 is the latest available print, so the forecast horizon is two monthly observations. The supplied independence restriction overrides the catalog lookup; no Thesis records or local files were accessed."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official Statistics Canada release calendar https://www150.statcan.gc.ca/n1/en/release-diffusion/2026-eng.pdf?st=JwXqPj0_ and table metadata https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401.",
+      "result": "The calendar explicitly pairs November 16, 2026 with October 2026 CPI, and October 19, 2026 with September 2026 CPI. Table 18-10-0004-01 is monthly and not seasonally adjusted; latest release date is September 14, 2026. Calendar citation: [Statistics Canada release dates](https://www150.statcan.gc.ca/n1/en/release-diffusion/2026-eng.pdf?st=JwXqPj0_)."
+    },
+    {
+      "kind": "text",
+      "text": "The WDS endpoint rejected the web tool's GET request; no successful WDS data retrieval is claimed. History was fetched from the primary release Table 1, All-items row and same-month-prior-year percentage-change column, including the equivalent tables embedded in official release PDFs. These reproduce the registered vector's annual transform. Statistics Canada states that NSA CPI is ordinarily unrevised; seasonal-adjustment revisions concern a different series. December 2025's PDF Table 1 confirms 165.0 versus 161.2 and 2.4%; some archive HTML pages have later modification dates, so immutable archive custody is not claimed. Resolution still uses the original publication without correction exceptions. [Statistics Canada CPI methodology](https://www.statcan.gc.ca/en/subjects-start/prices_and_price_indexes/consumer_price_indexes/faq)."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open/search official release Table 1 All-items rows: https://www150.statcan.gc.ca/n1/daily-quotidien/241015/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/241119/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/241217/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/250121/t001a-eng.htm",
+      "result": "2024-09: 1.6% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/241015/t001a-eng.htm); 2024-10: 2.0% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/241119/t001a-eng.htm); 2024-11: 1.9% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/241217/t001a-eng.htm); 2024-12: 1.8% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250121/t001a-eng.htm). Values are the annual percentage-change column, not the monthly change or annual-average index."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open/search official release Table 1 All-items rows: https://www150.statcan.gc.ca/n1/daily-quotidien/250218/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/250318/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/250415/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/250520/t001a-eng.htm",
+      "result": "2025-01: 1.9% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250218/t001a-eng.htm); 2025-02: 2.6% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250318/t001a-eng.htm); 2025-03: 2.3% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250415/t001a-eng.htm); 2025-04: 1.7% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250520/t001a-eng.htm). Values are the annual percentage-change column, not the monthly change or annual-average index."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open/search official release Table 1 All-items rows: https://www150.statcan.gc.ca/n1/daily-quotidien/250624/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/250715/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/250819/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/250916/t001a-eng.htm",
+      "result": "2025-05: 1.7% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250624/t001a-eng.htm); 2025-06: 1.9% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250715/t001a-eng.htm); 2025-07: 1.7% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250819/t001a-eng.htm); 2025-08: 1.9% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/250916/t001a-eng.htm). Values are the annual percentage-change column, not the monthly change or annual-average index."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open/search official release Table 1 All-items rows: https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251215/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260119/dq260119a-eng.pdf",
+      "result": "2025-09: 2.4% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/251021/t001a-eng.htm); 2025-10: 2.2% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/251117/t001a-eng.htm); 2025-11: 2.2% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/251215/t001a-eng.htm); 2025-12: 2.4% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260119/dq260119a-eng.pdf). Values are the annual percentage-change column, not the monthly change or annual-average index."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open/search official release Table 1 All-items rows: https://www150.statcan.gc.ca/n1/daily-quotidien/260217/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260316/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.pdf ; https://www150.statcan.gc.ca/n1/daily-quotidien/260519/t001a-eng.htm",
+      "result": "2026-01: 2.3% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260217/t001a-eng.htm); 2026-02: 1.8% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260316/t001a-eng.htm); 2026-03: 2.4% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260420/dq260420a-eng.pdf); 2026-04: 2.8% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260519/t001a-eng.htm). Values are the annual percentage-change column, not the monthly change or annual-average index."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open/search official release Table 1 All-items rows: https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.pdf ; https://www150.statcan.gc.ca/n1/daily-quotidien/260720/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260817/t001a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm",
+      "result": "2026-05: 3.2% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.pdf); 2026-06: 2.8% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260720/t001a-eng.htm); 2026-07: 3.0% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260817/t001a-eng.htm); 2026-08: 3.0% YoY, fetched from [official release table](https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm). Values are the annual percentage-change column, not the monthly change or annual-average index."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate/reference class: 24 consecutive monthly first-print headline YoY rates, September 2024-August 2026. Derived mean 2.229167%, median 2.2%, sample level standard deviation 0.471334 percentage points, range 1.6%-3.2%. Last-print persistence is 3.0%; the June-August trailing-three mean is (2.8+3.0+3.0)/3 = 2.933333%. Persistence is the default prior before comparing simple rules."
+    },
+    {
+      "kind": "math",
+      "text": "Benchmark comparison, computed in memory from the fetched 24-print history: expanding walk-forward training begins with six prints, with two-month-ahead forecasts from February 2025-June 2026 and 17 realized targets. Persistence MAE = 0.358824 pp and RMSE = 0.483249 pp; trailing-three mean MAE = 0.354902 pp and RMSE = 0.435140 pp. The MAE advantage is small, but both metrics favor the trailing-three mean; select it as the outside-view prior. Expanding-mean and drift checks have RMSE 0.544108 and 0.551792 pp respectively. These are point-score checks, not independent interval calibration."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated before the agent forecast, using arithmetic on fetched official history and an explicit fallback-prior interval wrapper: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":3,\"p10\":2.3727912087520306,\"p50\":3,\"p90\":3.6272087912479694,\"interval80\":{\"low\":2.3727912087520306,\"high\":3.6272087912479694},\"interval90\":{\"low\":2.194986231630061,\"high\":3.805013768369939},\"interval_method\":\"fallback_prior_gaussian_successive_rate_changes_sqrt_two_month_horizon\",\"calibration_n\":23,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"horizon_months\":2,\"min_train_n\":6,\"n\":17,\"mae\":0.3588235294117647,\"rmse\":0.4832488093774323}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"trailing3_mean\",\"point\":2.9333333333333336,\"p10\":2.306124542085364,\"p50\":2.9333333333333336,\"p90\":3.560542124581303,\"interval80\":{\"low\":2.306124542085364,\"high\":3.560542124581303},\"interval90\":{\"low\":2.1283195649633946,\"high\":3.7383471017032726},\"interval_method\":\"fallback_prior_gaussian_successive_rate_changes_sqrt_two_month_horizon\",\"calibration_n\":23,\"train_cutoff\":\"2026-08\",\"walk_forward\":{\"horizon_months\":2,\"min_train_n\":6,\"n\":17,\"mae\":0.3549019607843138,\"rmse\":0.4351395238641949}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open latest primary CPI table https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm, Bank of Canada decision https://www.bankofcanada.ca/2026/09/fad-press-release-2026-09-02/ and September speech https://www.bankofcanada.ca/2026/09/navigating-uncertainty-and-adapting-to-change/.",
+      "result": "August headline CPI is 3.0%, gasoline 22.8%, CPI excluding gasoline 2.4%, and services 2.8% YoY; headline monthly NSA change is -0.1%. The Bank held its policy rate at 2.25% on September 2. Its September 21 speech reports roughly 0.2 percentage points of CPI inflation per 10% oil-price rise under normal conditions, and inflation upside if oil remains near US$100 per barrel with disrupted refining. These are official observations and mechanisms, not a fetched August-to-October fuel-price change. [Bank decision](https://www.bankofcanada.ca/2026/09/fad-press-release-2026-09-02/), [Bank speech](https://www.bankofcanada.ca/2026/09/navigating-uncertainty-and-adapting-to-change/)."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open provincial fuel-tax announcements https://www.alberta.ca/alberta-energy-rebate and https://www.princeedwardisland.ca/en/news/province-suspends-provincial-fuel-tax-to-ease-cost-of-living.",
+      "result": "Alberta's full provincial gasoline/diesel tax suspension resumes October 1, 2026, saving 13 cents/litre after its July-September rebate period. PEI suspends tax from September 26, 2026 through January 31, 2027, removing 8.47 cents/litre gasoline and 14.15 cents/litre diesel. These changes postdate August and provide a downside price mechanism because CPI includes indirect taxes. [Alberta announcement](https://www.alberta.ca/alberta-energy-rebate), [PEI announcement](https://www.princeedwardisland.ca/en/news/province-suspends-provincial-fuel-tax-to-ease-cost-of-living)."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view decomposition: level is the selected 2.933333% prior; recent momentum is already in its June-August window. Existing gasoline, shelter and travel pressures are already in the observed history and receive no extra adjustment. Newly implemented provincial fuel-tax cuts point down, while continuing refining disruptions and possible cost spillovers point up. Current national pump-price comparisons and the weights/pass-through needed to size those effects were not fetched. Consequently the numerical adjustment for each is 0 pp, reflecting insufficient quantitative evidence rather than an assertion that their economic effects cancel. Final delta versus the selected benchmark is 0 pp; versus persistence it is -0.066667 pp before rounding."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = trailing3_mean from 24 official monthly first prints, September 2024-August 2026; prior weight = 1, extra momentum, one-off and current policy adjustments = 0 pp. Point = (2.8+3.0+3.0)/3 = 2.933333%, rounded to 2.9%. For this rate-level series use its 23 successive monthly rate changes: sum(delta) = 1.4 pp, sum(delta^2) = 2.72 pp^2, mean(delta) = 1.4/23 = 0.060870 pp. sigma = sqrt((2.72 - 1.4^2/23)/22) = 0.346068 pp. Fallback-prior Gaussian interval, with a two-month random-walk horizon assumption: horizon sigma = sqrt(2)*0.346068 = 0.489414 pp; 80% half-width = 1.281552*0.489414 = 0.627209 pp. Bounds = 2.933333 +/- 0.627209 = [2.306125,3.560542]%, rounded to [2.3,3.6]%. The sqrt(2) widening accounts for two unseen prints; no additional discretionary regime multiplier is applied because recent energy and tax volatility remains in the calibration sample. The 90% half-width = 1.644854*0.489414 = 0.805014 pp, giving [2.128320,3.738347]%, rounded [2.1,3.7]%. Apparent final asymmetry comes solely from decimal rounding."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: the fixed unrounded +/-0.627209 pp band covers 14 of 17 historical two-month trailing-three-mean forecast errors and 8 of the last 10. This is an in-sample width check using the full-history sigma, not a claim of walk-forward interval calibration. The limited sample, overlapping forecast horizons and energy regime leave uncertainty about nominal 80% coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration and falsification: upside risk would land above the interval, above 3.6%, if further loss of refining capacity and prolonged oil-shipping disruption lift fuel prices while higher transport costs spread into non-energy goods and services. Downside risk would land below the interval, below 2.3%, if refining margins and global fuel prices fall sharply, provincial tax savings pass through, and non-energy inflation also softens. A September release showing renewed broad monthly price acceleration would move the point up; confirmed falling national pump prices and softer services inflation would move it down. Tax-cut direction alone does not establish a national magnitude."
+    },
+    {
+      "kind": "forecast",
+      "point": 2.9,
+      "ciLow": 2.3,
+      "ciHigh": 3.6
+    }
+  ]
+}

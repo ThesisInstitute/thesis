@@ -1,0 +1,65 @@
+{
+  "slug": "snap-participation-august-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US SNAP participation, August 2026",
+  "question": "What is the first official USDA FNS national monthly Persons total for August 2026, converted from thousands to millions?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA FNS SNAP national monthly participation table",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Use the first official print of August 2026 national monthly SNAP Persons, multiplying the reported thousands by 0.001 and preserving the published precision. Exclude subsequent revisions and corrections.",
+  "dataPointId": "usda.fns.snap.persons.august_2026",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap"
+  ],
+  "runAt": "2026-10-07T00:02:39Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is August 2026 national monthly SNAP Persons, resolved on its first official print and expressed in millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap using the web tool.",
+      "result": "The fetch failed with HTTP 403 Forbidden. No participation statistics were retrieved."
+    },
+    {
+      "kind": "text",
+      "text": "The prompt explicitly requires stopping after a failed fetch. This run therefore stopped without substituting remembered values or search-summary table values."
+    },
+    {
+      "kind": "text",
+      "text": "No official historical base rate or reference class was fetched. The mandatory six distinct historical prints are unavailable for this run."
+    },
+    {
+      "kind": "text",
+      "text": "The official release date and a more specific stable resolution-table URL were not verified. The supplied release window is not treated as calendar verification."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sample, or adjustment components could be estimated. Sigma and final implied bounds remain unavailable because the official history was not retrieved."
+    },
+    {
+      "kind": "math",
+      "text": "The registered conversion is reported Persons in thousands multiplied by 0.001. No point estimate or 1.28*sigma interval was calculated."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

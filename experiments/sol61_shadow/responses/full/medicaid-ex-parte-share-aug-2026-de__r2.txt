@@ -1,0 +1,91 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-de",
+  "country": "US",
+  "type": "data",
+  "title": "Delaware ex parte renewal share, August 2026",
+  "question": "What will Delaware's ex parte renewal share be for the August 2026 reporting period, using the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, as first publicly published, without seasonal adjustment and computed to one decimal percent?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Delaware's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.de.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original-submission renewal outcomes",
+    "Exact numerator and denominator unavailable",
+    "First-print historical dispersion unavailable",
+    "Registered publication date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=5&offset=0",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+  ],
+  "runAt": "2026-10-07T12:18:47Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official first-print history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is Delaware's August 2026 ex parte renewal share from the first public original (O) submission. The ledger identity and resolver are preserved. Later updated submissions and corrections cannot replace the first print."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search the official CMS dataset and federal data catalog for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The official dataset is updated September 25, 2026 and contains 3,876 rows and 22 columns. Its dictionary identifies ex parte renewals as Metric 5a1, total renewed as Metric 5a, and renewals due as Metric 5. O means Original and U means Updated. The federal catalog identifies renewal-dataset-september-2026-release.csv as its distribution."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot.",
+      "result": "CMS lists June 2026 released September 25, 2026; May 2026 released August 28, 2026; April 2026 released July 31, 2026; March 2026 released June 26, 2026; February 2026 released May 29, 2026; January 2026 released April 24, 2026. The page does not verify an August 2026 release on December 15, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open the official Eligibility Processing Data Report Specifications and find Table 10.",
+      "result": "Table 10's August 2024 example gives September 8 as the original state report deadline, November 30 as the updated outcome cutoff, and December 15, 2024 as the updated state report deadline. These are submission deadlines, not CMS public release dates."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. Direct requests to the registered dataset API and its official September-release CSV returned inaccessible errors. The indexed dataset page exposed Alaska rows, not Delaware. No admissible Delaware numerator-denominator history was obtained. This is an access failure, not evidence that the official source exposes fewer than six prints; no history-floor exception is claimed."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancies: the registered December 15 date is retained but could not be verified as an official scheduled publication day. The resolver also does not explicitly identify whether its denominator is renewals due or successful renewals. The official dictionary distinguishes those quantities; I have not silently selected another target."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable for the exact registered first-print share. Last-print persistence, persistence plus panel shrinkage, and walk-forward model comparisons cannot be computed without the required official observations. No thesis_model_candidate_v1 estimates or calibration statistics are manufactured."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the intended prior is the strongest validated persistence or panel benchmark from fetched original submissions. That historical sample is unavailable, so sigma = unavailable; the intended successive-change calculation and half-width = 1.28*sigma cannot be evaluated. No level, momentum, one-off, or policy adjustment is quantified. Point and implied 80% bounds remain null."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would be an August renewal cohort with more beneficiaries verifiable automatically; downside risk would be failed data matching or a cohort requiring more renewal forms. Whether either would land outside the interval cannot be evaluated because no calibrated interval was produced."
+    },
+    {
+      "kind": "text",
+      "text": "The independence instruction precludes the production prompt's Thesis catalog lookup. No Thesis forecast or record was accessed. This object parses as JSON but is not a valid publishable forecast cell: numeric estimates, required history, model calibration, interval arithmetic, and official calendar verification are missing. Null estimates disclose the dropped forecast rather than inventing evidence."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

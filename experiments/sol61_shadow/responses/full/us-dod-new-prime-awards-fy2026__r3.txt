@@ -1,0 +1,93 @@
+{
+  "slug": "us-dod-new-prime-awards-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD new prime awards, FY2026",
+  "question": "What will USAspending API v2 report in new_award_count for agency 097 (Department of Defense), fiscal_year=2026, in the registered query snapshot, multiplied by 0.000001 and expressed in millions of awards?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 new award count",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026",
+  "resolutionRule": "Use GET https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026, read new_award_count, and multiply the integer count by 0.000001 to express millions, retaining six decimal places. Preserve the registered_query_snapshot policy; later updated counts do not replace the registered snapshot. The supplied target context gives an expected snapshot window of 2026-10-15 through 2026-10-22 but does not supply the exact resolutionDate or snapshot capture time. This run cannot establish either from the official documentation and refuses to invent them.",
+  "dataPointId": "usaspending.dod.new_prime_awards.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Exact registered query history unavailable",
+    "Snapshot capture date absent from target context",
+    "Continuously updated official data"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026"
+  ],
+  "runAt": "2026-10-07T12:36:23Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: registered query could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target identity and millions conversion are preserved from the supplied ledger context. The registered_query_snapshot policy controls this target, rather than a conventional statistical first print. No substitute agency aggregate or unrelated endpoint value is admissible."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open exact registered queries with fiscal_year=2025, fiscal_year=2024, and fiscal_year=2023.",
+      "result": "All requests returned Internal Error (). For FY2025, the tool reported: 'URL https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2025 is not accessible via this tool.' The FY2024 and FY2023 URLs returned the same failure. No JSON body or new_award_count was returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open exact registered queries with fiscal_year=2022, fiscal_year=2021, and fiscal_year=2020 using both available web tools.",
+      "result": "All requests returned Internal Error (). For FY2022, the tool reported: 'URL https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2022 is not accessible via this tool.' The FY2021 and FY2020 URLs returned the same failure through both tools. No new_award_count value was retrieved."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026; retry historical queries through the second web tool and URL redirect/rendering variants.",
+      "result": "The FY2026 query returned Internal Error () and 'URL https://api.usaspending.gov/api/v2/agency/097/awards/new/count/?fiscal_year=2026 is not accessible via this tool.' Historical retries also failed. No registered-query award count was fetched. Years in these failure reports are request parameters, not numeric outcome evidence."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://api.usaspending.gov/docs/endpoints and https://www.usaspending.gov/data/data-sources-download.pdf.",
+      "result": "Official API v2 documentation identifies the registered path as a GET endpoint for new awards in a single fiscal year. The official data-sources PDF states that USAspending updates daily after its nightly pipeline. Neither source supplies the requested DoD historical counts or an official October snapshot release date."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. The exact queries for all six requested prior fiscal years failed, so there is no admissible historicalContext, persistence estimate, reference-class distribution, or realized-dispersion calculation. This is a fetch failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates cannot be generated without fetched numeric observations. Persistence and competing time-series estimates would require inventing their training data; none is submitted."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: no numerical prior can be grounded; no numerical updates are applied; sigma and the 1.28*sigma half-width cannot be computed. The point estimate and interval are null to record refusal, not zero-valued forecasts."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: the supplied target context provides only an expected window. It omits a literal resolutionDate and exact snapshot timing. Daily updates do not establish a scheduled release-calendar date; selecting the window's end would invent a resolver detail."
+    },
+    {
+      "kind": "text",
+      "text": "Without a computed interval, an outside the interval scenario cannot be quantified. Snapshot timing and subsequent data updates could change the measured count, reinforcing the need for the registered capture rule."
+    },
+    {
+      "kind": "text",
+      "text": "No valid forecast cell is issued. The null estimates and empty history intentionally fail numeric forecast validation and disclose the evidence gap. Producing a forecast requires successful exact-query retrieval and an established registered snapshot date. This JSON was checked to parse. No Thesis/Brier source or local file was accessed."
+    }
+  ]
+}

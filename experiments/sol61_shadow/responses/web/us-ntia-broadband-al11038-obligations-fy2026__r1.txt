@@ -1,0 +1,90 @@
+{
+  "slug": "us-ntia-broadband-al11038-obligations-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "NTIA AL 11.038 obligations, FY2026",
+  "question": "What will USAspending's first registered-query snapshot report for FY2026 financial-assistance transaction obligations under Assistance Listing 11.038, grouped by fiscal year and expressed in USD millions?",
+  "unit": "usd_millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2 registered-query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Retain the registered query: POST to the specified endpoint with spending_level transactions, group fiscal_year, program_numbers [11.038], and award_type_codes [02,03,04,05,06,07,08,09,10,11]. Read results[time_period.fiscal_year=2026].aggregated_amount and multiply by 0.000001, preserving returned precision. Resolve on the first official registered-query snapshot; subsequent revisions do not replace it. The exact snapshot date was not verified.",
+  "dataPointId": "usaspending.ntia.broadband_al11038_obligations.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://www.ntia.gov/sites/default/files/2024-07/pwscif-nofo-2-amended.pdf",
+    "https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov",
+    "https://tfx.treasury.gov/data-transparency/resources",
+    "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx"
+  ],
+  "runAt": "2026-10-07T12:45:13Z",
+  "status": "refused",
+  "refusalReason": "The mandatory registered POST query could not be executed with the available web tools. Consequently, canonical historical prints could not be fetched, and no supported forecast or interval can be issued. An exact official resolution date also remains unverified. Null estimates and empty history explicitly represent this refusal.",
+  "fetchEvidence": [
+    {
+      "url": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "attemptedMethod": "GET",
+      "requiredMethod": "POST",
+      "result": "Two URL retrieval attempts returned HTTP 405 Method Not Allowed. Neither executed the registered POST query."
+    },
+    {
+      "url": "https://api.usaspending.gov/docs/endpoints",
+      "result": "The official endpoint index identifies /api/v2/search/spending_over_time/ as POST. Available web tools expose no request-method or request-body parameter; shell networking is outside the authorized scope."
+    },
+    {
+      "url": "https://tfx.treasury.gov/system/files/2025-09/fy26-dabs-reporting-window-schedule.xlsx",
+      "result": "The official linked FY26 schedule could not be read: HTTP 400 Unsupported content-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet."
+    }
+  ],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Refusal: required registered-query evidence unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target remains the registered FY2026 transaction-obligation query for Assistance Listing 11.038. Agency totals, appropriations, award announcements, and other aggregates cannot supply its historicalContext."
+    },
+    {
+      "kind": "text",
+      "text": "Fetch failure: URL retrieval at https://api.usaspending.gov/api/v2/search/spending_over_time/ returned HTTP 405. The official documentation at https://api.usaspending.gov/docs/endpoints confirms that POST is required. No POST query was executed."
+    },
+    {
+      "kind": "text",
+      "text": "The required base rate and reference class could not be established because no canonical historical query results were fetched. Missing results are not zero obligations and do not establish that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Concrete ledger discrepancy: the official NTIA funding notice identifies Assistance Listing 11.038 as the Public Wireless Supply Chain Innovation Fund. The ledger's broadband description is misleading; the registered program code and target identity are retained. Source: https://www.ntia.gov/sites/default/files/2024-07/pwscif-nofo-2-amended.pdf."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date verification failed. Treasury's current reporting requirements specify financial-assistance reporting at least twice monthly and within 30 days of an award action or modification. These requirements do not announce this target's snapshot date. The linked FY26 schedule was unreadable, so no date was inferred from the supplied expected window. Source: https://tfx.treasury.gov/tfm/volume1/part2/chapter-6000-agency-reporting-requirements-usaspendinggov."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or historical model was fitted because the mandatory historical sample is unavailable. Level, momentum, one-off, and policy adjustments cannot be quantified; sigma and the corresponding 1.28*sigma half-width cannot be computed. Final bounds remain null."
+    },
+    {
+      "kind": "math",
+      "text": "The registered transformation is aggregated_amount multiplied by 0.000001. No fetched aggregated_amount values are available, so neither a point calculation nor empirical interval arithmetic is possible."
+    },
+    {
+      "kind": "text",
+      "text": "Additional reported obligations would create upside risk; deobligations or reporting delays would create downside risk. With no estimated 80% interval, no numerical scenario can honestly be classified as outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

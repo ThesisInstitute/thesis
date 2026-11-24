@@ -1,0 +1,68 @@
+{
+  "slug": "us-dod-small-business-contract-obligation-share-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD small-business contract obligation share, FY2026",
+  "question": "What percentage of FY2026 Department of Defense prime-contract transaction obligations is assigned to recipients classified as small_business by the exact registered USAspending API v2 spending_over_time query, resolving on the registered_query_snapshot?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, registered spending_over_time query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+  "resolutionRule": "Preserve the registered_query_snapshot resolver. POST the registered fiscal-year query to the resolutionSourceUrl, with group fiscal_year, spendingLevel transactions, Department of Defense as the awarding toptier agency, and awardTypeCodes A, B, C, D. Read results[time_period.fiscal_year=2026].aggregated_amount separately for numeratorRecipientTypeNames [small_business] and denominatorRecipientTypeNames []; apply the registered ratio_percent operation with factor 1. Resolve from the registered snapshot, not later API revisions. The supplied context does not specify the exact snapshot date or rounding convention.",
+  "dataPointId": "usaspending.dod.small_business_contract_obligation_share.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "https://api.usaspending.gov/docs/endpoints"
+  ],
+  "runAt": "2026-10-07T10:33:25Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: exact registered-query history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The target is defined by the registered transaction query, not a published agency-profile total or small-business scorecard. The query must be executed for each historical fiscal year. No substitute series is admissible."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "result": "The exact official endpoint returned HTTP 405 Method Not Allowed. This was a web open, not an executed POST; no obligation amounts were returned."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "open and find spending_over_time at https://api.usaspending.gov/docs/endpoints",
+      "result": "The fetched official API v2 documentation identifies /api/v2/search/spending_over_time/ as a POST endpoint returning transaction aggregates. It supplies no historical values for the registered filters."
+    },
+    {
+      "kind": "text",
+      "text": "Inspection of both available web-tool schemas found no HTTP-method or request-body parameter, and tool discovery found no callable generic POST or USAspending query tool. Shell networking is prohibited by the run instructions. Therefore the required historical POST requests could not be executed."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate unavailable: no exact-series historical observations were fetched. The empty historicalContext records fetch failure, not evidence that the official source exposes fewer than six prints. Persistence, model candidates, sigma, and forecast intervals cannot be computed honestly."
+    },
+    {
+      "kind": "text",
+      "text": "The target context supplies an expected window of 2026-10-15 through 2026-10-22 but no resolutionDate or exact snapshot-selection rule. The window cannot establish an official scheduled release date. The registered_query_snapshot policy is preserved rather than changed to a conventional first-print policy."
+    },
+    {
+      "kind": "tool",
+      "tool": "exec_command",
+      "call": "date -u +%Y-%m-%dT%H:%M:%SZ",
+      "result": "2026-10-07T10:33:25Z"
+    },
+    {
+      "kind": "text",
+      "text": "This is an explicit refusal, not a valid numeric forecast cell. Null estimates and a null resolutionDate denote unavailable information; they are not predictions. Numeric, historical-depth, calibration, and resolution-date validation requirements remain unmet. No activity receipts were fabricated, no files were accessed or modified, and no prohibited forecast sources were visited."
+    }
+  ]
+}

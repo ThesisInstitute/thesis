@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "jolts-quits-rate-october-2026",
+    "country": "US",
+    "type": "data",
+    "title": "October 2026 JOLTS quits rate: forecast unavailable",
+    "question": "What will the first BLS print of the October 2026 total nonfarm seasonally adjusted quits rate be?",
+    "unit": "percent",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": "2026-12-01",
+    "resolutionSource": "BLS Job Openings and Labor Turnover Survey, Table 4",
+    "resolutionSourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR",
+    "resolutionRule": "Resolve to the first official October 2026 value for total nonfarm seasonally adjusted quits rate, series JTS000000000000000QUR, in percent at the published precision. Ignore subsequent revisions.",
+    "dataPointId": "bls.jolts.quits_rate.2026_10.first_print",
+    "historicalContext": [],
+    "drivers": [],
+    "sourceContext": [],
+    "runAt": "2026-10-06T22:16:22Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast stopped because the official-source fetch failed"
+      },
+      {
+        "kind": "text",
+        "text": "The registered target is October 2026 total nonfarm seasonally adjusted quits rate, BLS series JTS000000000000000QUR, first print."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open https://api.bls.gov/publicAPI/v2/timeseries/data/JTS000000000000000QUR?startyear=2024&endyear=2026 and https://www.bls.gov/news.release/jolts.t04.htm.",
+        "result": "The lookup failed with: Fatal error: network error: error sending request. No source response or numerical observations were returned."
+      },
+      {
+        "kind": "text",
+        "text": "The mandatory base rate could not be fetched. Following the explicit fetch-failure instruction, the run stopped without substituting remembered values."
+      },
+      {
+        "kind": "text",
+        "text": "December 1, 2026 is the supplied ledger resolution date; it was not verified from an official calendar in this run."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: No historical sample was obtained, so sigma, adjustment components, and an 80% interval cannot be calculated. Null forecast fields indicate failure and must not be treated as a valid forecast."
+      },
+      {
+        "kind": "forecast",
+        "point": null,
+        "ciLow": null,
+        "ciHigh": null
+      }
+    ]
+  }
+]

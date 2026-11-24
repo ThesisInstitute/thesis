@@ -1,0 +1,128 @@
+{
+  "slug": "us-dod-prime-award-transactions-fy2026",
+  "country": "US",
+  "type": "data",
+  "status": "refused",
+  "title": "DoD FY2026 prime award transactions",
+  "question": "What will USAspending API agency 097 transaction_count for FY2026 equal, in millions, at the registered query snapshot?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+  "resolutionRule": "Resolve the registered_query_snapshot using transaction_count from the exact registered FY2026 query, multiplied by 0.000001. Preserve integer-count precision as six decimal places in millions and exclude subsequent revisions. The required official resolution date could not be verified.",
+  "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+  "historicalContext": [
+    {
+      "period": {"type": "fiscal_year", "value": "2020"},
+      "label": "FY2020",
+      "value": 4.059219
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2021"},
+      "label": "FY2021",
+      "value": 4.362094
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2022"},
+      "label": "FY2022",
+      "value": 4.377453
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2023"},
+      "label": "FY2023",
+      "value": 4.43008
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2024"},
+      "label": "FY2024",
+      "value": 4.448038
+    },
+    {
+      "period": {"type": "fiscal_year", "value": "2025"},
+      "label": "FY2025",
+      "value": 4.516581
+    }
+  ],
+  "drivers": [
+    "DoD procurement reporting delay",
+    "Nightly transaction ingestion",
+    "Snapshot timing and historical backfills"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025",
+    "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+    "https://www.usaspending.gov/data/data-sources-download.pdf",
+    "https://www.fpds.gov/common/html/dodDataAvailability.html",
+    "https://nfc.usda.gov/FSS/clientservices/fms/DATA_Act/index.php"
+  ],
+  "runAt": "2026-10-07T12:49:05Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: official resolution date unverified"
+    },
+    {
+      "kind": "text",
+      "text": "The exact series is usaspending.agency.097.awards.transaction_count, obtained through the registered agency awards query. All historical anchors use that query and its specified conversion to millions."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020 and the identical query with fiscal_year=2021.",
+      "result": "Fetched transaction_count: FY2020 4059219; FY2021 4362094."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022 and the identical query with fiscal_year=2023.",
+      "result": "Fetched transaction_count: FY2022 4377453; FY2023 4430080."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024 and the identical query with fiscal_year=2025.",
+      "result": "Fetched transaction_count: FY2024 4448038; FY2025 4516581."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026.",
+      "result": "Fetched transaction_count 3218036, equivalent to 3.218036 million; latest_action_date 2026-09-30T00:00:00."
+    },
+    {
+      "kind": "math",
+      "text": "The six-period annual-flow reference class has base rate mean 4.3655775 million. sigma = sqrt(sum((x - 4.3655775)^2) / 5) = 0.159856846 million. The prescribed reference-class half-width is 1.28*sigma = 0.204616763 million."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: A snapshot-persistence prior would start from the fetched current 3.218036 million, with historical dispersion estimated from FY2020-FY2025 annual flow values. Reporting arrivals, one-off backfills, and policy effects would require adjustments for a specified snapshot date. No final adjustment, point estimate, or interval is issued because that date was not verified."
+    },
+    {
+      "kind": "text",
+      "text": "Official USAspending documentation states that data update after a nightly pipeline and that DoD procurement data have a 90-day delay. Its monthly reporting calendar concerns Files A/B/C rather than an annual release of this transaction-count query. These facts do not verify a particular resolution date in the registered October 15-22 window."
+    },
+    {
+      "kind": "text",
+      "text": "The linked official reporting-calendar spreadsheet fetch failed with '(400) OK'. No fetched official calendar or announcement established the required resolutionDate. Selecting a date from the window or nightly cadence would violate the instruction against inferring the date."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk would be a large reporting backfill; a downside risk would be stalled ingestion or removal of duplicate transactions. Either could fall outside the interval of a snapshot model, but final bounds cannot be specified without a verified resolution date."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

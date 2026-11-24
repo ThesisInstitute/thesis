@@ -1,0 +1,41 @@
+[
+  {
+    "slug": "belgium-unemployment-rate-september-2026",
+    "country": "BE",
+    "type": "data",
+    "title": "Belgium September 2026 unemployment forecast unavailable",
+    "question": "What is Eurostat's first official print of Belgium's seasonally adjusted total unemployment rate for September 2026?",
+    "unit": "percent",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": null,
+    "resolutionSource": "Eurostat monthly unemployment release and une_rt_m",
+    "resolutionSourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/une_rt_m/default/table?lang=en",
+    "resolutionRule": "Resolve using the first officially published September 2026 Belgium unemployment rate in une_rt_m, retaining its published precision and excluding subsequent revisions or corrections.",
+    "dataPointId": "eurostat.une_rt_m.unemployment_rate.belgium.2026_09.first_print",
+    "historicalContext": [],
+    "drivers": [],
+    "sourceContext": [
+      "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/une_rt_m?lang=en&geo=BE&unit=PC_ACT&age=Y15-74&sex=T&s_adj=SA&sinceTimePeriod=2025-09"
+    ],
+    "runAt": "2026-10-06T22:16:23Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast unavailable: official-source fetch failed"
+      },
+      {
+        "kind": "text",
+        "text": "The official Eurostat history request failed with a network error. The production instructions require stopping after a failed fetch. Search-result summaries were not used as statistical evidence. No historical values, base rate, sigma, point estimate, or interval were invented. The official resolution date was not verified. Null forecast fields explicitly mark this as a failed run rather than a valid forecast."
+      },
+      {
+        "kind": "tool",
+        "tool": "official.lookup",
+        "call": "Open the Eurostat une_rt_m API for Belgium, seasonally adjusted, total sex, ages 15\u201374, percent of the active population, from September 2025.",
+        "result": "Fatal error: network error: error sending request. No numeric observations were fetched."
+      }
+    ]
+  }
+]

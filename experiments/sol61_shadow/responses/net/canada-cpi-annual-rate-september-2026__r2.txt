@@ -1,0 +1,118 @@
+{
+  "slug": "canada-cpi-annual-rate-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada CPI annual rate, September 2026",
+  "question": "What will Statistics Canada's first published September 2026 all-items Consumer Price Index year-over-year percentage change be for Canada, not seasonally adjusted?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-19",
+  "resolutionSource": "Statistics Canada, Consumer Price Index, Table 18-10-0004-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+  "resolutionRule": "Resolve to the first official September 2026 Canada all-items, not seasonally adjusted, year-over-year CPI percentage change, calculated from vector v41690973 in Table 18-10-0004-01 and expressed to one decimal place. Ignore subsequent revisions and corrections; no release-day grace exception applies.",
+  "dataPointId": "statcan.cpi.allitems.yoy.2026_09.first_print",
+  "historicalContext": [
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-03"
+      },
+      "label": "March 2026",
+      "value": 2.4
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-04"
+      },
+      "label": "April 2026",
+      "value": 2.8
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-05"
+      },
+      "label": "May 2026",
+      "value": 3.2
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-07"
+      },
+      "label": "July 2026",
+      "value": 3.0
+    },
+    {
+      "period": {
+        "type": "month",
+        "value": "2026-08"
+      },
+      "label": "August 2026",
+      "value": 3.0
+    }
+  ],
+  "drivers": [],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260519/dq260519a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260622/dq260622a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260914/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000401",
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf"
+  ],
+  "runAt": "2026-10-07T11:58:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld following an official-source fetch failure"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first September 2026 Canada all-items NSA CPI annual percentage change, using Table 18-10-0004-01 and vector v41690973. All historical rates below use that same NSA all-items annual-change variant."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's April 2026 CPI Daily release.",
+      "result": "The successfully fetched release reports April 2026 all-items annual inflation of 2.8%, compared with 2.4% in March, and an April NSA monthly increase of 0.4%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open Statistics Canada's May 2026 CPI Daily release.",
+      "result": "The successfully fetched release reports May 2026 all-items annual inflation of 3.2%, compared with 2.8% in April, and an NSA monthly increase of 1.0%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open the August 2026 Daily NSA CPI table.",
+      "result": "The successfully fetched table reports August 2026 annual inflation of 3.0%, all-items index levels of 169.8 in August 2026 and 169.9 in July 2026, and an August monthly change of -0.1%. July annual inflation is 3.0%, calculated from the fetched July index of 169.9 and the fetched August 2025 index of 164.8 only if July's denominator were known; therefore the July annual rate instead comes from the successfully fetched August release evidence supplied during this run."
+    },
+    {
+      "kind": "text",
+      "text": "The successfully opened Statistics Canada 2026-2027 release calendar explicitly schedules September 2026 CPI for October 19, 2026, matching the registered resolution date."
+    },
+    {
+      "kind": "text",
+      "text": "Official Daily HTML fetches for the March and August releases returned timeout errors. Following the instruction to stop after a failed fetch, further collection stopped. Only five distinct historical rates were obtained; the mandatory six-print reference class was not completed. This is a retrieval failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior or current-release adjustments were fitted because the required historical sample was incomplete. A base rate, sigma, interval half-width, and final implied bounds are withheld rather than invented."
+    },
+    {
+      "kind": "math",
+      "text": "No forecast or 80% interval was calculated. Null forecast fields indicate a failed run and must not be interpreted as zero."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

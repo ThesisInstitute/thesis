@@ -1,0 +1,165 @@
+{
+  "slug": "canada-ei-regular-beneficiaries-august-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada EI regular beneficiaries, August 2026",
+  "question": "What will Statistics Canada first publish for August 2026 in Table 14-10-0011-01, vector v64549350: Canada regular Employment Insurance beneficiaries, both sexes, age 15 years and over, seasonally adjusted, expressed in thousands of persons?",
+  "unit": "thousands",
+  "pointEstimate": 547.05,
+  "ciLow": 533.18,
+  "ciHigh": 560.92,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-22",
+  "resolutionSource": "Statistics Canada, Employment Insurance, August 2026; Table 14-10-0011-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350",
+  "resolutionRule": "Resolve on the FIRST PRINT for reference month 2026-08 of Statistics Canada Table 14-10-0011-01, vector v64549350, Canada, Regular benefits, Both sexes, 15 years and over, seasonally adjusted. Take the first published August value in persons and multiply by 0.001 to obtain thousands; retain the table's precision, displayed to 0.01 thousand. The official next-release announcement specifies October 22, 2026. Freeze the initial publication: later revisions and corrections do not change the resolved outcome. Archived selected Table 1 extracts of this exact table supply historical first prints.",
+  "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.august_2026.first_print",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2024-05"}, "label": "2024-05", "value": 463.89},
+    {"period": {"type": "month", "value": "2024-06"}, "label": "2024-06", "value": 473.98},
+    {"period": {"type": "month", "value": "2024-07"}, "label": "2024-07", "value": 488.51},
+    {"period": {"type": "month", "value": "2024-08"}, "label": "2024-08", "value": 494.07},
+    {"period": {"type": "month", "value": "2024-09"}, "label": "2024-09", "value": 481.69},
+    {"period": {"type": "month", "value": "2024-10"}, "label": "2024-10", "value": 484.68},
+    {"period": {"type": "month", "value": "2024-11"}, "label": "2024-11", "value": 481.86},
+    {"period": {"type": "month", "value": "2024-12"}, "label": "2024-12", "value": 480.09},
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 477.64},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": 494.13},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 496.72},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 519.54},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": 516.62},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 541.43},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 551.87},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 551.67},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 543.74},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 553.46},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 565.96},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 569.11},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 554.83},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 542.11},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 548.00},
+    {"period": {"type": "month", "value": "2026-07"}, "label": "2026-07", "value": 547.05}
+  ],
+  "drivers": [
+    "July beneficiary stock anchors persistence",
+    "August unemployment unchanged despite lower employment",
+    "Existing temporary EI support already in July baseline",
+    "First-print volatility and seasonal revisions"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/240718/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/240822/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/240919/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241024/dq241024a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241121/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/241218/dq241218a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250123/dq250123b-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250220/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250320/dq250320b-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250417/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250522/dq250522b-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250619/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250724/dq250724b-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250821/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250918/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251023/dq251023b-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251120/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251218/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260122/dq260122a-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260219/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260325/t001a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260423/dq260423c-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260522/t001b-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101&request_locale=en",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260819/dq260819d-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260522/dq260522b-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm",
+    "https://www.canada.ca/en/employment-social-development/programs/ei/ei-list/reports/premium/rates2027.html"
+  ],
+  "runAt": "2026-10-07T12:41:56Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "First-print forecast for Canada's August 2026 regular EI beneficiary stock"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is national seasonally adjusted regular EI beneficiaries in exact Table 14-10-0011-01, vector v64549350, converted from persons to thousands. Preserve the supplied slug, unit and dataPointId. The release-calendar branch applies. The supplied expected window ends October 21, but the official next-release announcement specifies October 22; use 2026-10-22 and retain the same August target. Catalogue verification was omitted under this run's independence restriction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the exact official table and July release's next-release announcement.",
+      "result": "The [exact table](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001101&request_locale=en) reports July 2026 = 547,050 persons; its current-vintage March 2026 figure is 550,440, demonstrating why revised history cannot replace original prints. The [July release](https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm) reports July +0.5% monthly and explicitly announces August data for October 22, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search/open/find archived numerical Table 1 extracts of Table 14-10-0011-01 for May 2024 through March 2025.",
+      "result": "2024-05: 463,890 persons ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/240718/t001a-eng.htm)); 2024-06: 473,980 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/240822/t001a-eng.htm)); 2024-07: 488,510 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/240919/t001a-eng.htm)); 2024-08: 494,070 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/241024/dq241024a-eng.pdf)); 2024-09: 481,690 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/241121/t001b-eng.htm)); 2024-10: 484,680 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/241218/dq241218a-eng.pdf)); 2024-11: 481,860 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250123/dq250123b-eng.pdf)); 2024-12: 480,090 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250220/t001b-eng.htm)); 2025-01: 477,640 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250320/dq250320b-eng.pdf)); 2025-02: 494,130 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250417/t001b-eng.htm)); 2025-03: 496,720 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250522/dq250522b-eng.pdf)). All are the Canada, Both sexes, latest-period column, seasonally adjusted regular beneficiaries, from exact Table 14-10-0011-01 extracts; comparison columns are excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search/open/find archived numerical Table 1 extracts of Table 14-10-0011-01 for April through September 2025.",
+      "result": "2025-04: 519,540 persons ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250619/t001a-eng.htm)); 2025-05: 516,620 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250724/dq250724b-eng.pdf)); 2025-06: 541,430 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250821/t001a-eng.htm)); 2025-07: 551,870 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/250918/t001a-eng.htm)); 2025-08: 551,670 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/251023/dq251023b-eng.pdf)); 2025-09: 543,740 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/251120/t001a-eng.htm)). All are the Canada, Both sexes, latest-period column, seasonally adjusted regular beneficiaries, from exact Table 14-10-0011-01 extracts; comparison columns are excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search/open/find archived numerical Table 1 extracts of Table 14-10-0011-01 for October 2025 through March 2026.",
+      "result": "2025-10: 553,460 persons ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/251218/t001b-eng.htm)); 2025-11: 565,960 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/260122/dq260122a-eng.pdf)); 2025-12: 569,110 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/260219/t001b-eng.htm)); 2026-01: 554,830 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/260325/t001a-eng.htm)); 2026-02: 542,110 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/260423/dq260423c-eng.pdf)); 2026-03: 548,000 ([original Table 1](https://www150.statcan.gc.ca/n1/daily-quotidien/260522/t001b-eng.htm)). All are the Canada, Both sexes, latest-period column, seasonally adjusted regular beneficiaries, from exact Table 14-10-0011-01 extracts; comparison columns are excluded."
+    },
+    {
+      "kind": "text",
+      "text": "The vector API could not be fetched through the web tool. History therefore uses original numerical extracts of the resolving table, including exact Table 1 rows inside official PDFs, rather than narrative summaries or adjacent series. The [March release notice](https://www150.statcan.gc.ca/n1/daily-quotidien/260522/dq260522b-eng.pdf) discontinued analytical releases beginning with April 2026. Exact April-June original table archives could not be fetched, so those periods are absent, not imputed. This is 24 fetched first prints, not the latest 24 consecutive months; no fewer-than-six exception is claimed. PDF screenshots returned cache misses; the table rows were inspected through parsed PDF text."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: 23 contiguous first-print levels, May 2024-March 2026, have mean 516.330435 thousand, median 516.62 and range 463.89-569.11. Their 22 adjacent monthly changes have mean +3.823182 thousand, sample standard deviation 10.818829 and range -14.28 to +24.81. July 2026 supplies a separate latest anchor of 547.05. The default prior is July persistence, not the older level mean; the March-July gap is excluded from monthly-change calculations."
+    },
+    {
+      "kind": "text",
+      "text": "Benchmark comparison precedes the agent forecast. On identical walk-forward target months August 2024-March 2026, each prediction uses only earlier original prints: persistence RMSE 11.105466 thousand, expanding mean monthly drift RMSE 11.736499, and trailing-three-print mean RMSE 15.474129; each has 20 forecasts. Persistence also has lower MAE, 8.7215 versus 9.455169 and 12.8165. These scores test the original-print sequence, not a reconstructed full real-time revision dataset. Select persistence."
+    },
+    {
+      "kind": "text",
+      "text": "In-memory model candidates generated before selecting the agent forecast: {\"schema\":\"thesis_model_candidate_v1\",\"series\":\"statcan.employment_insurance.regular_beneficiaries\",\"target_period\":\"2026-08\",\"unit\":\"thousands\",\"candidates\":[{\"candidate_id\":\"persistence\",\"point\":547.05,\"p10\":533.18,\"p50\":547.05,\"p90\":560.92,\"interval80\":[533.18,560.92],\"interval90\":[529.25,564.85],\"interval_method\":\"normal_fallback_prior_using_sample_sd_of_adjacent_first_print_changes\",\"calibration_n\":22,\"train_cutoff\":\"2026-07\",\"calibration_cutoff\":\"2026-03\",\"walk_forward_score\":{\"metric\":\"RMSE\",\"value\":11.105466,\"n\":20,\"start\":\"2024-08\",\"end\":\"2026-03\"}},{\"candidate_id\":\"expanding_mean_monthly_drift\",\"point\":550.87,\"p10\":537.00,\"p50\":550.87,\"p90\":564.74,\"interval80\":[537.00,564.74],\"interval90\":[533.07,568.67],\"interval_method\":\"normal_fallback_prior_using_sample_sd_of_adjacent_first_print_changes\",\"calibration_n\":22,\"train_cutoff\":\"2026-07\",\"calibration_cutoff\":\"2026-03\",\"walk_forward_score\":{\"metric\":\"RMSE\",\"value\":11.736499,\"n\":20,\"start\":\"2024-08\",\"end\":\"2026-03\"}}]}. The drift candidate adds the +3.823182 monthly-change mean calibrated only through March to July's latest level; it loses the common-period comparison. Both candidates use explicitly labelled fallback-prior intervals, with July level cutoff and March interval cutoff. No open-source fitting adapter or model artifact file was used."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch Statistics Canada's Labour Force Survey, August 2026.",
+      "result": "The [August LFS](https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm) reports employment 21,173,000, down 42,000; unemployment unchanged at 6.4%; and an unadjusted layoff rate of 0.8%, compared with 1.0% in August 2025 and 0.9% for corresponding 2017-2019 months. Its reference week is August 9-15, 2026."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the official EI premium-rate actuarial summary for policy timing.",
+      "result": "The [official EI summary](https://www.canada.ca/en/employment-social-development/programs/ei/ei-list/reports/premium/rates2027.html) says the waiting-period waiver, separation-payment suspension and 20 extra benefit weeks had already been extended in March 2026 through October 10, 2026. Further extensions were announced August 25, after the August 9-15 reference week."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view updates: employment weakness points upward, but unchanged unemployment and the modest layoff rate give no calibrated beneficiary-stock increment. Policy extensions preserve measures already represented in July, so their August increment is zero. Seasonal variation is already adjusted in the target series. Apply +0.00 thousand for momentum, +0.00 for labour-market news, +0.00 for policy, and +0.00 for identified one-offs. Total delta from the strongest benchmark is 0.00; prior weight is 1.00 and current-news weight 0.00."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: selected persistence prior = 547.05 thousand from July 2026. Historical calibration uses the 22 adjacent changes between 23 original table prints, May 2024-March 2026; omit the March-July gap. Mean change = (548.00 - 463.89)/22 = 3.823181818. Sum of squared deviations from that mean = 2457.988477273 thousand-squared. sigma = 10.818829435 thousand, computed as sqrt(2457.988477273/21). Normal fallback-prior 80% half-width = 1.281551566*sigma = 13.864887800, with widening factor 1.00. Point = 1.00*547.05 + 0.00 = 547.05. Raw bounds = 547.05 +/- 13.864887800 = [533.185112200, 560.914887800]; outward rounding to 0.01 thousand gives [533.18, 560.92]. The 90% half-width is 1.644853627*sigma = 17.795390836, giving [529.25, 564.85] after outward rounding."
+    },
+    {
+      "kind": "text",
+      "text": "The constant 80% half-width covers 17 of 22 original-print monthly changes and 8 of the last 10, an in-sample sanity check rather than independent coverage validation. The [June release](https://www150.statcan.gc.ca/n1/daily-quotidien/260819/dq260819d-eng.htm) revised series back to January 2023 for seasonal patterns and geographical allocation. Older original-vintage dispersion remains the available first-print calibration; annual revisions and the missing recent original tables limit its currency. No ungrounded point adjustment or additional numerical widening is imposed."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk outside the interval: concentrated layoffs among EI-eligible workers or clearance of delayed awards could raise the measured August stock above 560.92 thousand, more than 13.87 thousand above July. Downside risk outside the interval: faster returns to work or benefit exhaustion exceeding new awards could put the stock below 533.18 thousand. Direct official August claims and award evidence showing unexpectedly stronger inflows would move the point up; evidence of faster exits would move it down. A seasonal-factor revision large enough to shift the initial August estimate could also breach either tail."
+    },
+    {
+      "kind": "forecast",
+      "point": 547.05,
+      "ciLow": 533.18,
+      "ciHigh": 560.92
+    }
+  ]
+}

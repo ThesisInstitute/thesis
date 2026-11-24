@@ -1,0 +1,115 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ks",
+  "country": "US",
+  "type": "data",
+  "title": "Kansas ex parte renewal share, August 2026",
+  "question": "What percentage of Kansas Medicaid and CHIP beneficiaries due for renewal in August 2026 will be renewed on an ex parte basis, calculated from CMS's first published original (O) submission and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 48.7,
+  "ciLow": 39.7,
+  "ciHigh": 57.7,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Kansas's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row with reporting_period=202608 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Following CMS's published state-table convention, compute 100 times beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis divided by beneficiaries_with_a_renewal_due, using the numerator and denominator as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not affect resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ks.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 39.5},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": 43.1},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 34.6},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 35.6},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": 33.9},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 38.4},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 36.0},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 43.9},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 48.6},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 55.4},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 56.1},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 53.4},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 45.2},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 45.7},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 51.1},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 46.8},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 46.2},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 47.5}
+  ],
+  "drivers": [
+    "Persistence near Kansas's recent original-report level",
+    "Modest prior-year summer cohort adjustment",
+    "Renewal-cohort composition and available verification data",
+    "Form-renewal classification and reporting timing"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=20&conditions%5B0%5D%5Bproperty%5D=state_abbreviation&conditions%5B0%5D%5Bvalue%5D=KS&conditions%5B0%5D%5Boperator%5D=%3D&conditions%5B1%5D%5Bproperty%5D=original_or_updated&conditions%5B1%5D%5Bvalue%5D=O&conditions%5B1%5D%5Boperator%5D=%3D&conditions%5B2%5D%5Bproperty%5D=reporting_period&conditions%5B2%5D%5Bvalue%5D=202601&conditions%5B2%5D%5Boperator%5D=%3E%3D",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/unwinding-data-specifications.pdf"
+  ],
+  "runAt": "2026-10-07T12:07:18Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Kansas August 2026 ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Kansas's state row for August 2026, using the first official publication of its original (O) report. Dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c publishes eligibility-processing counts. The ledger omits the denominator field; I adopt CMS's published state-table convention: ex parte renewals, Metric 5a1, divided by all beneficiaries due for renewal, Metric 5. All historical shares use that same denominator and O variant."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS datastore dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, filtering state_abbreviation=KS, original_or_updated=O, and reporting_period from 202501 through 202506.",
+      "result": "Fetched ex parte/due counts: January 2025 14359/36356; February 9049/20986; March 13608/39321; April 15127/42542; May 15227/44881; June 14690/38257. Calculated shares rounded to one decimal: 39.5%, 43.1%, 34.6%, 35.6%, 33.9%, 38.4%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same CMS datastore, filtering Kansas original reports for reporting_period from 202507 through 202512.",
+      "result": "Fetched ex parte/due counts: July 2025 11442/31779; August 15946/36356; September 16017/32956; October 18880/34051; November 22218/39631; December 16277/30480. Calculated shares rounded to one decimal: 36.0%, 43.9%, 48.6%, 55.4%, 56.1%, 53.4%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same CMS datastore, filtering Kansas original reports with reporting_period>=202601; the response contains six rows through June 2026.",
+      "result": "Fetched ex parte/due counts: January 2026 15260/33796; February 11883/25992; March 15421/30165; April 16944/36241; May 17999/38980; June 19188/40362. Calculated shares rounded to one decimal: 45.2%, 45.7%, 51.1%, 46.8%, 46.2%, 47.5%. June also reports 32897 total renewed and 1252 pending."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's June 2026 Eligibility Operations and Enrollment Snapshot, Coverage Retention and Disenrollment Rates by State table, printed page 31.",
+      "result": "Kansas has 40362 beneficiaries due for renewal, 82% renewed, 15% disenrolled, 3% pending, and 48% renewed ex parte. The percentage-column header specifies the total number due for renewal as denominator. The API calculation 100*19188/40362=47.539765% agrees with the snapshot's whole-percent display."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the fetched Kansas original-report reference class. July 2025 through June 2026 averages 47.986599%; January through June 2026 averages 47.076958%; April through June averages 46.822801%. The latest June level is 47.539765%. Historical entries are computed from currently exposed O rows; CMS permits corrections to original reports, so these are not independently verified archives of historical first-publication values."
+    },
+    {
+      "kind": "text",
+      "text": "Level: blend June persistence equally with the recent six-month mean. Momentum: zero additional adjustment because recent movements alternate rather than establish a sustained trend. Seasonality: retain one quarter of the prior year's June-to-August increase, acknowledging only one annual comparison. One-off and policy-mechanism adjustments: zero because the fetched evidence establishes no specific August Kansas change. CMS classifies some renewals completed through data checks after sending a form under form renewals, which can affect the reported ex parte share."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: The model is a persistence prior shrunk toward the January-June 2026 mean, plus a heavily shrunk seasonal adjustment. Level = 0.5*47.539765 + 0.5*47.076958 = 47.308362. Seasonal adjustment = 0.25*(43.860711-38.398202) = 1.365627 percentage points; momentum, one-off, and policy adjustments are zero. Point = round(48.673989,1) = 48.7. For the 12 monthly observations July 2025-June 2026, the 11 successive changes have mean 1.048623 and squared deviations summing to 245.250851; sigma = 4.952281 percentage points = sqrt(245.250851/(11-1)). The Gaussian 80% one-month half-width is 1.28*sigma = 6.338919. Assuming independent monthly innovations over the two-month June-to-August horizon, multiply by sqrt(2), yielding 8.964586. Bounds around the rounded point are 39.735414 and 57.664586, emitted as 39.7 and 57.7."
+    },
+    {
+      "kind": "math",
+      "text": "pointEstimate = round(0.5*(100*19188/40362) + 0.5*47.07695844089116 + 0.25*((100*15946/36356)-(100*14690/38257)),1) = 48.7. ciLow = round(48.7-1.28*4.952280797972056*sqrt(2),1) = 39.7. ciHigh = round(48.7+1.28*4.952280797972056*sqrt(2),1) = 57.7."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule verification limitation: the fetched official CMS snapshot page lists June 2026 released September 25, 2026 and earlier completed releases, but provides no August 2026 future publication announcement. CMS's reporting specifications distinguish original state submissions due on the eighth from pending-outcome updates due on the fifteenth; these are submission deadlines, not public release dates. I retain the registered resolutionDate of 2026-12-15, but could not verify it from an official publication calendar this run. The prompt's mandatory official schedule-verification requirement therefore remains unsatisfied."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is an August cohort with unusually easy verification or improved data matching that shifts renewals into ex parte processing; a share above 57.7% would land outside the interval. The downside risk is disrupted data matching or a harder-to-verify cohort that leaves more beneficiaries awaiting forms or determinations; a share below 39.7% would land outside the interval. Reporting-classification changes could also produce either tail outcome."
+    },
+    {
+      "kind": "forecast",
+      "point": 48.7,
+      "ciLow": 39.7,
+      "ciHigh": 57.7
+    }
+  ]
+}

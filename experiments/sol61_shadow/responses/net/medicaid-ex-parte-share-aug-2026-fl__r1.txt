@@ -1,0 +1,152 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-fl",
+  "country": "US",
+  "type": "data",
+  "title": "Florida ex parte renewal share, August 2026",
+  "question": "What percentage of Florida Medicaid and CHIP beneficiaries due for renewal in August 2026 will have coverage renewed ex parte, calculated from CMS's first-published original (O) submission?",
+  "unit": "percent",
+  "pointEstimate": 22.6,
+  "ciLow": 18.7,
+  "ciHigh": 26.6,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Florida's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Following CMS's published state-table convention, compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator as first published and rounding the share to one decimal. Later updated submissions and revisions do not change resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.fl.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 28.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 24.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 26.9
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 23.7
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 23.6
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 24.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 24.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 23.7
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 20.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 21.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 22.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 22.4
+    }
+  ],
+  "drivers": [
+    "Persistence near Florida's recent ex parte renewal rate",
+    "Partial continuation of the April-to-June recovery",
+    "Monthly variation in renewal cohort composition",
+    "Automated eligibility verification and reporting classification"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions[0][property]=state_abbreviation&conditions[0][value]=FL&conditions[0][operator]=%3D&conditions[1][property]=original_or_updated&conditions[1][value]=O&conditions[1][operator]=%3D&conditions[2][property]=reporting_period&conditions[2][value]=202507&conditions[2][operator]=%3E%3D&limit=20&schema=false&properties[0]=state_abbreviation&properties[1]=reporting_period&properties[2]=original_or_updated&properties[3]=beneficiaries_with_a_renewal_due&properties[4]=beneficiaries_whose_coverage_was_renewed_total&properties[5]=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis&properties[6]=beneficiaries_whose_coverage_was_renewed_total__footnotes&properties[7]=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_bas_6356",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?conditions[0][property]=state_abbreviation&conditions[0][value]=FL&conditions[0][operator]=%3D&conditions[1][property]=original_or_updated&conditions[1][value]=O&conditions[1][operator]=%3D&conditions[2][property]=reporting_period&conditions[2][value]=202408&conditions[2][operator]=%3D&limit=1&schema=false&properties[0]=state_abbreviation&properties[1]=reporting_period&properties[2]=original_or_updated&properties[3]=beneficiaries_with_a_renewal_due&properties[4]=beneficiaries_whose_coverage_was_renewed_total&properties[5]=beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T12:52:09Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Florida August 2026 original-submission ex parte renewal forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Florida's state row for reporting period 202608 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, resolved from its first-published original submission. All historical anchors use O rows and the same count-based calculation. They are original-submission observations available in the current official dataset; this run did not independently authenticate archived first-publication versions of each historical row."
+    },
+    {
+      "kind": "text",
+      "text": "Denominator audit: the ledger says 'ex parte renewal share' without explicitly naming its denominator. CMS's June 2026 state table places ex parte renewals under percentages of all beneficiaries due for renewal. Accordingly, this forecast uses metric 5a1 divided by metric 5. The ledger's denominator ambiguity remains an explicit contract limitation."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch CMS datastore API for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, filtering Florida, original_or_updated=O, reporting_period>=202507; echo the complete filtered response.",
+      "result": "Fetched 12 rows. Reporting period: ex parte count / renewal-due count. 202507: 54163/188605; 202508: 48446/199175; 202509: 52442/195239; 202510: 45700/192991; 202511: 36719/155346; 202512: 39911/165970; 202601: 47094/195466; 202602: 46790/197339; 202603: 38557/190674; 202604: 38476/176275; 202605: 38201/172329; 202606: 38444/171927. Numerator and total-renewed footnotes were empty for these rows."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the same CMS datastore API for Florida's original August 2024 row as an earlier same-month comparison; echo the complete response.",
+      "result": "For reporting_period=202408, original_or_updated=O, Florida reported 40849 beneficiaries renewed ex parte, 225974 beneficiaries due for renewal, and 128587 beneficiaries renewed in total."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open CMS's June 2026 Eligibility Operations and Enrollment Snapshot and inspect the Coverage Retention and Disenrollment Rates by State table.",
+      "result": "The June 2026 Florida row reports 171927 beneficiaries due for renewal, 67% renewed in total, 22% renewed ex parte, 18% disenrolled, and 15% pending. Its table header specifies percentages of the total number due for renewal. The PDF is dated September 25, 2026."
+    },
+    {
+      "kind": "text",
+      "text": "Reference class and base rate: the 12 consecutive Florida original-submission shares from July 2025 through June 2026 average 23.8038%. The latest six average 22.3967%, close to June's unrounded 22.3607%, supporting persistence near the recent lower level. August 2024 computes to 18.0769% and August 2025 to 24.3233%; those differing levels do not establish a reliable August seasonal adjustment."
+    },
+    {
+      "kind": "text",
+      "text": "Separate adjustments: level is June's 22.3607%. Momentum receives a modest positive adjustment because the rate rose 0.5334 percentage points between April and June. One-off and policy-mechanism adjustments are each zero: the fetched evidence supplies no quantified Florida change timed specifically to August. CMS explains that cohort composition, mitigation strategies, and whether automated checks occur after forms are sent can affect reported ex parte outcomes."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: use a June persistence prior with 50% damping of the April-to-June trend over the two-month June-to-August horizon. Historical sample: 12 unrounded shares computed from fetched O-row counts, yielding 11 successive monthly changes. Their mean is -0.577912 percentage points and their centered sum of squares is 47.413133; sigma = 2.177456 percentage points = sqrt(47.413133/10). Level 22.360653 + momentum 0.5*(22.360653-21.827259)=0.266697 + one-off 0 + policy 0 gives 22.627350%, rounded to 22.6%. The Gaussian 80% one-month half-width is 1.28*sigma = 2.787143 percentage points. Scale by sqrt(2) for two unobserved monthly changes, giving 3.941616. Unrounded bounds are 18.685734% and 26.568966%, producing final implied bounds of 18.7% and 26.6%."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar audit: retain the registered resolutionDate of 2026-12-15, but this run could not verify that date from an official CMS release calendar or announcement schedule. The official snapshot page lists January through June 2026 releases on April 24, May 29, June 26, July 31, August 28, and September 25, respectively. It provides no August 2026 publication date. No future date has been inferred from cadence, so the required official verification of resolutionDate remains unmet."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is an improvement in automated eligibility matching or a cohort with more beneficiaries eligible for ex parte renewal. A substantial implementation or reporting-classification change could place the result above 26.6%, outside the interval. The downside risk is weaker electronic matches, a less readily verifiable cohort, or a processing disruption; a sufficiently large deterioration could place the share below 18.7%, outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 22.6,
+      "ciLow": 18.7,
+      "ciHigh": 26.6
+    }
+  ]
+}

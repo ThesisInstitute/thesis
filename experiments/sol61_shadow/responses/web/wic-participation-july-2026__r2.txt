@@ -1,0 +1,137 @@
+{
+  "slug": "wic-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "WIC participation in July 2026",
+  "question": "What will USDA FNS report for national total WIC participation, without seasonal adjustment, for July 2026 in its first official print?",
+  "unit": "millions",
+  "pointEstimate": 6.678421,
+  "ciLow": 6.633801,
+  "ciHigh": 6.72304,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official agency release",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve to July 2026 national Total Participants in the first official USDA WIC monthly publication. Convert absolute person counts to millions by dividing by 1,000,000; equivalently multiply counts expressed in thousands by the registered factor 0.001. Retain published precision. Ignore all subsequent revisions and corrections, including same-day corrections. Do not substitute a fiscal-year average, eligibility estimate, or seasonally adjusted series.",
+  "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 6.6963
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 6.664741
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 6.703035
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 6.708518
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 6.687977
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 6.669554
+    }
+  ],
+  "drivers": [
+    "June participation anchors the level",
+    "Recent participation momentum is negative",
+    "Prior July increases support a modest seasonal uplift",
+    "Annual income-guideline changes support eligibility",
+    "Initial reporting and subsequent revisions add uncertainty"
+  ],
+  "sourceContext": [
+    "https://fns-prod.azureedge.us/pd/wic-program",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-January-2026.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-February-2026.pdf",
+    "https://fns-prod.azureedge.us/wic/fr-042926",
+    "https://fns-prod.azureedge.us/pd/overview",
+    "https://usda.azureedge.us/about-usda/reports-and-data/agency-reports"
+  ],
+  "runAt": "2026-10-07T11:46:14Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "July 2026 WIC total participation forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the raw national monthly Total Participants series, fns.wic.total_participation, covering women, infants, and children. Historical entries use this same unadjusted participation measure from the current preliminary table. They are not six verified original vintages; that requested vintage comparison could not be completed."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch the [USDA national monthly WIC table](https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf), Total Participants column.",
+      "result": "January-June 2026 counts: 6,696,300; 6,664,741; 6,703,035; 6,708,518; 6,687,977; 6,669,554 persons. FY2026 figures are preliminary."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Read June and July observations from the [same national monthly table](https://fns-prod.azureedge.us/sites/default/files/resource-files/37wic-monthly-9.pdf).",
+      "result": "June/July counts: 2023, 6,732,424/6,727,442; 2024, 6,736,885/6,787,037; 2025, 6,883,200/6,923,325 persons."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Cross-check the initial June column in the [USDA latest-month participation table](https://fns-prod.azureedge.us/sites/default/files/resource-files/27wilatest-9.pdf).",
+      "result": "June 2026 Initial TOTAL is 6,669,554 persons, matching the national table. Virgin Islands reports 0 versus 2,084 in the preceding column."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is persistence plus a partially retained July increment. The reference class is the fetched monthly history and prior June-to-July transitions. Weak recent momentum argues for shrinking the seasonal uplift."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch [USDA WIC income eligibility guidelines](https://fns-prod.azureedge.us/wic/fr-042926).",
+      "result": "Guidelines effective July 1, 2026 set the contiguous-state four-person annual maximum at $61,050, using 185 percent of the poverty guideline."
+    },
+    {
+      "kind": "text",
+      "text": "Policy mechanism: annual guideline updates can admit additional households, but their usual July effect is already represented by seasonality. No separate quantified policy increment is added. One-off reporting omissions could reverse, but no specific restoration adjustment is assumed."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Compare contemporaneous [January Keydata](https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-January-2026.pdf) and [February Keydata](https://fns-prod.azureedge.us/sites/default/files/data-files/keydata-February-2026.pdf), Table 21, with the current table.",
+      "result": "Contemporaneous January total: 6,689,525; February: 6,640,819 persons. Current totals are higher by 6,775 and 23,922 respectively, demonstrating material revision uncertainty."
+    },
+    {
+      "kind": "text",
+      "text": "Source discrepancy: the fetched agency pages use the FNA name and USDA CDN, while the registration allows www.fns.usda.gov. The registered target and resolver address are retained. The latest-month PDF also contains stale prior-month/footer year labels; its June column agrees with the national table."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification failed: the fetched USDA scheduled-release page and agency program-data pages did not establish an exact July WIC publication date. The registration supplies only an expected window. resolutionDate is null rather than an invented date, so this object does not satisfy the required calendar-date validation."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Persistence prior anchored at 6.669554 million. January-June successive changes are [-0.031559, 0.038294, 0.005483, -0.020541, -0.018423]; mean momentum = -0.0053492. Prior July changes average 0.028431667; retain half, a judgmental shrinkage. Point = 6.669554 + 0.014215833 - 0.0053492 = 6.678421. Sample sigma = 0.027886978, calculated as sqrt(sum((change-mean)^2)/4). Normal 80% half-width = 1.28*sigma = 0.035695332; multiply by 1.25 for the small sample and observed vintage uncertainty, giving 0.044619164. Rounded bounds: [6.633801, 6.723040]."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: stronger July enrollment or restored state reporting would land above the interval if participation exceeds 6.723040 million. Downside risk: accelerating enrollment losses or a large reporting omission would land below 6.633801 million. Either outcome would fall outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 6.678421,
+      "ciLow": 6.633801,
+      "ciHigh": 6.72304
+    }
+  ]
+}

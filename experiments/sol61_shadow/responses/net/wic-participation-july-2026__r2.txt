@@ -1,0 +1,55 @@
+{
+  "slug": "wic-participation-july-2026",
+  "country": "US",
+  "type": "data",
+  "title": "July 2026 WIC participation",
+  "question": "What will USDA FNS report for total monthly WIC participation, not seasonally adjusted, in July 2026 on its first official print?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Official agency release",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve using the first official USDA FNS monthly table reporting July 2026 total WIC participation. Convert persons to millions by dividing by 1,000,000, or thousands of persons to millions by multiplying by 0.001. Preserve the published precision and exclude subsequent revisions and corrections.",
+  "dataPointId": "fns.wic.total_participation.2026-07.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program"
+  ],
+  "runAt": "2026-10-07T11:58:00Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast unavailable: official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The target is July 2026 total monthly WIC participation on its first official print, expressed in millions."
+    },
+    {
+      "kind": "text",
+      "text": "The web fetch of https://www.fns.usda.gov/pd/wic-program returned HTTP 403 Forbidden. The subsequent curl -sS fetch of the same official URL returned an empty body."
+    },
+    {
+      "kind": "text",
+      "text": "Stopped under the specified fetch-failure rule. No official participation history was retrieved, so the mandatory base rate and historicalContext could not be established."
+    },
+    {
+      "kind": "text",
+      "text": "The resolution date was not verified from an official release calendar and has therefore been left null."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: No persistence prior, historical sample, adjustment components, sigma, or interval bounds can be calculated from fetched evidence. Forecast values are null rather than invented."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-dc",
+  "country": "US",
+  "type": "data",
+  "title": "DC ex parte renewal share, August 2026",
+  "question": "What percentage of District of Columbia beneficiaries due for Medicaid or CHIP renewal in August 2026 were renewed on an ex parte basis, calculated from CMS's first published original (O) submission row and rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 71.7,
+  "ciLow": 58.2,
+  "ciHigh": 85.1,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to District of Columbia's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Calculate 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using the numerator and denominator in that first publication, and round to one decimal. Exclude updated (U) submissions and subsequent revisions or corrections.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.dc.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2025-01"}, "label": "2025-01", "value": 86.3},
+    {"period": {"type": "month", "value": "2025-02"}, "label": "2025-02", "value": 86.1},
+    {"period": {"type": "month", "value": "2025-03"}, "label": "2025-03", "value": 83.7},
+    {"period": {"type": "month", "value": "2025-04"}, "label": "2025-04", "value": 67.8},
+    {"period": {"type": "month", "value": "2025-05"}, "label": "2025-05", "value": 70.3},
+    {"period": {"type": "month", "value": "2025-06"}, "label": "2025-06", "value": 68.6},
+    {"period": {"type": "month", "value": "2025-07"}, "label": "2025-07", "value": 69.0},
+    {"period": {"type": "month", "value": "2025-08"}, "label": "2025-08", "value": 71.2},
+    {"period": {"type": "month", "value": "2025-09"}, "label": "2025-09", "value": 84.7},
+    {"period": {"type": "month", "value": "2025-10"}, "label": "2025-10", "value": 88.6},
+    {"period": {"type": "month", "value": "2025-11"}, "label": "2025-11", "value": 83.6},
+    {"period": {"type": "month", "value": "2025-12"}, "label": "2025-12", "value": 86.3},
+    {"period": {"type": "month", "value": "2026-01"}, "label": "2026-01", "value": 83.5},
+    {"period": {"type": "month", "value": "2026-02"}, "label": "2026-02", "value": 83.8},
+    {"period": {"type": "month", "value": "2026-03"}, "label": "2026-03", "value": 66.8},
+    {"period": {"type": "month", "value": "2026-04"}, "label": "2026-04", "value": 72.4},
+    {"period": {"type": "month", "value": "2026-05"}, "label": "2026-05", "value": 77.1},
+    {"period": {"type": "month", "value": "2026-06"}, "label": "2026-06", "value": 70.5}
+  ],
+  "drivers": [
+    "Persistence near June's 70.5% share",
+    "Recent quarterly level of 73.3%",
+    "Prior August cohort share of 71.2%",
+    "Large monthly changes in cohort outcomes",
+    "Possible cohort composition changes following DC's Basic Health Program launch"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/dataset/items/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf"
+  ],
+  "runAt": "2026-10-07T12:28:55Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "District of Columbia August 2026 ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the DC state row for reporting period 202608 in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. CMS Table 6 defines ex parte renewals as metric 5a(1) and beneficiaries due for renewal as metric 5; the snapshot tables express ex parte shares relative to renewals due. All numerical anchors and historical calculations use original (O) rows, without seasonal adjustment or smoothing. Historical rows were fetched from the September 2026 dataset vintage; the forecast outcome is frozen at August's first public O-row publication, excluding later corrections and U rows."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv; echo exact DC-row excerpts and select original O submissions.",
+      "result": "Fetched ex parte numerator / renewals-due denominator: 2025-01 16504/19123; 2025-02 16080/18673; 2025-03 15870/18958; 2025-04 12805/18888; 2025-05 10647/15144; 2025-06 12392/18059; 2025-07 15122/21904; 2025-08 14706/20662; 2025-09 15888/18749; 2025-10 28933/32663; 2025-11 20464/24480; 2025-12 28829/33408; 2026-01 15652/18735; 2026-02 15658/18682; 2026-03 12073/18078; 2026-04 12023/16604; 2026-05 10526/13652; 2026-06 11816/16766. These are 18 distinct numeric original-submission observations."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf and inspect the June 2026 Coverage Retention and Disenrollment Rates by State table, PDF page 31.",
+      "result": "The DC row reports 16,766 beneficiaries due for renewal, 75% total renewed, 15% disenrolled, 9% pending, and 70% renewed on an ex parte basis. The table explicitly uses total beneficiaries due as its percentage denominator. Its whole-percent ex parte figure corroborates the raw-count calculation 100*11816/16766 = 70.475963%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf and inspect the August 2025 Coverage Retention and Disenrollment Rates by State table, PDF page 29.",
+      "result": "The DC row reports 20,662 beneficiaries due for renewal, 78% total renewed, 14% disenrolled, 8% pending, and 71% renewed on an ex parte basis. This corroborates the original-row seasonal anchor 100*14706/20662 = 71.174136%. Model calculations use the raw counts rather than the PDF's rounded percentages."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class is 18 monthly DC original-submission shares from January 2025 through June 2026. Their arithmetic mean, the broad base rate, is 77.799905%. That average includes higher autumn and winter cohorts: April-August 2025 shares were 67.8%, 70.3%, 68.6%, 69.0%, and 71.2%. June 2026 is 70.475963%, while April-June 2026 averages 73.329494%. These recent and seasonally relevant levels support a forecast below the broad base rate."
+    },
+    {
+      "kind": "text",
+      "text": "Required date verification could not be completed. The fetched official CMS snapshot announcement page lists June 2026 as released September 25, 2026, May as August 28, and April as July 31, but provides no announced August 2026 publication date or forward calendar confirming December 15, 2026. The registered resolutionDate remains 2026-12-15 as required by the ledger contract; it is unverified and must not be treated as a confirmed CMS release date. This leaves the prompt's mandatory schedule-verification condition unmet."
+    },
+    {
+      "kind": "text",
+      "text": "Level effect: retain June's 70.475963% persistence anchor. Recent-level adjustment: blend toward the April-June mean of 73.329494%. Seasonal adjustment: blend toward August 2025's 71.174136%. Momentum: May-to-June fell 6.626293 percentage points, but large reversals and changing cohort timing argue against extrapolating that decline. One-off adjustment: zero. Policy-mechanism adjustment: zero additional quantified effect; CMS states that DC began its Basic Health Program in January 2026. A resulting change in Medicaid renewal-cohort composition is a possible mechanism, not an identified numerical effect."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use an equal-weight persistence, recent-quarter, and seasonal-level model: point = (70.475963 + 73.329494 + 71.174136)/3 = 71.659864%, rounded to 71.7%. The historical sample is the 18 fetched O-row ratios from January 2025 through June 2026, calculated before rounding. For their 17 successive monthly changes, mean change = -0.931087 percentage points and sum of squared deviations from that mean = 884.495588. Sample sigma = sqrt(884.495588/16) = 7.435118 percentage points. The nominal normal 80% half-width is 1.28*7.435118 = 9.516951 points. Widen by sqrt(2) for the two unobserved monthly transitions from June to August: half-width = 13.459001 points, 1.414 times nominal. No further momentum, one-off, or policy adjustment is added. Final implied bounds are 71.659864 +/- 13.459001 = [58.200864, 85.118865]%, rounded to [58.2, 85.1]%. This is a model-based 80% interval, not an empirically validated coverage guarantee."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: an August cohort with easier automated eligibility matching or improved ex parte processing raises the numerator relative to renewals due; a share above 85.1% would land outside the interval. Downside risk: matching failures, more difficult renewal cases, or reporting more outcomes as form-based renewals depress the share; a result below 58.2% would land outside the interval. The historical spring declines show why a substantial downside remains plausible."
+    },
+    {
+      "kind": "forecast",
+      "point": 71.7,
+      "ciLow": 58.2,
+      "ciHigh": 85.1
+    }
+  ]
+}

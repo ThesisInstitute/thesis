@@ -1,0 +1,88 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-al",
+  "country": "US",
+  "type": "data",
+  "title": "Alabama ex parte renewal share, August 2026",
+  "question": "What will Alabama's seasonally unadjusted ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, computed to one decimal under the registered resolver?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Alabama's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.al.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Required Alabama history could not be fetched",
+    "Registered denominator is unspecified",
+    "Original submissions can be corrected",
+    "Registered publication date could not be verified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=100&offset=75"
+  ],
+  "runAt": "2026-10-07T12:18:43Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast dropped: required official Alabama history unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target identity, unit, date, and resolver are retained exactly from the supplied target context. This is an unconditional first-print target. The independence override prohibited checking the Thesis catalog; no local files or Thesis records were used."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact CMS dataset identifier on data.medicaid.gov.",
+      "result": "The official dataset page reports an update on September 25, 2026, with 3,876 rows and 22 columns. Its dictionary identifies O as Original and U as Updated. The fetched table exposes Alaska rows, not usable Alabama history. Source: https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open the official Data.gov catalog entry for State Medicaid and CHIP Eligibility Processing Data.",
+      "result": "The catalog identifies the exact dataset and modification timestamp 2026-09-25T18:00:00Z. Its distribution is https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. These are metadata, not Alabama observations. Source: https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open CMS Eligibility Processing Data Report Specifications and inspect the reporting schedule and renewal definitions.",
+      "result": "The fetched document is Version 4, updated November 2025. Original monthly reports are due on the 8th calendar day and pending-renewal updates on the 15th. Table 6 distinguishes renewals due, metric 5; successful renewals, metric 5a; and ex parte renewals, metric 5a(1). Corrections to original submissions are permitted. Source: https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf"
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed. Opening the official CSV and datastore query returned inaccessible errors; direct and paginated dataset pages returned empty content. No Alabama original-submission numerator or denominator was fetched. The empty historicalContext records access failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Resolver discrepancy: the registered rule does not name its denominator. The official dataset distinguishes beneficiaries due for renewal from beneficiaries successfully renewed; either denominator yields a different share. The registered wording is preserved without silently choosing between them. Furthermore, an O row in the current dataset does not by itself establish the immutable first-publication vintage."
+    },
+    {
+      "kind": "text",
+      "text": "Date discrepancy: the registered resolutionDate is retained, but no official publication calendar confirming that day was fetched. The specifications give state submission deadlines, which do not establish a CMS publication date. The date therefore remains unverified, and the default release-calendar requirement is unmet."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. Without the exact Alabama original-submission history, last-print persistence, panel shrinkage, historical dispersion, and walk-forward comparisons cannot be computed. No thesis_model_candidate_v1 candidate was generated because the required numerical input was not fetched."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: the persistence prior is unavailable; the historical sample is empty because retrieval failed; no adjustment components are estimated; sigma is unavailable; therefore the required dispersion-based half-width and final implied bounds cannot be computed. Null estimate fields denote abstention, not a numerical forecast."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: correcting original submissions or changing the renewal cohort could materially change the measured share. No numerical outside the interval scenario can be calibrated without a grounded interval."
+    },
+    {
+      "kind": "text",
+      "text": "No valid forecast cell can be grounded in the evidence fetched during this run. JSON syntax was validated, but this abstention fails the numeric forecast, historical-print floor, model-candidate, interval-arithmetic, and release-calendar requirements. The numerical forecast is dropped under the honesty rule."
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "slug": "canada-monthly-gdp-growth-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada monthly GDP growth, September 2026",
+  "question": "What will Statistics Canada's first official September 2026 print show for month-over-month real GDP growth, all industries, seasonally adjusted at annual rates, chained 2017 dollars?",
+  "unit": "percent_growth",
+  "pointEstimate": 0.1,
+  "ciLow": -0.2002,
+  "ciHigh": 0.4002,
+  "confidence": 0.8,
+  "resolutionDate": "2026-11-30",
+  "resolutionSource": "Statistics Canada, GDP by industry, Table 36-10-0434-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+  "resolutionRule": "Resolve from the first official September 2026 release of vector v65201210 in Table 36-10-0434-01: Canada, all industries, seasonally adjusted at annual rates, chained 2017 dollars. Calculate 100*(September level/August level-1), using both levels from that initial release vintage. Retain the calculated percentage's precision; the Daily's one-decimal headline is a presentation cross-check. Exclude advance estimates and all subsequent revisions or corrections.",
+  "dataPointId": "statcan.gdp_by_industry.monthly_growth.2026_09.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": -0.3
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 0
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 0.2
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": -0.1
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 0.5
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 0.3
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 0
+    }
+  ],
+  "drivers": [
+    "Recent GDP momentum supports modest growth",
+    "August employment weakness tempers demand",
+    "Possible September payback after export front-loading",
+    "Construction strength and volatile resource output"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf",
+    "https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm",
+    "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610043401",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/250926/dq250926a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251031/dq251031a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251128/dq251128b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/251223/dq251223a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260130/dq260130a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm"
+  ],
+  "runAt": "2026-10-07T11:42:50Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 Canadian GDP: modest growth with substantial monthly uncertainty"
+    },
+    {
+      "kind": "text",
+      "text": "The official calendar at https://www150.statcan.gc.ca/n1/release-diffusion/2026-eng.pdf explicitly schedules September 2026 GDP by industry for November 30, 2026. The vector definition at https://www150.statcan.gc.ca/n1/pub/13-607-x/2016001/v65201210-eng.htm confirms v65201210 is the registered all-industries SAAR chained-2017-dollar level series. All GDP historical anchors use the same seasonally adjusted real industry variant and original official monthly release, rather than advance estimates or later revised histories. Headline growth prints are one-decimal proxies for the ledger's unrounded level-vector transform."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch original Statistics Canada GDP releases for July-December 2025: https://www150.statcan.gc.ca/n1/daily-quotidien/250926/dq250926a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251031/dq251031a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251128/dq251128b-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/251223/dq251223a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260130/dq260130a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260227/dq260227b-eng.htm",
+      "result": "Original headline monthly growth: July 2025 +0.2%, August -0.3%, September +0.2%, October -0.3%, November 0.0%, December +0.2%. These are each month's own first official print."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch January-March 2026 original GDP releases: https://www150.statcan.gc.ca/n1/daily-quotidien/260331/dq260331a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260430/dq260430a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260529/dq260529b-eng.htm",
+      "result": "Original headline monthly growth: January 2026 +0.1%, February +0.2%, March -0.1%."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch April-June 2026 original GDP releases: https://www150.statcan.gc.ca/n1/daily-quotidien/260630/dq260630a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260731/dq260731a-eng.htm ; https://www150.statcan.gc.ca/n1/daily-quotidien/260828/dq260828b-eng.htm",
+      "result": "Original headline monthly growth: April 2026 +0.5%, May +0.3%, June +0.3%. May public administration grew 0.6%, with federal activity supported by the Census."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch latest official GDP release: https://www150.statcan.gc.ca/n1/daily-quotidien/260929/dq260929a-eng.htm",
+      "result": "July 2026 GDP growth was 0.0%; 10 of 20 sectors expanded. Construction grew 1.3%, manufacturing fell 0.9%, and retail trade fell 1.0%. Refinery downtime and unusually strong electricity demand contributed to sector volatility."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the mean of 13 original monthly prints from July 2025 through July 2026: 1.3/13 = 0.10% growth. This reference class includes contractions and temporary disruptions. The latest three official prints average (0.3+0.3+0.0)/3 = 0.20%, providing a modest positive momentum signal."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch August Labour Force Survey: https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm",
+      "result": "August employment declined 42,000, or 0.2%, while unemployment remained 6.4%. Manufacturing employment increased 22,000, or 1.2%. This is mixed evidence, with broad employment weakness tempering the growth forecast."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetch official search results for August merchandise trade: https://www150.statcan.gc.ca/n1/daily-quotidien/261006/dq261006a-eng.htm",
+      "result": "August real exports increased 2.5% and real imports decreased 1.1%. Exports to the United States rose 8.1%. The release identifies possible shipment front-loading before tariffs took effect at August's end; September payback is an inference, not an observed outcome."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a historical-mean prior from the 13 original GDP prints, centered at 0.10%. Separate components: no GDP-level adjustment; momentum adds 0.03 percentage points, equal to 30% of the recent-three-month mean's 0.10-point excess over the prior; employment weakness subtracts 0.02; temporary export front-loading and its tariff mechanism subtract 0.01 for possible September payback. These adjustments are model judgments. Census, refinery and weather effects receive no additional extrapolation. Final point = 0.10+0.03-0.02-0.01 = 0.10%. Because this is a growth series, estimate dispersion from the growth values themselves: squared deviations sum to 0.66; sigma = 0.234521 percentage points, calculated as sqrt(0.66/12). A normal-approximation 80% predictive interval uses half-width 1.28*sigma = 0.300187, with no additional scaling. Final implied bounds are -0.2002% and 0.4002%, rounded to four decimals. Headline rounding and the small historical sample limit calibration precision."
+    },
+    {
+      "kind": "math",
+      "text": "Mean = 1.3/13 = 0.10. Sample variance = 0.66/(13-1) = 0.055. Sigma = sqrt(0.055) = 0.234520788. Half-width = 1.28*0.234520788 = 0.300186609. Point = 0.10; 80% interval = [0.10-0.300186609, 0.10+0.300186609] = [-0.2002, 0.4002] after rounding."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: sustained construction growth combined with resource and manufacturing rebounds could produce growth comparable to April's 0.5%, outside the interval above 0.4002%. Downside risk: a larger export unwind, renewed production disruptions or widespread service weakness could produce a contraction comparable to the historical -0.3% prints, outside the interval below -0.2002%. These scenarios would falsify the modest-growth forecast."
+    },
+    {
+      "kind": "forecast",
+      "point": 0.1,
+      "ciLow": -0.2002,
+      "ciHigh": 0.4002
+    }
+  ]
+}

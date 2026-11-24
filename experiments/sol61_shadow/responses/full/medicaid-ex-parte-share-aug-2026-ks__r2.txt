@@ -1,0 +1,90 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-ks",
+  "country": "US",
+  "type": "data",
+  "title": "Kansas ex parte renewal share, August 2026",
+  "question": "What will Kansas's ex parte renewal share be for the August 2026 reporting period in the FIRST PRINT of the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, computed from the published numerator and denominator and rounded to one decimal percent?",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Kansas's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.ks.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Required Kansas original submission counts unavailable",
+    "Official future publication date unverified",
+    "Registered denominator requires clarification"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T12:19:00Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official history could not be fetched"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target identifiers, unit, date, and resolver text are preserved. No Thesis forecasts, records, catalog, or repository files were accessed. The required official Kansas original-row history could not be retrieved, so the forecast is dropped under the honesty rule. Null estimates disclose missing values; this output cannot satisfy numeric forecast validation."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search",
+      "call": "Search the official CMS dataset page at https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c.",
+      "result": "The official page's cached search rendering identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, updated September 25, 2026, with 3,876 rows and 22 columns. Only the first 25 Alaska rows were exposed. The dictionary distinguishes O original from U updated and identifies ex parte renewals as metric 5a1, renewals due as metric 5, and total renewed as metric 5a. No Kansas numerical history was fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data.",
+      "result": "Official federal catalog metadata confirms the dataset identifier, modification timestamp 2026-09-25T18:00:00Z, monthly frequency, and 1 CSV distribution: https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv. The distribution could not be fetched through the web tool."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot.",
+      "result": "CMS lists June 2026 released September 25, 2026; May 2026 released August 28; April 2026 released July 31; March 2026 released June 26; February 2026 released May 29; and January 2026 released April 24. No official future August 2026 publication date is listed."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution discrepancy: the registered 2026-12-15 is retained, but it was not verified as an official scheduled CMS release date. No resolve-by-bound designation was supplied, so release-calendar verification remains unmet. The resolver also omits an explicit denominator. CMS's June snapshot uses renewals due for its displayed ex parte rate; the registered denominator could not be independently confirmed."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failure: the exact dataset datastore endpoint and catalog-linked CSV returned web-tool access errors; dataset opens exposed an empty application page. Filtered and alternate official requests did not produce Kansas original submission counts. Official snapshot summaries cannot substitute for the registered dataset's exact numerator and denominator. This is an access failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. The recent Kansas first-print distribution and last-print persistence benchmark cannot be calculated without admissible original-row observations. A persistence-plus-panel-shrinkage benchmark and thesis_model_candidate_v1 candidates likewise cannot be grounded. No historical values or model outputs are fabricated."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior unavailable; admissible Kansas historical sample empty; level, momentum, one-off, and policy adjustments unestimated. Sigma cannot be computed from successive first-print share changes, so the required 1.28 times sigma half-width and implied 80% bounds are undefined. Point and bounds are therefore null."
+    },
+    {
+      "kind": "text",
+      "text": "Counter-consideration: without a grounded point or interval, an outside the interval scenario cannot be quantified. Changes in ex parte matching performance or renewal-cohort composition could move the share in either direction, but no numerical effect is asserted."
+    },
+    {
+      "kind": "text",
+      "text": "The JSON was serialized and parsed successfully in memory. Required numeric estimates, historical prints, and official release-date verification remain unavailable."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

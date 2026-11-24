@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:14:18Z",
+  "runStartedAt": "2026-10-07T10:14:18Z",
+  "series": "bls.ces.nonfarm_payrolls.change",
+  "period": "2026-10",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "nonfarm-payrolls-october-2026",
+    "country": "US",
+    "dataPointId": "bls.ces.nonfarm_payrolls.change.2026_10.first_print",
+    "expectedReleaseDate": "2026-11-06",
+    "expectedReleaseWindow": {
+      "end": "2026-11-06",
+      "start": "2026-11-06"
+    },
+    "period": "2026-10",
+    "registeredAt": "2026-10-02T20:51:43Z",
+    "registeredAtUtc": "2026-10-02T20:51:43Z",
+    "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+    "registrationState": "preregistered",
+    "releaseCalendarUrl": "https://www.bls.gov/schedule/news_release/empsit.htm",
+    "series": "bls.ces.nonfarm_payrolls.change",
+    "sourceBinding": {
+      "adapter": "bls-api",
+      "allowedHosts": [
+        "api.bls.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-11-06",
+        "start": "2026-11-06"
+      },
+      "field": "value",
+      "releasePolicy": "first_print",
+      "sourceSeriesId": "CES0000000001",
+      "sourceUrl": "https://api.bls.gov/publicAPI/v2/timeseries/data/CES0000000001",
+      "table": "Current Employment Statistics, all employees, total nonfarm, seasonally adjusted (Employment Situation, Table B-1)",
+      "transform": {
+        "factor": 1,
+        "operation": "difference_previous_period"
+      }
+    },
+    "targetContentHash": "63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945",
+    "targetRegistrationPath": "records/targets/2026-10-02-63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945.json",
+    "targetUnit": "thousands",
+    "valueScale": 1
+  },
+  "registrationCommit": "7fadd28f68ffdbdeee5e4e2c93d595b0384bba8b",
+  "targetContentHash": "63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945",
+  "targetRegistrationPath": "records/targets/2026-10-02-63c2cf8968abf559c2c009b59f9735f573a9f8e9a005e5c7adf6f8e74c941945.json",
+  "registeredAtUtc": "2026-10-02T20:51:43Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/prompt.md",
+      "sha256": "a9b1f3b97ab93795e40a9f4c30db64f7caa91acc629ac3389baa5b76296c954c",
+      "bytes": 10636,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/command.json",
+      "sha256": "17eb134a136988759e54e5b697eb10f007584287d7e752ee5175a5a01d1231fe",
+      "bytes": 187,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/stdout.txt",
+      "sha256": "56407f711090239cf40dc16ef18d88b60e104b1c6af0fbd90048e8a44c72bb62",
+      "bytes": 2763,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/raw_response.txt",
+      "sha256": "56407f711090239cf40dc16ef18d88b60e104b1c6af0fbd90048e8a44c72bb62",
+      "bytes": 2763,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/parsed_cells.json",
+      "sha256": "168a18dd226b16d218275b4f2eb898c35572cbaab4095685d2a6a147d7e5e2c2",
+      "bytes": 2875,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/normalized_cells.json",
+      "sha256": "7ecab6c501b9effdaaa03fb43c4b0bb87d4f6ea98f3eb1f23b44af09049db823",
+      "bytes": 2725,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:14:18Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/net/nonfarm-payrolls-october-2026__r1/manifest.json",
+      "sha256": "8b4ce849ce741e162c0cb52e6a97b538c254b597c7f45beba8b49c2534acd135",
+      "bytes": 4593,
+      "createdAt": "2026-10-07T10:14:18Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "6152818f9974fa0009f8019e77caee1d6bb68232b6427f27602011f21cb704c6"
+}

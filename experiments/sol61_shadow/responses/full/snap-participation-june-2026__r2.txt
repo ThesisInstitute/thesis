@@ -1,0 +1,144 @@
+{
+  "slug": "snap-participation-june-2026",
+  "country": "US",
+  "type": "data",
+  "title": "June 2026 SNAP participation",
+  "question": "What is national total SNAP participation, Persons, for June 2026 in USDA FNS SNAP monthly data tables, not seasonally adjusted, on the FIRST PRINT, expressed in millions?",
+  "unit": "millions",
+  "pointEstimate": 36.352716,
+  "ciLow": 36.026188,
+  "ciHigh": 36.679244,
+  "confidence": 0.8,
+  "resolutionDate": "2026-09-18",
+  "resolutionSource": "USDA Food and Nutrition Service, SNAP Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+  "resolutionRule": "Resolve fns.snap.total_persons using the earliest public June 2026 national monthly Participation Persons value in FNS SNAP Data Tables, FIRST PRINT, not seasonally adjusted. Identify the initial vintage using the accompanying Number of Persons Participating table, TOTAL row, June 2026 Initial column; the national monthly summary's June 2026 Persons entry agrees. Retain any disaster assistance included by USDA and exclude the separate Nutrition Assistance Grant programs. Convert thousands of persons to millions by multiplying by 0.001; where the fetched artifact reports individual persons, divide by 1000000, retaining six decimal places. Ignore all later revisions and corrections, including same-day corrections. September 18, 2026 is the documented public posting date of June data, not a verified advance-calendar date; it conflicts with the registered October 26-November 3 expected window.",
+  "dataPointId": "usda.fns.snap.persons.june_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 39.513033
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 38.54773
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 37.870817
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 37.298271
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 37.011096
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 36.562128
+    }
+  ],
+  "drivers": [
+    "June initial outcome already published",
+    "Declining pretarget first-print participation",
+    "Later revisions excluded",
+    "Registered release window contradicted",
+    "Historical dispersion envelope only"
+  ],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fna-bwbufwdzbabpezgc.z01.azurefd.us/pd/supplemental-nutrition-assistance-program-snap",
+    "https://fna-bwbufwdzbabpezgc.z01.azurefd.us/pd/overview",
+    "https://www.fna.usda.gov/documents-resources-compact-view",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-3.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-4.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-7.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-8.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-persons-9.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-5.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-6.pdf",
+    "https://fns-prod.azureedge.us/sites/default/files/resource-files/snap-4fymonthly-8.pdf",
+    "https://fna-bwbufwdzbabpezgc.z01.azurefd.us/sites/default/files/resource-files/snap-4fymonthly-9.pdf"
+  ],
+  "runAt": "2026-10-07T12:18:12Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "June 2026 SNAP total Persons: retrospective known-outcome estimate"
+    },
+    {
+      "kind": "text",
+      "text": "The official initial June outcome was already public when this run executed. This cell cannot qualify as an ex-ante forecast or an independent pre-release research observation. The point reports the fetched initial value; the required nonzero bounds are a nominal historical dispersion envelope, not an 80% posterior interval for an unknown outcome. Preserve the registered slug, unit, dataPointId and first-print resolver; disclose timing and source-unit discrepancies instead of changing the target. No Thesis/Brier records or local files were consulted, and the prohibited catalog lookup was skipped."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official USDA SNAP Data Tables through its agency CDN; open Program Data Overview; search the official documents-resources-compact-view for June report dates.",
+      "result": "SNAP Data Tables lists latest month June 2026 and page updated September 18, 2026. Program Data Overview likewise lists June 2026 and data as of September 18, 2026. The official compact resource list dates the June 2026 Keydata Report September 18, 2026. These establish that June was public before this run, contradicting the registered October 26-November 3, 2026 expected window. No advance release calendar or conclusive earliest posting timestamp was fetched; resolutionDate records the documented publication date, not an invented scheduled date. The registered FNS landing URL returned HTTP 403; the accessible official page links agency CDN files."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Search exact official snap-persons-3.pdf and snap-persons-4.pdf content; read Initial headers and TOTAL rows.",
+      "result": "snap-persons-3.pdf, data as of March 13, 2026: December 2025 Initial TOTAL = 39,513,033 persons. snap-persons-4.pdf, data as of April 10, 2026: January 2026 Initial TOTAL = 38,547,730 persons. These full official tables were fetched through search-index content; direct PDF opens returned 404. The separate national-summary files for these vintages were not successfully fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-5.pdf and snap-persons-6.pdf; cross-check latest rows in snap-4fymonthly-5.pdf and snap-4fymonthly-6.pdf.",
+      "result": "May 8, 2026 vintage: February 2026 Initial TOTAL = 37,870,817 persons. June 12, 2026 vintage: March 2026 Initial TOTAL = 37,298,271 persons. The national monthly summary Persons entries match 37,870,817 and 37,298,271 respectively. Later preliminary values are excluded from the first-print history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open official snap-persons-7.pdf and snap-persons-8.pdf; cross-check latest May row in snap-4fymonthly-8.pdf.",
+      "result": "July 10, 2026 vintage: April 2026 Initial TOTAL = 37,011,096 persons. August 14, 2026 vintage: May 2026 Initial TOTAL = 36,562,128 persons. The August national monthly summary also reports May Persons = 36,562,128. April's original national-summary file was unavailable; its accompanying official Persons table provides the national TOTAL."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate, before using June: six distinct initial prints, December 2025-May 2026, average 37.800513 million and range 36.562128-39.513033 million. Their five successive changes are -0.965303, -0.676913, -0.572546, -0.287175 and -0.448968 million; mean -0.590181 and sample standard deviation 0.255100 million. Last-print persistence is 36.562128 million. On four comparable expanding-origin predictions for February-May, persistence MAE is 0.496401 million, expanding-drift MAE 0.291137, and last-change MAE 0.209980. Select last-change, 36.113160 million, as the strongest tested pre-release benchmark, while acknowledging the very small evaluation sample."
+    },
+    {
+      "kind": "text",
+      "text": "Generated in memory from the fetched initial values before choosing the final estimate; no model artifact or receipt was fabricated. Model candidates: [{\"schema\":\"thesis_model_candidate_v1\",\"series\":\"fns.snap.total_persons\",\"target_period\":\"2026-06\",\"model\":\"persistence\",\"unit\":\"millions\",\"point\":36.562128,\"p10\":36.2356,\"p50\":36.562128,\"p90\":36.888656,\"interval80\":[36.2356,36.888656],\"interval90\":[36.142526,36.98173],\"interval_method\":\"fallback_prior_normal_sample_sd_of_first_print_successive_changes\",\"calibration_n\":5,\"train_cutoff\":\"2026-05\",\"walk_forward\":{\"start\":\"2026-02\",\"end\":\"2026-05\",\"n\":4,\"mae\":0.496401,\"rmse\":0.517219}},{\"schema\":\"thesis_model_candidate_v1\",\"series\":\"fns.snap.total_persons\",\"target_period\":\"2026-06\",\"model\":\"expanding_drift\",\"unit\":\"millions\",\"point\":35.971947,\"p10\":35.645419,\"p50\":35.971947,\"p90\":36.298475,\"interval80\":[35.645419,36.298475],\"interval90\":[35.552345,36.391549],\"interval_method\":\"fallback_prior_normal_sample_sd_of_first_print_successive_changes\",\"calibration_n\":5,\"train_cutoff\":\"2026-05\",\"walk_forward\":{\"start\":\"2026-02\",\"end\":\"2026-05\",\"n\":4,\"mae\":0.291137,\"rmse\":0.308051}},{\"schema\":\"thesis_model_candidate_v1\",\"series\":\"fns.snap.total_persons\",\"target_period\":\"2026-06\",\"model\":\"last_change\",\"unit\":\"millions\",\"point\":36.11316,\"p10\":35.786632,\"p50\":36.11316,\"p90\":36.439688,\"interval80\":[35.786632,36.439688],\"interval90\":[35.693558,36.532762],\"interval_method\":\"fallback_prior_normal_sample_sd_of_first_print_successive_changes\",\"calibration_n\":5,\"train_cutoff\":\"2026-05\",\"walk_forward\":{\"start\":\"2026-02\",\"end\":\"2026-05\",\"n\":4,\"mae\":0.20998,\"rmse\":0.224541}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read June 2026 Initial TOTAL in official snap-persons-9.pdf and June Participation Persons in the linked national snap-4fymonthly-9.pdf.",
+      "result": "Both September 11, 2026 vintage tables report June 2026 = 36,352,716 persons; snap-persons-9.pdf explicitly labels June Initial. Its May Preliminary comparator is 36,685,024, unlike May's original 36,562,128. June's published month-to-month change against the revised comparator is -0.9%. The national summary and initial table agree on the target count. These fetched artifacts use individual persons, whereas the registered table description says thousands: 36,352,716 persons = 36,352.716 thousands = 36.352716 million."
+    },
+    {
+      "kind": "text",
+      "text": "Inside-view update: the actual published initial June count directly overrides the pre-release last-change prior by +0.239556 million, and differs from May initial persistence by -0.209412 million. This is material relative to the computed 0.163264 million threshold and is justified by direct target-period evidence absent from the December-May training sample. Final weights are 0% model and 100% observed initial count. Level comes from the observed June total; momentum is already represented in the benchmark; no additional one-off or policy effect is asserted. Later revisions do not move this first-print estimate."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = last-change candidate 2*36.562128 - 37.011096 = 36.113160 million, trained on six December 2025-May 2026 first prints. Direct-observation adjustment = 36.352716 - 36.113160 = +0.239556; other adjustments = 0; point = 36.352716. From the five fetched-history successive changes, mean = -0.590181 and sum((change-mean)^2) = 0.260303695338; sigma = 0.255100 million = sqrt(0.260303695338/(5-1)). Historical normal-envelope half-width = 1.28*sigma = 0.326527783826 million, with widening factor 1.00. Bounds = 36.352716 +/- 0.326527783826 = [36.026188216174,36.679243783826], rounded to [36.026188,36.679244]. This fallback-prior historical envelope satisfies the numeric contract but is not calibrated residual uncertainty about the already observed first print; confidence 0.8 is nominal."
+    },
+    {
+      "kind": "text",
+      "text": "Calibration limitation: the fixed historical half-width covers all four evaluated last-change errors, versus only one of the five persistence changes. This is a descriptive check using the full fetched sample, not an independent interval backtest. There are too few evaluated transitions to claim eight-of-ten coverage or reliable nominal 80% calibration. Six initial prints satisfy the numeric history floor, but original national-summary artifacts were not fetched for every period; corresponding official Persons TOTAL rows supplied those initial values."
+    },
+    {
+      "kind": "text",
+      "text": "Retrospective downside risk: additional June eligibility terminations exceeding 326,528 persons relative to the observed total would have put a hypothetical outcome below 36.026188 million. Retrospective upside risk: disaster assistance or delayed approvals adding more than 326,528 persons would have put a hypothetical outcome above 36.679244 million. These are pre-release stress scenarios, not live uncertainty after publication. Now only discovery of an authentic earlier first-print artifact with a different national total could change the registered resolution value; later corrections cannot. Evidence of an earlier initial count above or below 36,352,716 would move the point in that direction."
+    },
+    {
+      "kind": "forecast",
+      "point": 36.352716,
+      "ciLow": 36.026188,
+      "ciHigh": 36.679244
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-co",
+  "country": "US",
+  "type": "data",
+  "title": "Colorado ex parte renewal share, August 2026",
+  "question": "What percentage of Colorado Medicaid and CHIP beneficiaries due for renewal in the August 2026 reporting period will have coverage renewed on an ex parte basis, calculated as 100 times CMS Eligibility Processing Data metric 5a1 divided by metric 5, using Colorado's original (O) submission row in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c as FIRST published, not seasonally adjusted, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 61.0,
+  "ciLow": 47.9,
+  "ciHigh": 74.1,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Colorado's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.co.aug_2026",
+  "historicalContext": [
+    {"period": {"type": "month", "value": "2024-01"}, "label": "2024-01", "value": 23.8},
+    {"period": {"type": "month", "value": "2024-02"}, "label": "2024-02", "value": 25.4},
+    {"period": {"type": "month", "value": "2024-03"}, "label": "2024-03", "value": 25.5},
+    {"period": {"type": "month", "value": "2024-04"}, "label": "2024-04", "value": 27.0},
+    {"period": {"type": "month", "value": "2024-05"}, "label": "2024-05", "value": 49.9},
+    {"period": {"type": "month", "value": "2024-06"}, "label": "2024-06", "value": 49.1},
+    {"period": {"type": "month", "value": "2024-07"}, "label": "2024-07", "value": 55.4},
+    {"period": {"type": "month", "value": "2024-08"}, "label": "2024-08", "value": 51.1},
+    {"period": {"type": "month", "value": "2024-09"}, "label": "2024-09", "value": 56.6},
+    {"period": {"type": "month", "value": "2024-10"}, "label": "2024-10", "value": 55.1},
+    {"period": {"type": "month", "value": "2024-11"}, "label": "2024-11", "value": 54.5},
+    {"period": {"type": "month", "value": "2024-12"}, "label": "2024-12", "value": 58.7}
+  ],
+  "drivers": [
+    "Latest Colorado CMS snapshot persistence",
+    "Renewal-cohort composition and data matching",
+    "National panel shrinkage comparator",
+    "Conservative archival volatility",
+    "Unavailable current exact counts and first-print vintages"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://huggingface.co/HHS-Official",
+    "https://huggingface.co/datasets/HHS-Official/state-medicaid-and-chip-eligibility-processing-dat/blob/main/README.md",
+    "https://huggingface.co/datasets/HHS-Official/state-medicaid-and-chip-eligibility-processing-dat/blob/main/data/dataset.csv",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T10:50:50Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Colorado August 2026 ex parte renewal share: persistence with a conservative archival interval"
+    },
+    {
+      "kind": "text",
+      "text": "Target identity, unit, slug, dataPointId, date and registered resolver text are preserved. CMS's published ex parte percentage uses beneficiaries due for renewal as the denominator: metric 5a1/5. The supplied resolver omits explicit denominator field names; this question adopts that official CMS definition. The measure is a reporting-month cohort rate without seasonal adjustment. Resolution uses the first published O row, excluding U rows and subsequent corrections."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search and web.open",
+      "call": "Fetch CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c and its data dictionary at https://data.medicaid.gov/api/1/metastore/schemas/data-dictionary/items/0c98be2c-4c51-42b3-a0d6-2667f54c9ef6.",
+      "result": "CMS metadata: September 25, 2026 update; 3,876 rows; 22 columns. Dictionary identifies beneficiaries_with_a_renewal_due as metric 5 and beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis as metric 5a1; original_updated distinguishes O from U."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click and web.find",
+      "call": "Open HHS-Official archive data/dataset.csv and find CO,Colorado; read original O rows for January-April 2024, using the header's ex parte and renewal-due columns.",
+      "result": "Fetched numerator/denominator counts: 2024-01 36,502/153,265; 2024-02 34,750/136,981; 2024-03 35,127/137,882; 2024-04 31,508/116,528. Source: https://huggingface.co/datasets/HHS-Official/state-medicaid-and-chip-eligibility-processing-dat/blob/main/data/dataset.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click and web.find",
+      "call": "Read Colorado original O rows for May-August 2024 from the same HHS-Official CSV, preserving metric 5a1/5.",
+      "result": "Fetched numerator/denominator counts: 2024-05 32,099/64,356; 2024-06 35,169/71,640; 2024-07 43,029/77,736; 2024-08 38,306/74,949. These are O rows, not updated U outcomes."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click and web.find",
+      "call": "Read Colorado original O rows for September-December 2024 from the same HHS-Official CSV and inspect its README provenance.",
+      "result": "Fetched numerator/denominator counts: 2024-09 45,702/80,695; 2024-10 47,616/86,471; 2024-11 49,488/90,767; 2024-12 61,123/104,085. README names CMS as publisher, last modified 2025-04-30, and links HealthData.gov/d/fkfr-fp4z. December 2024 is the archive's latest Colorado observation."
+    },
+    {
+      "kind": "text",
+      "text": "Outside-view base rate: the 12 archived Colorado O-row ratios for January-December 2024 have mean 44.3398%, sample level standard deviation 14.2493 percentage points, and range 23.8163%-58.7241%. Last archived print persistence is 100*61,123/104,085 = 58.7241%, or 58.7%. The April-May change is +22.8383 percentage points, so extrapolating the archival upward trend would be inappropriate."
+    },
+    {
+      "kind": "text",
+      "text": "History-access limitation: the current CMS datastore queries, Colorado-filtered page and official September 2026 CSV could not be fetched through the web tool. historicalContext therefore contains ratios computed from the older HHS-Official CSV, not invented recent counts. The hosting organization identifies itself as HHS and supplies CMS/HealthData.gov provenance, but independent .gov confirmation of this mirror's authorization was not located. O identifies original-report outcomes and does not independently certify immutable first-publication vintage. This run cannot certify the strict pinned-artifact and first-print-history requirements; that is a material audit limitation."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.click and web.find",
+      "call": "Fetch CMS January-June 2026 snapshot PDFs from the official release page; read Coverage Retention and Disenrollment Rates by State, Colorado row, Renewed on an Ex Parte Basis column.",
+      "result": "Fetched Colorado snapshot rates and renewals due: January 2026 61%, 87,086; February 59%, 89,314; March 55%, 97,700; April 57%, 92,499; May 61%, 78,955; June 61%, 85,937. The PDFs publish these rates rounded to whole percentage points, not exact one-decimal O-row ratios. National ex parte rates for January-June are 47%, 47%, 48%, 47%, 48%, 47%. June's state ex parte rates range from 8% to 85%. Sources are the six CMS PDF URLs in sourceContext."
+    },
+    {
+      "kind": "text",
+      "text": "Updated official reference class: the six rounded January-June 2026 Colorado rates have mean 59.0%, sample level standard deviation 2.5298 percentage points and range 55%-61%. Their latest-print persistence benchmark is 61.0%. The new June observation updates the stale archival anchor by +2.2759 percentage points. This is replacement by a newer official measurement, rather than a separate policy or momentum adjustment. The panel comparator is 0.9*61 + 0.1*47 = 59.6%."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated in memory before selecting the forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"last_print_persistence\",\"trainCutoff\":\"2026-06\",\"targetPeriod\":\"2026-08\",\"point\":61.0,\"p10\":47.9,\"p50\":61.0,\"p90\":74.1,\"interval80\":[47.9,74.1],\"interval90\":[44.2,77.8],\"intervalMethod\":\"Gaussian fallback archival O-row successive-change sigma, sqrt(2) horizon scaling; rounded June 2026 snapshot point; archival vintages not certified\",\"calibration_n\":11,\"calibrationCutoff\":\"2024-12\",\"walkForwardScore\":{\"horizonMonths\":2,\"officialSnapshotProxy\":{\"n\":4,\"mae\":4.5,\"rmse\":4.795831523312719},\"archivalO\":{\"n\":10,\"mae\":6.828831263862062,\"rmse\":10.753911214205583}}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence_plus_panel_shrinkage\",\"trainCutoff\":\"2026-06\",\"targetPeriod\":\"2026-08\",\"point\":59.6,\"p10\":46.5,\"p50\":59.6,\"p90\":72.7,\"interval80\":[46.5,72.7],\"interval90\":[42.8,76.4],\"intervalMethod\":\"Same conservative archival residual wrapper; point=0.9*Colorado+0.1*national\",\"calibration_n\":11,\"calibrationCutoff\":\"2024-12\",\"walkForwardScore\":{\"horizonMonths\":2,\"officialSnapshotProxy\":{\"n\":4,\"mae\":4.275,\"rmse\":4.787744771810627}}}]"
+    },
+    {
+      "kind": "text",
+      "text": "Select last_print_persistence. On four two-month walks using the rounded 2026 snapshots, persistence has MAE 4.5000 and RMSE 4.7958 percentage points; the fixed 90% Colorado/10% national shrinkage comparator has MAE 4.2750 and RMSE 4.7877. The RMSE difference of about 0.0081 is much smaller than the snapshots' rounding uncertainty and this small sample does not establish panel superiority. No direct August-specific evidence justifies a momentum, one-off or policy adjustment. Final departure from the selected benchmark is 0.0 percentage points."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = June 2026 official snapshot persistence, 61.0%, with 100% prior weight; momentum = 0.0 pp, one-offs = 0.0 pp, policy = 0.0 pp. The point is trained through 2026-06, giving a two-reporting-month horizon to 2026-08. Residual calibration uses the 12 unrounded archived O-row ratios x_t = 100*numerator_t/denominator_t for January-December 2024, with 11 successive monthly changes d_t. mean(d) = 3.173441; sigma = 7.241924 pp = sqrt(sum((d_t-3.173441)^2)/10). Half-width = 1.28*sigma*sqrt(2) = 1.28*7.241924*1.414214 = 13.109283 pp. Bounds = 61.0-13.109283 = 47.890717 and 61.0+13.109283 = 74.109283; rounded 80% interval = [47.9,74.1]. The 90% half-width is 1.644854*7.241924*sqrt(2) = 16.845978, giving [44.2,77.8]. The sqrt(2) factor accounts for the two-month horizon. Retaining the archival unwinding break gives conservative uncertainty relative to the current rounded-snapshot change sigma of 3.162278, compensating for unavailable exact current counts and uncertified archival vintages; nominal 80% coverage is not independently established for the target regime."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: the archival two-month persistence errors are 1.6599, 1.6705, 24.4011, 22.0523, 5.4755, 2.0181, 1.2827, 3.9564, -2.1135 and 3.6583 percentage points. Eight of ten fall inside the 13.1093-point half-width; MAE is 6.8288 and RMSE is 10.7539. All four current rounded-snapshot two-month errors also fit. Colorado's last two rounded monthly moves, +4 and 0 percentage points, fit this band. The national 8%-85% cross-sectional range is substantially broader and reinforces uncertainty about transferring a small state history across operational regimes."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Fetch https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot and verify published dates without inferring a future scheduled day.",
+      "result": "Official release list: January 2026 released April 24, 2026; February released May 29; March June 26; April July 31; May August 28; June September 25, 2026. No August 2026 scheduled release date or December 15 announcement was found."
+    },
+    {
+      "kind": "text",
+      "text": "Resolution-date discrepancy: retain the supplied registered resolutionDate 2026-12-15 exactly, but it was not verified as an official agency scheduled release day. The target supplied no resolve-by-bound basis; this run does not silently convert it into one or infer a more specific publication date. The registered slug is used without visiting the prohibited Thesis catalog. No files or activity receipts were created."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: expanded reliable data matching that converts a substantial portion of form-based renewals into ex parte renewals, or an unusually stable-income August cohort, could place the share above 74.1%, outside the interval. Downside risk: a wage or benefits-data feed failure, increased unresolved matches, or an August cohort with substantially more income changes could place it below 47.9%, outside the interval. A higher subsequent official Colorado renewal rate would raise the point; a lower rate or a documented matching disruption would lower it. No such August-specific mechanism was established in the fetched evidence."
+    },
+    {
+      "kind": "forecast",
+      "point": 61.0,
+      "ciLow": 47.9,
+      "ciHigh": 74.1
+    }
+  ]
+}

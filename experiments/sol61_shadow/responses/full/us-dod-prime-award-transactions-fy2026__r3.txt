@@ -1,0 +1,72 @@
+{
+  "slug": "us-dod-prime-award-transactions-fy2026",
+  "country": "US",
+  "type": "data",
+  "title": "DoD prime award transactions, FY2026",
+  "question": "What is transaction_count, multiplied by 0.000001 and expressed in millions, in the registered FY2026 snapshot of USAspending API v2 GET https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026, preserving the query's default filters?",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": null,
+  "resolutionDate": null,
+  "resolutionSource": "USAspending API v2, agency 097 award summary, registered query snapshot",
+  "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+  "resolutionRule": "Use transaction_count from the exact registered FY2026 GET query and multiply by 0.000001. Preserve the registered_query_snapshot policy and default filters; do not substitute profile totals, obligations, award counts, or a contracts-only query. The supplied target context does not provide a resolutionDate or sufficient snapshot timing to complete this rule.",
+  "dataPointId": "usaspending.dod.prime_award_transactions.fy2026.registered_query_snapshot",
+  "historicalContext": [],
+  "drivers": [
+    "Required registered-query history could not be fetched",
+    "Persistence and volatility cannot be calculated",
+    "Resolution date absent from supplied target context"
+  ],
+  "sourceContext": [
+    "https://api.usaspending.gov/docs/endpoints",
+    "https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/agency/toptier_code/awards.md"
+  ],
+  "runAt": "2026-10-07T12:35:03Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast refused: required registered-query history unavailable"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the supplied FY2026 registered query snapshot, not a conventional first-print statistical release. All target identity fields are retained. No Thesis sources or local files were consulted."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2025 ; https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2024 ; https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2023",
+      "result": "Each exact URL returned: URL [requested URL] is not accessible via this tool. No transaction_count value was fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "Open https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2022 ; https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2021 ; https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2020 ; https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year=2026",
+      "result": "Each exact URL returned: URL [requested URL] is not accessible via this tool. No historical or current transaction_count value was fetched."
+    },
+    {
+      "kind": "tool",
+      "tool": "search_service_web_run.open",
+      "call": "Retry the exact FY2025, FY2024 and FY2023 registered URLs through the other available web-search tool.",
+      "result": "Each exact URL again returned: URL [requested URL] is not accessible via this tool. A subsequent web.open retry of the exact FY2025 URL also failed."
+    },
+    {
+      "kind": "text",
+      "text": "Official endpoint documentation confirms GET returns agency transaction counts and obligations. The linked official contract specifies awarding-agency and all-award-type defaults, with transaction_count as the required numeric field. Documentation examples are not DoD history and were excluded. Sources: https://api.usaspending.gov/docs/endpoints and https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/agency/toptier_code/awards.md ."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate/reference class: unavailable. None of the required prior-period transaction_count responses was obtained. No persistence benchmark, model candidate, sigma, point estimate, or interval can be calculated from admissible fetched evidence. This is a fetch failure, not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "The supplied target context contains an expected window of 2026-10-15 through 2026-10-22, but no resolutionDate or resolutionDateBasis. The window's end cannot be silently promoted to an official release date or registered outer deadline."
+    },
+    {
+      "kind": "text",
+      "text": "Refusal under the registered-query instruction: the exact history query could not be executed successfully with the permitted web tools. The null forecast fields and empty historicalContext deliberately mark this as an unissued forecast, not a contract-valid scored cell. No substitute series, remembered values, fabricated uncertainty, or activity receipts were supplied."
+    }
+  ]
+}

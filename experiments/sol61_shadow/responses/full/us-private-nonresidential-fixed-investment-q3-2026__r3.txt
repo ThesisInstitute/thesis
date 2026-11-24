@@ -1,0 +1,169 @@
+{
+  "slug": "us-private-nonresidential-fixed-investment-q3-2026",
+  "country": "US",
+  "type": "data",
+  "title": "US private nonresidential fixed investment, Q3 2026",
+  "question": "What will BEA first publish for US private nonresidential fixed investment in 2026-Q3, NIPA Table 5.3.5, line 2 (Nonresidential), series T50305:L2 / account A008RC, in billions of current US dollars, seasonally adjusted at an annual rate, with the GDP advance release?",
+  "unit": "usd_billions",
+  "pointEstimate": 4827.053,
+  "ciLow": 4724.834,
+  "ciHigh": 4929.272,
+  "confidence": 0.8,
+  "resolutionDate": "2026-10-29",
+  "resolutionSource": "Bureau of Economic Analysis, GDP (Advance Estimate), 3rd Quarter 2026",
+  "resolutionSourceUrl": "https://apps.bea.gov/iTable/?ReqID=19&step=3&isuri=1&nipa_table_list=145&categories=survey",
+  "resolutionRule": "Resolve on the FIRST PRINT of the 2026-Q3 current-dollar, seasonally adjusted annual-rate value in BEA NIPA Table 5.3.5, Private Fixed Investment by Type, line 2 Nonresidential (T50305:L2, account A008RC), accompanying GDP (Advance Estimate), 3rd Quarter 2026. The official calendar schedules October 29, 2026 at 8:30 a.m. Eastern. Apply the registered multiplication by 0.001 to raw million-dollar observations to express billions; an already-billion-dollar display requires no further conversion. Report the raw-data equivalent to 0.001 billion. Preserve the original release vintage; subsequent corrections, second/third estimates, and annual revisions do not change the outcome.",
+  "dataPointId": "bea.private_nonresidential_fixed_investment.2026_q3.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "quarter", "value": "2024-Q2"},
+      "label": "2024-Q2",
+      "value": 3904.6
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q3"},
+      "label": "2024-Q3",
+      "value": 4075.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2024-Q4"},
+      "label": "2024-Q4",
+      "value": 4080.976
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q1"},
+      "label": "2025-Q1",
+      "value": 4174.9
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q2"},
+      "label": "2025-Q2",
+      "value": 4203.2
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q3"},
+      "label": "2025-Q3",
+      "value": 4291.558
+    },
+    {
+      "period": {"type": "quarter", "value": "2025-Q4"},
+      "label": "2025-Q4",
+      "value": 4378.954
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q1"},
+      "label": "2026-Q1",
+      "value": 4494.45
+    },
+    {
+      "period": {"type": "quarter", "value": "2026-Q2"},
+      "label": "2026-Q2",
+      "value": 4623.657
+    }
+  ],
+  "drivers": [
+    "Latest BEA revision raises the starting level",
+    "Positive capital-goods shipment momentum",
+    "Private nonresidential construction recovery",
+    "Historical nominal investment drift",
+    "Small-sample and vintage uncertainty"
+  ],
+  "sourceContext": [
+    "https://www.bea.gov/news/schedule",
+    "https://www.bea.gov/sites/default/files/2024-07/gdp2q24-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2024-10/gdp3q24-adv.pdf",
+    "https://alfred.stlouisfed.org/release?et=&ob=pv&od=desc&pageID=1&rd=2025-01-30&rid=53&t=fixed",
+    "https://www.bea.gov/sites/default/files/2025-04/gdp1q25-adv.pdf",
+    "https://www.bea.gov/sites/default/files/2025-07/gdp2q25-adv.pdf",
+    "https://alfred.stlouisfed.org/release?ob=pv&od=desc&rd=2025-12-23&rid=53&t=fixed",
+    "https://alfred.stlouisfed.org/release?ob=pv&od=desc&rd=2026-02-20&rid=53&t=nonresidential",
+    "https://alfred.stlouisfed.org/release?et=&ob=pv&od=desc&pageID=1&rd=2026-04-30&rid=53&t=nonresidential",
+    "https://alfred.stlouisfed.org/release?et=&ob=pv&od=desc&pageID=3&rd=2026-07-30&rid=53&t=",
+    "https://www.bea.gov/news/2025/gross-domestic-product-3rd-quarter-2025-initial-estimate-and-corporate-profits",
+    "https://apps.bea.gov/national/pdf/SNTables.pdf",
+    "https://fred.stlouisfed.org/release/tables?eid=8128&rid=53",
+    "https://fred.stlouisfed.org/data/PNFI",
+    "https://www.bea.gov/news/2026/gdp-third-estimate-industries-corporate-profits-state-gdp-and-state-personal-income-2nd",
+    "https://www.census.gov/manufacturing/m3/prel/pdf/s-i-o.pdf",
+    "https://www.census.gov/construction/c30/pdf/release.pdf"
+  ],
+  "runAt": "2026-10-07T12:42:31Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast of the original Q3 2026 nominal nonresidential investment level"
+    },
+    {
+      "kind": "text",
+      "text": "The registered target is the US current-dollar level of private nonresidential fixed investment, seasonally adjusted at an annual rate, in its first Q3 publication. The supplied slug, unit, dataPointId, source binding, and release window are retained. The catalog lookup was omitted under the run's independence instruction."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open https://www.bea.gov/news/schedule",
+      "result": "BEA's fetched 2026 calendar lists October 29, 8:30 AM: GDP (Advance Estimate), 3rd Quarter 2026. Thus resolutionDate is 2026-10-29, matching the registered window."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Open BEA gdp2q24-adv.pdf, gdp3q24-adv.pdf, gdp1q25-adv.pdf and gdp2q25-adv.pdf; read news Table 3 line 28, current-dollar columns.",
+      "result": "Official advance-release PDFs report first-print nonresidential investment, billions of dollars SAAR: 2024-Q2 3904.6; 2024-Q3 4075.9; 2025-Q1 4174.9; 2025-Q2 4203.2. These are published to 0.1 billion. Adjacent chained-dollar columns were excluded."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch ALFRED GDP release-date pages for 2025-01-30, 2025-12-23, 2026-02-20, 2026-04-30 and 2026-07-30; read PNFI, quarterly SAAR, billions of dollars.",
+      "result": "The Federal Reserve's BEA vintage mirror returns original PNFI levels: 2024-Q4 4080.976; 2025-Q3 4291.558; 2025-Q4 4378.954; 2026-Q1 4494.45; 2026-Q2 4623.657. Each corresponding release-date entry identifies one new/revised latest-quarter observation. The 2024-Q4 number was fetched in the official ALFRED search extraction."
+    },
+    {
+      "kind": "text",
+      "text": "History provenance limitation: the exact archived Table 5.3.5 raw-million files could not be fetched through this web tool. Four historical entries therefore use the identical nominal concept in BEA news Table 3 line 28 at its published precision; five use the sanctioned Federal Reserve vintage mirror. No missing decimal digits were supplied. This does not establish the contract's stricter exact-artifact historical provenance. BEA identifies the December 23, 2025 Q3 initial release as the first publication after the shutdown, combining customary advance and second-estimate inputs."
+    },
+    {
+      "kind": "text",
+      "text": "Base rate / reference class: nine original first prints from 2024-Q2 through 2026-Q2 have mean level 4247.577 billion, median 4203.2, and range 3904.6–4623.657. Their eight successive level changes are 171.300, 5.076, 93.924, 28.300, 88.358, 87.396, 115.496 and 129.207 billion; mean change is 89.882125 and sample standard deviation is 53.238901. Original-first-print persistence is 4623.657. Before current-evidence adjustments, the expanding-mean drift benchmark is 4623.657 + 89.882125 = 4713.539125."
+    },
+    {
+      "kind": "math",
+      "text": "Common expanding-window checks forecast 2025-Q2 through 2026-Q2, using only earlier observations along the fetched first-print path. Five forecast MAEs are: persistence 89.7514 billion; expanding-mean drift 33.378423; last-change extrapolation 33.691; trailing-three-change drift 40.905667. Select expanding-mean drift because it has the lowest MAE and RMSE, while recognizing its negligible advantage over last-change extrapolation. These checks do not reconstruct the complete revised information set available at each historical release."
+    },
+    {
+      "kind": "text",
+      "text": "Model candidates generated in memory before the final forecast: [{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"persistence\",\"point\":4623.657,\"p10\":4555.511,\"p50\":4623.657,\"p90\":4691.803,\"interval80\":{\"low\":4555.511,\"high\":4691.803},\"interval90\":{\"low\":4536.079,\"high\":4711.235},\"interval_method\":\"Gaussian fallback using sample standard deviation of eight successive original-first-print level changes; nominal intervals, no independent coverage calibration\",\"calibration_n\":8,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"metric\":\"MAE\",\"value\":89.751,\"rmse\":96.208,\"n\":5,\"periods\":\"2025-Q2 through 2026-Q2\",\"scope\":\"expanding-window forecasts along the original-first-print path; no reconstruction of full real-time revised histories\"}},{\"schema\":\"thesis_model_candidate_v1\",\"model\":\"expanding_mean_drift\",\"point\":4713.539,\"p10\":4645.393,\"p50\":4713.539,\"p90\":4781.685,\"interval80\":{\"low\":4645.393,\"high\":4781.685},\"interval90\":{\"low\":4625.961,\"high\":4801.117},\"interval_method\":\"Gaussian fallback using sample standard deviation of eight successive original-first-print level changes; nominal intervals, no independent coverage calibration\",\"calibration_n\":8,\"train_cutoff\":\"2026-Q2\",\"walk_forward_score\":{\"metric\":\"MAE\",\"value\":33.378,\"rmse\":38.613,\"n\":5,\"periods\":\"2025-Q2 through 2026-Q2\",\"scope\":\"expanding-window forecasts along the original-first-print path; no reconstruction of full real-time revised histories\"}}]"
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read BEA Selected NIPA Tables PDF page 213, Table 5.3.5 line 2; cross-check the same line in FRED's Table 5.3.5 and PNFI data table; read BEA's September 30 release.",
+      "result": "BEA's September 30 vintage reports quarterly levels 2025-Q2 4321.6, Q3 4412.2, Q4 4482.6, 2026-Q1 4597.4 and Q2 4737.2 billion SAAR. The same-table Federal Reserve mirror gives the more precise Q2 4737.171 and Q1 4597.400. BEA states its September 30, 2026 release incorporated the annual update covering 2021-Q1 through 2026-Q1. These revised levels are current evidence, separate from the original-print calibration history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Read Census August 2026 full M3 report Table 5 and August construction release Table 1.",
+      "result": "Full M3, released October 2, reports nondefense capital-goods excluding aircraft shipments: June 83320, July 84506 and August 84960 million dollars, seasonally adjusted monthly; August +0.5%. Orders: June 85757, July 86295, August 87640 million; August +1.6%. Construction, released October 1, reports private nonresidential construction June 758852, July 764979 and August 773010 million dollars SAAR; August +1.0% month-on-month and -1.0% year-on-year."
+    },
+    {
+      "kind": "text",
+      "text": "Current update: the observed Q2 level revision is +113.514 billion, calculated as 4737.171 - 4623.657. Rebase the selected drift benchmark by that amount because the target will be published on the current BEA vintage; this revision was unavailable in the Q2 first print. It exceeds the material-update threshold of 34.073 billion, one quarter of the historical unmodified 80% band. Shipments and construction support positive momentum, but no fitted bridge maps these partial-quarter proxies into total BEA investment. Consequently their additional point adjustment is zero. No separately quantified one-off or policy adjustment is applied. The final point is +113.514 relative to the original-print drift candidate and +89.882125 relative to current-level persistence."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior = selected expanding-mean drift, trained on nine original prints, 2024-Q2–2026-Q2; the eight changes total 719.057, so mean change = 719.057/8 = 89.882125 billion. sigma = 53.238901 billion, computed as sqrt(19840.664240875/(8-1)) from squared deviations of those changes. Point = 4623.657 + 89.882125 + 113.514 observed revision + 0 proxy adjustment = 4827.053125, equivalently 4737.171 + 89.882125. The benchmark drift receives 100% weight; directional proxy evidence receives 0 additional weight. Normal 80% half-width = 1.28*sigma = 68.145794; widen by 1.5 for the small calibration sample, mixed historical vintages, and the September annual update, giving 102.218690. Raw bounds = 4827.053125 +/- 102.218690 = [4724.834435,4929.271815]. Rounded to 0.001 billion: point 4827.053; ciLow 4724.834; ciHigh 4929.272."
+    },
+    {
+      "kind": "text",
+      "text": "Interval sanity check: the unmodified mean-centered band covers 6 of the 8 historical changes; the widened band covers 8 of 8, and all 5 drift walk-forward errors are smaller than its half-width. These are small-sample, partly in-sample checks, not independent proof of 80% coverage; there are fewer than 10 historical transitions. Successive original-print changes contain revisions as well as economic growth. Rebasing on the latest Q2 level can therefore partly double-count typical historical revision effects, which is a downside consideration."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: accelerated September capital-equipment deliveries, stronger investment imports, and faster software/R&D spending could produce a quarterly increase above 192.101 billion from the current Q2 level and would land above the interval. Downside risk: a broad equipment-delivery reversal combined with falling private structures or weak intellectual-property investment could put Q3 below 4724.834 and outside the interval. Strong September shipment and construction releases would move the point up; declines in those releases or weaker official service-investment evidence would move it down."
+    },
+    {
+      "kind": "forecast",
+      "point": 4827.053,
+      "ciLow": 4724.834,
+      "ciHigh": 4929.272
+    }
+  ]
+}

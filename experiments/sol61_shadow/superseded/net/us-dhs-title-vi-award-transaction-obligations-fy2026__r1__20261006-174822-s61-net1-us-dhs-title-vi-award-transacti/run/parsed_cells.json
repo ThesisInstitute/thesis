@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "us-dhs-title-vi-award-transaction-obligations-fy2026",
+    "country": "US",
+    "type": "data",
+    "title": "DHS Title VI FY2026 forecast refused: historical query failed",
+    "question": "What will FY2026 award-transaction obligations in USD equal in the first registered USAspending query snapshot for the specified DHS Treasury accounts?",
+    "unit": "usd",
+    "pointEstimate": null,
+    "ciLow": null,
+    "ciHigh": null,
+    "confidence": 0.8,
+    "resolutionDate": null,
+    "resolutionSource": "U.S. Department of the Treasury USAspending API",
+    "resolutionSourceUrl": "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+    "resolutionRule": "Use the first official registered-query snapshot under the supplied release policy, reading the FY2026 results[].aggregated_amount with fiscal-year grouping, transaction spending level, the registered award-type codes and Treasury-account components, and factor 1. Preserve the returned USD precision and exclude subsequent revisions. The resolution date could not be verified before the mandatory fetch-failure stop.",
+    "dataPointId": "usaspending.dhs.title_vi.award_transaction_obligations.fy2026.registered_query_snapshot",
+    "historicalContext": [],
+    "drivers": [],
+    "sourceContext": [
+      "https://api.usaspending.gov/api/v2/search/spending_over_time/",
+      "https://api.usaspending.gov/docs/endpoints",
+      "https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/search/spending_over_time.md"
+    ],
+    "runAt": "2026-10-06T21:59:58Z",
+    "reasoning": [
+      {
+        "kind": "heading",
+        "text": "Forecast refused because the mandatory historical query could not be fetched"
+      },
+      {
+        "kind": "text",
+        "text": "The target is the exact registered transaction-obligations query, not a DHS agency total. The official endpoint documentation confirms POST, fiscal-year grouping, transaction spending level, and the aggregated_amount response field."
+      },
+      {
+        "kind": "text",
+        "text": "Attempted the registered query for FY2025 using POST https://api.usaspending.gov/api/v2/search/spending_over_time/, group=fiscal_year, spending_level=transactions, and time_period=2024-10-01 through 2025-09-30. Included all 22 registered award-type codes and all six Treasury-account component filters, preserving their registered availability years."
+      },
+      {
+        "kind": "text",
+        "text": "The curl response contained no data body and exited with code 35. Exact echoed error: curl: (35) Recv failure: Connection reset by peer."
+      },
+      {
+        "kind": "text",
+        "text": "No historical numeric print was fetched. The required base rate and six-print reference class therefore cannot be established. No remembered values, broader aggregates, or independent forecasts were substituted."
+      },
+      {
+        "kind": "text",
+        "text": "Prior/update/interval: No prior, adjustment components, sigma, interval half-width, or implied bounds were estimated because the registered historical query failed."
+      },
+      {
+        "kind": "text",
+        "text": "Stopped after the failed historical fetch as instructed. Null estimates and an empty historicalContext explicitly represent refusal; this object does not satisfy forecast normalization. A valid forecast requires successful registered-query history and an officially verified resolution date."
+      }
+    ]
+  }
+]

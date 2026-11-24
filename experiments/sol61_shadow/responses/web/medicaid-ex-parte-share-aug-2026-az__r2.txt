@@ -1,0 +1,173 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-az",
+  "country": "US",
+  "type": "data",
+  "title": "Arizona ex parte renewal share, August 2026",
+  "question": "What percentage of Arizona Medicaid and CHIP beneficiaries due for renewal in August 2026 will have been renewed on an ex parte basis, using the first officially published original (O) submission in CMS's State Medicaid and CHIP Eligibility Processing Data?",
+  "unit": "percent",
+  "pointEstimate": 67.2,
+  "ciLow": 52.2,
+  "ciHigh": 82.2,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Arizona's ex parte renewal share for the August 2026 reporting period using the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times Beneficiaries Whose Coverage Was Renewed on an Ex Parte Basis divided by Beneficiaries with a Renewal Due, using numerator and denominator as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not replace the first print.",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "June 2025",
+      "value": 51
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 65
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 68
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 61
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 67
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 70
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 59
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 68
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 63
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 70
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 69
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 73
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 60
+    }
+  ],
+  "drivers": [
+    "Recent Arizona renewal-share level",
+    "Monthly renewal-cohort composition",
+    "June volatility and possible seasonal effects",
+    "Automated data matching and renewal classification"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-june2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T11:44:57Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Arizona August 2026 ex parte renewal-share forecast"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Arizona's state row for reporting period 202608, original submission O, in dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c. The ledger does not explicitly name the denominator. I use all beneficiaries due for renewal, consistent with CMS's coverage-retention tables and Metric 5a(1)/Metric 5 convention. This denominator clarification is an interpretation of the ledger wording. The official specifications identify these metrics in Table 6: https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf."
+    },
+    {
+      "kind": "text",
+      "text": "All historical values are Arizona current-reporting-period preliminary renewal-cohort percentages from the corresponding CMS release snapshots. Retrospective updated outcomes are excluded. These tables represent original-cohort outcomes but do not expose literal O flags, and CMS rounds their shares to whole percentages. The raw CSV and API rows could not be fetched, so exact historical numerator counts and one-decimal shares could not be independently reconstructed. The history therefore preserves fetched snapshot precision; final resolution still uses the first published O counts."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Web-fetch Arizona rows in CMS's June, July, and August 2025 Coverage Retention and Disenrollment Rates by State tables: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-june2025.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-july2025.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-aug2025.pdf",
+      "result": "June 2025: 66,398 beneficiaries due, ex parte share 51%. July 2025: 226,932 due, share 65%. August 2025: 189,866 due, share 68%. Shares are published whole-percent values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Web-fetch Arizona rows in CMS's September through December 2025 coverage-retention tables: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-sep2025.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-oct2025.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-nov2025.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-dec2025.pdf",
+      "result": "September 2025: 111,492 beneficiaries due, ex parte share 61%. October: 178,468 due, share 67%. November: 176,740 due, share 70%. December: 97,996 due, share 59%. Shares are published whole-percent values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Web-fetch Arizona rows in CMS's January through March 2026 coverage-retention tables: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jan2026.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-feb2026.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-mar2026.pdf",
+      "result": "January 2026: 183,464 beneficiaries due, ex parte share 68%. February: 113,696 due, share 63%. March: 180,456 due, share 70%. Shares are published whole-percent values."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Web-fetch Arizona rows in CMS's April through June 2026 coverage-retention tables: https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-apr2026.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-may2026.pdf ; https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+      "result": "April 2026: 151,629 beneficiaries due, ex parte share 69%. May: 181,665 due, share 73%. June: 98,446 due, share 60%. Shares are published whole-percent values."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view reference class contains 13 consecutive Arizona monthly prints, June 2025 through June 2026. The recent base rate is the January-June 2026 mean: (68+63+70+69+73+60)/6 = 67.1667%. August 2025's 68% supports this level, although one previous August cannot establish reliable seasonality."
+    },
+    {
+      "kind": "text",
+      "text": "Level: anchor on the recent six-month mean. Momentum: January-March averaged 67.0%, versus 67.3333% for April-June, providing little evidence for sustained acceleration. One-off effects: June fell 13 percentage points after May, while June was also relatively low the previous year; treat this as possible cohort variation rather than extrapolating the decline. Policy mechanism: data matching and classification can change ex parte outcomes, but no separately quantified Arizona policy adjustment is supported by the fetched evidence."
+    },
+    {
+      "kind": "text",
+      "text": "Schedule-verification limitation: the official CMS archive records the June 2026 snapshot release on September 25, 2026, and the federal dataset catalog confirms that update date. Neither fetched source announces the August 2026 publication date or verifies December 15, 2026. I retain the registered resolutionDate 2026-12-15, but the required official schedule verification remains unmet. State submission deadlines are not publication dates. Sources: https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot ; https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a local-level persistence prior equal to the January-June 2026 mean, 67.1667%, with momentum, one-off, and policy adjustments each set to 0. Estimate dispersion from successive changes across all 13 fetched original-cohort snapshot prints: [14,3,-7,6,3,-11,9,-5,7,-1,4,-13] percentage points. Mean change = 0.75; squared deviations sum = 754.25; sigma = 8.2806 percentage points = sqrt(754.25/11). The approximate normal 80% one-month half-width is 1.28*sigma = 10.5992. For the two-month June-to-August horizon, multiply by sqrt(2), giving 14.9895; this assumes independent monthly innovations and retains observed cohort volatility. Thus 67.1667 +/- 14.9895 gives [52.1772,82.1561], rounded to [52.2,82.2], with point 67.2. This is a model-based interval, not empirically verified coverage."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: more beneficiaries with readily matched eligibility data or more successful automated checks could lift the share. Downside risk: a harder-to-match cohort, verification-system disruption, or more data-source renewals classified as form-based could reduce it. Outside the interval: a substantial automation or reporting change could produce a share above 82.2%; a major matching failure or unusually difficult cohort could produce a share below 52.2%. CMS describes the form-based classification mechanism in https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf."
+    },
+    {
+      "kind": "forecast",
+      "point": 67.2,
+      "ciLow": 52.2,
+      "ciHigh": 82.2
+    }
+  ]
+}

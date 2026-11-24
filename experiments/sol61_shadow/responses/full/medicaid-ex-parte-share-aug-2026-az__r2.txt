@@ -1,0 +1,99 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-az",
+  "country": "US",
+  "type": "data",
+  "title": "Arizona ex parte renewal share, August 2026",
+  "question": "What is Arizona's ex parte renewal share for the August 2026 reporting period, calculated to one decimal from the original (O) submission row in CMS State Medicaid and CHIP Eligibility Processing Data, dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, at FIRST PRINT? No seasonal adjustment is specified by CMS.",
+  "unit": "percent",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolves to Arizona's ex parte renewal share for the August 2026 reporting period, computed from the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it (expected roughly three to four months after the period). Numerator and denominator as published; share computed to one decimal.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.az.aug_2026",
+  "historicalContext": [],
+  "drivers": [
+    "Original-submission first-print requirement",
+    "Arizona history could not be fetched",
+    "Registered denominator is unspecified",
+    "Official future publication date unverified"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+    "https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0?limit=5&offset=0",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf"
+  ],
+  "runAt": "2026-10-07T12:20:09Z",
+  "activityLog": [],
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast withheld: required official Arizona history could not be fetched."
+    },
+    {
+      "kind": "text",
+      "text": "The registered target identity and resolver are preserved. Null estimates explicitly mark the cell as dropped under the honesty rule; this object does not satisfy numeric forecast validation. No files or Thesis records were accessed, and the prohibited catalog lookup was skipped."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.search_query",
+      "call": "Search the exact CMS dataset identifier on data.medicaid.gov.",
+      "result": "Official indexed dataset page reports an update on September 25, 2026, with 3,876 rows and 22 columns; O denotes original submissions and U denotes updated submissions. The exposed table contained Alaska rows, not the required Arizona history."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://catalog.data.gov/dataset/state-medicaid-and-chip-eligibility-processing-data",
+      "result": "Official federal catalog identifies dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, modified 2026-09-25T18:00:00Z, and links its September 2026 CSV at https://download.medicaid.gov/data/renewal-dataset-september-2026-release.csv."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+      "result": "Fetched specifications display Version 4, updated November 2025. Metric 5 counts beneficiaries due for renewal; metric 5a counts beneficiaries renewed; metric 5a(1) counts ex parte renewals. Original reports are due by the 8th and pending-renewal updates by the 15th; these are submission deadlines, not publication dates. Corrections to original reports are permitted."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.open",
+      "call": "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot",
+      "result": "CMS lists the June 2026 snapshot as released September 25, 2026, and the May 2026 snapshot as released August 28, 2026. The fetched page does not give an August 2026 publication date."
+    },
+    {
+      "kind": "text",
+      "text": "History fetch failed: the official CSV and datastore API returned inaccessible/Internal Error responses; filtered and paginated dataset pages also failed, while the dataset root yielded no readable rows. No Arizona original-submission numerator or denominator was retrieved. Rounded snapshot summaries cannot replace the exact registered artifact, so historicalContext remains empty."
+    },
+    {
+      "kind": "text",
+      "text": "The base rate and reference class are unavailable. Last-print persistence, panel shrinkage, realized first-print dispersion, and walk-forward comparisons cannot be calculated from the fetched metadata. Missing retrieval is not evidence that the official source exposes fewer than six prints."
+    },
+    {
+      "kind": "text",
+      "text": "No thesis_model_candidate_v1 candidate is emitted because no admissible Arizona numeric observations were fetched. Assigning a persistence point, quantiles, calibration sample, or score would fabricate evidence."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: prior unavailable; historical sample unavailable; adjustment components unestimated; sigma = unavailable. The required half-width calculation, 1.28 * sigma, and implied bounds cannot be computed. Point estimate and interval bounds are null; confidence retains the contract's nominal coverage only."
+    },
+    {
+      "kind": "text",
+      "text": "Resolver discrepancies: the registered wording does not identify whether the denominator is all beneficiaries due or only beneficiaries renewed. The registered resolutionDate is preserved, but it could not be verified as an official scheduled release date. An O row can receive corrections, so first-print resolution requires the initial published vintage."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk would include better electronic verification or a cohort easier to renew automatically; downside risk would include failed data matches or a cohort requiring more forms. No numeric interval exists, so neither scenario can be assigned an outside-the-interval threshold."
+    },
+    {
+      "kind": "forecast",
+      "point": null,
+      "ciLow": null,
+      "ciHigh": null
+    }
+  ]
+}

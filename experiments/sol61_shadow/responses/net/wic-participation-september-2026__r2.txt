@@ -1,0 +1,37 @@
+{
+  "slug": "wic-participation-september-2026",
+  "country": "US",
+  "type": "data",
+  "title": "September 2026 WIC participation",
+  "question": "USDA FNS total monthly WIC participation for September 2026, first official print",
+  "unit": "millions",
+  "pointEstimate": null,
+  "ciLow": null,
+  "ciHigh": null,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "USDA Food and Nutrition Service WIC Data Tables",
+  "resolutionSourceUrl": "https://www.fns.usda.gov/pd/wic-program",
+  "resolutionRule": "Resolve on September 2026 total WIC participation in the first official monthly publication, converted from the published units to millions. Preserve published precision and exclude subsequent corrections and revisions.",
+  "dataPointId": "fns.wic.total_participation.2026-09.first_print",
+  "historicalContext": [],
+  "drivers": [],
+  "sourceContext": [
+    "https://www.fns.usda.gov/pd/wic-program"
+  ],
+  "runAt": "2026-10-07T12:03:26Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Forecast aborted: official-source fetch failed"
+    },
+    {
+      "kind": "text",
+      "text": "The web fetch of https://www.fns.usda.gov/pd/wic-program returned HTTP 403 Forbidden. Following the instruction to stop after a failed fetch, this run stopped without obtaining the participation history or verifying the release date."
+    },
+    {
+      "kind": "text",
+      "text": "No numeric forecast or interval is emitted because the required official base rate was not fetched. Null values indicate unavailable estimates; no remembered statistics or inferred release date were substituted."
+    }
+  ]
+}

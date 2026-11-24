@@ -1,0 +1,146 @@
+{
+  "slug": "additional-child-tax-credit-total-claims-ty2027-current-law",
+  "country": "US",
+  "type": "conditional",
+  "conditionalOn": "No legislation enacted by 2027-12-31 changes the IRC §24(d)(1)(B)(i) earned-income threshold of $2,500 for tax year 2027; current law holds. The $2,500 operative amount is applied by IRC §24(h)(6), while §24(d)(1)(B)(i) contains the underlying $3,000 amount.",
+  "title": "TY2027 total ACTC claiming returns",
+  "question": "Conditional on the registered current-law assumption, how many millions of returns will claim the additional child tax credit for tax year 2027 in the first official IRS SOI Publication 1304 Table 3.3, all returns total row, plain refundable child tax credit or additional child tax credit number-of-returns column?",
+  "unit": "millions",
+  "pointEstimate": 17.276696,
+  "ciLow": 13.734663,
+  "ciHigh": 20.818729,
+  "confidence": 0.8,
+  "resolutionDate": "2029-12-31",
+  "resolutionSource": "IRS SOI Individual Income Tax Returns Complete Report, Publication 1304, Table 3.3",
+  "resolutionSourceUrl": "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+  "resolutionRule": "If the registered condition holds, resolve to the first official tax-year-2027 Publication 1304 Table 3.3 all returns total number of returns under the plain refundable child tax credit or additional child tax credit concept header. Use total claiming returns, excluding substitution of the refundable-portion or used-to-offset-other-taxes subsets. Multiply the published return count by 0.000001 exactly once, preserving published precision without additional rounding. Ignore subsequent revisions and corrections; apply no correction grace period. Retain 2029-12-31 as the registered deadline, although an official release schedule establishing that deadline could not be verified in this run.",
+  "dataPointId": "irs.actc.total_claims.2027.first_print.current_law",
+  "historicalContext": [
+    {
+      "period": {"type": "year", "value": "2017"},
+      "label": "2017",
+      "value": 18.341984
+    },
+    {
+      "period": {"type": "year", "value": "2018"},
+      "label": "2018",
+      "value": 20.450468
+    },
+    {
+      "period": {"type": "year", "value": "2019"},
+      "label": "2019",
+      "value": 19.867646
+    },
+    {
+      "period": {"type": "year", "value": "2020"},
+      "label": "2020",
+      "value": 19.119249
+    },
+    {
+      "period": {"type": "year", "value": "2021"},
+      "label": "2021",
+      "value": 37.771612
+    },
+    {
+      "period": {"type": "year", "value": "2022"},
+      "label": "2022",
+      "value": 18.076696
+    }
+  ],
+  "drivers": [
+    "Damped decline in ordinary-regime claiming returns",
+    "Larger indexed child credit supports refundable claims",
+    "Taxpayer Social Security number restrictions reduce eligibility",
+    "Proposed qualified-alien restrictions create additional downside",
+    "Temporary 2021 expansion differs from the forecast policy regime"
+  ],
+  "sourceContext": [
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304",
+    "https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304-basic-tables-part-3",
+    "https://www.irs.gov/pub/irs-prior/p1304--2019.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2020.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2021.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2022.pdf",
+    "https://www.irs.gov/pub/irs-prior/p1304--2024.pdf",
+    "https://www.irs.gov/pub/irs-pdf/p1304.pdf",
+    "https://www.irs.gov/pub/irs-pdf/p4801.pdf",
+    "https://www.irs.gov/credits-deductions/individuals/child-tax-credit",
+    "https://www.irs.gov/irb/2025-45_IRB",
+    "https://www.irs.gov/irb/2026-38_irb",
+    "https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases",
+    "https://www.irs.gov/statistics/soi-tax-stats-whats-new"
+  ],
+  "runAt": "2026-10-07T12:49:57Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Provisional TY2027 ACTC forecast; mandatory audit checks failed"
+    },
+    {
+      "kind": "text",
+      "text": "Run status: failed. The required fetch_source, extract_irs_soi, and calculate MCP tools were unavailable. Web attempts to open the 2018–2023 canonical workbooks returned unsupported application/vnd.ms-excel errors. Consequently, no captured-workbook extraction call IDs exist, and the latest canonical 2023 total was not extracted. The six historicalContext values are exact official Publication 1304 PDF/table evidence fetched in this run, not successful registered-adapter extractions. They do not waive the mandatory workflow or establish original-vintage provenance. The numeric forecast is provisional."
+    },
+    {
+      "kind": "text",
+      "text": "The target is total claiming returns in Publication 1304 Table 3.3 under the plain ACTC concept header, all returns total row. Historical evidence uses that total concept, including the combined refundable-child-credit heading in 2021. Refundable-portion and other-tax-offset counts are different subsets. The registered tax year, condition, unit, first-print policy, and deadline are retained."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch official Publication 1304 Table 3.3 evidence for tax years 2017 and 2018 from p1304--2019.pdf and p1304--2020.pdf.",
+      "result": "Plain Additional child tax credit total claiming returns: 2017 = 18,341,984, or 18.341984 million; 2018 = 20,450,468, or 20.450468 million. Sources: https://www.irs.gov/pub/irs-prior/p1304--2019.pdf and https://www.irs.gov/pub/irs-prior/p1304--2020.pdf."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch official Publication 1304 Table 3.3 evidence for tax years 2019 and 2020 from p1304--2021.pdf and p1304--2022.pdf.",
+      "result": "Total ACTC claiming returns: 2019 = 19,867,646, or 19.867646 million; 2020 = 19,119,249, or 19.119249 million. The 2020 count was fetched through the official PDF search rendering; opening its complete PDF exceeded the web tool's document-size limit. Sources: https://www.irs.gov/pub/irs-prior/p1304--2021.pdf and https://www.irs.gov/pub/irs-prior/p1304--2022.pdf."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch official Publication 1304 evidence for tax years 2021 and 2022, checking the total credit concept.",
+      "result": "Total refundable child tax credit or additional child tax credit claiming returns: 2021 = 37,771,612, or 37.771612 million; 2022 = 18,076,696, or 18.076696 million. The 2022 Table 3.3 search rendering is corroborated by the publication's total-credit evidence elsewhere. Sources: https://www.irs.gov/pub/irs-prior/p1304--2024.pdf and https://www.irs.gov/pub/irs-pdf/p1304.pdf."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate starts with the latest recovered Publication 1304 level, 18.076696 million in 2022. The five recovered non-2021 levels average 19.1712086 million. The 2021 jump reflects the temporary expanded refundable credit and is inappropriate as a persistent current-law level."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch tax-year-2023 Publication 4801 Form 1040 line-item estimates as supplementary momentum evidence.",
+      "result": "Form 1040 line 28 shows 17,626,084 returns with additional child tax credit, or 17.626084 million. This is a different publication/table and is not inserted as the missing canonical 2023 print. Source: https://www.irs.gov/pub/irs-pdf/p4801.pdf."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch IRS child-credit eligibility guidance and Revenue Procedure 2025-32, section 4.05.",
+      "result": "IRS guidance states a $2,500 earned-income threshold, a $2,200 maximum child credit and $1,700 maximum ACTC for 2025, and taxpayer-or-spouse employment-valid SSN requirements. Revenue Procedure 2025-32 confirms $2,200 and $1,700 for 2026 and permanent extension of expanded section 24(h). No official 2027 inflation amounts were established. Sources: https://www.irs.gov/credits-deductions/individuals/child-tax-credit and https://www.irs.gov/irb/2025-45_IRB."
+    },
+    {
+      "kind": "tool",
+      "tool": "web.run",
+      "call": "Fetch the proposed refundable-credit qualified-alien regulation in Internal Revenue Bulletin 2026-38.",
+      "result": "Treasury estimates 200,000–700,000 taxpayers, representing 0.8–2.8% of 24 million recipients across affected refundable credits, could lose eligibility for refunded benefits in 2026. This is an aggregate estimate across several credits, not an ACTC claimant estimate; the regulation remains proposed in the fetched source. Source: https://www.irs.gov/irb/2026-38_irb."
+    },
+    {
+      "kind": "text",
+      "text": "Release-date verification failed. The fetched IRS upcoming-release page exposes a 2026 calendar, not an announcement establishing the TY2027 Publication 1304 release by 2029-12-31. The IRS What's New page gives March 26, 2026 as the revised release date for TY2023 tables. That historical announcement does not verify the registered future deadline, which remains a contract field rather than a verified scheduled release. Sources: https://www.irs.gov/statistics/soi-tax-stats-upcoming-data-releases and https://www.irs.gov/statistics/soi-tax-stats-whats-new."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a damped-trend, mean-reverting level prior anchored at the recovered 2022 level. Judgmental adjustments in millions are momentum -1.000000 through 2027, monetary-credit expansion/indexation +0.800000, enacted taxpayer-SSN restrictions -0.450000, and expected proposed-regulation effects -0.150000. These adjustments are model assumptions, not fetched government claimant estimates. Point = 18.076696 - 1.000000 + 0.800000 - 0.450000 - 0.150000 = 17.276696. The six fetched levels imply successive changes [2.108484, -0.582822, -0.748397, 18.652363, -19.694916]; their sample sigma = 13.611868 million, giving 1.28*sigma = 17.423191. Excluding the temporary 2021 expansion and 2022 reversal leaves three pre-2021 successive changes with sigma = 1.603762 million and 1.28*sigma = 2.052815. Retaining the 2018 policy transition makes this dispersion conservative for ordinary annual variation. Assume annual level shocks persist at 0.7, a judgmental model parameter, over the five-year horizon: variance multiplier = 1 + 0.49 + 0.2401 + 0.117649 + 0.05764801 = 1.90539701. Add a 1.25 standard-deviation multiplier for sparse-history and policy uncertainty. Half-width = 1.28*1.603761833649353*sqrt(1.90539701)*1.25 = 3.542033 million. This is substantially narrower than the raw-history band because the temporary full-refund regime is excluded. Final 80% bounds = 17.276696 +/- 3.542033 = [13.734663, 20.818729]. The interval is model-based and not backtested."
+    },
+    {
+      "kind": "text",
+      "text": "Upside risk: larger credits, stronger take-up, or a moderate income slowdown could move more eligible families into refundable claims; a substantial increase in participation could land above 20.818729 million, outside the interval. Downside risk: SSN restrictions, finalized qualified-alien rules, reduced filing participation, or sufficiently severe employment losses could lower claims below 13.734663 million, outside the interval. These mechanisms can operate without legislation changing the conditioned earned-income threshold."
+    },
+    {
+      "kind": "forecast",
+      "point": 17.276696,
+      "ciLow": 13.734663,
+      "ciHigh": 20.818729
+    }
+  ]
+}

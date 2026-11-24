@@ -1,0 +1,185 @@
+{
+  "slug": "canada-ei-regular-beneficiaries-september-2026",
+  "country": "CA",
+  "type": "data",
+  "title": "Canada EI regular beneficiaries, September 2026",
+  "question": "What will Statistics Canada's first official print report for Canada's seasonally adjusted regular Employment Insurance beneficiaries in September 2026, vector v64549350 in Table 14-10-0011-01, expressed in thousands?",
+  "unit": "thousands",
+  "pointEstimate": 546.87,
+  "ciLow": 530.439,
+  "ciHigh": 563.301,
+  "confidence": 0.8,
+  "resolutionDate": null,
+  "resolutionSource": "Statistics Canada, Employment Insurance release and Table 14-10-0011-01",
+  "resolutionSourceUrl": "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350&startRefPeriod=2026-09-01&endReferencePeriod=2026-09-30",
+  "resolutionRule": "Resolve using the first officially published September 2026 observation for vector v64549350: Canada, regular Employment Insurance beneficiaries, seasonally adjusted, persons, Table 14-10-0011-01. Multiply the published persons value by 0.001 to obtain thousands, retaining the source's precision. Ignore subsequent revisions and corrections, including same-day corrections. The official release date could not be verified in this run; resolutionDate is therefore null and this object does not satisfy the production calendar-validation requirement.",
+  "dataPointId": "statcan.employment_insurance.regular_beneficiaries.canada.september_2026.first_print",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-01"},
+      "label": "January 2025",
+      "value": 489.78
+    },
+    {
+      "period": {"type": "month", "value": "2025-02"},
+      "label": "February 2025",
+      "value": 506.29
+    },
+    {
+      "period": {"type": "month", "value": "2025-03"},
+      "label": "March 2025",
+      "value": 508.23
+    },
+    {
+      "period": {"type": "month", "value": "2025-04"},
+      "label": "April 2025",
+      "value": 530.38
+    },
+    {
+      "period": {"type": "month", "value": "2025-05"},
+      "label": "May 2025",
+      "value": 530.31
+    },
+    {
+      "period": {"type": "month", "value": "2025-06"},
+      "label": "June 2025",
+      "value": 550.53
+    },
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "July 2025",
+      "value": 559.24
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "August 2025",
+      "value": 557.44
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "September 2025",
+      "value": 554.05
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "October 2025",
+      "value": 560.03
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "November 2025",
+      "value": 568.42
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "December 2025",
+      "value": 569.52
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "January 2026",
+      "value": 559.37
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "February 2026",
+      "value": 550.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "March 2026",
+      "value": 550.44
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "April 2026",
+      "value": 547.59
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "May 2026",
+      "value": 547.76
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "June 2026",
+      "value": 544.19
+    },
+    {
+      "period": {"type": "month", "value": "2026-07"},
+      "label": "July 2026",
+      "value": 547.05
+    }
+  ],
+  "drivers": [
+    "July beneficiary level anchors persistence",
+    "Recent EI momentum is nearly flat",
+    "August employment decline creates upward pressure",
+    "Stable unemployment limits the upward adjustment",
+    "Existing benefit extensions support the beneficiary stock",
+    "Two unobserved months increase forecast uncertainty"
+  ],
+  "sourceContext": [
+    "https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350&startRefPeriod=2024-01-01&endReferencePeriod=2026-09-30",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm",
+    "https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm",
+    "https://www.canada.ca/en/services/benefits/ei/temporary-measures-for-major-economic-conditions.html",
+    "https://www150.statcan.gc.ca/n1/dai-quo/cal2-eng.htm",
+    "https://www150.statcan.gc.ca/n1/en/release-diffusion/2026-eng.pdf?st=JwXqPj0_"
+  ],
+  "runAt": "2026-10-07T12:33:06Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "September 2026 EI forecast; release-date verification incomplete"
+    },
+    {
+      "kind": "text",
+      "text": "The target is the first official September observation for Canada's seasonally adjusted regular EI beneficiaries, vector v64549350, Table 14-10-0011-01, multiplied by 0.001. Every EI anchor and historical value uses that same series and adjustment. Historical entries are the current official vintage fetched during this run, including revisions; they are not represented as archived first-print vintages."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "curl -sS 'https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorByReferencePeriodRange?vectorIds=64549350&startRefPeriod=2024-01-01&endReferencePeriod=2026-09-30'; read the echoed JSON response.",
+      "result": "The response ends at July 2026. Selected monthly values in persons: 2025-01 489780; 2025-02 506290; 2025-03 508230; 2025-04 530380; 2025-05 530310; 2025-06 550530; 2025-07 559240; 2025-08 557440; 2025-09 554050; 2025-10 560030; 2025-11 568420; 2025-12 569520; 2026-01 559370; 2026-02 550600; 2026-03 550440; 2026-04 547590; 2026-05 547760; 2026-06 544190; 2026-07 547050."
+    },
+    {
+      "kind": "text",
+      "text": "The reference class is 19 official monthly levels from January 2025 through July 2026, yielding 18 successive changes. The base rate is persistence at July's 547.050 thousand. The earlier rise has reversed, while April-to-July momentum is almost flat, so the point forecast uses damped recent drift rather than extrapolating the full sample's positive average change."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www150.statcan.gc.ca/n1/daily-quotidien/260917/dq260917c-eng.htm and read the Canada indicator and release announcement.",
+      "result": "July 2026 regular EI beneficiaries were 547050 persons, up 0.5% monthly and down 2.2% annually. August EI data are announced for October 22, 2026. The page provides no September EI release date."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Open https://www150.statcan.gc.ca/n1/daily-quotidien/260904/dq260904a-eng.htm and read August labour-market highlights.",
+      "result": "Seasonally adjusted employment fell 42000, or 0.2%, in August 2026; unemployment remained 6.4%. Employment had increased cumulatively by 181000 from April through July. The auxiliary, explicitly non-seasonally-adjusted August layoff rate was 0.8%, compared with 1.0% a year earlier."
+    },
+    {
+      "kind": "text",
+      "text": "The August employment loss supplies upward EI risk, but unchanged unemployment and the relatively low layoff rate offset that signal. I assign no net macro adjustment. Existing waiting-period and separation-earnings waivers and 20 additional benefit weeks for eligible long-tenured workers already operated before July. The new rule reviewing only the latest separation reason begins October 11, 2026, so it receives no September adjustment. These are judgmental zero adjustments, not estimated causal coefficients."
+    },
+    {
+      "kind": "text",
+      "text": "Calendar verification failed: the fetched upcoming-release calendar covers October 5–16, 2026, and the fetched annual major-economic calendar omits EI. The latest EI announcement verifies only the August release on October 22. No exact September EI release date was verified from an official calendar or announcement. The registered November 17–25 window is insufficient to establish a day; resolutionDate remains null, making this forecast incomplete under the required production validation."
+    },
+    {
+      "kind": "math",
+      "text": "Prior/update/interval: Use a persistence prior with 50% damping of recent drift. Historical sample: 19 fetched levels, January 2025–July 2026, and 18 successive monthly changes in thousands. Their sum is 57.270 and sum of squares is 1582.8151. sigma = 9.076800, calculated as sqrt((1582.8151 - 57.270^2/18)/17). The one-month 80% half-width is 1.28*sigma = 11.618304. July-to-September spans two unobserved monthly changes, so the random-walk approximation gives 11.618304*sqrt(2) = 16.430763, a 1.414-fold widening. Level component = 547.050; momentum component = 2*0.5*((547.050-547.590)/3) = -0.180; macro, one-off, and incremental policy components = 0. Point = 546.870. Bounds = 546.870 +/- 16.430763 = 530.439237–563.300763, rounded to 530.439–563.301 thousand. This approximate interval uses current-vintage monthly dispersion; first-print revision error is not separately estimated."
+    },
+    {
+      "kind": "text",
+      "text": "The upside risk is a September increase in layoffs or slower exits from extended claims; cumulative gains exceeding 16.251 thousand from July would land above the interval. The downside risk is faster re-employment or benefit exhaustion; cumulative declines exceeding 16.611 thousand would land below the interval. A concentrated employer shutdown, unusually rapid hiring rebound, or large initial seasonal-adjustment surprise could put the first print outside the interval."
+    },
+    {
+      "kind": "forecast",
+      "point": 546.87,
+      "ciLow": 530.439,
+      "ciHigh": 563.301
+    }
+  ]
+}

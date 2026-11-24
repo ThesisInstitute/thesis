@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "thesis_analyst_run_manifest_v1",
+  "createdAt": "2026-10-07T10:12:54Z",
+  "runStartedAt": "2026-10-07T10:12:54Z",
+  "series": "usaspending.dod.prime_award_obligations",
+  "period": "FY2026",
+  "conditional": null,
+  "targetContext": {
+    "catalogSlug": "us-dod-prime-award-obligations-fy2026",
+    "country": "US",
+    "dataPointId": "usaspending.dod.prime_award_obligations.fy2026.registered_query_snapshot",
+    "expectedReleaseWindow": {
+      "end": "2026-10-22",
+      "start": "2026-10-15"
+    },
+    "period": "FY2026",
+    "registeredAt": "2026-08-07T17:54:06Z",
+    "registeredAtUtc": "2026-08-07T17:54:06Z",
+    "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+    "registrationState": "preregistered",
+    "series": "usaspending.dod.prime_award_obligations",
+    "sourceBinding": {
+      "adapter": "usaspending-api",
+      "allowedHosts": [
+        "api.usaspending.gov"
+      ],
+      "expectedReleaseWindow": {
+        "end": "2026-10-22",
+        "start": "2026-10-15"
+      },
+      "field": "obligations",
+      "releasePolicy": "registered_query_snapshot",
+      "sourceSeriesId": "usaspending.agency.097.awards.obligations",
+      "sourceUrl": "https://api.usaspending.gov/api/v2/agency/097/awards/?fiscal_year={fiscal_year}",
+      "table": "USAspending API v2, agency 097 (DoD) award summary, prime award obligations, fiscal year to date",
+      "transform": {
+        "factor": 1e-09,
+        "operation": "multiply"
+      }
+    },
+    "targetContentHash": "59b334c6612eaf1c20be70ad587590901539f4fc2a11749e9f6a8f1ef2927907",
+    "targetRegistrationPath": "records/targets/2026-08-07-59b334c6612eaf1c20be70ad587590901539f4fc2a11749e9f6a8f1ef2927907.json",
+    "targetUnit": "billions USD",
+    "valueScale": 1e-09
+  },
+  "registrationCommit": "a6991688486115b857a52f29c370ed8f884457e3",
+  "targetContentHash": "59b334c6612eaf1c20be70ad587590901539f4fc2a11749e9f6a8f1ef2927907",
+  "targetRegistrationPath": "records/targets/2026-08-07-59b334c6612eaf1c20be70ad587590901539f4fc2a11749e9f6a8f1ef2927907.json",
+  "registeredAtUtc": "2026-08-07T17:54:06Z",
+  "promptMode": "fast",
+  "agent": {
+    "agent": "thesis.analyst",
+    "agentVersion": "2.5.11",
+    "model": "claude-fable-5",
+    "promptHash": "87db344b803f5ab4116f3b0f5f01ed64adb8ea1235daa18627ec596fff56e044",
+    "toolPolicyHash": "024388e49298be19f06d31f4aa89de0878a6bc78bcbb8eb78a8687d93d774c51",
+    "skills": [
+      "axiom.md",
+      "calibration.md",
+      "cms-medicaid.md",
+      "intl-data.md",
+      "policyengine.md",
+      "resolution-rules.md",
+      "treasury-fiscal.md",
+      "us-data.md"
+    ]
+  },
+  "ok": false,
+  "cellsPath": null,
+  "artifacts": [
+    {
+      "artifactType": "prompt",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/prompt.md",
+      "sha256": "b882c22ba581f538b65c87985be4fd8c440a5fec261e6770579069b854d4c56a",
+      "bytes": 11459,
+      "createdAt": "2026-10-07T10:12:54Z"
+    },
+    {
+      "artifactType": "command",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/command.json",
+      "sha256": "0d450ce1966b5c1f2b30c8b8a680777015af0f410f19894ec4bbe885d91e2903",
+      "bytes": 195,
+      "createdAt": "2026-10-07T10:12:54Z"
+    },
+    {
+      "artifactType": "stdout",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/stdout.txt",
+      "sha256": "ff4db7a3d0fe7836ae5bad2cd8f52a99554bf2b62f4cd421c98ce5d67fb0c88c",
+      "bytes": 4170,
+      "createdAt": "2026-10-07T10:12:54Z"
+    },
+    {
+      "artifactType": "stderr",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/stderr.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "bytes": 1,
+      "createdAt": "2026-10-07T10:12:54Z"
+    },
+    {
+      "artifactType": "raw_response",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/raw_response.txt",
+      "sha256": "ff4db7a3d0fe7836ae5bad2cd8f52a99554bf2b62f4cd421c98ce5d67fb0c88c",
+      "bytes": 4170,
+      "createdAt": "2026-10-07T10:12:54Z"
+    },
+    {
+      "artifactType": "parsed_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/parsed_cells.json",
+      "sha256": "4107e6e7ca432ae32a02239c7aa43e0352e0a0abd4ee004c121bd25fee16aaf5",
+      "bytes": 4310,
+      "createdAt": "2026-10-07T10:12:54Z"
+    },
+    {
+      "artifactType": "normalized_cell",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/normalized_cells.json",
+      "sha256": "6df8bba26f2d33936490b84182334e48e04387e3a7ce497b45a762d8ff77004e",
+      "bytes": 4117,
+      "createdAt": "2026-10-07T10:12:54Z"
+    },
+    {
+      "artifactType": "error",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/error.json",
+      "sha256": "e89d9055bb94caab5569fcf4b8b8f55df856f27da7c71fabe0e3abd7abae419b",
+      "bytes": 134,
+      "createdAt": "2026-10-07T10:12:54Z"
+    },
+    {
+      "artifactType": "manifest",
+      "path": "experiments/sol61_shadow/runs/web/us-dod-prime-award-obligations-fy2026__r1/manifest.json",
+      "sha256": "e9211d0037a75f98eb165d78db4b24ccdb5af1d81e2e0872f9deed81a49353d1",
+      "bytes": 4643,
+      "createdAt": "2026-10-07T10:12:54Z",
+      "hashMode": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256"
+    }
+  ],
+  "validation": null,
+  "error": {
+    "phase": "seal",
+    "message": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+    "command": null
+  },
+  "checkoutSha": "16a49e3e32c31b1e26940b8da24ab50d34751ad0",
+  "custodyInventoryVersion": 2,
+  "runMode": "analyst",
+  "manifestHashSemantics": "canonical-json-v1; exclude artifacts where artifactType=manifest and exclude custodyRootSha256",
+  "custodyRootSha256": "182dcfd94daaae0eb0c6909f3357db6295a1fcd059b5ee6cb6ed90f863050953"
+}

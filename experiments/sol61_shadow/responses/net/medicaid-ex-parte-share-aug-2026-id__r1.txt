@@ -1,0 +1,155 @@
+{
+  "slug": "medicaid-ex-parte-share-aug-2026-id",
+  "country": "US",
+  "type": "data",
+  "title": "Idaho ex parte renewal share, August 2026",
+  "question": "What percentage of Idaho Medicaid and CHIP beneficiaries whose coverage was renewed in August 2026 were renewed on an ex parte basis, using the original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c at first publication, rounded to one decimal?",
+  "unit": "percent",
+  "pointEstimate": 70.4,
+  "ciLow": 47.3,
+  "ciHigh": 93.5,
+  "confidence": 0.8,
+  "resolutionDate": "2026-12-15",
+  "resolutionSource": "CMS, State Medicaid and CHIP Eligibility Processing Data (data.medicaid.gov)",
+  "resolutionSourceUrl": "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+  "resolutionRule": "Resolve to Idaho's August 2026 original (O) submission row in CMS dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c when CMS first publishes it. Compute 100 times beneficiaries_whose_coverage_was_renewed_on_an_ex_parte_basis divided by beneficiaries_whose_coverage_was_renewed_total, using the counts as first published, and round to one decimal. Subsequent corrections and updated (U) submissions do not alter resolution.",
+  "dataPointId": "cms.medicaid_pi.ex_parte_renewal_share.id.aug_2026",
+  "historicalContext": [
+    {
+      "period": {"type": "month", "value": "2025-07"},
+      "label": "2025-07",
+      "value": 74.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-08"},
+      "label": "2025-08",
+      "value": 75.5
+    },
+    {
+      "period": {"type": "month", "value": "2025-09"},
+      "label": "2025-09",
+      "value": 84.0
+    },
+    {
+      "period": {"type": "month", "value": "2025-10"},
+      "label": "2025-10",
+      "value": 83.8
+    },
+    {
+      "period": {"type": "month", "value": "2025-11"},
+      "label": "2025-11",
+      "value": 83.2
+    },
+    {
+      "period": {"type": "month", "value": "2025-12"},
+      "label": "2025-12",
+      "value": 68.8
+    },
+    {
+      "period": {"type": "month", "value": "2026-01"},
+      "label": "2026-01",
+      "value": 70.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-02"},
+      "label": "2026-02",
+      "value": 99.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-03"},
+      "label": "2026-03",
+      "value": 66.6
+    },
+    {
+      "period": {"type": "month", "value": "2026-04"},
+      "label": "2026-04",
+      "value": 45.9
+    },
+    {
+      "period": {"type": "month", "value": "2026-05"},
+      "label": "2026-05",
+      "value": 71.0
+    },
+    {
+      "period": {"type": "month", "value": "2026-06"},
+      "label": "2026-06",
+      "value": 69.9
+    }
+  ],
+  "drivers": [
+    "Recent original-submission shares near 70%",
+    "Large fluctuations in form-based renewal counts",
+    "Reversion after unusually high and low monthly shares",
+    "Insufficient repeated August observations to establish seasonality"
+  ],
+  "sourceContext": [
+    "https://data.medicaid.gov/dataset/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c",
+    "https://data.medicaid.gov/api/1/datastore/query/5abea2e0-3f8e-4b49-a50d-d63d5fd9103c/0",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligibility-processing-data-specs-august-2024.pdf",
+    "https://www.medicaid.gov/resources-for-states/downloads/eligib-oper-and-enrol-snap-jun2026.pdf",
+    "https://www.medicaid.gov/medicaid-and-chip-eligibility-operations-and-enrollment-snapshot"
+  ],
+  "runAt": "2026-10-07T00:02:39Z",
+  "reasoning": [
+    {
+      "kind": "heading",
+      "text": "Idaho August 2026 ex parte renewal share"
+    },
+    {
+      "kind": "text",
+      "text": "The target is Idaho's August 2026 state row at first publication, using original (O), rather than updated (U), submissions. All historical anchors use O rows. The ledger does not explicitly identify the denominator field; this forecast interprets renewal share as ex parte renewals divided by total beneficiaries renewed, CMS metrics 5a(1)/5a. This interpretation is stated explicitly because CMS also publishes ex parte rates relative to all beneficiaries due for renewal."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched the CMS datastore API for dataset 5abea2e0-3f8e-4b49-a50d-d63d5fd9103c, filtering state_abbreviation=ID, original_or_updated=O, and reporting_period>=202501; the raw response was echoed.",
+      "result": "The response contained 18 observations through June 2026. Ex parte/total renewed counts: January 2025 8782/12744; February 9026/12737; March 10457/15763; April 10278/15209; May 10832/15720; June 9530/13251; July 10490/14173; August 10054/13317; September 15794/18796; October 16352/19515; November 14815/17796; December 7914/11501; January 2026 8969/12655; February 11063/11112; March 10834/16263; April 10812/23554; May 11049/15571; June 9870/14129."
+    },
+    {
+      "kind": "text",
+      "text": "The outside-view base rate is the median of the 18 fetched monthly shares, 70.8688%. Their mean is 72.6488%; the latest six-month mean is 70.6280%. These support a level near 70%. August 2025 was 75.4975%, but one prior August does not establish a reliable seasonal adjustment."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Fetched a second CMS API query for Idaho O rows from January 2026 onward, including renewed counts, renewal-form counts, and their footnotes; the raw response was echoed.",
+      "result": "February 2026 reported 11063 ex parte renewals, 49 form-based renewals, and 11112 total renewed. April reported 10812 ex parte renewals, 12742 form-based renewals, and 23554 total renewed. May reported 11049/15571 and June 9870/14129 ex parte/total renewed. The relevant renewed, ex parte, and form-based footnotes were empty for all six months."
+    },
+    {
+      "kind": "text",
+      "text": "Level is anchored on the latest two observations. Momentum receives no extrapolation: May-to-June declined 1.1025 percentage points, while earlier changes reversed sharply. February and April are treated as possible cohort, processing, or reporting effects rather than evidence of a permanent level change; their causes are unverified, so both remain in uncertainty calibration. No policy adjustment is applied without fetched evidence of an Idaho-specific change."
+    },
+    {
+      "kind": "tool",
+      "tool": "official.lookup",
+      "call": "Opened CMS's June 2026 Eligibility Operations and Enrollment Snapshot, page 31, and inspected the Idaho renewal-outcomes row.",
+      "result": "The Idaho row reports 19476 beneficiaries due for renewal, 73% renewed, and 51% renewed on an ex parte basis. Those displayed percentages use all renewals due as denominator. The API counts yield 100*9870/19476=50.6778% on that basis and 100*9870/14129=69.8563% among beneficiaries renewed."
+    },
+    {
+      "kind": "text",
+      "text": "CMS Table 6 defines metric 5a as beneficiaries renewed and retained and metric 5a(1) as its ex parte subset. The historicalContext values are computed from those published counts and rounded to one decimal; interval calculations retain unrounded ratios."
+    },
+    {
+      "kind": "text",
+      "text": "Required release-date verification could not be completed. The official publication page lists June 2026 released September 25, May released August 28, and April released July 31, but provides no prospective August 2026 publication date. The specifications' Table 10 associates December 15 with submission of updated pending-renewal outcomes, not CMS publication of original rows. The registered resolutionDate 2026-12-15 is preserved, but it remains unverified as an official release date; no date is inferred from cadence."
+    },
+    {
+      "kind": "text",
+      "text": "Prior/update/interval: Use a persistence prior averaging the latest two O-row shares, 70.4076%, consistent with the full-history median base rate of 70.8688%. Additional level, momentum, seasonal, one-off, and policy adjustments are zero. Calibrate uncertainty on the July 2025-June 2026 reference class: 12 shares and 11 successive changes, retaining February and April. Their mean change is -0.377968 percentage points and sum of squared deviations is 3252.576860; sigma = 18.0349 percentage points = sqrt(3252.576860/10). The 80% half-width is 1.28*18.0349 = 23.0847 points. Bounds are 70.4076-23.0847 = 47.3229% and 70.4076+23.0847 = 93.4923%, rounded to 47.3%-93.5%. A mean-reverting level assumption avoids accumulating two months of random-walk variance."
+    },
+    {
+      "kind": "math",
+      "text": "Point = ((100*11049/15571)+(100*9870/14129))/2 = 70.4075788%, rounded to 70.4%. The 80% interval is 70.4075788 +/- 23.0846744 percentage points, rounded to [47.3%, 93.5%]."
+    },
+    {
+      "kind": "text",
+      "text": "An upside risk is a repeat of February's 99.5590% share, which would land above the interval. A downside risk is a repeat of April's unusually large form-renewal denominator and 45.9030% share, which would land below the interval. Either outcome would be outside the interval; sustained changes in processing or classification could also invalidate the persistence assumption."
+    },
+    {
+      "kind": "forecast",
+      "point": 70.4,
+      "ciLow": 47.3,
+      "ciHigh": 93.5
+    }
+  ]
+}
