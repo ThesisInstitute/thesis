@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "thesis_bill_compute_edit_v1",
+  "billSlug": "s3596-119",
+  "editedAt": "2026-10-22",
+  "pullRequest": "https://github.com/ThesisInstitute/thesis/pull/392",
+  "reason": "POLICYENGINE.md §0.2: an uncertified run is inadmissible for a published number. The 2026-07-31 row was published with a hand-set certified=false and a 'claimed-tier' note; its running version was the Modal driver's pin constant and its reform was validated on another model version (prb4 round 3). Re-run with versions measured and the reform validated in the container; certification is compute_block output.",
+  "previousBill": {
+    "commit": "cb2a4fae69a1fed1d7ea618fb995bbe100df82b1",
+    "path": "bills/s3596-119.json",
+    "sha256": "9ed0283aee4a7b9030b7fd3bc7bc73594bdb411f40c79db2759a9ae1b45aedb4"
+  },
+  "editedBill": {
+    "path": "bills/s3596-119.json",
+    "sha256": "9afbe89bb2a7da984ce84f10d6a13211e6ddf10a0b32ca9f2cfa4af71c07abcc"
+  },
+  "changedFields": [
+    "provisions[0].compute[0].param_source",
+    "provisions[0].compute[0].certification",
+    "provisions[0].compute[0].note",
+    "provisions[0].compute[0].source"
+  ],
+  "analysisUnchanged": true,
+  "figuresUnchanged": {
+    "budgetary_impact_2026": -1826050568.8,
+    "ten_year_budgetary_impact": -17069142980.93,
+    "note": "The 2026-10-22 run reproduces every 2026-07-31 metric bit for bit (2026 economy artifact and all ten sweep years)."
+  },
+  "runArtifacts": {
+    "bills/stronger-start-working-families-act/buildP-economy-2026.json": "b95df5d40f45a5d08dfab72dace5ce79c92b6f03133f428f19523c631439576c",
+    "bills/stronger-start-working-families-act/buildP-sweep-2026-2035.json": "a0c65692e618152751c1ba95939b97a2a6e4ab40474e61c6da8560476e891512",
+    "bills/stronger-start-working-families-act/compute-row-2026.json": "0c3a5a51476b6dab06c175c26c65fb40060cbc544fa525724bb0d980325140e2",
+    "bills/compute-log/20261022T122753-us-2026-8ac3173be623.json": "e22e39bbf92d9adc3212c6b94b1e6276d8ea6fccd61a8c213e4e3732b98f4c26"
+  },
+  "modalRuns": {
+    "economy-2026": "https://modal.com/apps/policyengine/main/ap-3hNH8qQe8MgQudwigCL6fh",
+    "sweep-2026-2035": "https://modal.com/apps/policyengine/main/ap-pC0HjguLRapdnimfkCfcEV"
+  },
+  "bindingUpdated": {
+    "path": "scripts/bill_forecast_bindings.json",
+    "field": "bills.s3596-119.artifactSha256",
+    "from": "9ed0283aee4a7b9030b7fd3bc7bc73594bdb411f40c79db2759a9ae1b45aedb4",
+    "to": "9afbe89bb2a7da984ce84f10d6a13211e6ddf10a0b32ca9f2cfa4af71c07abcc"
+  }
+}

@@ -2,7 +2,7 @@
   "schemaVersion": "thesis_bill_forecast_bindings_v1",
   "bills": {
     "s3596-119": {
-      "artifactSha256": "9ed0283aee4a7b9030b7fd3bc7bc73594bdb411f40c79db2759a9ae1b45aedb4",
+      "artifactSha256": "9afbe89bb2a7da984ce84f10d6a13211e6ddf10a0b32ca9f2cfa4af71c07abcc",
       "sourceTextSha256": "c45170c8e73d94d2d9b542135dc9e0abba2361fb0d9658422788fc3e3d865352",
       "sourceUrl": "https://www.congress.gov/119/bills/s3596/BILLS-119s3596is.xml",
       "pairs": [
