@@ -11,7 +11,12 @@
 # 2026-07-31 adversarial-review attacks (forged/stale comparator,
 # origin/main ref shadowing, refspec-less fetch, fork-to-upstream
 # introduction, missing-tree walk errors, replacement refs, grafts,
-# shallow clones, and equivalent fetch/push URL spellings).
+# shallow clones, and equivalent fetch/push URL spellings). Cases 66-86
+# cover how a push reaches the guard: the per-clone dispatcher
+# (scripts/pre_push_dispatch.sh, installed by scripts/install_git_hooks.sh)
+# and the guard's own handoff when git runs another checkout's copy, both
+# against the absolute core.hooksPath the Claude desktop app writes into
+# every worktree.
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HOOK="$ROOT/.githooks/pre-push"
@@ -24,7 +29,7 @@ ZERO40=0000000000000000000000000000000000000000
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
 export GIT_AUTHOR_NAME=T GIT_AUTHOR_EMAIL=t@t
 export GIT_COMMITTER_NAME=T GIT_COMMITTER_EMAIL=t@t
-unset THESIS_ALLOW_RECORDS_PUSH
+unset THESIS_ALLOW_RECORDS_PUSH THESIS_PRE_PUSH_DISPATCHED
 
 pass=0; fail=0
 check() { # check <name> <expected_rc> <actual_rc> [stderr_file must_contain]
@@ -784,6 +789,242 @@ M65=$(git -C "$S/o65" commit-tree "$P65^{tree}" -p "$P65" -p "$B65" \
     -m "ours-merge of b while main shows a again")
 hook "$S/o65" origin "refs/heads/p65 $M65 refs/heads/p65 $ZERO40"
 check "65 a merge equal to main only through main's restoration blocks" 1 $rc "$S/err" "ours-merge of b while main shows a again"
+
+# ==== 66-86: which checkout's guard judges a push
+# The Claude desktop app (2.9939.x, configureHooksPath) reads the base
+# repo's core.hooksPath, resolves a relative value against the MAIN
+# checkout and writes the absolute result into every worktree it creates
+# or reuses (`git config --worktree`); `git worktree add` run inside such a
+# worktree copies that setting on. Every worktree then ran the guard of
+# whatever branch the main checkout had out (2026-09-27: one 13 revisions
+# stale). app_worktree reproduces that write.
+ok() { # ok <name> <shell condition>
+    if eval "$2"; then echo "PASS $1"; pass=$((pass+1))
+    else echo "FAIL $1"; fail=$((fail+1)); fi
+}
+stub_guard() { # stub_guard <dir> <tag> <rc>: a guard that only announces itself
+    mkdir -p "$1/.githooks"
+    printf '#!/bin/sh\necho "%s" >&2\nexit %s\n' "$2" "$3" >"$1/.githooks/pre-push"
+    chmod +x "$1/.githooks/pre-push"
+}
+app_worktree() { # app_worktree <main checkout> <new dir> <branch> <start>
+    git -C "$1" worktree add -q -b "$3" "$2" "$4" 2>/dev/null
+    local p; p=$(git -C "$1" config --type=path --get core.hooksPath)
+    case $p in /*) ;; *) p="$1/$p" ;; esac
+    git -C "$2" config --worktree core.hooksPath "$p"
+}
+INSTALL_SRC="$ROOT/scripts/install_git_hooks.sh"
+DISPATCH_SRC="$ROOT/scripts/pre_push_dispatch.sh"
+[ -n "$(command -v timeout)" ] && T="timeout 60" || T=""
+SR=$(cd "$S" && pwd -P) # git prints worktree paths canonicalized
+
+# fixture: the main checkout moves to a long-lived branch whose guard is a
+# stub, under the old convention plus the app's write into worktree w1
+git init -q --bare "$S/d.git"
+git -C "$S/d.git" symbolic-ref HEAD refs/heads/main
+git clone -q "$S/d.git" "$S/dm" 2>/dev/null
+mkdir -p "$S/dm/.githooks" "$S/dm/scripts"
+cp "$HOOK" "$S/dm/.githooks/pre-push"
+cp "$INSTALL_SRC" "$DISPATCH_SRC" "$S/dm/scripts/"
+commit_file "$S/dm" records/seed.txt r0 "seed records"
+commit_file "$S/dm" scripts/verify_records_attestations.py "# stub" "epoch dm"
+git -C "$S/dm" push -q origin HEAD:main
+DM0=$(git -C "$S/dm" rev-parse HEAD)
+git -C "$S/dm" checkout -qb hack
+stub_guard "$S/dm" STALE-MAIN-GUARD 1
+git -C "$S/dm" add -A; git -C "$S/dm" commit -qm "stale guard on the main checkout's branch"
+git -C "$S/dm" config core.hooksPath .githooks
+git -C "$S/dm" config extensions.worktreeConfig true
+app_worktree "$S/dm" "$S/w1" w1 "$DM0"
+
+# ---- 66: the incident shape before the fix
+commit_file "$S/w1" src/a.txt a "src-only change"
+(cd "$S/w1" && git push -q origin w1) 2>"$S/err"
+check "66 before the fix, the main checkout's stale guard judges w1" 1 $? "$S/err" STALE-MAIN-GUARD
+
+# ---- 67: --check names the override; the installer migrates
+(cd "$S/w1" && sh scripts/install_git_hooks.sh --check) >"$S/out" 2>&1
+check "67a --check fails on the app's override" 1 $? "$S/out" "FAIL  $SR/w1"
+(cd "$S/w1" && sh scripts/install_git_hooks.sh) >"$S/out" 2>&1
+check "67b installer exits 0 after migrating" 0 $? "$S/out" "every worktree"
+ok "67c repo core.hooksPath unset" '[ -z "$(git -C "$S/dm" config --get core.hooksPath)" ]'
+ok "67d w1 override removed" '[ -z "$(git -C "$S/w1" config --get core.hooksPath)" ]'
+ok "67e undo line printed" 'grep -q "undo: git -C .$SR/w1. config --worktree --add core.hooksPath" "$S/out"'
+ok "67f dispatcher installed and executable" '[ -x "$S/dm/.git/hooks/pre-push" ]'
+
+# ---- 68-69: w1's pushes now run w1's own guard
+(cd "$S/w1" && git push -q origin w1) 2>"$S/err"
+check "68 src-only push from w1 allowed by its own guard" 0 $?
+ok "68b the stale main-checkout guard did not run" '! grep -q STALE-MAIN-GUARD "$S/err"'
+ok "68c no note and no handoff through the dispatcher" '! grep -q -e "core.hooksPath is set" -e "handing the push" "$S/err"'
+commit_file "$S/w1" records/evil.txt e "records from a worktree"
+(cd "$S/w1" && git push -q origin w1) 2>"$S/err"
+check "69 records push from w1 blocked by its own guard" 1 $? "$S/err" "records/evil.txt"
+ok "69b remote w1 unmoved" '[ "$(git -C "$S/d.git" rev-parse w1)" = "$(git -C "$S/w1" rev-parse HEAD~1)" ]'
+git -C "$S/w1" reset -q --hard HEAD~1
+
+# ---- 70: the pushing worktree's guard decides, not the main checkout's
+git -C "$S/dm" worktree add -q -b w2 "$S/w2" "$DM0" 2>/dev/null
+stub_guard "$S/w2" W2-OWN-GUARD 1
+git -C "$S/w2" add -A; git -C "$S/w2" commit -qm "w2 guard stub"
+(cd "$S/w2" && git push -q origin w2) 2>"$S/err"
+check "70 w2's own guard runs for w2's push" 1 $? "$S/err" W2-OWN-GUARD
+
+# ---- 71: arguments, stdin ref lines and environment pass through
+probe_guard() { # probe_guard <dir> <out>: a guard that records what it got
+    mkdir -p "$1/.githooks"
+    cat >"$1/.githooks/pre-push" <<EOF
+#!/bin/sh
+printf '%s|%s|%s|%s\n' "\$1" "\$2" "\${PROBE:-}" "\${THESIS_PRE_PUSH_DISPATCHED:-}" >"$2"
+cat >>"$2"
+EOF
+}
+git -C "$S/dm" worktree add -q -b w3 "$S/w3" "$DM0" 2>/dev/null
+probe_guard "$S/w3" "$S/probe"
+git -C "$S/w3" add -A; git -C "$S/w3" commit -qm "w3 probe guard"
+W3=$(git -C "$S/w3" rev-parse HEAD)
+(cd "$S/w3" && PROBE=p1 git push -q origin w3) 2>"$S/err"
+check "71 probe push succeeds" 0 $?
+printf 'origin|%s|p1|1\nrefs/heads/w3 %s refs/heads/w3 %s\n' "$S/d.git" "$W3" "$ZERO40" >"$S/want"
+ok "71b remote, url, env and ref line reach the guard verbatim" 'cmp -s "$S/want" "$S/probe"'
+
+# ---- 72: a checkout without the guard is refused, not waved through
+git -C "$S/dm" worktree add -q -b w4 "$S/w4" "$DM0" 2>/dev/null
+git -C "$S/w4" rm -q .githooks/pre-push; git -C "$S/w4" commit -qm "branch predating the guard"
+(cd "$S/w4" && git push -q origin w4) 2>"$S/err"
+check "72 no .githooks/pre-push: push refused" 1 $? "$S/err" "no records guard"
+ok "72b remote w4 not created" '! git -C "$S/d.git" rev-parse -q --verify refs/heads/w4 >/dev/null'
+
+# ---- 73: a cone-mode sparse checkout without .githooks/ is refused
+git -C "$S/dm" worktree add -q --no-checkout -b w5 "$S/w5" "$DM0" 2>/dev/null
+git -C "$S/w5" sparse-checkout set --cone src 2>/dev/null
+git -C "$S/w5" checkout -q w5 2>/dev/null
+commit_file "$S/w5" src/s.txt s "sparse src change"
+ok "73a the sparse checkout leaves out .githooks" '[ ! -e "$S/w5/.githooks/pre-push" ]'
+(cd "$S/w5" && git push -q origin w5) 2>"$S/err"
+check "73b sparse checkout without the guard: push refused" 1 $? "$S/err" "no records guard"
+git -C "$S/w5" sparse-checkout add .githooks 2>/dev/null
+(cd "$S/w5" && git push -q origin w5) 2>"$S/err"
+check "73c with .githooks in the sparse set: push allowed" 0 $?
+
+# ---- 74: the dispatcher in the guard's place cannot loop
+git -C "$S/dm" worktree add -q -b w6 "$S/w6" "$DM0" 2>/dev/null
+cp "$S/w6/scripts/pre_push_dispatch.sh" "$S/w6/.githooks/pre-push"
+git -C "$S/w6" add -A; git -C "$S/w6" commit -qm "dispatcher in the guard's place"
+(cd "$S/w6" && $T git push -q origin w6) 2>"$S/err"
+check "74 dispatcher-as-guard refused, no loop" 1 $? "$S/err" "re-entered"
+
+# ---- 75: git worktree add inside a worktree copies nothing to redirect
+(cd "$S/w1" && git worktree add -q -b w7 "$S/w7" HEAD 2>/dev/null)
+ok "75a new worktree has no core.hooksPath at any scope" '[ -z "$(git -C "$S/w7" config --get core.hooksPath)" ]'
+commit_file "$S/w7" records/w7.txt x "records from a nested worktree"
+(cd "$S/w7" && git push -q origin w7) 2>"$S/err"
+check "75b its records push is blocked by its own guard" 1 $? "$S/err" "records/w7.txt"
+
+# ---- 76: the inputs under which the app CLEARS a worktree's override
+# (no base-repo core.hooksPath, no <base>/.husky, and a non-.sample entry
+# in <common-dir>/hooks)
+ok "76a base repo core.hooksPath, as the app reads it, is empty" '[ -z "$(git -C "$S/dm" config --type=path --get core.hooksPath)" ]'
+ok "76b no .husky in the base repo" '[ ! -d "$S/dm/.husky" ]'
+ok "76c the shared hooks dir holds a non-.sample entry" 'ls "$S/dm/.git/hooks" | grep -qv "\.sample$"'
+
+# ---- 77: the installer never clobbers someone else's hooks
+git init -q "$S/f1"; git -C "$S/f1" config core.hooksPath .husky
+mkdir -p "$S/f1/scripts"; cp "$INSTALL_SRC" "$DISPATCH_SRC" "$S/f1/scripts/"
+(cd "$S/f1" && sh scripts/install_git_hooks.sh) >"$S/out" 2>&1
+check "77a a foreign core.hooksPath is refused" 2 $? "$S/out" "not this repo's setting"
+ok "77b the foreign setting is untouched" '[ "$(git -C "$S/f1" config core.hooksPath)" = .husky ]'
+git -C "$S/f1" config --unset core.hooksPath
+printf '#!/bin/sh\nexit 0\n' >"$S/f1/.git/hooks/pre-push"
+(cd "$S/f1" && sh scripts/install_git_hooks.sh) >"$S/out" 2>&1
+check "77c an existing non-dispatcher hook is refused" 2 $? "$S/out" "not replacing it"
+ok "77d that hook is untouched" 'grep -q "exit 0" "$S/f1/.git/hooks/pre-push"'
+
+# ---- 78: idempotent
+cp "$S/dm/.git/hooks/pre-push" "$S/before"
+(cd "$S/w1" && sh scripts/install_git_hooks.sh) >"$S/out" 2>&1
+check "78 a second install exits 0" 0 $?
+ok "78b nothing removed the second time" '! grep -q "^removed core" "$S/out"'
+ok "78c dispatcher unchanged" 'cmp -s "$S/before" "$S/dm/.git/hooks/pre-push"'
+
+# ---- 79: the main checkout runs its own guard, and only its own
+(cd "$S/dm" && git push -q origin hack) 2>"$S/err"
+check "79 the main checkout's push is judged by its own guard" 1 $? "$S/err" STALE-MAIN-GUARD
+
+# ---- 80: uninstall restores the pre-dispatcher convention
+(cd "$S/w1" && sh scripts/install_git_hooks.sh --uninstall) >"$S/out" 2>&1
+check "80 uninstall exits 0" 0 $?
+ok "80b dispatcher removed" '[ ! -e "$S/dm/.git/hooks/pre-push" ]'
+ok "80c core.hooksPath=.githooks restored" '[ "$(git -C "$S/dm" config core.hooksPath)" = .githooks ]'
+
+# ---- 81: with a setting in force, the guard notes it and keeps its verdict
+git -C "$S/w1" config --worktree core.hooksPath "$S/dm/.githooks"
+(cd "$S/w1" && printf 'refs/heads/w1 %s refs/heads/w1 %s\n' "$(git rev-parse HEAD)" "$ZERO40" |
+    sh .githooks/pre-push origin "$S/d.git") 2>"$S/err"
+check "81 note printed, clean branch still allowed" 0 $? "$S/err" "core.hooksPath is set"
+commit_file "$S/w1" records/n.txt n "records under the note"
+(cd "$S/w1" && printf 'refs/heads/w1 %s refs/heads/w1 %s\n' "$(git rev-parse HEAD)" "$ZERO40" |
+    sh .githooks/pre-push origin "$S/d.git") 2>"$S/err"
+check "81b note printed, records commit still blocked" 1 $? "$S/err" "records/n.txt"
+
+# ---- 82-86: the guard's own handoff. Old convention, no dispatcher, and a
+# main checkout that carries THIS guard: git runs the main checkout's copy
+# for every app worktree, and that copy hands the push to the pushing
+# checkout's own guard.
+git init -q --bare "$S/h.git"
+git -C "$S/h.git" symbolic-ref HEAD refs/heads/main
+git clone -q "$S/h.git" "$S/hm" 2>/dev/null
+mkdir -p "$S/hm/.githooks"; cp "$HOOK" "$S/hm/.githooks/pre-push"
+commit_file "$S/hm" records/seed.txt r0 "seed records"
+commit_file "$S/hm" scripts/verify_records_attestations.py "# stub" "epoch hm"
+git -C "$S/hm" push -q origin HEAD:main
+HM0=$(git -C "$S/hm" rev-parse HEAD)
+git -C "$S/hm" config core.hooksPath .githooks
+git -C "$S/hm" config extensions.worktreeConfig true
+
+app_worktree "$S/hm" "$S/h1" h1 "$HM0"
+stub_guard "$S/h1" H1-OWN-GUARD 1
+git -C "$S/h1" add -A; git -C "$S/h1" commit -qm "h1 guard stub"
+(cd "$S/h1" && git push -q origin h1) 2>"$S/err"
+check "82 another checkout's copy hands the push to h1's own guard" 1 $? "$S/err" H1-OWN-GUARD
+ok "82b and says so" 'grep -q "handing the push to $SR/h1/.githooks/pre-push" "$S/err"'
+
+app_worktree "$S/hm" "$S/h2" h2 "$HM0"
+probe_guard "$S/h2" "$S/probe2"
+git -C "$S/h2" add -A; git -C "$S/h2" commit -qm "h2 probe guard"
+H2=$(git -C "$S/h2" rev-parse HEAD)
+(cd "$S/h2" && PROBE=p2 git push -q origin h2) 2>"$S/err"
+check "83 handed-off probe push succeeds" 0 $?
+printf 'origin|%s|p2|1\nrefs/heads/h2 %s refs/heads/h2 %s\n' "$S/h.git" "$H2" "$ZERO40" >"$S/want"
+ok "83b the handoff passes arguments, env and ref lines verbatim" 'cmp -s "$S/want" "$S/probe2"'
+
+app_worktree "$S/hm" "$S/h3" h3 "$HM0"
+git -C "$S/h3" rm -q .githooks/pre-push; git -C "$S/h3" commit -qm "h3 predates the guard"
+commit_file "$S/h3" records/h3.txt h "records with no own guard"
+(cd "$S/h3" && git push -q origin h3) 2>"$S/err"
+check "84 no own guard: the copy git ran judges, records blocked" 1 $? "$S/err" "records/h3.txt"
+ok "84b no handoff without an own copy" '! grep -q "handing the push" "$S/err"'
+
+# an own copy identical to the one git ran: one handoff, then judged
+app_worktree "$S/hm" "$S/h4" h4 "$HM0"
+commit_file "$S/h4" src/h4.txt h "src on h4"
+(cd "$S/h4" && $T git push -q origin h4) 2>"$S/err"
+check "85 handed to an identical own copy: clean push allowed" 0 $?
+ok "85b handed exactly once" '[ "$(grep -c "handing the push" "$S/err")" = 1 ]'
+commit_file "$S/h4" records/h4.txt h "records on h4"
+(cd "$S/h4" && $T git push -q origin h4) 2>"$S/err"
+check "85c the own copy still blocks records" 1 $? "$S/err" "records/h4.txt"
+
+# the relative setting alone runs the pushing checkout's copy: no handoff
+git -C "$S/hm" worktree add -q -b h5 "$S/h5" "$HM0" 2>/dev/null
+commit_file "$S/h5" src/h5.txt h "src on h5"
+(cd "$S/h5" && git push -q origin h5) 2>"$S/err"
+check "86 relative core.hooksPath runs its own copy: allowed" 0 $? "$S/err" "core.hooksPath is set"
+ok "86b no handoff when git ran the pushing checkout's copy" '! grep -q "handing the push" "$S/err"'
+(cd "$S/hm" && git checkout -q -b hm-side && commit_file "$S/hm" src/hm.txt m "src on main checkout" &&
+    git push -q origin hm-side) 2>"$S/err"
+check "86c the main checkout's own push: allowed" 0 $?
+ok "86d no handoff from the main checkout" '! grep -q "handing the push" "$S/err"'
 
 echo
 echo "== $pass passed, $fail failed =="

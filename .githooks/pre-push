@@ -86,6 +86,36 @@
 #
 # Break glass, deliberately, when you truly mean it:
 #   THESIS_ALLOW_RECORDS_PUSH=1 git push ...
+#
+# Whose copy of this file judges the push: always the pushing checkout's
+# own. In this repo core.hooksPath stays unset and
+# scripts/install_git_hooks.sh puts a dispatcher in the clone's shared
+# hooks directory that runs exactly that file (see AGENTS.md). A
+# core.hooksPath setting makes git run whatever sits at that path instead:
+# the Claude desktop app writes the MAIN checkout's .githooks, as an
+# absolute path, into every worktree it creates or reuses, so worktrees ran
+# whatever guard the main checkout's branch carried (in July, none; on
+# 2026-09-27, one 13 revisions stale). So when git ran another checkout's
+# copy, hand the push, arguments, stdin and environment unchanged, to this
+# checkout's own copy, once. With no own copy (a branch older than the
+# guard, a sparse checkout without .githooks/) it is judged here, never
+# waved through. The dispatcher sets the same marker, so a dispatched push
+# skips this block. None of it changes a verdict below.
+if [ "${THESIS_PRE_PUSH_DISPATCHED:-}" != "1" ]; then
+    if [ -n "$(git config --get core.hooksPath </dev/null 2>/dev/null)" ]; then
+        echo "pre-push: note: core.hooksPath is set; this repo runs its guard" >&2
+        echo "through a dispatcher: sh scripts/install_git_hooks.sh (AGENTS.md)" >&2
+    fi
+    own_top=$(git rev-parse --show-toplevel </dev/null 2>/dev/null) || own_top=""
+    if [ -n "$own_top" ] && [ -f "$own_top/.githooks/pre-push" ] &&
+        ! [ "$own_top/.githooks/pre-push" -ef "$0" ]; then
+        echo "pre-push: git ran $0, another checkout's guard;" >&2
+        echo "pre-push: handing the push to $own_top/.githooks/pre-push" >&2
+        THESIS_PRE_PUSH_DISPATCHED=1
+        export THESIS_PRE_PUSH_DISPATCHED
+        exec sh "$own_top/.githooks/pre-push" "$@"
+    fi
+fi
 GIT_NO_REPLACE_OBJECTS=1
 GIT_GRAFT_FILE=/dev/null
 export GIT_NO_REPLACE_OBJECTS GIT_GRAFT_FILE
