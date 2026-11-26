@@ -601,29 +601,54 @@ def utc_now() -> str:
 def replay_stanli_records(path: Path) -> int:
     """Replay the stanli candidates in a candidate or candidate-set JSON file.
 
-    Returns 0 when every candidate passes replay's checks and every field
-    replay rebuilds comes out exactly as recorded.
+    Returns 0 when every stanli candidate passes replay's checks and its
+    rebuild matches the record field for field. A record that names a stanli
+    model or carries a posterior predictive block, but whose library is not
+    exactly ``stanli``, is refused rather than skipped.
     """
 
-    from brier.stan_candidates import replay_mismatches
+    from brier.stan_candidates import CUSTOM_MODEL, STAN_PROGRAMS, replay_mismatches
 
     payload = json.loads(path.read_text())
-    records = [
-        record
-        for record in payload.get("candidates", [payload])
-        if record.get("library") == "stanli"
-    ]
-    if not records:
+    entries = payload.get("candidates", [payload]) if isinstance(payload, dict) else []
+    stanli_models = {*STAN_PROGRAMS, CUSTOM_MODEL}
+    records = []
+    failed = skipped = 0
+    for record in entries:
+        if not isinstance(record, dict):
+            failed += 1
+            print(
+                f"REFUSED: a candidate entry is {type(record).__name__}, not an object"
+            )
+        elif record.get("library") == "stanli":
+            records.append(record)
+        elif (
+            record.get("modelName") in stanli_models or "posteriorPredictive" in record
+        ):
+            failed += 1
+            label = record.get("candidateId", "candidate without an id")
+            print(
+                f"{label}: REFUSED: library is {record.get('library')!r}, not "
+                "'stanli', for a stanli model or posterior predictive record"
+            )
+        else:
+            skipped += 1
+    if not records and not failed:
         print(f"no stanli candidates in {path}")
         return 1
-    failed = 0
+    if skipped:
+        print(f"skipped {skipped} candidates from other libraries")
     for record in records:
         label = record.get("candidateId", "candidate without an id")
         try:
             mismatched = replay_mismatches(record)
-        except (KeyError, ValueError) as exc:
+        except KeyError as exc:
             failed += 1
-            reason = f"missing field {exc}" if isinstance(exc, KeyError) else exc
+            print(f"{label}: REFUSED: missing field {exc}")
+            continue
+        except (TypeError, AttributeError, ValueError) as exc:
+            failed += 1
+            reason = exc if isinstance(exc, ValueError) else f"malformed record: {exc}"
             print(f"{label}: REFUSED: {reason}")
             continue
         failed += bool(mismatched)
@@ -677,7 +702,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--stan-file",
         type=Path,
-        help="Stan program for the stanli-custom model; it must define y_next.",
+        help=(
+            "Stan program for the stanli-custom model, in one file with no "
+            "#include. It must define y_next in generated quantities "
+            "(see docs/stanli-candidates.md)."
+        ),
     )
     parser.add_argument("--round-increment", type=float)
     parser.add_argument("--generated-at")

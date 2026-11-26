@@ -56,25 +56,32 @@ not declare:
 | `N` | number of prints (at least 3; `stanli-ar1-diff-t` needs 4) |
 | `y` | the raw history |
 | `y_loc` | the last print |
-| `y_scale` | 1.4826 times the median absolute deviation of the one-step changes, falling back to √(π/2) times their mean absolute deviation, then, when every change is the same, the size of that change, then `y_grid`, then 1 |
+| `y_scale` | 1.4826 times the median absolute deviation of the one-step changes, falling back to √(π/2) times their mean absolute deviation, then, when every change is the same, the size of the first change, then `y_grid`, then 1. A deviation counts as zero unless it exceeds a millionth of `y_grid` and 1e-12 of the largest absolute print, so float error in equal decimal changes does not set the scale |
 | `y_std` | `(y - y_loc) / y_scale` |
 | `y_grid` | the rounding step of the prints (see [Reporting grid](#reporting-grid)) |
 
 Expose a finite scalar output named `y_next`, in raw units, and define it in
 generated quantities as one draw from the next print's posterior predictive
-distribution. The builder checks the output's name, shape and finite draws, not
-the block that declares it. Write a custom program in one file: the runner
-rejects `#include`, so the candidate JSON carries the whole program. The builder
-raises a `ValueError` naming the problem when a program fails to parse, declares
-data the contract does not supply, includes another file, omits `y_next`, makes
-it non-scalar, or draws a non-finite value.
+distribution. The builder checks the output's name, shape and finite draws. It
+refuses a `y_next` declared in parameters, because the R-hat check skips
+`y_next`. Write a custom program in one file: the builder and replay refuse any
+`#include`, even in a comment, so the candidate JSON carries the whole program.
+The builder raises a `ValueError` naming the problem when a program fails to
+parse, declares data the contract does not supply, contains `#include`, omits
+`y_next`, declares it in parameters, makes it non-scalar, or draws a non-finite
+value.
 
-The built-ins fit `y_std`, so scaling the history (and its grid) by a power of
-two scales every predictive quantile exactly, and shifting it shifts them by the
-same amount, to within rounding error. Only the changes and the grid set
-`y_scale`, so both hold for flat and constant-drift histories too, unless the
-history is flat and the grid is 0. `tests/test_stan_candidates.py` checks both,
-including on flat and constant-drift histories.
+The built-ins fit `y_std` under fixed priors. Scaling the history and an
+explicit grid by a power of two scales every predictive quantile exactly, within
+the normal floating-point range, unless the history is flat and the grid is 0,
+where `y_scale` falls back to 1. With the grid held fixed, a shift of the
+history leaves `y_scale` unchanged up to float error. It shifts every
+quantile by the same amount only when the shifted prints are exact in floating
+point, as multiples of 1/8 are. Most decimal prints are not: a shift changes
+their float error, and the sampler can amplify that into quantile differences of
+Monte Carlo size. `tests/test_stan_candidates.py` checks exact rescaling,
+shifts of flat, drifting and noisy histories on a 1/8 grid, and that a shift
+keeps `y_scale` on flat, drifting and noisy histories of tenths.
 
 ## Reporting grid
 
@@ -136,14 +143,17 @@ produced: a source that doesn't match its hash or model name, a built-in whose
 source isn't this version's program, a source with `#include`, sampler settings
 other than this version's, quantiles at levels other than the 19, or a candidate
 id, seed, standardization or inferred grid that doesn't follow from the record.
-It refits every other candidate and compares each field the fit or the history
-determines: the point, the p10, p50 and p90, both intervals, the diagnostics, the
-draw count, the 19 predictive quantiles, the sampler summary, the walk-forward
-score when the record has one, the training cutoff, the history length, the
-interval method and the stanli version. It names the fields that differ and exits
-1 on any refusal or mismatch. `tests/test_stan_candidates.py` replays every
-built-in and a custom program through a JSON round trip and checks that replay
-refuses or flags an edit to each of those fields. Those tests replay on the
+It also refuses a record with a missing field or one it can't read, and a record
+that names a stanli model or carries a posterior predictive block but whose
+library isn't exactly `stanli`. It rebuilds every other candidate from its
+history, grid, rounding increment and program, the walk-forward score included
+when the record has one, and compares the rebuild with the record field by field
+as JSON. So a value the builder would type, name or nest differently counts as a
+mismatch, and so does a missing or extra field. It names the fields that differ
+and exits 1 on any refusal or mismatch. `tests/test_stan_candidates.py` replays
+every built-in and a custom program through a JSON round trip, checks that the
+rebuild equals the record, and checks that replay refuses or flags an edit to
+each field. Those tests replay on the
 machine that fitted, and no test compares platforms. Replay flags a record from
 another stanli version, and the JSON records no platform.
 
@@ -171,19 +181,23 @@ adapter resolves (46 after merging unit variants of the same FRED series) in
 real time:
 
 - It downloads ALFRED vintages on the 1st and 16th of each month from
-  2024-06-01 through 2026-11-01. It caches a download after checking its vintage
-  labels and CSV row widths, and checks a cached file the same way when it reads
-  it.
+  2024-06-01 through 2026-11-01. It caches a download only after parsing it,
+  and parses a cached file the same way when it reads it. The parser refuses a
+  header column that isn't one vintage of the series, a repeated vintage, a row
+  whose cell count differs from the header's, a body without a final line break,
+  and a body with no rows. A body cut exactly at a line break passes these
+  checks; `urlopen` raises `IncompleteRead` when a download stops short of its
+  stated length.
 - For each period it trains on the last sampled vintage without the period,
-  reads the period's cadence from that vintage, and transforms it as the
-  resolver transforms prints. It scores against the earliest sampled vintage
-  that holds the period, so the twice-monthly grid can include revisions
-  published before that sample.
+  reads the period's cadence from that vintage, and transforms that vintage's
+  prints as the resolver does. It scores against the earliest sampled vintage
+  that holds the period. Vintages are sampled twice a month, so that vintage can
+  include revisions published after the first print.
 - The models treat adjacent available prints as consecutive steps. In each run,
   111 training windows in 12 series contain a calendar gap: the latest vintage
   has no October 2025 print for UNRATE, U6RATE and CIVPART, and no October or
-  November 2025 one-month change for the nine CPI and import and export price
-  series.
+  November 2025 one-month change for the nine CPI, import price and export
+  price series.
 - Every arm forecasts one step ahead from the same last `--window` prints, and
   the script scores it by CRPS on the site's 201-point CDF.
   `tests/test_backtest_stanli_candidates.py` checks that the Python CRPS port
@@ -227,12 +241,14 @@ precision that were not available at the historical cutoffs.
 Commit 33a078aa records the three programs and their priors, specifies a
 60-print backtest, and proposes choosing among programs by walk-forward MAE and
 coverage for series with at least 12 prints. We made it after a pilot on four
-series and about four minutes into the first full run. Commit 9f3d82b9
-implements coverage as a tie-breaker, and commit 0fb35048 first reports both
-windows. We later changed grid inference and seed derivation, added the
-`persistence-ladder` and `noskip` arms, and chose a fixed `stanli-ar1-t` for the
-[draft skill](#draft-pack-skill), with a 36-print minimum and up to 60 prints,
-after reading those results.
+series, about four minutes into a first full run that we stopped unfinished. A
+second full run scored the three programs on both windows, and we read its
+results before commit 9f3d82b9 made coverage break exact MAE ties. Commit
+0fb35048 first reports both windows, and its draft skill sets the 36-print
+minimum. We later changed grid inference and seed derivation, added the
+`persistence-ladder` and `noskip` arms, and, after reading those reruns, chose a
+fixed `stanli-ar1-t` for the [draft skill](#draft-pack-skill), which fits up to
+60 prints.
 
 ### Results
 
@@ -345,15 +361,15 @@ with 60 prints and 1.000 (0.929, 1.063) with 36. On A063RC1, government social
 benefits at a seasonally adjusted annual rate, its 60-print ratio reaches 3.73.
 That series jumped from $3,235.1 billion in March 2020 to $6,397.7 billion in
 April, and from $4,157.0 billion in February 2021 to $8,134.5 billion in March.
-Of its 24 targets, seven have 60-print windows that contain both jumps, and 17
-have windows that contain the 2021 jump. The 36-print windows start after both
-jumps, and with 36 prints its ratio falls to 0.837. With 60
-prints, `statsmodels` covered all 24 A063RC1 targets, and the stanli programs
-scored 0.79 to 0.85. On the 97 targets whose 60-print window starts in July 2021
-or later, `statsmodels` scores 1.019, and its 60-print ratio falls from 1.305 in
-the earlier half of the period to 1.061 in the later half. No stanli arm's ratio
-moves by more than 0.02 between windows, and with 60 prints `stanli-ar1-t`
-scores 0.886 and 0.857 in the two halves.
+Of its 24 targets' 60-print windows, 17 contain the 2021 jump, seven of those
+also contain the 2020 jump, and the other seven contain neither. The 36-print
+windows start after both jumps, and with 36 prints its ratio falls to 0.837.
+With 60 prints, `statsmodels` covered all 24 A063RC1 targets, and the stanli
+programs scored 0.79 to 0.85. On the 97 targets whose 60-print window starts in
+July 2021 or later, `statsmodels` scores 1.019, and its 60-print ratio falls
+from 1.305 in the earlier half of the period to 1.061 in the later half. No
+stanli arm's ratio moves by more than 0.02 between windows, and with 60 prints
+`stanli-ar1-t` scores 0.886 and 0.857 in the two halves.
 
 `stanli-ar1-t`'s 80% intervals run narrow on levels. With 60 prints they cover
 73% of level targets and 87% of percent-change targets, against 77% and 88% for
@@ -376,7 +392,8 @@ with 36. `stanli-selected-ladder` scores between 0.864 and 0.904, and between
   understate the uncertainty when they move together.
 - We compare 14 arms over two windows with no multiple-comparison correction,
   and we chose every subset above (W824RC1, the warning split, the period
-  halves, the late windows and the transforms) after a first full run.
+  halves, the late windows and the transforms) after reading the full runs'
+  results.
 - Persistence here reads the same window of ALFRED prints as the other arms,
   while the site's baseline reads the ledger's history. We built
   `persistence-ladder` for this backtest, and no analyst run has used it.
@@ -400,9 +417,9 @@ To test the pack on agents:
 3. Run matched analyst runs on the same targets, resolver and model, with and
    without the skill, in fast and ladder prompt modes. Choose the targets
    without reference to the skill's exclusions or its warning fallback. The
-   agent applies both, and the analysis scores every matched target, so they
-   count as part of the treatment. Report the targets where the agent used the
-   candidate as a secondary subgroup.
+   agent applies the exclusions and the fallback itself, and the analysis scores
+   every matched target, so both count as part of the treatment. Report the
+   targets where the agent used the candidate as a secondary subgroup analysis.
 4. Score resolved runs through the Brier reward export and apply the gate in
    `docs/pack-promotion.md`, which measures accuracy by normalized CRPS first
    and interval coverage second.
@@ -414,8 +431,9 @@ CRPS ratio of `stanli-ar1-t-ladder` has a target-level standard deviation of
 intraclass correlations of 0.17 and 0.16 from a one-way ANOVA. On that proxy, we
 estimate 532 matched targets, or 25 independent series, for 80% power to detect
 a 10% reduction in geometric-mean CRPS with 60 prints. With 36 prints, the
-estimates are 880 targets or 39 series. The first estimate counts targets and
-allows for their clustering within series; the second counts series means. A 5%
+estimates are 880 targets or 39 series. The target count allows for clustering
+within series, and the series count treats each series mean as one observation.
+Both assume about 23 targets per series, as in the backtest. A 5%
 reduction takes about 2,250 targets or 104 series with 60 prints, and 3,710
 targets or 163 series with 36, more than the 46 series here. The paired agent
 study will need its own power calculation for mean normalized CRPS, the gate's
@@ -436,19 +454,20 @@ the other 45 series, the rule's ladder scores 1.000 and 1.008 times
 of persistence's CRPS, against 0.992 and 1.015 for `stanli-ar1-t`. On mean normalized CRPS, the rule's ladder minus
 `stanli-ar1-t-ladder`'s is -0.018 (-0.073, +0.020) with 60 prints and -0.012
 (-0.079, +0.031) with 36, and without W824RC1 it is +0.006 (-0.009, +0.026) and
-+0.017 (-0.0001, +0.037). So the draft runs `stanli-ar1-t` alone.
++0.017 (-0.0001, +0.037), whose lower end sits at zero. The rule's edge comes
+from one series, so the draft runs `stanli-ar1-t` alone.
 
 We will test a fixed `stanli-ar1-t` candidate with a warning fallback. On warned
 targets, its ladder's geometric-mean CRPS ratios against `persistence-ladder`
-were 1.063 with 60 prints and 1.042 with 36. Mean normalized CRPS rose by 0.048
-with 60 prints and fell by 0.006 with 36. Using `persistence-ladder` on the
-warned targets moves the full sample's mean normalized CRPS by -0.001 (-0.003,
-+0.000) with 60 prints and +0.000 (-0.003, +0.004) with 36. The backtest neither
-supports nor rules out the fallback. We keep it because a sampler warning means
-the draws may not represent the posterior. With 60
-prints, `stanli-ar1-t-ladder` also varies less from target to target than the
-rule's, so a 10% test needs about 25 series against the rule's 56. With 36
-prints, the two need about 39 and 40.
+were 1.063 with 60 prints and 1.042 with 36. Its mean normalized CRPS minus
+`persistence-ladder`'s was +0.048 with 60 prints and -0.006 with 36. Using
+`persistence-ladder` on the warned targets moves the full sample's mean
+normalized CRPS by -0.001 (-0.003, +0.0003) with 60 prints and +0.000 (-0.003,
++0.004) with 36. The backtest neither supports nor rules out the fallback. We
+keep it because a sampler warning means the draws may not represent the
+posterior. With 60 prints, `stanli-ar1-t-ladder` also varies less from target to
+target than the rule's, so on the same proxy a 10% test needs about 25 series
+against the rule's 56. With 36 prints, the two need about 39 and 40.
 
 > For a repeated numeric series with at least 36 prints, also run
 > `stanli-ar1-t` on its last 60 prints. If its diagnostics end in a WARNING,

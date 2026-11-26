@@ -56,7 +56,6 @@ import argparse
 import concurrent.futures
 import csv
 import datetime as dt
-import decimal
 import gzip
 import io
 import json
@@ -125,17 +124,12 @@ def round_distribution_number(value: float) -> float:
 
     toPrecision rounds the exact binary value to 12 significant digits and
     breaks an exact tie away from zero, where Python's format would round it
-    to even.
+    to even. The analyst's port does exactly that, so the backtest uses it.
     """
 
-    if not math.isfinite(value) or value == 0:
-        return value + 0.0
-    exact = decimal.Decimal(value)
-    step = decimal.Decimal(1).scaleb(exact.adjusted() - 11)
-    rounded = exact.quantize(
-        step, rounding=decimal.ROUND_HALF_UP, context=decimal.Context(prec=50)
-    )
-    return float(rounded) + 0.0
+    import run_thesis_analyst
+
+    return run_thesis_analyst.round_distribution_number(value)
 
 
 def score_numeric_cdf(
@@ -290,19 +284,35 @@ def vintage_grid(start: dt.date, end: dt.date) -> list[dt.date]:
     return dates
 
 
-def parse_vintage_csv(text: str) -> dict[str, dict[str, float]]:
-    """Map each vintage (YYYY-MM-DD) to its {observation_date: value} rows."""
+def parse_vintage_csv(text: str, series: str) -> dict[str, dict[str, float]]:
+    """Map each vintage (YYYY-MM-DD) to its {observation_date: value} rows.
+
+    It refuses a body that does not end with a line break or has no rows, a
+    row whose cell count differs from the header's, and a header column that
+    is not ``<series>_YYYYMMDD`` or repeats a vintage. A body cut at a line
+    break passes these checks; ``urlopen`` raises ``IncompleteRead`` when a
+    download stops short of its stated length.
+    """
 
     reader = csv.reader(io.StringIO(text))
-    header = next(reader)
+    header = next(reader, [])
     if not header or header[0] != "observation_date":
         raise ValueError(f"unexpected ALFRED header {header[:3]!r}")
+    if not text.endswith("\n"):
+        # A cut after a comma or inside the last cell keeps the cell count.
+        raise ValueError(f"ALFRED response for {series} ends without a line break")
     vintages = []
     for column in header[1:]:
-        stamp = column.rsplit("_", 1)[-1]
+        name, _, stamp = column.rpartition("_")
+        if name != series or len(stamp) != 8 or not stamp.isdigit():
+            raise ValueError(f"ALFRED column {column!r} is not a {series} vintage")
         vintages.append(f"{stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}")
+    if len(set(vintages)) != len(vintages):
+        raise ValueError(f"ALFRED header for {series} repeats a vintage")
     rows: dict[str, dict[str, float]] = {vintage: {} for vintage in vintages}
+    count = 0
     for line, record in enumerate(reader, start=2):
+        count += 1
         if len(record) != len(header):
             # zip would drop the missing cells, so a cut-off row would read as
             # vintages without that period.
@@ -313,6 +323,8 @@ def parse_vintage_csv(text: str) -> dict[str, dict[str, float]]:
         for vintage, cell in zip(vintages, record[1:]):
             if cell not in ("", "."):
                 rows[vintage][record[0]] = float(cell)
+    if not count:
+        raise ValueError(f"ALFRED response for {series} has no rows")
     return rows
 
 
@@ -329,8 +341,9 @@ def fetch_vintages(
 
     A past ALFRED vintage never changes, so a cached chunk never goes stale.
     The script refuses vintage dates from today on, which can still change.
-    It checks every chunk, downloaded or cached, for its vintage labels and
-    CSV row widths, and caches a download only after that check passes.
+    It checks every chunk, downloaded or cached, with
+    :func:`parse_vintage_csv` and against the vintages it asked for, and
+    caches a download only after those checks pass.
     """
 
     today = today or dt.date.today()
@@ -356,7 +369,7 @@ def fetch_vintages(
             )
             with opener(request, timeout=90) as response:
                 text = response.read().decode()
-        parsed = parse_vintage_csv(text)
+        parsed = parse_vintage_csv(text, series)
         received = sorted(parsed)
         wanted = [date.isoformat() for date in chunk]
         if received != wanted:

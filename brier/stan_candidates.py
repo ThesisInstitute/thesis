@@ -15,11 +15,16 @@ one-step changes, and ``y_grid`` the increment the prints are reported on (0
 when unknown). A program must expose a finite scalar output named ``y_next``,
 in raw units, and should define it in generated quantities as one draw from
 the next print's posterior predictive distribution. The builder checks the
-output's name, shape and finite draws, not the block that declares it. A
-program must be one file: the builder and replay reject ``#include``, so a
+output's name, shape and finite draws, and refuses a ``y_next`` declared in
+parameters, which the R-hat check would skip. A program must be one file: the
+builder and replay refuse any ``#include``, even in a comment, so a
 candidate's JSON carries the whole program. The built-in programs fit
-``y_std`` under fixed priors, so a power-of-two rescaling or a shift of the
-history (and its grid) moves their forecast by the same rescaling or shift.
+``y_std`` under fixed priors, so rescaling the history and an explicit grid by
+a power of two rescales their forecast exactly. A shift of the history leaves
+``y_scale`` unchanged up to float error. The forecast shifts by the same amount
+only when the shifted prints are exact in floating point: otherwise the shift
+changes the prints' float error, and the sampler can amplify that into
+differences of Monte Carlo size.
 
 Official prints are rounded, and rounded series repeat a print often.
 Repeated prints can make a Student-t likelihood favor scales near zero and
@@ -35,8 +40,8 @@ neighboring residuals.
 from __future__ import annotations
 
 import hashlib
+import json
 import math
-import re
 from decimal import Decimal
 from statistics import median
 from typing import Any, Sequence
@@ -194,25 +199,31 @@ def standardization(values: Sequence[float], grid: float = 0.0) -> tuple[float, 
     """Return ``(y_loc, y_scale)``: the last print and a robust step scale.
 
     The scale is 1.4826 times the median absolute deviation of the one-step
-    changes. Rounded series often repeat a print, which can zero the MAD, so
-    the mean absolute deviation (times sqrt(pi/2)) backs it up. When every
-    change is the same, the scale falls back to the size of that change, then
-    to ``grid``, then to 1. Only the changes and the grid set the scale, so a
-    shift of the history leaves it alone, and a rescaling of the history and
-    grid rescales it, unless the history is flat and the grid is 0.
+    changes. Rounded series often repeat a print or a change, which can zero
+    the MAD, so the mean absolute deviation (times sqrt(pi/2)) backs it up.
+    When every change is the same, the scale falls back to the size of that
+    change, then to ``grid``, then to 1.
+
+    A deviation counts as zero unless it exceeds a millionth of ``grid`` and
+    1e-12 of the largest absolute print. Float error makes equal decimal
+    changes differ slightly (``4.1 - 4.0`` and ``104.1 - 104.0`` are both one
+    step of 0.1 but differ in the 14th digit), and that error grows with the
+    level, so it must not set the scale. A rescaling of the history and grid
+    by a power of two rescales the scale exactly, unless the history is flat
+    and the grid is 0. A shift changes it only by float error.
     """
 
     loc = float(values[-1])
     diffs = [values[index] - values[index - 1] for index in range(1, len(values))]
     scale = 0.0
     if diffs:
+        noise = max(grid * 1e-6, 1e-12 * max(abs(float(value)) for value in values))
         center = median(diffs)
         scale = 1.4826 * median(abs(diff - center) for diff in diffs)
-        if not scale > 0:
+        if not scale > 1.4826 * noise:
             average = sum(diffs) / len(diffs)
-            scale = math.sqrt(math.pi / 2) * (
-                sum(abs(diff - average) for diff in diffs) / len(diffs)
-            )
+            spread = sum(abs(diff - average) for diff in diffs) / len(diffs)
+            scale = math.sqrt(math.pi / 2) * spread if spread > noise else 0.0
         if not scale > 0:
             scale = abs(diffs[0])
     if not scale > 0:
@@ -437,16 +448,19 @@ def diagnostic_lines(
     return lines
 
 
-_INCLUDE = re.compile(r"^[ \t]*#include\b", re.MULTILINE)
-
-
 def reject_includes(source: str) -> None:
-    """Refuse a program that pulls in another file, which its JSON can't carry."""
+    """Refuse a program that could pull in another file, which its JSON can't carry.
 
-    if _INCLUDE.search(source):
+    stanc reads ``#include`` wherever a token can start, not only at the start
+    of a line, and stanli hands the compiler include paths only when the source
+    contains that text. Refusing the text anywhere, comments included, leaves no
+    way to reach another file.
+    """
+
+    if "#include" in source:
         raise ValueError(
-            "Stan programs must be one file: the runner rejects #include so the "
-            "candidate JSON carries the whole program"
+            "Stan programs must be one file: the runner rejects any #include, "
+            "even in a comment, so the candidate JSON carries the whole program"
         )
 
 
@@ -508,6 +522,13 @@ def sample_next(
         # stanli raises RuntimeError for a parse or type error and for data that
         # does not match the data block.
         raise ValueError(f"Stan program failed to compile or bind data: {exc}") from exc
+    if any(name.split("[", 1)[0] == "y_next" for name in stan_model.constrained_names):
+        # The R-hat check below skips y_next, so as a parameter nothing would
+        # check its chains.
+        raise ValueError(
+            "y_next is declared in parameters, where the R-hat check skips it; "
+            "define it in generated quantities"
+        )
     fit = stan_model.sample(
         chains=CHAINS,
         seed=seed,
@@ -550,19 +571,18 @@ def sample_next(
 
 
 def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
-    """Refit a stanli candidate from its own JSON and rebuild its forecast.
+    """Rebuild a stanli candidate from its own JSON.
 
     The record carries everything the fit depends on: the program source, the
-    history, the grid and the rounding increment. Replay derives the candidate
-    id, the seed and the standardization from the record itself, refits, and
-    returns every field the fit or the history determines, keyed as
-    :func:`recorded_fields` keys them, including the walk-forward score when
-    the record has one. It raises a ``ValueError`` for a record no build of
-    this version could have produced: a source that does not match its
-    recorded hash, model name or, for a built-in, this version's program; a
-    source with ``#include``; sampler settings other than this version's;
-    quantile levels other than the 19; or a candidate id, seed,
-    standardization or inferred grid that does not follow from the record.
+    history, the grid and the rounding increment. Replay first refuses, with a
+    ``ValueError``, a record whose inputs no build of this version takes: a
+    source that does not match its recorded hash, model name or, for a
+    built-in, this version's program; a source with ``#include``; sampler
+    settings other than this version's; quantile levels other than the 19; or
+    a candidate id, seed, standardization or inferred grid that does not follow
+    from the record. It then runs the builder on the record's inputs, with a
+    walk-forward score when the record has one, and returns the candidate as
+    JSON holds it, for :func:`replay_mismatches` to compare with the record.
     """
 
     block = record["posteriorPredictive"]
@@ -608,75 +628,65 @@ def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
     grid = scaling["yGrid"]
     if not (isinstance(grid, (int, float)) and math.isfinite(grid) and grid >= 0):
         raise ValueError("grid must be a finite non-negative increment")
+    if not isinstance(scaling["gridInferred"], bool):
+        raise ValueError("gridInferred must be true or false")
     if scaling["gridInferred"] and grid != observation_grid(values):
         raise ValueError("inferred grid does not follow from the history")
     loc, scale = standardization(values, grid)
     if (scaling["yLoc"], scaling["yScale"]) != (loc, scale):
         raise ValueError("standardization does not follow from the history")
 
-    draws, sampler = sample_next(
-        source, history, loc=loc, scale=scale, grid=grid, seed=seed
-    )
-    quantiles = {level: empirical_quantile(draws, level) for level in QUANTILE_LEVELS}
-    point, p10, p90, p05, p95 = rounded_summary(quantiles, block["roundIncrement"])
-    score = None
-    if record["backtestScore"] is not None:
+    rebuilt = build_stanli_candidate(
+        model=model,
+        target_data_point_id=record["targetDataPointId"],
+        target_period=record["targetPeriod"],
+        history=record["history"],
+        generated_at=record["generatedAt"],
+        round_increment=block["roundIncrement"],
+        program=source if model == CUSTOM_MODEL else None,
+        grid=None if scaling["gridInferred"] else grid,
         # A build with backtest=False records no score, so only a recorded
         # score is recomputed.
-        replayed_score = backtest_stanli(
-            model,
-            history,
-            program=source,
-            grid=grid,
-            target_data_point_id=(
-                f"{record['targetDataPointId']}:{record['targetPeriod']}"
-            ),
-        )
-        score = replayed_score.as_dict() if replayed_score else None
-    return {
-        "libraryVersion": package_version("stanli"),
-        "trainCutoff": history[-1].period,
-        "calibrationN": len(history),
-        "intervalMethod": "posterior_predictive",
-        "backtestScore": score,
-        "pointEstimate": point,
-        "quantiles": {"p10": p10, "p50": point, "p90": p90},
-        "interval80": ForecastInterval(lower=p10, upper=p90, level=0.8).as_dict(),
-        "interval90": ForecastInterval(lower=p05, upper=p95, level=0.9).as_dict(),
-        "diagnostics": diagnostic_lines(model, seed, len(draws), sampler, quantiles),
-        "posteriorPredictive.draws": len(draws),
-        "posteriorPredictive.quantiles": quantile_rows(quantiles),
-        "posteriorPredictive.sampler": sampler,
-    }
+        backtest=record["backtestScore"] is not None,
+    )
+    return json.loads(json.dumps(rebuilt.as_dict()))
 
 
 def recorded_fields(record: dict[str, Any]) -> dict[str, Any]:
-    """The fields of a stanli record that replay rebuilds, keyed alike."""
+    """A candidate's fields as replay compares them.
 
-    block = record["posteriorPredictive"]
-    return {
-        "libraryVersion": record["libraryVersion"],
-        "trainCutoff": record["trainCutoff"],
-        "calibrationN": record["calibrationN"],
-        "intervalMethod": record["intervalMethod"],
-        "backtestScore": record["backtestScore"],
-        "pointEstimate": record["pointEstimate"],
-        "quantiles": record["quantiles"],
-        "interval80": record["interval80"],
-        "interval90": record["interval90"],
-        "diagnostics": record["diagnostics"],
-        "posteriorPredictive.draws": block["draws"],
-        "posteriorPredictive.quantiles": block["quantiles"],
-        "posteriorPredictive.sampler": block["sampler"],
+    Each top-level field is one, except that each entry of the posterior
+    predictive block is its own field, such as ``posteriorPredictive.seed``.
+    """
+
+    fields = {
+        key: value for key, value in record.items() if key != "posteriorPredictive"
     }
+    block = record.get("posteriorPredictive")
+    if isinstance(block, dict):
+        fields.update(
+            {f"posteriorPredictive.{key}": value for key, value in block.items()}
+        )
+    elif "posteriorPredictive" in record:
+        fields["posteriorPredictive"] = block
+    return fields
 
 
 def replay_mismatches(record: dict[str, Any]) -> list[str]:
-    """Replay a stanli record and name each field that came out different."""
+    """Replay a stanli record and name each field that differs from the rebuild.
 
-    replayed = replay_stanli_candidate(record)
+    Fields compare as JSON text, so a string, a boolean or an integer where the
+    builder writes a float differs, and so does a field only one side has.
+    """
+
+    replayed = recorded_fields(replay_stanli_candidate(record))
     recorded = recorded_fields(record)
-    return [field for field in replayed if replayed[field] != recorded[field]]
+    names = [*replayed, *(name for name in recorded if name not in replayed)]
+
+    def text(fields: dict[str, Any], name: str) -> str | None:
+        return json.dumps(fields[name], sort_keys=True) if name in fields else None
+
+    return [name for name in names if text(replayed, name) != text(recorded, name)]
 
 
 def empirical_quantile(values: Sequence[float], probability: float) -> float:

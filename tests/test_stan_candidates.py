@@ -200,6 +200,46 @@ def test_constant_changes_set_a_scale_that_ignores_the_level(
     )
 
 
+@pytest.mark.parametrize(
+    ("tenths", "expected"),
+    [
+        ([40] * 6, 0.1),
+        ([40 + index for index in range(6)], 0.1),
+        ([3, 4, 5, 6, 7, 8, 8], None),
+    ],
+    ids=["flat", "drift", "one-repeat"],
+)
+@pytest.mark.parametrize("shift", [100, 1000, 10**6])
+def test_decimal_float_error_does_not_set_the_scale(tenths, expected, shift):
+    # 4.1 - 4.0 and 104.1 - 104.0 are both one step of 0.1, yet differ in the
+    # 14th digit. Those residues once set the scale at about 1e-16, growing
+    # with the level, in 45 walk-forward fits of the 36-print backtest.
+    values = [tenth / 10 for tenth in tenths]
+    _, scale = standardization(values, 0.1)
+    _, shifted = standardization([(tenth + 10 * shift) / 10 for tenth in tenths], 0.1)
+
+    assert scale > 0.01
+    if expected is not None:
+        assert scale == pytest.approx(expected, rel=1e-9)
+    assert shifted == pytest.approx(scale, rel=1e-9)
+
+
+@given(
+    tenths=st.lists(st.integers(min_value=-3, max_value=3), min_size=1, max_size=30),
+    start=st.integers(min_value=-1000, max_value=1000),
+    shift=st.integers(min_value=-(10**6), max_value=10**6),
+)
+def test_shifting_a_decimal_history_keeps_its_scale(tenths, start, shift):
+    levels = [start]
+    for step in tenths:
+        levels.append(levels[-1] + step)
+    base = standardization([level / 10 for level in levels], 0.1)[1]
+    moved = standardization([(level + shift) / 10 for level in levels], 0.1)[1]
+
+    assert base > 0.01
+    assert moved == pytest.approx(base, rel=1e-9)
+
+
 def test_resolve_program_guards_custom_and_builtin_names():
     with pytest.raises(ValueError, match="needs a Stan program"):
         resolve_program(CUSTOM_MODEL, None)
@@ -213,17 +253,36 @@ def test_resolve_program_guards_custom_and_builtin_names():
 
 
 @pytest.mark.parametrize(
-    "line", ["#include gen.stan", "  #include <gen.stan>", '\t#include "gen.stan"']
+    "opening",
+    [
+        "generated quantities {\n#include gen.stan\n",
+        "generated quantities {\n  #include <gen.stan>\n",
+        'generated quantities {\n\t#include "gen.stan"\n',
+        "generated quantities { #include gen.stan\n",
+        "generated quantities {\n/* x */ #include gen.stan\n",
+        "generated quantities {\n\f#include gen.stan\n",
+        "generated quantities {\r#include gen.stan\r",
+        "generated quantities {\n// #include gen.stan\n",
+    ],
+    ids=[
+        "line-start",
+        "indented",
+        "tab",
+        "mid-line",
+        "after-comment",
+        "form-feed",
+        "cr-only",
+        "commented",
+    ],
 )
-def test_custom_programs_must_be_one_file(line):
-    # The candidate JSON records the source, not the files it includes.
-    source = STAN_PROGRAMS["stanli-ar1-t"].replace(
-        "generated quantities {", f"generated quantities {{\n{line}", 1
-    )
+def test_custom_programs_must_be_one_file(opening):
+    # The candidate JSON records the source, not the files it includes. stanc
+    # reads #include wherever a token can start, so the runner refuses the
+    # text anywhere, a comment included.
+    source = STAN_PROGRAMS["stanli-ar1-t"].replace("generated quantities {", opening, 1)
+    assert source != STAN_PROGRAMS["stanli-ar1-t"]
     with pytest.raises(ValueError, match="must be one file"):
         resolve_program(CUSTOM_MODEL, source)
-    commented = STAN_PROGRAMS["stanli-ar1-t"] + "\n// #include gen.stan\n"
-    assert resolve_program(CUSTOM_MODEL, commented) == commented
 
 
 @pytest.mark.parametrize("model", sorted(STAN_PROGRAMS))
@@ -565,6 +624,14 @@ model {
             + "generated quantities { vector[2] y_next = [mu, mu]'; }",
             "must be a scalar",
         ),
+        (
+            # Two modes the chains split between; the R-hat check skips
+            # y_next, so it must not be a parameter.
+            stan_candidates._DATA_BLOCK
+            + "parameters { real y_next; } model { target += log_mix(0.5, "
+            "normal_lpdf(y_next | -50, 1), normal_lpdf(y_next | 50, 1)); }",
+            "declared in parameters",
+        ),
     ],
 )
 def test_bad_custom_programs_raise_value_errors(source, message):
@@ -659,7 +726,7 @@ def test_replay_reproduces_every_published_field_from_the_json_alone(model, prog
 
     assert stan_candidates.replay_mismatches(record) == []
     replayed = stan_candidates.replay_stanli_candidate(record)
-    assert replayed == stan_candidates.recorded_fields(record)
+    assert json.dumps(replayed, sort_keys=True) == json.dumps(record, sort_keys=True)
 
 
 def drop_quantiles(record):
@@ -790,11 +857,81 @@ def test_replay_names_each_edited_field(field, tamper):
     assert stan_candidates.replay_mismatches(record) == [field]
 
 
+def stringify_the_history(record):
+    for point in record["history"]:
+        point["value"] = str(point["value"])
+
+
+def note_a_revision_on_every_print(record):
+    for point in record["history"]:
+        point["revised"] = 99.0
+
+
+def carry_an_include_map(record):
+    record["posteriorPredictive"]["program"]["includes"] = {"gen.stan": "..."}
+
+
 @requires_stanli
-def test_replay_refuses_a_custom_program_that_includes_a_file():
+@pytest.mark.parametrize(
+    "field, tamper",
+    [
+        ("history", stringify_the_history),
+        ("history", note_a_revision_on_every_print),
+        (
+            "posteriorPredictive.chains",
+            lambda record: record["posteriorPredictive"].update(chains=4.0),
+        ),
+        (
+            "posteriorPredictive.seed",
+            lambda record: record["posteriorPredictive"].update(
+                seed=float(record["posteriorPredictive"]["seed"])
+            ),
+        ),
+        ("calibrationN", lambda record: record.update(calibrationN=30.0)),
+        ("schemaVersion", lambda record: record.update(schemaVersion="bogus_v9")),
+        (
+            "pointEstimateOverride",
+            lambda record: record.update(pointEstimateOverride=77),
+        ),
+        ("posteriorPredictive.program", carry_an_include_map),
+    ],
+    ids=[
+        "string-prints",
+        "extra-print-key",
+        "float-chains",
+        "float-seed",
+        "float-count",
+        "schema",
+        "extra-field",
+        "include-map",
+    ],
+)
+def test_replay_flags_a_value_the_builder_would_type_or_name_differently(field, tamper):
+    # Python's == calls 4.0 and 4 equal, and float() reads "1.3"; the builder
+    # writes neither, so replay compares each field as JSON text.
+    record = replay_record()
+    tamper(record)
+
+    assert stan_candidates.replay_mismatches(record) == [field]
+
+
+@requires_stanli
+def test_replay_refuses_a_grid_flag_that_is_not_a_boolean():
+    record = replay_record()
+    record["posteriorPredictive"]["standardization"]["gridInferred"] = "no"
+
+    with pytest.raises(ValueError, match="gridInferred must be true or false"):
+        stan_candidates.replay_stanli_candidate(record)
+
+
+@requires_stanli
+@pytest.mark.parametrize(
+    "include", ["#include gen.stan\n", "/* x */ #include gen.stan\n"]
+)
+def test_replay_refuses_a_custom_program_that_includes_a_file(include):
     record = replay_record(CUSTOM_MODEL, STAN_PROGRAMS["stanli-ar1-t"])
     program = record["posteriorPredictive"]["program"]
-    program["source"] = "#include gen.stan\n" + program["source"]
+    program["source"] = include + program["source"]
     rehash(record)
     record["candidateId"] = stan_candidates.candidate_id(
         record["targetDataPointId"],
@@ -900,6 +1037,41 @@ def test_cli_replay_refuses_a_swapped_program_and_flags_an_edited_score(
     assert "MISMATCH in backtestScore" in out
     assert "REFUSED: recorded sampler settings" in out
     assert "replayed exactly" not in out
+
+
+@requires_stanli
+def test_cli_replay_refuses_malformed_and_mislabeled_records(tmp_path, capsys):
+    candidate_set = build_candidate_set(
+        target_data_point_id="test.series",
+        target_period="next",
+        history=rounded_walk(30),
+        models=["persistence", "stanli-rw-drift-t", "stanli-ar1-t"],
+        generated_at=GENERATED_AT,
+    )
+    genuine = candidate_set["candidates"][1]
+    # A copy under the same id that a near-miss label once kept out of replay.
+    forged = json.loads(json.dumps(genuine))
+    forged["library"] = "stanli "
+    forged["pointEstimate"] = 78.6
+    candidate_set["candidates"][2]["posteriorPredictive"]["quantiles"][0] = 0.05
+    candidate_set["candidates"].append(forged)
+    path = tmp_path / "candidates.json"
+    path.write_text(json.dumps(candidate_set))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    out = capsys.readouterr().out
+    assert "REFUSED: library is 'stanli ', not 'stanli'" in out
+    assert "REFUSED: malformed record" in out
+    assert "skipped 1 candidates from other libraries" in out
+    assert out.count("replayed exactly") == 1
+
+    genuine["posteriorPredictive"]["roundIncrement"] = "0.1"
+    path.write_text(json.dumps({"candidates": [genuine, 7]}))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    out = capsys.readouterr().out
+    assert "REFUSED: a candidate entry is int, not an object" in out
+    assert "REFUSED: malformed record" in out
 
 
 @requires_stanli

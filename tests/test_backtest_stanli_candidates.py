@@ -161,7 +161,10 @@ def test_rounding_and_crps_ports_break_ties_as_javascript_does(tmp_path):
     )
     site = json.loads(result.stdout)
 
-    assert [backtest.round_distribution_number(v) for v in values] == site["rounded"]
+    # JSON.stringify writes whole numbers below 1e21 without a decimal point,
+    # so json.loads would read them as ints.
+    rounded = [float(value) for value in site["rounded"]]
+    assert [backtest.round_distribution_number(v) for v in values] == rounded
     crps, pit = backtest.score_numeric_cdf(uniform["points"], observed)
     assert crps == site["score"]["crps"]
     assert pit == site["score"]["probabilityIntegralTransform"]
@@ -203,22 +206,54 @@ def test_parse_vintage_csv_reads_each_vintage_column():
         "2026-07-01,.,4.1\n"
         "2026-08-01,,4.1\n"
     )
-    assert backtest.parse_vintage_csv(text) == {
+    assert backtest.parse_vintage_csv(text, "UNRATE") == {
         "2026-08-01": {"2026-06-01": 4.2},
         "2026-10-01": {"2026-06-01": 4.2, "2026-07-01": 4.1, "2026-08-01": 4.1},
     }
 
 
-def test_parse_vintage_csv_refuses_a_row_cut_short():
-    # Explicit missing cells parse; a row with fewer cells than the header
-    # would otherwise lose its last vintages silently.
-    text = "observation_date,X_20260101,X_20260116\n2025-11-01,.,\n2025-12-01,1\n"
-    with pytest.raises(ValueError, match="row 3 has 2 cells, not the header's 3"):
-        backtest.parse_vintage_csv(text)
-    with pytest.raises(ValueError, match="row 2 has 4 cells"):
-        backtest.parse_vintage_csv(
-            "observation_date,X_20260101,X_20260116\n2025-12-01,1,2,3\n"
-        )
+HEADER = "observation_date,X_20260101,X_20260116\n"
+
+
+@pytest.mark.parametrize(
+    "body, message",
+    [
+        # A row with fewer cells than the header would lose its last vintages.
+        ("2025-11-01,.,\n2025-12-01,1\n", "row 3 has 2 cells, not the header's 3"),
+        ("2025-12-01,1,2,3\n", "row 2 has 4 cells"),
+        # A cut after a comma or inside the last cell keeps the cell count.
+        ("2025-11-01,1.0,1.1\n2025-12-01,1.2,", "ends without a line break"),
+        ("2025-11-01,1.0,1.1\n2025-12-01,1.2,1.", "ends without a line break"),
+        ("", "has no rows"),
+    ],
+    ids=["short-row", "long-row", "cut-after-comma", "cut-in-cell", "header-only"],
+)
+def test_parse_vintage_csv_refuses_a_cut_body(body, message):
+    with pytest.raises(ValueError, match=message):
+        backtest.parse_vintage_csv(HEADER + body, "X")
+
+
+@pytest.mark.parametrize(
+    "header",
+    [
+        "observation_date,OTHER_20260101,OTHER_20260116\n",
+        "observation_date,X_20260101xyz,X_20260116\n",
+        "observation_date,X_20260101,X_20260116,X_20260101\n",
+    ],
+    ids=["other-series", "junk-stamp", "repeated"],
+)
+def test_parse_vintage_csv_refuses_a_column_that_is_not_one_vintage(header):
+    cells = header.count(",")
+    with pytest.raises(ValueError, match="vintage"):
+        backtest.parse_vintage_csv(header + "2025-12-01" + ",1" * cells + "\n", "X")
+
+
+def test_parse_vintage_csv_reads_crlf_and_quoted_cells():
+    text = '"observation_date","X_20260101","X_20260116"\r\n"2025-12-01","1.5",""\r\n'
+    assert backtest.parse_vintage_csv(text, "X") == {
+        "2026-01-01": {"2025-12-01": 1.5},
+        "2026-01-16": {},
+    }
 
 
 def test_adapter_series_dedupes_unit_variants():
@@ -652,7 +687,7 @@ def test_persistence_ladder_rises_strictly_from_the_last_print(steps):
     magnitude=st.sampled_from([1.0, 1e6, 1e14, 1e15, 2.0**53, 1e300]),
     steps=st.lists(st.integers(min_value=-2, max_value=2), min_size=2, max_size=20),
 )
-def test_persistence_ladder_rises_strictly_at_any_magnitude(magnitude, steps):
+def test_persistence_ladder_rises_strictly_at_magnitudes_up_to_1e300(magnitude, steps):
     # A thousandth of the grid can fall below the float spacing at large
     # magnitudes, where a tied rung must still move up.
     history = [magnitude]
@@ -670,6 +705,12 @@ def test_persistence_ladder_rises_strictly_at_any_magnitude(magnitude, steps):
         "thresholdLadder": {"thresholds": rungs, "cumulativeProbabilities": levels},
     }
     assert analyst.ladder_validation_errors(cell) == []
+
+
+def test_persistence_ladder_refuses_a_tie_with_no_float_above_it():
+    # At the float maximum, a tied rung has nowhere to move up.
+    with pytest.raises(ValueError, match="not finite"):
+        backtest.persistence_ladder([sys.float_info.max] * 3)
 
 
 def test_persistence_ladder_passes_the_analyst_ladder_check():
