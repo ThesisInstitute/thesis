@@ -27,6 +27,7 @@ IntervalMethod = Literal[
     "native_state_space",
     "residual_quantile",
     "fallback_prior",
+    "posterior_predictive",
 ]
 
 
@@ -96,9 +97,12 @@ class ForecastModelCandidate:
     history: tuple[TimeSeriesObservation, ...]
     diagnostics: tuple[str, ...]
     backtest_score: BacktestScore | None = None
+    # Bayesian candidates only: predictive quantile grid, sampler settings and
+    # diagnostics, and the Stan program source, so anyone can replay the fit.
+    posterior_predictive: dict[str, Any] | None = None
 
     def as_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "schemaVersion": SCHEMA_VERSION,
             "candidateId": self.candidate_id,
             "targetDataPointId": self.target_data_point_id,
@@ -124,6 +128,9 @@ class ForecastModelCandidate:
             ),
             "diagnostics": list(self.diagnostics),
         }
+        if self.posterior_predictive is not None:
+            payload["posteriorPredictive"] = self.posterior_predictive
+        return payload
 
 
 def build_candidate_set(
@@ -134,8 +141,13 @@ def build_candidate_set(
     models: Sequence[str] = ("persistence", "statsmodels-local-level"),
     generated_at: str | None = None,
     round_increment: float | None = None,
+    stan_program: str | None = None,
 ) -> dict[str, Any]:
-    """Build model candidates under the common Thesis candidate-set schema."""
+    """Build model candidates under the common Thesis candidate-set schema.
+
+    ``stan_program`` is the Stan source for the ``stanli-custom`` model; see
+    :mod:`brier.stan_candidates` for its data contract.
+    """
 
     normalized_history = normalize_history(history)
     effective_generated_at = generated_at or utc_now()
@@ -159,6 +171,20 @@ def build_candidate_set(
                     history=normalized_history,
                     generated_at=effective_generated_at,
                     round_increment=round_increment,
+                )
+            )
+        elif model.startswith("stanli-"):
+            from brier.stan_candidates import build_stanli_candidate
+
+            candidates.append(
+                build_stanli_candidate(
+                    model=model,
+                    target_data_point_id=target_data_point_id,
+                    target_period=target_period,
+                    history=normalized_history,
+                    generated_at=effective_generated_at,
+                    round_increment=round_increment,
+                    program=stan_program if model == "stanli-custom" else None,
                 )
             )
         else:
@@ -391,8 +417,16 @@ def normalize_history(
             value = point.value
         else:
             period = str(point["period"])
-            value = float(point["value"])
-        if not math.isfinite(value):
+            try:
+                value = float(point["value"])
+            except OverflowError:
+                # float() of an int with more than about 308 digits overflows.
+                value = math.inf
+        try:
+            finite = math.isfinite(value)
+        except OverflowError:
+            finite = False
+        if not finite:
             raise ValueError(f"non-finite value for period {period!r}")
         normalized.append(TimeSeriesObservation(period=period, value=value))
     return tuple(normalized)
@@ -515,10 +549,10 @@ def round_values(
     if increment <= 0:
         raise ValueError("round_increment must be positive")
     places = decimal_places(increment)
-    return tuple(
-        float(f"{(round(value / increment) * increment):.{places}f}")
-        for value in values
-    )
+    ratios = [value / increment for value in values]
+    if not all(math.isfinite(ratio) for ratio in ratios):
+        raise ValueError(f"a value is too large to round to increment {increment!r}")
+    return tuple(float(f"{(round(ratio) * increment):.{places}f}") for ratio in ratios)
 
 
 def widen_equal_interval(point: float, increment: float | None) -> tuple[float, float]:
@@ -572,7 +606,166 @@ def utc_now() -> str:
     )
 
 
+def unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Build a JSON object, refusing a repeated key.
+
+    ``json.loads`` keeps a repeated key's last value, while another reader may
+    keep the first, so the two could see different records in one file.
+    """
+
+    seen: set[str] = set()
+    for key, _ in pairs:
+        if key in seen:
+            raise ValueError(f"repeated key {key!r} in an object")
+        seen.add(key)
+    return dict(pairs)
+
+
+def replay_stanli_records(path: Path, *, legacy_endpoints: bool = False) -> int:
+    """Replay the stanli candidates in a candidate or candidate-set JSON file.
+
+    Returns 0 when every stanli candidate passes replay's checks and its
+    rebuild matches the record field for field. It refuses a file that
+    ``json.loads`` can't parse or that repeats a key in an object, a record
+    whose ``modelName`` is not a string, and a record that names a stanli model
+    or carries a posterior predictive block but whose library is not exactly
+    ``stanli``; it skips every other record. ``legacy_endpoints`` rebuilds
+    the candidate's own fit and each walk-forward fit with the endpoint rule
+    of builds before commit 22b08c84. Without it, a mismatch names the option
+    when an interval endpoint of the record sits on the point, and so does a
+    refusal of a non-finite endpoint.
+    """
+
+    from brier.stan_candidates import (
+        CUSTOM_MODEL,
+        STAN_PROGRAMS,
+        NonFiniteEndpointError,
+        interval_touches_point,
+        replay_mismatches,
+    )
+
+    try:
+        payload = json.loads(path.read_text(), object_pairs_hook=unique_keys)
+    except (ValueError, RecursionError) as exc:
+        print(f"REFUSED: {path} is not readable JSON: {exc}")
+        return 1
+    entries = payload.get("candidates", [payload]) if isinstance(payload, dict) else []
+    if not isinstance(entries, list):
+        kind = type(entries).__name__
+        print(f"REFUSED: candidates in {path} is {kind}, not a list")
+        return 1
+
+    def legacy_hint(record: dict[str, Any], refusal: Exception | None = None) -> str:
+        # The option changes only the endpoint rule, so name it only where that
+        # rule can explain the result.
+        if legacy_endpoints:
+            return ""
+        if isinstance(refusal, NonFiniteEndpointError):
+            return (
+                "; only builds before 22b08c84 kept one, as in an unused "
+                "walk-forward p95: replay it with --legacy-endpoints"
+            )
+        if refusal is None and interval_touches_point(record):
+            return (
+                "; an interval endpoint sits on the point, which only builds "
+                "before 22b08c84 wrote: replay it with --legacy-endpoints"
+            )
+        return ""
+
+    stanli_models = {*STAN_PROGRAMS, CUSTOM_MODEL}
+    records = []
+    failed = skipped = 0
+    for record in entries:
+        if not isinstance(record, dict):
+            failed += 1
+            print(
+                f"REFUSED: a candidate entry is {type(record).__name__}, not an object"
+            )
+        elif not isinstance(record.get("modelName", ""), str):
+            failed += 1
+            label = record.get("candidateId", "candidate without an id")
+            kind = type(record["modelName"]).__name__
+            print(f"{label}: REFUSED: modelName is {kind}, not a string")
+        elif record.get("library") == "stanli":
+            records.append(record)
+        elif (
+            record.get("modelName") in stanli_models or "posteriorPredictive" in record
+        ):
+            failed += 1
+            label = record.get("candidateId", "candidate without an id")
+            print(
+                f"{label}: REFUSED: library is {record.get('library')!r}, not "
+                "'stanli', for a stanli model or posterior predictive record"
+            )
+        else:
+            skipped += 1
+    if not records and not failed:
+        print(f"no stanli candidates in {path}")
+        return 1
+    if skipped:
+        print(f"skipped {skipped} candidates from other libraries")
+    for record in records:
+        label = record.get("candidateId", "candidate without an id")
+        try:
+            mismatched = replay_mismatches(record, legacy_endpoints=legacy_endpoints)
+        except KeyError as exc:
+            failed += 1
+            print(f"{label}: REFUSED: missing field {exc}")
+            continue
+        except (TypeError, AttributeError, ValueError, ArithmeticError) as exc:
+            failed += 1
+            reason = exc if isinstance(exc, ValueError) else f"malformed record: {exc}"
+            print(f"{label}: REFUSED: {reason}{legacy_hint(record, exc)}")
+            continue
+        except RuntimeError as exc:
+            # The builder fails the same way, so no build produced this record.
+            failed += 1
+            print(f"{label}: REFUSED: the fit failed: {exc}")
+            continue
+        failed += bool(mismatched)
+        if not mismatched:
+            verdict = "replayed exactly"
+            if legacy_endpoints:
+                verdict += " with the endpoint rule of builds before 22b08c84"
+        else:
+            verdict = f"MISMATCH in {', '.join(mismatched)}{legacy_hint(record)}"
+        print(f"{label}: {verdict}")
+    return 1 if failed else 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    if argv is None:
+        import sys
+
+        argv = sys.argv[1:]
+    if any(arg.split("=", 1)[0] == "--print-stan-program" for arg in argv):
+        from brier.stan_candidates import STAN_PROGRAMS
+
+        printer = argparse.ArgumentParser(
+            description="Print a built-in stanli program to start a custom one.",
+        )
+        printer.add_argument("--print-stan-program", choices=sorted(STAN_PROGRAMS))
+        print(STAN_PROGRAMS[printer.parse_args(argv).print_stan_program], end="")
+        return 0
+    if any(arg.split("=", 1)[0] == "--replay-stanli" for arg in argv):
+        replayer = argparse.ArgumentParser(
+            description="Refit recorded stanli candidates and check what they publish.",
+        )
+        replayer.add_argument("--replay-stanli", type=Path, required=True)
+        replayer.add_argument(
+            "--legacy-endpoints",
+            action="store_true",
+            help=(
+                "rebuild the candidate's fit and each walk-forward fit with the "
+                "endpoint rule of builds before commit 22b08c84, which could leave "
+                "an interval endpoint on the point or keep a non-finite one"
+            ),
+        )
+        replayed = replayer.parse_args(argv)
+        return replay_stanli_records(
+            replayed.replay_stanli, legacy_endpoints=replayed.legacy_endpoints
+        )
+
     parser = argparse.ArgumentParser(
         description="Emit Thesis time-series model candidates with intervals.",
     )
@@ -586,7 +779,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--models",
         default="persistence,statsmodels-local-level",
-        help="Comma-separated candidate models.",
+        help=(
+            "Comma-separated candidate models: persistence, "
+            "statsmodels-local-level, stanli-rw-drift-t, stanli-ar1-t, "
+            "stanli-ar1-diff-t, or stanli-custom with --stan-file."
+        ),
+    )
+    parser.add_argument(
+        "--stan-file",
+        type=Path,
+        help=(
+            "Stan program for the stanli-custom model, in one file with no "
+            "#include. Expose a finite scalar y_next in raw units, not declared "
+            "in parameters, and define it in generated quantities to draw the "
+            "next print (see docs/stanli-candidates.md)."
+        ),
     )
     parser.add_argument("--round-increment", type=float)
     parser.add_argument("--generated-at")
@@ -595,6 +802,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if bool(args.history_json) == bool(args.history_file):
         parser.error("provide exactly one of --history-json or --history-file")
+    models = [model.strip() for model in args.models.split(",") if model.strip()]
+    if ("stanli-custom" in models) != (args.stan_file is not None):
+        parser.error("--stan-file and the stanli-custom model go together")
 
     raw_history = (
         json.loads(args.history_json)
@@ -605,9 +815,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         target_data_point_id=args.target_id,
         target_period=args.target_period,
         history=raw_history,
-        models=[model.strip() for model in args.models.split(",") if model.strip()],
+        models=models,
         generated_at=args.generated_at,
         round_increment=args.round_increment,
+        stan_program=args.stan_file.read_text() if args.stan_file else None,
     )
     output = json.dumps(candidate_set, indent=2)
     if args.output:
@@ -618,4 +829,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    # Run as ``python -m brier.timeseries``, this file loads as ``__main__``, a
+    # second copy whose classes are not ``brier.timeseries``'s, which the stanli
+    # builder checks for. Run the canonical module's main instead.
+    try:
+        from brier.timeseries import main as canonical_main
+    except ImportError:  # run by path, with the package not importable
+        canonical_main = main
+
+    raise SystemExit(canonical_main())

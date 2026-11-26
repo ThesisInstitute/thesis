@@ -88,7 +88,7 @@ def test_statsmodels_candidate_uses_native_interval_metadata():
     )
 
 
-def count_sarimax_fits():
+def count_sarimax_fits(budget: int = 100):
     """Return a patch of SARIMAX.fit that counts calls, and the call list."""
 
     from statsmodels.tsa.statespace.sarimax import SARIMAX
@@ -98,6 +98,11 @@ def count_sarimax_fits():
 
     def counting_fit(self, *args, **kwargs):
         calls.append(len(self.endog))
+        # A returned recursion should fail here. It would otherwise run far
+        # past any assertion on the count, and python-tests has no timeout of
+        # its own. pytest.fail raises BaseException, past any `except Exception`.
+        if len(calls) > budget:
+            pytest.fail(f"SARIMAX.fit ran more than {budget} times")
         return original(self, *args, **kwargs)
 
     return mock.patch.object(SARIMAX, "fit", counting_fit), calls

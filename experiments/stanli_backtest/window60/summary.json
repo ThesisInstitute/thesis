@@ -1,0 +1,3381 @@
+{
+  "ablationPower": {
+    "stanli-ar1-t": {
+      "change": 0.1,
+      "clusteredTargetsNeeded": 363.99862493620935,
+      "designEffect": 4.95309412350774,
+      "independentTargetsNeeded": 73.48913948730467,
+      "intraclassCorrelation": 0.1816606690123437,
+      "meanTargetsPerSeries": 22.76086956521739,
+      "power": 0.8,
+      "sdLogRatio": 0.32239302054878066,
+      "sdSeriesMeanLogRatio": 0.15409120550169222,
+      "series": 46,
+      "seriesNeeded": 16.788334169268932,
+      "targets": 1047
+    },
+    "stanli-ar1-t-ladder": {
+      "change": 0.1,
+      "clusteredTargetsNeeded": 417.8801900970369,
+      "designEffect": 4.358765379281949,
+      "independentTargetsNeeded": 95.87122814256118,
+      "intraclassCorrelation": 0.15434885858838127,
+      "meanTargetsPerSeries": 22.76086956521739,
+      "power": 0.8,
+      "sdLogRatio": 0.3682291756001636,
+      "sdSeriesMeanLogRatio": 0.16750744015148888,
+      "series": 46,
+      "seriesNeeded": 19.83901488118536,
+      "targets": 1047
+    },
+    "stanli-selected": {
+      "change": 0.1,
+      "clusteredTargetsNeeded": 2214.34134421122,
+      "designEffect": 10.046625401827331,
+      "independentTargetsNeeded": 220.4064803499556,
+      "intraclassCorrelation": 0.4157290394446126,
+      "meanTargetsPerSeries": 22.76086956521739,
+      "power": 0.8,
+      "sdLogRatio": 0.5583239140698918,
+      "sdSeriesMeanLogRatio": 0.3655758700958758,
+      "series": 46,
+      "seriesNeeded": 94.49458983248266,
+      "targets": 1047
+    },
+    "stanli-selected-ladder": {
+      "change": 0.1,
+      "clusteredTargetsNeeded": 2412.482741415842,
+      "designEffect": 9.206149607739068,
+      "independentTargetsNeeded": 262.0512205654153,
+      "intraclassCorrelation": 0.3771057761798173,
+      "meanTargetsPerSeries": 22.76086956521739,
+      "power": 0.8,
+      "sdLogRatio": 0.6087894863063112,
+      "sdSeriesMeanLogRatio": 0.3827096854484266,
+      "series": 46,
+      "seriesNeeded": 103.55970537345138,
+      "targets": 1047
+    }
+  },
+  "arms": {
+    "persistence": {
+      "coverage80": 0.8223495702005731,
+      "geometricMeanCrpsRatio": 1.0,
+      "interval95": {
+        "coverage80": [
+          0.7685703843163153,
+          0.8726765799256505
+        ],
+        "geometricMeanCrpsRatio": [
+          1.0,
+          1.0
+        ],
+        "meanNormalizedCrps": [
+          0.4695786614562932,
+          0.7271189942862583
+        ],
+        "meanNormalizedCrpsDifference": [
+          0.0,
+          0.0
+        ],
+        "shareBeatingBaseline": [
+          0.0,
+          0.0
+        ]
+      },
+      "meanNormalizedCrps": 0.5840884349504134,
+      "meanNormalizedCrpsDifference": 0.0,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.0,
+      "targets": 1047
+    },
+    "persistence-ladder": {
+      "coverage80": 0.7936962750716332,
+      "geometricMeanCrpsRatio": 0.8906906042862598,
+      "interval95": {
+        "coverage80": [
+          0.7422394561471575,
+          0.8430335330044633
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8466724902816364,
+          0.9293949713058655
+        ],
+        "meanNormalizedCrps": [
+          0.45208131320840056,
+          0.6464846358768305
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.10238547955592912,
+          -0.0012768429615810496
+        ],
+        "shareBeatingBaseline": [
+          0.5510954267093657,
+          0.6444082447182801
+        ]
+      },
+      "meanNormalizedCrps": 0.5452880630294731,
+      "meanNormalizedCrpsDifference": -0.03880037192094031,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.5959885386819485,
+      "targets": 1047
+    },
+    "stanli-ar1-diff-t": {
+      "coverage80": 0.7956064947468959,
+      "geometricMeanCrpsRatio": 0.8705612395518904,
+      "interval95": {
+        "coverage80": [
+          0.7386032753417362,
+          0.8470725919850011
+        ],
+        "geometricMeanCrpsRatio": [
+          0.7500394877716551,
+          0.9543573820521026
+        ],
+        "meanNormalizedCrps": [
+          0.4335989270182687,
+          0.6000478059490092
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.1736447412407313,
+          -0.009185341436367568
+        ],
+        "shareBeatingBaseline": [
+          0.5062082139446036,
+          0.6073525907123419
+        ]
+      },
+      "meanNormalizedCrps": 0.5111690113449132,
+      "meanNormalizedCrpsDifference": -0.0729194236055001,
+      "ratioTargets": 1047,
+      "samplerFailures": 10,
+      "series": 46,
+      "shareBeatingBaseline": 0.556829035339064,
+      "targets": 1047
+    },
+    "stanli-ar1-diff-t-ladder": {
+      "coverage80": 0.7956064947468959,
+      "geometricMeanCrpsRatio": 0.8110281449664071,
+      "interval95": {
+        "coverage80": [
+          0.7386032753417362,
+          0.8470725919850011
+        ],
+        "geometricMeanCrpsRatio": [
+          0.6962405669667459,
+          0.8942503651140483
+        ],
+        "meanNormalizedCrps": [
+          0.42541459101724444,
+          0.5992830865552343
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.17943169313062513,
+          -0.01247408283801407
+        ],
+        "shareBeatingBaseline": [
+          0.6233497569307581,
+          0.6989357201919975
+        ]
+      },
+      "meanNormalizedCrps": 0.5066481912532785,
+      "meanNormalizedCrpsDifference": -0.07744024369713487,
+      "ratioTargets": 1047,
+      "samplerFailures": 10,
+      "series": 46,
+      "shareBeatingBaseline": 0.66189111747851,
+      "targets": 1047
+    },
+    "stanli-ar1-t": {
+      "coverage80": 0.7936962750716332,
+      "geometricMeanCrpsRatio": 0.8709987475330571,
+      "interval95": {
+        "coverage80": [
+          0.7335119344917326,
+          0.8489546371167573
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8330914621446877,
+          0.9086404849134131
+        ],
+        "meanNormalizedCrps": [
+          0.4191554656602107,
+          0.6291618352917774
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.11346623877801292,
+          -0.03745567844543558
+        ],
+        "shareBeatingBaseline": [
+          0.6192262635782899,
+          0.7213764451400476
+        ]
+      },
+      "meanNormalizedCrps": 0.514725431384509,
+      "meanNormalizedCrpsDifference": -0.06936300356590447,
+      "ratioTargets": 1047,
+      "samplerFailures": 22,
+      "series": 46,
+      "shareBeatingBaseline": 0.6695319961795606,
+      "targets": 1047
+    },
+    "stanli-ar1-t-ladder": {
+      "coverage80": 0.7936962750716332,
+      "geometricMeanCrpsRatio": 0.8153682271692049,
+      "interval95": {
+        "coverage80": [
+          0.7335119344917326,
+          0.8489546371167573
+        ],
+        "geometricMeanCrpsRatio": [
+          0.7787063937195349,
+          0.8518894269577395
+        ],
+        "meanNormalizedCrps": [
+          0.4119788627091683,
+          0.6318028837742694
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.11313973983412566,
+          -0.041681264624890614
+        ],
+        "shareBeatingBaseline": [
+          0.67378862907574,
+          0.7533470511222636
+        ]
+      },
+      "meanNormalizedCrps": 0.5120234136555565,
+      "meanNormalizedCrpsDifference": -0.07206502129485697,
+      "ratioTargets": 1047,
+      "samplerFailures": 22,
+      "series": 46,
+      "shareBeatingBaseline": 0.7134670487106017,
+      "targets": 1047
+    },
+    "stanli-rw-drift-t": {
+      "coverage80": 0.8013371537726839,
+      "geometricMeanCrpsRatio": 0.9765969790584181,
+      "interval95": {
+        "coverage80": [
+          0.7481051761808655,
+          0.8502847174091109
+        ],
+        "geometricMeanCrpsRatio": [
+          0.9247769625814892,
+          1.0208239954880707
+        ],
+        "meanNormalizedCrps": [
+          0.4622637890018651,
+          0.6485628169580853
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.09587426157076825,
+          0.004236431835976788
+        ],
+        "shareBeatingBaseline": [
+          0.375857566697857,
+          0.491412213740458
+        ]
+      },
+      "meanNormalizedCrps": 0.5513074265433285,
+      "meanNormalizedCrpsDifference": -0.03278100840708488,
+      "ratioTargets": 1047,
+      "samplerFailures": 2,
+      "series": 46,
+      "shareBeatingBaseline": 0.4326647564469914,
+      "targets": 1047
+    },
+    "stanli-rw-drift-t-ladder": {
+      "coverage80": 0.8013371537726839,
+      "geometricMeanCrpsRatio": 0.9108629259257353,
+      "interval95": {
+        "coverage80": [
+          0.7481051761808655,
+          0.8502847174091109
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8654253897272616,
+          0.9525336521649739
+        ],
+        "meanNormalizedCrps": [
+          0.45438246792381154,
+          0.6492501896952977
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.09794121034893047,
+          -0.001122367180833313
+        ],
+        "shareBeatingBaseline": [
+          0.5415758334281489,
+          0.6381603120236915
+        ]
+      },
+      "meanNormalizedCrps": 0.5472075555498532,
+      "meanNormalizedCrpsDifference": -0.03688087940056017,
+      "ratioTargets": 1047,
+      "samplerFailures": 2,
+      "series": 46,
+      "shareBeatingBaseline": 0.5893027698185291,
+      "targets": 1047
+    },
+    "stanli-selected": {
+      "coverage80": 0.792741165234002,
+      "geometricMeanCrpsRatio": 0.8335765086289499,
+      "interval95": {
+        "coverage80": [
+          0.7364124595116481,
+          0.8443208102758153
+        ],
+        "geometricMeanCrpsRatio": [
+          0.7357157856085837,
+          0.9060802286423916
+        ],
+        "meanNormalizedCrps": [
+          0.41569359531924654,
+          0.5929688002765324
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.17619069256999595,
+          -0.02580702046569452
+        ],
+        "shareBeatingBaseline": [
+          0.6009174311926605,
+          0.7021514722219189
+        ]
+      },
+      "meanNormalizedCrps": 0.4983649867407914,
+      "meanNormalizedCrpsDifference": -0.08572344820962204,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.6513849092645654,
+      "targets": 1047
+    },
+    "stanli-selected-ladder": {
+      "coverage80": 0.792741165234002,
+      "geometricMeanCrpsRatio": 0.7763346801210481,
+      "interval95": {
+        "coverage80": [
+          0.7364124595116481,
+          0.8443208102758153
+        ],
+        "geometricMeanCrpsRatio": [
+          0.6828007869965097,
+          0.8476249776324678
+        ],
+        "meanNormalizedCrps": [
+          0.4083373665056748,
+          0.5912764475381103
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.180298068527284,
+          -0.028402809492324446
+        ],
+        "shareBeatingBaseline": [
+          0.6577942168118822,
+          0.7440279579356991
+        ]
+      },
+      "meanNormalizedCrps": 0.4943913911751228,
+      "meanNormalizedCrpsDifference": -0.08969704377529059,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.7000955109837631,
+      "targets": 1047
+    },
+    "stanli-selected-noskip": {
+      "coverage80": 0.7994269340974212,
+      "geometricMeanCrpsRatio": 0.8235978192806602,
+      "interval95": {
+        "coverage80": [
+          0.7445929130666589,
+          0.8487590994976052
+        ],
+        "geometricMeanCrpsRatio": [
+          0.7094985650923668,
+          0.9055315484790875
+        ],
+        "meanNormalizedCrps": [
+          0.4117953857626834,
+          0.5837468241158796
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.19310199443259998,
+          -0.025901550617776662
+        ],
+        "shareBeatingBaseline": [
+          0.602381805819359,
+          0.7044641212782647
+        ]
+      },
+      "meanNormalizedCrps": 0.492649209945124,
+      "meanNormalizedCrpsDifference": -0.09143922500528934,
+      "ratioTargets": 1047,
+      "samplerFailures": 13,
+      "series": 46,
+      "shareBeatingBaseline": 0.6532951289398281,
+      "targets": 1047
+    },
+    "stanli-selected-noskip-ladder": {
+      "coverage80": 0.7994269340974212,
+      "geometricMeanCrpsRatio": 0.767044835826838,
+      "interval95": {
+        "coverage80": [
+          0.7445929130666589,
+          0.8487590994976052
+        ],
+        "geometricMeanCrpsRatio": [
+          0.6582385754268665,
+          0.8468071110657797
+        ],
+        "meanNormalizedCrps": [
+          0.40446841676557,
+          0.5825207881883244
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.19807678548480087,
+          -0.028635668382053812
+        ],
+        "shareBeatingBaseline": [
+          0.6577942168118822,
+          0.7440279579356991
+        ]
+      },
+      "meanNormalizedCrps": 0.4884490740393974,
+      "meanNormalizedCrpsDifference": -0.09563936091101596,
+      "ratioTargets": 1047,
+      "samplerFailures": 13,
+      "series": 46,
+      "shareBeatingBaseline": 0.7000955109837631,
+      "targets": 1047
+    },
+    "statsmodels": {
+      "coverage80": 0.8404966571155683,
+      "geometricMeanCrpsRatio": 1.1751330469299959,
+      "interval95": {
+        "coverage80": [
+          0.7909002904162633,
+          0.8842026293806113
+        ],
+        "geometricMeanCrpsRatio": [
+          1.0661194180320264,
+          1.2939541334563627
+        ],
+        "meanNormalizedCrps": [
+          0.49421944671157847,
+          0.6636272583522352
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.0790455052545158,
+          0.032960145815127455
+        ],
+        "shareBeatingBaseline": [
+          0.3031668620671702,
+          0.41794188097895707
+        ]
+      },
+      "meanNormalizedCrps": 0.5755416730088276,
+      "meanNormalizedCrpsDifference": -0.008546761941585691,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.35816618911174786,
+      "targets": 1047
+    },
+    "statsmodels-ladder": {
+      "coverage80": 0.8404966571155683,
+      "geometricMeanCrpsRatio": 1.104011287524944,
+      "interval95": {
+        "coverage80": [
+          0.7909002904162633,
+          0.8842026293806113
+        ],
+        "geometricMeanCrpsRatio": [
+          1.0100968819703584,
+          1.2056202629016228
+        ],
+        "meanNormalizedCrps": [
+          0.48101958669833567,
+          0.6588787187638612
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.0847754257041358,
+          0.021272867575556798
+        ],
+        "shareBeatingBaseline": [
+          0.373231689409772,
+          0.48352792834330444
+        ]
+      },
+      "meanNormalizedCrps": 0.566410654005296,
+      "meanNormalizedCrpsDifference": -0.017677780945117415,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.4269340974212034,
+      "targets": 1047
+    }
+  },
+  "baseline": "persistence",
+  "byPeriodHalf": {
+    "earlier": {
+      "persistence": {
+        "coverage80": 0.8532818532818532,
+        "geometricMeanCrpsRatio": 1.0,
+        "meanNormalizedCrps": 0.5212719833516896,
+        "meanNormalizedCrpsDifference": 0.0,
+        "series": 46,
+        "shareBeatingBaseline": 0.0,
+        "targets": 518
+      },
+      "persistence-ladder": {
+        "coverage80": 0.833976833976834,
+        "geometricMeanCrpsRatio": 0.8891547361685488,
+        "meanNormalizedCrps": 0.4868966323447381,
+        "meanNormalizedCrpsDifference": -0.03437535100695138,
+        "series": 46,
+        "shareBeatingBaseline": 0.61003861003861,
+        "targets": 518
+      },
+      "stanli-ar1-diff-t": {
+        "coverage80": 0.832046332046332,
+        "geometricMeanCrpsRatio": 0.8929478432345681,
+        "meanNormalizedCrps": 0.45194304821016507,
+        "meanNormalizedCrpsDifference": -0.06932893514152447,
+        "series": 46,
+        "shareBeatingBaseline": 0.525096525096525,
+        "targets": 518
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "coverage80": 0.832046332046332,
+        "geometricMeanCrpsRatio": 0.8210181198388052,
+        "meanNormalizedCrps": 0.44440097429144265,
+        "meanNormalizedCrpsDifference": -0.07687100906024688,
+        "series": 46,
+        "shareBeatingBaseline": 0.6737451737451737,
+        "targets": 518
+      },
+      "stanli-ar1-t": {
+        "coverage80": 0.8301158301158301,
+        "geometricMeanCrpsRatio": 0.8860547139567412,
+        "meanNormalizedCrps": 0.46070122779848743,
+        "meanNormalizedCrpsDifference": -0.06057075555320212,
+        "series": 46,
+        "shareBeatingBaseline": 0.6505791505791506,
+        "targets": 518
+      },
+      "stanli-ar1-t-ladder": {
+        "coverage80": 0.8301158301158301,
+        "geometricMeanCrpsRatio": 0.8185056063688287,
+        "meanNormalizedCrps": 0.4553850891261669,
+        "meanNormalizedCrpsDifference": -0.06588689422552263,
+        "series": 46,
+        "shareBeatingBaseline": 0.7104247104247104,
+        "targets": 518
+      },
+      "stanli-rw-drift-t": {
+        "coverage80": 0.8455598455598455,
+        "geometricMeanCrpsRatio": 0.9967664774674393,
+        "meanNormalizedCrps": 0.4971482444544763,
+        "meanNormalizedCrpsDifference": -0.024123738897213268,
+        "series": 46,
+        "shareBeatingBaseline": 0.3764478764478765,
+        "targets": 518
+      },
+      "stanli-rw-drift-t-ladder": {
+        "coverage80": 0.8455598455598455,
+        "geometricMeanCrpsRatio": 0.9142855110755563,
+        "meanNormalizedCrps": 0.49011583688666527,
+        "meanNormalizedCrpsDifference": -0.03115614646502427,
+        "series": 46,
+        "shareBeatingBaseline": 0.5868725868725869,
+        "targets": 518
+      },
+      "stanli-selected": {
+        "coverage80": 0.8204633204633205,
+        "geometricMeanCrpsRatio": 0.8588094480417849,
+        "meanNormalizedCrps": 0.44363439444638286,
+        "meanNormalizedCrpsDifference": -0.07763758890530666,
+        "series": 46,
+        "shareBeatingBaseline": 0.6486486486486487,
+        "targets": 518
+      },
+      "stanli-selected-ladder": {
+        "coverage80": 0.8204633204633205,
+        "geometricMeanCrpsRatio": 0.78998352976185,
+        "meanNormalizedCrps": 0.4368807621867005,
+        "meanNormalizedCrpsDifference": -0.08439122116498898,
+        "series": 46,
+        "shareBeatingBaseline": 0.722007722007722,
+        "targets": 518
+      },
+      "stanli-selected-noskip": {
+        "coverage80": 0.832046332046332,
+        "geometricMeanCrpsRatio": 0.838957888098651,
+        "meanNormalizedCrps": 0.43239711091692423,
+        "meanNormalizedCrpsDifference": -0.08887487243476527,
+        "series": 46,
+        "shareBeatingBaseline": 0.6525096525096525,
+        "targets": 518
+      },
+      "stanli-selected-noskip-ladder": {
+        "coverage80": 0.832046332046332,
+        "geometricMeanCrpsRatio": 0.7720467315850967,
+        "meanNormalizedCrps": 0.425225772173644,
+        "meanNormalizedCrpsDifference": -0.09604621117804552,
+        "series": 46,
+        "shareBeatingBaseline": 0.722007722007722,
+        "targets": 518
+      },
+      "statsmodels": {
+        "coverage80": 0.8822393822393823,
+        "geometricMeanCrpsRatio": 1.3049600489218391,
+        "meanNormalizedCrps": 0.5339972107983761,
+        "meanNormalizedCrpsDifference": 0.012725227446686648,
+        "series": 46,
+        "shareBeatingBaseline": 0.2857142857142857,
+        "targets": 518
+      },
+      "statsmodels-ladder": {
+        "coverage80": 0.8822393822393823,
+        "geometricMeanCrpsRatio": 1.2104570890327435,
+        "meanNormalizedCrps": 0.5201978715207738,
+        "meanNormalizedCrpsDifference": -0.0010741118309157192,
+        "series": 46,
+        "shareBeatingBaseline": 0.3667953667953668,
+        "targets": 518
+      }
+    },
+    "later": {
+      "persistence": {
+        "coverage80": 0.7920604914933838,
+        "geometricMeanCrpsRatio": 1.0,
+        "meanNormalizedCrps": 0.6455986843419804,
+        "meanNormalizedCrpsDifference": 0.0,
+        "series": 46,
+        "shareBeatingBaseline": 0.0,
+        "targets": 529
+      },
+      "persistence-ladder": {
+        "coverage80": 0.7542533081285444,
+        "geometricMeanCrpsRatio": 0.8921971063911568,
+        "meanNormalizedCrps": 0.6024653051744498,
+        "meanNormalizedCrpsDifference": -0.043133379167530586,
+        "series": 46,
+        "shareBeatingBaseline": 0.5822306238185255,
+        "targets": 529
+      },
+      "stanli-ar1-diff-t": {
+        "coverage80": 0.7599243856332704,
+        "geometricMeanCrpsRatio": 0.8491840948103164,
+        "meanNormalizedCrps": 0.5691634327131545,
+        "meanNormalizedCrpsDifference": -0.07643525162882595,
+        "series": 46,
+        "shareBeatingBaseline": 0.5879017013232514,
+        "targets": 529
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "coverage80": 0.7599243856332704,
+        "geometricMeanCrpsRatio": 0.8013637018461444,
+        "meanNormalizedCrps": 0.5676010426450194,
+        "meanNormalizedCrpsDifference": -0.07799764169696091,
+        "series": 46,
+        "shareBeatingBaseline": 0.6502835538752363,
+        "targets": 529
+      },
+      "stanli-ar1-t": {
+        "coverage80": 0.7580340264650284,
+        "geometricMeanCrpsRatio": 0.8565037921999079,
+        "meanNormalizedCrps": 0.5676262583364166,
+        "meanNormalizedCrpsDifference": -0.07797242600556387,
+        "series": 46,
+        "shareBeatingBaseline": 0.6880907372400756,
+        "targets": 529
+      },
+      "stanli-ar1-t-ladder": {
+        "coverage80": 0.7580340264650284,
+        "geometricMeanCrpsRatio": 0.8123077400492466,
+        "meanNormalizedCrps": 0.567484003648418,
+        "meanNormalizedCrpsDifference": -0.07811468069356241,
+        "series": 46,
+        "shareBeatingBaseline": 0.7164461247637051,
+        "targets": 529
+      },
+      "stanli-rw-drift-t": {
+        "coverage80": 0.7580340264650284,
+        "geometricMeanCrpsRatio": 0.95724242665743,
+        "meanNormalizedCrps": 0.6043404252617132,
+        "meanNormalizedCrpsDifference": -0.04125825908026728,
+        "series": 46,
+        "shareBeatingBaseline": 0.4877126654064272,
+        "targets": 529
+      },
+      "stanli-rw-drift-t-ladder": {
+        "coverage80": 0.7580340264650284,
+        "geometricMeanCrpsRatio": 0.907523925596381,
+        "meanNormalizedCrps": 0.6031121118211791,
+        "meanNormalizedCrpsDifference": -0.042486572520801354,
+        "series": 46,
+        "shareBeatingBaseline": 0.5916824196597353,
+        "targets": 529
+      },
+      "stanli-selected": {
+        "coverage80": 0.7655954631379962,
+        "geometricMeanCrpsRatio": 0.8095868217954282,
+        "meanNormalizedCrps": 0.5519575137890024,
+        "meanNormalizedCrpsDifference": -0.0936411705529781,
+        "series": 46,
+        "shareBeatingBaseline": 0.6540642722117203,
+        "targets": 529
+      },
+      "stanli-selected-ladder": {
+        "coverage80": 0.7655954631379962,
+        "geometricMeanCrpsRatio": 0.7631981835560304,
+        "meanNormalizedCrps": 0.5507061469709692,
+        "meanNormalizedCrpsDifference": -0.09489253737101128,
+        "series": 46,
+        "shareBeatingBaseline": 0.6786389413988658,
+        "targets": 529
+      },
+      "stanli-selected-noskip": {
+        "coverage80": 0.7674858223062382,
+        "geometricMeanCrpsRatio": 0.8088296909825614,
+        "meanNormalizedCrps": 0.5516484297874823,
+        "meanNormalizedCrpsDifference": -0.09395025455449815,
+        "series": 46,
+        "shareBeatingBaseline": 0.6540642722117203,
+        "targets": 529
+      },
+      "stanli-selected-noskip-ladder": {
+        "coverage80": 0.7674858223062382,
+        "geometricMeanCrpsRatio": 0.7621783529070307,
+        "meanNormalizedCrps": 0.5503577136735379,
+        "meanNormalizedCrpsDifference": -0.09524097066844259,
+        "series": 46,
+        "shareBeatingBaseline": 0.6786389413988658,
+        "targets": 529
+      },
+      "statsmodels": {
+        "coverage80": 0.7996219281663516,
+        "geometricMeanCrpsRatio": 1.0605305892686334,
+        "meanNormalizedCrps": 0.6162222617139579,
+        "meanNormalizedCrpsDifference": -0.029376422628022505,
+        "series": 46,
+        "shareBeatingBaseline": 0.42911153119092627,
+        "targets": 529
+      },
+      "statsmodels-ladder": {
+        "coverage80": 0.7996219281663516,
+        "geometricMeanCrpsRatio": 1.0088553135664378,
+        "meanNormalizedCrps": 0.6116624901621627,
+        "meanNormalizedCrpsDifference": -0.03393619417981774,
+        "series": 46,
+        "shareBeatingBaseline": 0.48582230623818523,
+        "targets": 529
+      }
+    },
+    "laterHalfFrom": "2025-08"
+  },
+  "byTransform": {
+    "level": {
+      "persistence": {
+        "coverage80": 0.7705779334500875,
+        "geometricMeanCrpsRatio": 1.0,
+        "meanNormalizedCrps": 0.6658407626891207,
+        "meanNormalizedCrpsDifference": 0.0,
+        "series": 25,
+        "shareBeatingBaseline": 0.0,
+        "targets": 571
+      },
+      "persistence-ladder": {
+        "coverage80": 0.7443082311733801,
+        "geometricMeanCrpsRatio": 0.8568513038863788,
+        "meanNormalizedCrps": 0.5972563266557659,
+        "meanNormalizedCrpsDifference": -0.06858443603335475,
+        "series": 25,
+        "shareBeatingBaseline": 0.6129597197898424,
+        "targets": 571
+      },
+      "stanli-ar1-diff-t": {
+        "coverage80": 0.7478108581436077,
+        "geometricMeanCrpsRatio": 0.8075348808205521,
+        "meanNormalizedCrps": 0.5557268885595579,
+        "meanNormalizedCrpsDifference": -0.11011387412956267,
+        "series": 25,
+        "shareBeatingBaseline": 0.5849387040280211,
+        "targets": 571
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "coverage80": 0.7478108581436077,
+        "geometricMeanCrpsRatio": 0.7550471983681036,
+        "meanNormalizedCrps": 0.5544356698842594,
+        "meanNormalizedCrpsDifference": -0.11140509280486122,
+        "series": 25,
+        "shareBeatingBaseline": 0.6777583187390543,
+        "targets": 571
+      },
+      "stanli-ar1-t": {
+        "coverage80": 0.7320490367775832,
+        "geometricMeanCrpsRatio": 0.8869994998285876,
+        "meanNormalizedCrps": 0.598172443666712,
+        "meanNormalizedCrpsDifference": -0.06766831902240857,
+        "series": 25,
+        "shareBeatingBaseline": 0.658493870402802,
+        "targets": 571
+      },
+      "stanli-ar1-t-ladder": {
+        "coverage80": 0.7320490367775832,
+        "geometricMeanCrpsRatio": 0.8352397890139026,
+        "meanNormalizedCrps": 0.5995736473264964,
+        "meanNormalizedCrpsDifference": -0.06626711536262417,
+        "series": 25,
+        "shareBeatingBaseline": 0.6830122591943958,
+        "targets": 571
+      },
+      "stanli-rw-drift-t": {
+        "coverage80": 0.7565674255691769,
+        "geometricMeanCrpsRatio": 0.9254623389726229,
+        "meanNormalizedCrps": 0.5986871100415436,
+        "meanNormalizedCrpsDifference": -0.06715365264757694,
+        "series": 25,
+        "shareBeatingBaseline": 0.4973730297723292,
+        "targets": 571
+      },
+      "stanli-rw-drift-t-ladder": {
+        "coverage80": 0.7565674255691769,
+        "geometricMeanCrpsRatio": 0.8666593643360587,
+        "meanNormalizedCrps": 0.5990924771907737,
+        "meanNormalizedCrpsDifference": -0.06674828549834683,
+        "series": 25,
+        "shareBeatingBaseline": 0.6059544658493871,
+        "targets": 571
+      },
+      "stanli-selected": {
+        "coverage80": 0.7390542907180385,
+        "geometricMeanCrpsRatio": 0.8135071038991872,
+        "meanNormalizedCrps": 0.5618326535442407,
+        "meanNormalizedCrpsDifference": -0.1040081091448798,
+        "series": 25,
+        "shareBeatingBaseline": 0.6392294220665499,
+        "targets": 571
+      },
+      "stanli-selected-ladder": {
+        "coverage80": 0.7390542907180385,
+        "geometricMeanCrpsRatio": 0.7587128365628286,
+        "meanNormalizedCrps": 0.5610280163258057,
+        "meanNormalizedCrpsDifference": -0.10481274636331485,
+        "series": 25,
+        "shareBeatingBaseline": 0.6795096322241682,
+        "targets": 571
+      },
+      "stanli-selected-noskip": {
+        "coverage80": 0.7495621716287215,
+        "geometricMeanCrpsRatio": 0.7959218669890671,
+        "meanNormalizedCrps": 0.5515178745640449,
+        "meanNormalizedCrpsDifference": -0.11432288812507568,
+        "series": 25,
+        "shareBeatingBaseline": 0.6427320490367776,
+        "targets": 571
+      },
+      "stanli-selected-noskip-ladder": {
+        "coverage80": 0.7495621716287215,
+        "geometricMeanCrpsRatio": 0.7423262391766391,
+        "meanNormalizedCrps": 0.5502990448336162,
+        "meanNormalizedCrpsDifference": -0.11554171785550436,
+        "series": 25,
+        "shareBeatingBaseline": 0.6795096322241682,
+        "targets": 571
+      },
+      "statsmodels": {
+        "coverage80": 0.8126094570928196,
+        "geometricMeanCrpsRatio": 1.1986658766505083,
+        "meanNormalizedCrps": 0.6292516777088527,
+        "meanNormalizedCrpsDifference": -0.03658908498026789,
+        "series": 25,
+        "shareBeatingBaseline": 0.404553415061296,
+        "targets": 571
+      },
+      "statsmodels-ladder": {
+        "coverage80": 0.8126094570928196,
+        "geometricMeanCrpsRatio": 1.1280961241097434,
+        "meanNormalizedCrps": 0.6219302141974822,
+        "meanNormalizedCrpsDifference": -0.043910548491638474,
+        "series": 25,
+        "shareBeatingBaseline": 0.4395796847635727,
+        "targets": 571
+      }
+    },
+    "mom_diff": {
+      "persistence": {
+        "coverage80": 0.9583333333333334,
+        "geometricMeanCrpsRatio": 1.0,
+        "meanNormalizedCrps": 0.26709072285349716,
+        "meanNormalizedCrpsDifference": 0.0,
+        "series": 1,
+        "shareBeatingBaseline": 0.0,
+        "targets": 24
+      },
+      "persistence-ladder": {
+        "coverage80": 0.9166666666666666,
+        "geometricMeanCrpsRatio": 0.850677473140843,
+        "meanNormalizedCrps": 0.2525035336238755,
+        "meanNormalizedCrpsDifference": -0.014587189229621657,
+        "series": 1,
+        "shareBeatingBaseline": 0.7916666666666666,
+        "targets": 24
+      },
+      "stanli-ar1-diff-t": {
+        "coverage80": 1.0,
+        "geometricMeanCrpsRatio": 0.9454448756879416,
+        "meanNormalizedCrps": 0.23521682573256109,
+        "meanNormalizedCrpsDifference": -0.03187389712093605,
+        "series": 1,
+        "shareBeatingBaseline": 0.5833333333333334,
+        "targets": 24
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "coverage80": 1.0,
+        "geometricMeanCrpsRatio": 0.8305793574211109,
+        "meanNormalizedCrps": 0.22124927903019198,
+        "meanNormalizedCrpsDifference": -0.045841443823305135,
+        "series": 1,
+        "shareBeatingBaseline": 0.75,
+        "targets": 24
+      },
+      "stanli-ar1-t": {
+        "coverage80": 0.9166666666666666,
+        "geometricMeanCrpsRatio": 0.8885019728227508,
+        "meanNormalizedCrps": 0.24988481107515081,
+        "meanNormalizedCrpsDifference": -0.017205911778346357,
+        "series": 1,
+        "shareBeatingBaseline": 0.7083333333333334,
+        "targets": 24
+      },
+      "stanli-ar1-t-ladder": {
+        "coverage80": 0.9166666666666666,
+        "geometricMeanCrpsRatio": 0.7859635465161217,
+        "meanNormalizedCrps": 0.24331075278720518,
+        "meanNormalizedCrpsDifference": -0.023779970066291983,
+        "series": 1,
+        "shareBeatingBaseline": 0.75,
+        "targets": 24
+      },
+      "stanli-rw-drift-t": {
+        "coverage80": 0.9583333333333334,
+        "geometricMeanCrpsRatio": 1.0233109063440886,
+        "meanNormalizedCrps": 0.26889062111894785,
+        "meanNormalizedCrpsDifference": 0.0017998982654506685,
+        "series": 1,
+        "shareBeatingBaseline": 0.4166666666666667,
+        "targets": 24
+      },
+      "stanli-rw-drift-t-ladder": {
+        "coverage80": 0.9583333333333334,
+        "geometricMeanCrpsRatio": 0.8921839046963603,
+        "meanNormalizedCrps": 0.25464708603846853,
+        "meanNormalizedCrpsDifference": -0.012443636815028676,
+        "series": 1,
+        "shareBeatingBaseline": 0.7083333333333334,
+        "targets": 24
+      },
+      "stanli-selected": {
+        "coverage80": 1.0,
+        "geometricMeanCrpsRatio": 0.9325950857215664,
+        "meanNormalizedCrps": 0.24034973673515728,
+        "meanNormalizedCrpsDifference": -0.026740986118339843,
+        "series": 1,
+        "shareBeatingBaseline": 0.6666666666666666,
+        "targets": 24
+      },
+      "stanli-selected-ladder": {
+        "coverage80": 1.0,
+        "geometricMeanCrpsRatio": 0.8228827985520552,
+        "meanNormalizedCrps": 0.22788345977001634,
+        "meanNormalizedCrpsDifference": -0.03920726308348079,
+        "series": 1,
+        "shareBeatingBaseline": 0.75,
+        "targets": 24
+      },
+      "stanli-selected-noskip": {
+        "coverage80": 1.0,
+        "geometricMeanCrpsRatio": 0.9325950857215664,
+        "meanNormalizedCrps": 0.24034973673515728,
+        "meanNormalizedCrpsDifference": -0.026740986118339843,
+        "series": 1,
+        "shareBeatingBaseline": 0.6666666666666666,
+        "targets": 24
+      },
+      "stanli-selected-noskip-ladder": {
+        "coverage80": 1.0,
+        "geometricMeanCrpsRatio": 0.8228827985520552,
+        "meanNormalizedCrps": 0.22788345977001634,
+        "meanNormalizedCrpsDifference": -0.03920726308348079,
+        "series": 1,
+        "shareBeatingBaseline": 0.75,
+        "targets": 24
+      },
+      "statsmodels": {
+        "coverage80": 0.9583333333333334,
+        "geometricMeanCrpsRatio": 2.0232058617448234,
+        "meanNormalizedCrps": 0.34064341811600296,
+        "meanNormalizedCrpsDifference": 0.07355269526250582,
+        "series": 1,
+        "shareBeatingBaseline": 0.2916666666666667,
+        "targets": 24
+      },
+      "statsmodels-ladder": {
+        "coverage80": 0.9583333333333334,
+        "geometricMeanCrpsRatio": 1.8215127391693162,
+        "meanNormalizedCrps": 0.31714200740079346,
+        "meanNormalizedCrpsDifference": 0.050051284547296286,
+        "series": 1,
+        "shareBeatingBaseline": 0.4166666666666667,
+        "targets": 24
+      }
+    },
+    "pct_change_1d": {
+      "persistence": {
+        "coverage80": 0.8805309734513275,
+        "geometricMeanCrpsRatio": 1.0,
+        "meanNormalizedCrps": 0.4976445543121925,
+        "meanNormalizedCrpsDifference": 0.0,
+        "series": 20,
+        "shareBeatingBaseline": 0.0,
+        "targets": 452
+      },
+      "persistence-ladder": {
+        "coverage80": 0.8495575221238938,
+        "geometricMeanCrpsRatio": 0.9376415657875531,
+        "meanNormalizedCrps": 0.4951839704965553,
+        "meanNormalizedCrpsDifference": -0.0024605838156372224,
+        "series": 20,
+        "shareBeatingBaseline": 0.5641592920353983,
+        "targets": 452
+      },
+      "stanli-ar1-diff-t": {
+        "coverage80": 0.8451327433628318,
+        "geometricMeanCrpsRatio": 0.9530754380797504,
+        "meanNormalizedCrps": 0.46953251701998927,
+        "meanNormalizedCrpsDifference": -0.028112037292203237,
+        "series": 20,
+        "shareBeatingBaseline": 0.5199115044247787,
+        "targets": 452
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "coverage80": 0.8451327433628318,
+        "geometricMeanCrpsRatio": 0.8865969427204408,
+        "meanNormalizedCrps": 0.46143342044589797,
+        "meanNormalizedCrpsDifference": -0.03621113386629455,
+        "series": 20,
+        "shareBeatingBaseline": 0.6371681415929203,
+        "targets": 452
+      },
+      "stanli-ar1-t": {
+        "coverage80": 0.8650442477876106,
+        "geometricMeanCrpsRatio": 0.8502986177616305,
+        "meanNormalizedCrps": 0.4233712961506298,
+        "meanNormalizedCrpsDifference": -0.07427325816156279,
+        "series": 20,
+        "shareBeatingBaseline": 0.6814159292035398,
+        "targets": 452
+      },
+      "stanli-ar1-t-ladder": {
+        "coverage80": 0.8650442477876106,
+        "geometricMeanCrpsRatio": 0.7924834594618623,
+        "meanNormalizedCrps": 0.4156913792191265,
+        "meanNormalizedCrpsDifference": -0.08195317509306599,
+        "series": 20,
+        "shareBeatingBaseline": 0.75,
+        "targets": 452
+      },
+      "stanli-rw-drift-t": {
+        "coverage80": 0.8495575221238938,
+        "geometricMeanCrpsRatio": 1.0426624657462875,
+        "meanNormalizedCrps": 0.5064494709077185,
+        "meanNormalizedCrpsDifference": 0.008804916595526006,
+        "series": 20,
+        "shareBeatingBaseline": 0.35176991150442477,
+        "targets": 452
+      },
+      "stanli-rw-drift-t-ladder": {
+        "coverage80": 0.8495575221238938,
+        "geometricMeanCrpsRatio": 0.9710092251880879,
+        "meanNormalizedCrps": 0.49719684982265766,
+        "meanNormalizedCrpsDifference": -0.0004477044895348879,
+        "series": 20,
+        "shareBeatingBaseline": 0.5619469026548672,
+        "targets": 452
+      },
+      "stanli-selected": {
+        "coverage80": 0.8495575221238938,
+        "geometricMeanCrpsRatio": 0.8545308376554401,
+        "meanNormalizedCrps": 0.4318878368632816,
+        "meanNormalizedCrpsDifference": -0.06575671744891094,
+        "series": 20,
+        "shareBeatingBaseline": 0.665929203539823,
+        "targets": 452
+      },
+      "stanli-selected-ladder": {
+        "coverage80": 0.8495575221238938,
+        "geometricMeanCrpsRatio": 0.796715045402476,
+        "meanNormalizedCrps": 0.4243619163801728,
+        "meanNormalizedCrpsDifference": -0.07328263793201976,
+        "series": 20,
+        "shareBeatingBaseline": 0.7234513274336283,
+        "targets": 452
+      },
+      "stanli-selected-noskip": {
+        "coverage80": 0.8517699115044248,
+        "geometricMeanCrpsRatio": 0.8542836538933442,
+        "meanNormalizedCrps": 0.43167836892661826,
+        "meanNormalizedCrpsDifference": -0.06596618538557428,
+        "series": 20,
+        "shareBeatingBaseline": 0.665929203539823,
+        "targets": 452
+      },
+      "stanli-selected-noskip-ladder": {
+        "coverage80": 0.8517699115044248,
+        "geometricMeanCrpsRatio": 0.79647404751026,
+        "meanNormalizedCrps": 0.4241509355857828,
+        "meanNormalizedCrpsDifference": -0.07349361872640969,
+        "series": 20,
+        "shareBeatingBaseline": 0.7234513274336283,
+        "targets": 452
+      },
+      "statsmodels": {
+        "coverage80": 0.8694690265486725,
+        "geometricMeanCrpsRatio": 1.113474755107712,
+        "meanNormalizedCrps": 0.5201636761807602,
+        "meanNormalizedCrpsDifference": 0.022519121868567717,
+        "series": 20,
+        "shareBeatingBaseline": 0.3030973451327434,
+        "targets": 452
+      },
+      "statsmodels-ladder": {
+        "coverage80": 0.8694690265486725,
+        "geometricMeanCrpsRatio": 1.04613294063408,
+        "meanNormalizedCrps": 0.5095097218123088,
+        "meanNormalizedCrpsDifference": 0.011865167500116207,
+        "series": 20,
+        "shareBeatingBaseline": 0.41150442477876104,
+        "targets": 452
+      }
+    }
+  },
+  "config": {
+    "bootstrapDraws": 2000,
+    "gridEnd": "2026-11-01",
+    "gridStart": "2024-06-01",
+    "maxTargets": 24,
+    "stanModels": [
+      "stanli-rw-drift-t",
+      "stanli-ar1-t",
+      "stanli-ar1-diff-t"
+    ],
+    "stanliChains": 4,
+    "vintageDates": 59,
+    "walkForward": true,
+    "window": 60
+  },
+  "failures": {},
+  "leaveOneSeriesOut": {
+    "persistence": {
+      "highestRatio": 1.0,
+      "highestRatioDrops": "A063RC1:level",
+      "lowestRatio": 1.0,
+      "lowestRatioDrops": "A063RC1:level"
+    },
+    "persistence-ladder": {
+      "highestRatio": 0.9060921565220422,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.8878625760096627,
+      "lowestRatioDrops": "BOPGSTB:level"
+    },
+    "stanli-ar1-diff-t": {
+      "highestRatio": 0.9285611046770011,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.86373235143109,
+      "lowestRatioDrops": "W729RC1:level"
+    },
+    "stanli-ar1-diff-t-ladder": {
+      "highestRatio": 0.8662167657331089,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.8028406205123431,
+      "lowestRatioDrops": "W729RC1:level"
+    },
+    "stanli-ar1-t": {
+      "highestRatio": 0.8805478010302741,
+      "highestRatioDrops": "DGORDER:pct_change_1d",
+      "lowestRatio": 0.8663411476414047,
+      "lowestRatioDrops": "MCUMFN:level"
+    },
+    "stanli-ar1-t-ladder": {
+      "highestRatio": 0.8241813306686266,
+      "highestRatioDrops": "DGORDER:pct_change_1d",
+      "lowestRatio": 0.8111122675027863,
+      "lowestRatioDrops": "TTLCONS:pct_change_1d"
+    },
+    "stanli-rw-drift-t": {
+      "highestRatio": 0.9955603875689103,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.9733286935711034,
+      "lowestRatioDrops": "CES0500000003:pct_change_1d"
+    },
+    "stanli-rw-drift-t-ladder": {
+      "highestRatio": 0.9262517501466474,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.9084042685312594,
+      "lowestRatioDrops": "COMPUTSA:level"
+    },
+    "stanli-selected": {
+      "highestRatio": 0.8779101121279786,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.826195846692186,
+      "lowestRatioDrops": "W729RC1:level"
+    },
+    "stanli-selected-ladder": {
+      "highestRatio": 0.8189278912483398,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.7677095764803451,
+      "lowestRatioDrops": "W729RC1:level"
+    },
+    "stanli-selected-noskip": {
+      "highestRatio": 0.8773266571759555,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.8160749063890169,
+      "lowestRatioDrops": "W729RC1:level"
+    },
+    "stanli-selected-noskip-ladder": {
+      "highestRatio": 0.818169549558926,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 0.7583087453823056,
+      "lowestRatioDrops": "W729RC1:level"
+    },
+    "statsmodels": {
+      "highestRatio": 1.2047108092942458,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 1.1437487333394047,
+      "lowestRatioDrops": "A063RC1:level"
+    },
+    "statsmodels-ladder": {
+      "highestRatio": 1.1294104555188795,
+      "highestRatioDrops": "W824RC1:level",
+      "lowestRatio": 1.0762082297398277,
+      "lowestRatioDrops": "A063RC1:level"
+    }
+  },
+  "pairedComparisons": {
+    "stanli-selected vs stanli-ar1-t": {
+      "coverage80": 0.792741165234002,
+      "geometricMeanCrpsRatio": 0.9570352552054769,
+      "interval95": {
+        "coverage80": [
+          0.7364124595116481,
+          0.8443208102758153
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8663834397747243,
+          1.0160077803914298
+        ],
+        "meanNormalizedCrps": [
+          0.41569359531924654,
+          0.5929688002765324
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.06895158707729282,
+          0.019378464709488286
+        ],
+        "shareBeatingBaseline": [
+          0.20246361625649156,
+          0.3506112952769076
+        ]
+      },
+      "meanNormalizedCrps": 0.4983649867407914,
+      "meanNormalizedCrpsDifference": -0.016360444643717567,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.27602674307545366,
+      "targets": 1047
+    },
+    "stanli-selected vs stanli-selected-noskip": {
+      "coverage80": 0.792741165234002,
+      "geometricMeanCrpsRatio": 1.0121159734942051,
+      "interval95": {
+        "coverage80": [
+          0.7364124595116481,
+          0.8443208102758153
+        ],
+        "geometricMeanCrpsRatio": [
+          1.0001265931244576,
+          1.0361969715773296
+        ],
+        "meanNormalizedCrps": [
+          0.41569359531924654,
+          0.5929688002765324
+        ],
+        "meanNormalizedCrpsDifference": [
+          4.1111207621281034e-05,
+          0.017079113337283038
+        ],
+        "shareBeatingBaseline": [
+          0.0,
+          0.0048449612403100775
+        ]
+      },
+      "meanNormalizedCrps": 0.4983649867407914,
+      "meanNormalizedCrpsDifference": 0.0057157767956673,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.0019102196752626551,
+      "targets": 1047
+    },
+    "stanli-selected-ladder vs stanli-ar1-t-ladder": {
+      "coverage80": 0.792741165234002,
+      "geometricMeanCrpsRatio": 0.9521277065410392,
+      "interval95": {
+        "coverage80": [
+          0.7364124595116481,
+          0.8443208102758153
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8553227079654787,
+          1.0168041516639126
+        ],
+        "meanNormalizedCrps": [
+          0.4083373665056748,
+          0.5912764475381103
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.0728219236116051,
+          0.02003046001774624
+        ],
+        "shareBeatingBaseline": [
+          0.2065934405521846,
+          0.3534462012946686
+        ]
+      },
+      "meanNormalizedCrps": 0.4943913911751228,
+      "meanNormalizedCrpsDifference": -0.017632022480433638,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.2808022922636103,
+      "targets": 1047
+    },
+    "stanli-selected-ladder vs stanli-selected-noskip-ladder": {
+      "coverage80": 0.792741165234002,
+      "geometricMeanCrpsRatio": 1.0121112141824098,
+      "interval95": {
+        "coverage80": [
+          0.7364124595116481,
+          0.8443208102758153
+        ],
+        "geometricMeanCrpsRatio": [
+          1.0001323830176378,
+          1.0356694554820154
+        ],
+        "meanNormalizedCrps": [
+          0.4083373665056748,
+          0.5912764475381103
+        ],
+        "meanNormalizedCrpsDifference": [
+          4.8951569684393374e-05,
+          0.017719642054327335
+        ],
+        "shareBeatingBaseline": [
+          0.0,
+          0.0048449612403100775
+        ]
+      },
+      "meanNormalizedCrps": 0.4943913911751228,
+      "meanNormalizedCrpsDifference": 0.005942317135725356,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.0019102196752626551,
+      "targets": 1047
+    }
+  },
+  "perSeriesCrpsRatio": {
+    "A063RC1:level": {
+      "persistence-ladder": 0.7943182744262952,
+      "stanli-ar1-diff-t": 0.7921677903162355,
+      "stanli-ar1-diff-t-ladder": 0.7238300767549168,
+      "stanli-ar1-t": 0.84651590163271,
+      "stanli-ar1-t-ladder": 0.7672048206206599,
+      "stanli-rw-drift-t": 0.7886852610533759,
+      "stanli-rw-drift-t-ladder": 0.707172305539791,
+      "stanli-selected": 0.7950418373762811,
+      "stanli-selected-ladder": 0.7194926992346231,
+      "stanli-selected-noskip": 0.7950418373762811,
+      "stanli-selected-noskip-ladder": 0.7194926992346231,
+      "statsmodels": 3.7256681149453836,
+      "statsmodels-ladder": 3.2744576175719042
+    },
+    "A191RL1Q225SBEA:level": {
+      "persistence-ladder": 0.9363898347692188,
+      "stanli-ar1-diff-t": 1.030931419350609,
+      "stanli-ar1-diff-t-ladder": 0.9077149735071528,
+      "stanli-ar1-t": 0.7260899851342141,
+      "stanli-ar1-t-ladder": 0.6254294337713544,
+      "stanli-rw-drift-t": 1.1101567410747784,
+      "stanli-rw-drift-t-ladder": 0.9730231604047908,
+      "stanli-selected": 0.7260899851342141,
+      "stanli-selected-ladder": 0.6254294337713544,
+      "stanli-selected-noskip": 0.7260899851342141,
+      "stanli-selected-noskip-ladder": 0.6254294337713544,
+      "statsmodels": 2.7228239534794407,
+      "statsmodels-ladder": 2.3556380827618124
+    },
+    "A576RC1:level": {
+      "persistence-ladder": 0.5863280968709718,
+      "stanli-ar1-diff-t": 0.6376189187903668,
+      "stanli-ar1-diff-t-ladder": 0.5960134104615493,
+      "stanli-ar1-t": 0.6600240360168073,
+      "stanli-ar1-t-ladder": 0.618231432337208,
+      "stanli-rw-drift-t": 0.6523233785567705,
+      "stanli-rw-drift-t-ladder": 0.6020179179197335,
+      "stanli-selected": 0.6398639705099611,
+      "stanli-selected-ladder": 0.5972893701872766,
+      "stanli-selected-noskip": 0.6398639705099611,
+      "stanli-selected-noskip-ladder": 0.5972893701872766,
+      "statsmodels": 0.7174774328393966,
+      "statsmodels-ladder": 0.6727546581318943
+    },
+    "AMDMVS:pct_change_1d": {
+      "persistence-ladder": 0.9145016019554939,
+      "stanli-ar1-diff-t": 0.865578690454416,
+      "stanli-ar1-diff-t-ladder": 0.7725639620854239,
+      "stanli-ar1-t": 0.7403220363889214,
+      "stanli-ar1-t-ladder": 0.671541284440762,
+      "stanli-rw-drift-t": 1.061679331215727,
+      "stanli-rw-drift-t-ladder": 0.9463746782235098,
+      "stanli-selected": 0.7747986782076096,
+      "stanli-selected-ladder": 0.6960425097336467,
+      "stanli-selected-noskip": 0.7747986782076096,
+      "stanli-selected-noskip-ladder": 0.6960425097336467,
+      "statsmodels": 1.3093766770865578,
+      "statsmodels-ladder": 1.1958980272040518
+    },
+    "BOPGSTB:level": {
+      "persistence-ladder": 1.01999285950702,
+      "stanli-ar1-diff-t": 0.9480975884871301,
+      "stanli-ar1-diff-t-ladder": 0.9335729482537388,
+      "stanli-ar1-t": 0.979712192253694,
+      "stanli-ar1-t-ladder": 0.976492926950778,
+      "stanli-rw-drift-t": 1.0074829381256338,
+      "stanli-rw-drift-t-ladder": 1.0133435341432018,
+      "stanli-selected": 0.9723705041351324,
+      "stanli-selected-ladder": 0.964083485785639,
+      "stanli-selected-noskip": 0.9723705041351324,
+      "stanli-selected-noskip-ladder": 0.964083485785639,
+      "statsmodels": 1.0108022793708615,
+      "statsmodels-ladder": 1.0051588599416965
+    },
+    "BUSINV:level": {
+      "persistence-ladder": 0.8550111602087174,
+      "stanli-ar1-diff-t": 0.7206840762385408,
+      "stanli-ar1-diff-t-ladder": 0.6825665748016506,
+      "stanli-ar1-t": 0.8954244325409881,
+      "stanli-ar1-t-ladder": 0.8200040223163539,
+      "stanli-rw-drift-t": 0.9701962977781302,
+      "stanli-rw-drift-t-ladder": 0.9067368628836564,
+      "stanli-selected": 0.8434492851507155,
+      "stanli-selected-ladder": 0.7900237020488042,
+      "stanli-selected-noskip": 0.8434492851507155,
+      "stanli-selected-noskip-ladder": 0.7900237020488042,
+      "statsmodels": 1.0180788693562781,
+      "statsmodels-ladder": 0.9686247392051694
+    },
+    "CES0500000003:pct_change_1d": {
+      "persistence-ladder": 0.9809071211664676,
+      "stanli-ar1-diff-t": 0.9177546996637659,
+      "stanli-ar1-diff-t-ladder": 0.8228470212060033,
+      "stanli-ar1-t": 0.8449149527538754,
+      "stanli-ar1-t-ladder": 0.7766866290783035,
+      "stanli-rw-drift-t": 1.1266032101226562,
+      "stanli-rw-drift-t-ladder": 1.0159590568849908,
+      "stanli-selected": 0.8661024267680913,
+      "stanli-selected-ladder": 0.8015805608336584,
+      "stanli-selected-noskip": 0.8661024267680913,
+      "stanli-selected-noskip-ladder": 0.8015805608336584,
+      "statsmodels": 1.4771489545198573,
+      "statsmodels-ladder": 1.3521532950282682
+    },
+    "CIVPART:level": {
+      "persistence-ladder": 0.9576283036586836,
+      "stanli-ar1-diff-t": 1.0371016524018941,
+      "stanli-ar1-diff-t-ladder": 1.003923559202491,
+      "stanli-ar1-t": 1.0349358959434896,
+      "stanli-ar1-t-ladder": 1.0055772907083802,
+      "stanli-rw-drift-t": 1.0315812314075012,
+      "stanli-rw-drift-t-ladder": 0.999995710248268,
+      "stanli-selected": 1.0396990311862289,
+      "stanli-selected-ladder": 1.0077392701205923,
+      "stanli-selected-noskip": 1.0396990311862289,
+      "stanli-selected-noskip-ladder": 1.0077392701205923,
+      "statsmodels": 1.2113096038702817,
+      "statsmodels-ladder": 1.1588096523882372
+    },
+    "COMPUTSA:level": {
+      "persistence-ladder": 1.0123963009807677,
+      "stanli-ar1-diff-t": 0.8606830991052383,
+      "stanli-ar1-diff-t-ladder": 0.8394462023063292,
+      "stanli-ar1-t": 0.8556867894710016,
+      "stanli-ar1-t-ladder": 0.8220446614292645,
+      "stanli-rw-drift-t": 1.0219987028305122,
+      "stanli-rw-drift-t-ladder": 1.0220891652926387,
+      "stanli-selected": 0.8771328192694591,
+      "stanli-selected-ladder": 0.8566261795617696,
+      "stanli-selected-noskip": 0.8771328192694591,
+      "stanli-selected-noskip-ladder": 0.8566261795617696,
+      "statsmodels": 1.0223618824525862,
+      "statsmodels-ladder": 1.0223529699341851
+    },
+    "CPIAUCSL:pct_change_1d": {
+      "persistence-ladder": 0.9867719804623786,
+      "stanli-ar1-diff-t": 1.0385981024344983,
+      "stanli-ar1-diff-t-ladder": 0.980382265108091,
+      "stanli-ar1-t": 0.8612406693798167,
+      "stanli-ar1-t-ladder": 0.7971967935990644,
+      "stanli-rw-drift-t": 1.0585927619708406,
+      "stanli-rw-drift-t-ladder": 1.005999126530728,
+      "stanli-selected": 0.9349502394960837,
+      "stanli-selected-ladder": 0.8835044572674615,
+      "stanli-selected-noskip": 0.9349502394960837,
+      "stanli-selected-noskip-ladder": 0.8835044572674615,
+      "statsmodels": 1.0998498632337508,
+      "statsmodels-ladder": 1.0417843823025046
+    },
+    "CPILFESL:pct_change_1d": {
+      "persistence-ladder": 0.9613828401028365,
+      "stanli-ar1-diff-t": 1.0633736646787204,
+      "stanli-ar1-diff-t-ladder": 1.0044820737533935,
+      "stanli-ar1-t": 0.9089697583112741,
+      "stanli-ar1-t-ladder": 0.8432679714581954,
+      "stanli-rw-drift-t": 1.0610471014567509,
+      "stanli-rw-drift-t-ladder": 1.0002050917297207,
+      "stanli-selected": 0.9325368705779016,
+      "stanli-selected-ladder": 0.8672502656758854,
+      "stanli-selected-noskip": 0.9325368705779016,
+      "stanli-selected-noskip-ladder": 0.8672502656758854,
+      "statsmodels": 1.0622534895923301,
+      "statsmodels-ladder": 1.0065036742850197
+    },
+    "CUSR0000SAH1:pct_change_1d": {
+      "persistence-ladder": 0.9647149701412134,
+      "stanli-ar1-diff-t": 0.9248476420584245,
+      "stanli-ar1-diff-t-ladder": 0.9159421826678693,
+      "stanli-ar1-t": 0.9154106185762453,
+      "stanli-ar1-t-ladder": 0.89871671575582,
+      "stanli-rw-drift-t": 0.9864185119683705,
+      "stanli-rw-drift-t-ladder": 0.9587761534604875,
+      "stanli-selected": 0.9521562924197633,
+      "stanli-selected-ladder": 0.9470525522635278,
+      "stanli-selected-noskip": 0.9521562924197633,
+      "stanli-selected-noskip-ladder": 0.9470525522635278,
+      "statsmodels": 0.9780689877672495,
+      "statsmodels-ladder": 0.9555512365213424
+    },
+    "CUSR0000SASL2RS:pct_change_1d": {
+      "persistence-ladder": 0.9002653732293163,
+      "stanli-ar1-diff-t": 0.99275779973818,
+      "stanli-ar1-diff-t-ladder": 0.9103886251270586,
+      "stanli-ar1-t": 0.8590384807502313,
+      "stanli-ar1-t-ladder": 0.7727096745925939,
+      "stanli-rw-drift-t": 1.0187690223353174,
+      "stanli-rw-drift-t-ladder": 0.9255453374935558,
+      "stanli-selected": 0.8722052453996716,
+      "stanli-selected-ladder": 0.7851577119100344,
+      "stanli-selected-noskip": 0.8722052453996716,
+      "stanli-selected-noskip-ladder": 0.7851577119100344,
+      "statsmodels": 1.0432637222483923,
+      "statsmodels-ladder": 0.9629176829867554
+    },
+    "CUSR0000SASLE:pct_change_1d": {
+      "persistence-ladder": 0.9868014244670292,
+      "stanli-ar1-diff-t": 0.9920592230520847,
+      "stanli-ar1-diff-t-ladder": 0.9736972168096646,
+      "stanli-ar1-t": 0.8368965699989465,
+      "stanli-ar1-t-ladder": 0.8026039173842244,
+      "stanli-rw-drift-t": 1.0165355164962435,
+      "stanli-rw-drift-t-ladder": 0.9974546539517541,
+      "stanli-selected": 0.8368965699989465,
+      "stanli-selected-ladder": 0.8026039173842244,
+      "stanli-selected-noskip": 0.8368965699989465,
+      "stanli-selected-noskip-ladder": 0.8026039173842244,
+      "statsmodels": 1.012741317642614,
+      "statsmodels-ladder": 0.9960361599735302
+    },
+    "CUSR0000SEHA:pct_change_1d": {
+      "persistence-ladder": 0.8686193654028165,
+      "stanli-ar1-diff-t": 0.9100263060702244,
+      "stanli-ar1-diff-t-ladder": 0.8646195081626048,
+      "stanli-ar1-t": 1.017062317013362,
+      "stanli-ar1-t-ladder": 0.9757086446081268,
+      "stanli-rw-drift-t": 1.0269373826030657,
+      "stanli-rw-drift-t-ladder": 0.9840312194519942,
+      "stanli-selected": 0.920726750815457,
+      "stanli-selected-ladder": 0.8676661377362777,
+      "stanli-selected-noskip": 0.9157041268894677,
+      "stanli-selected-noskip-ladder": 0.8625708569737389,
+      "statsmodels": 1.0363822121484996,
+      "statsmodels-ladder": 1.0010179091733493
+    },
+    "CUSR0000SEHC:pct_change_1d": {
+      "persistence-ladder": 0.9445098581002629,
+      "stanli-ar1-diff-t": 0.8687100726860624,
+      "stanli-ar1-diff-t-ladder": 0.8433245353178163,
+      "stanli-ar1-t": 0.966756067647847,
+      "stanli-ar1-t-ladder": 0.9508772297644291,
+      "stanli-rw-drift-t": 1.0133549376545465,
+      "stanli-rw-drift-t-ladder": 0.9938387600113587,
+      "stanli-selected": 0.9225953477273076,
+      "stanli-selected-ladder": 0.8999283402621437,
+      "stanli-selected-noskip": 0.9225953477273076,
+      "stanli-selected-noskip-ladder": 0.8999283402621437,
+      "statsmodels": 1.0181202628092376,
+      "statsmodels-ladder": 1.0006934581114333
+    },
+    "DGORDER:pct_change_1d": {
+      "persistence-ladder": 0.9472865410170894,
+      "stanli-ar1-diff-t": 0.9242751191728349,
+      "stanli-ar1-diff-t-ladder": 0.8759549935265941,
+      "stanli-ar1-t": 0.5472311801068712,
+      "stanli-ar1-t-ladder": 0.5156299626755306,
+      "stanli-rw-drift-t": 1.0186657542030095,
+      "stanli-rw-drift-t-ladder": 0.9608209975376448,
+      "stanli-selected": 0.5472311801068712,
+      "stanli-selected-ladder": 0.5156299626755306,
+      "stanli-selected-noskip": 0.5472311801068712,
+      "stanli-selected-noskip-ladder": 0.5156299626755306,
+      "statsmodels": 1.1132911738645457,
+      "statsmodels-ladder": 1.0561823865295676
+    },
+    "DSPI:level": {
+      "persistence-ladder": 0.6142282054965149,
+      "stanli-ar1-diff-t": 0.6810127002665856,
+      "stanli-ar1-diff-t-ladder": 0.5957504882606214,
+      "stanli-ar1-t": 0.7188555677198212,
+      "stanli-ar1-t-ladder": 0.6373674449143362,
+      "stanli-rw-drift-t": 0.674304532126483,
+      "stanli-rw-drift-t-ladder": 0.5869249007274976,
+      "stanli-selected": 0.6949719000030912,
+      "stanli-selected-ladder": 0.6090340626443274,
+      "stanli-selected-noskip": 0.6846790709168848,
+      "stanli-selected-noskip-ladder": 0.5944242626269979,
+      "statsmodels": 1.8849678348670655,
+      "statsmodels-ladder": 1.6766720911195645
+    },
+    "ECICOM:pct_change_1d": {
+      "persistence-ladder": 0.9291762082309798,
+      "stanli-ar1-diff-t": 0.9309937448472821,
+      "stanli-ar1-diff-t-ladder": 0.8885269582365409,
+      "stanli-ar1-t": 0.8459726449959244,
+      "stanli-ar1-t-ladder": 0.7830169540265305,
+      "stanli-rw-drift-t": 1.0020282171255661,
+      "stanli-rw-drift-t-ladder": 0.9523440860484867,
+      "stanli-selected": 0.9537836959447762,
+      "stanli-selected-ladder": 0.9195667709365177,
+      "stanli-selected-noskip": 0.9537836959447762,
+      "stanli-selected-noskip-ladder": 0.9195667709365177,
+      "statsmodels": 1.0377292439363142,
+      "statsmodels-ladder": 0.9844819611062141
+    },
+    "ECIWAG:pct_change_1d": {
+      "persistence-ladder": 0.8892656294220493,
+      "stanli-ar1-diff-t": 0.9020708429015816,
+      "stanli-ar1-diff-t-ladder": 0.8622472392193596,
+      "stanli-ar1-t": 0.8602890301139081,
+      "stanli-ar1-t-ladder": 0.8005562471045244,
+      "stanli-rw-drift-t": 0.9869162862678449,
+      "stanli-rw-drift-t-ladder": 0.9288856865408637,
+      "stanli-selected": 0.9336972022554146,
+      "stanli-selected-ladder": 0.9011617287642757,
+      "stanli-selected-noskip": 0.9336972022554146,
+      "stanli-selected-noskip-ladder": 0.9011617287642757,
+      "statsmodels": 0.9914771506794862,
+      "statsmodels-ladder": 0.9381265701708867
+    },
+    "HOUST:level": {
+      "persistence-ladder": 0.975620806799307,
+      "stanli-ar1-diff-t": 0.830954944431445,
+      "stanli-ar1-diff-t-ladder": 0.8025980704027972,
+      "stanli-ar1-t": 0.9471233174610706,
+      "stanli-ar1-t-ladder": 0.9135285640705891,
+      "stanli-rw-drift-t": 1.0149141321608162,
+      "stanli-rw-drift-t-ladder": 0.9802042586710824,
+      "stanli-selected": 0.830954944431445,
+      "stanli-selected-ladder": 0.8025980704027972,
+      "stanli-selected-noskip": 0.830954944431445,
+      "stanli-selected-noskip-ladder": 0.8025980704027972,
+      "statsmodels": 1.0045121516031659,
+      "statsmodels-ladder": 0.9728348390731575
+    },
+    "HSN1F:level": {
+      "persistence-ladder": 0.9529499077780756,
+      "stanli-ar1-diff-t": 0.9250530406311039,
+      "stanli-ar1-diff-t-ladder": 0.8773432658749319,
+      "stanli-ar1-t": 0.9034783259108075,
+      "stanli-ar1-t-ladder": 0.8587069591838173,
+      "stanli-rw-drift-t": 1.0062713629313207,
+      "stanli-rw-drift-t-ladder": 0.9679989317314339,
+      "stanli-selected": 0.936287305117026,
+      "stanli-selected-ladder": 0.9009804197048273,
+      "stanli-selected-noskip": 0.9288565804389355,
+      "stanli-selected-noskip-ladder": 0.8924516774499353,
+      "statsmodels": 1.0035692882757166,
+      "statsmodels-ladder": 0.971152455282757
+    },
+    "INDPRO:pct_change_1d": {
+      "persistence-ladder": 0.9338523259805682,
+      "stanli-ar1-diff-t": 0.8735337320164296,
+      "stanli-ar1-diff-t-ladder": 0.7531990585506811,
+      "stanli-ar1-t": 0.7207673620595982,
+      "stanli-ar1-t-ladder": 0.6576638699009822,
+      "stanli-rw-drift-t": 1.0918083687576747,
+      "stanli-rw-drift-t-ladder": 0.9612659575515009,
+      "stanli-selected": 0.7207673620595982,
+      "stanli-selected-ladder": 0.6576638699009822,
+      "stanli-selected-noskip": 0.7207673620595982,
+      "stanli-selected-noskip-ladder": 0.6576638699009822,
+      "statsmodels": 1.3606829507252423,
+      "statsmodels-ladder": 1.2184400161906996
+    },
+    "IPMAN:pct_change_1d": {
+      "persistence-ladder": 0.946940296636554,
+      "stanli-ar1-diff-t": 0.99363098187466,
+      "stanli-ar1-diff-t-ladder": 0.8659048523362645,
+      "stanli-ar1-t": 0.7250929928953382,
+      "stanli-ar1-t-ladder": 0.6309036500486546,
+      "stanli-rw-drift-t": 1.1176279715437545,
+      "stanli-rw-drift-t-ladder": 0.9734793779401962,
+      "stanli-selected": 0.7250929928953382,
+      "stanli-selected-ladder": 0.6309036500486546,
+      "stanli-selected-noskip": 0.7250929928953382,
+      "stanli-selected-noskip-ladder": 0.6309036500486546,
+      "statsmodels": 1.4280742126507395,
+      "statsmodels-ladder": 1.2675537609063678
+    },
+    "IQ:pct_change_1d": {
+      "persistence-ladder": 0.967660308860521,
+      "stanli-ar1-diff-t": 1.0424183063205081,
+      "stanli-ar1-diff-t-ladder": 0.9792606475443734,
+      "stanli-ar1-t": 0.8812822516252814,
+      "stanli-ar1-t-ladder": 0.8327829253657485,
+      "stanli-rw-drift-t": 1.0636306005962668,
+      "stanli-rw-drift-t-ladder": 0.9996910275048818,
+      "stanli-selected": 0.8812822516252814,
+      "stanli-selected-ladder": 0.8327829253657485,
+      "stanli-selected-noskip": 0.8812822516252814,
+      "stanli-selected-noskip-ladder": 0.8327829253657485,
+      "statsmodels": 1.0746314841330988,
+      "statsmodels-ladder": 1.0151862852001414
+    },
+    "IR:pct_change_1d": {
+      "persistence-ladder": 0.9034226823373226,
+      "stanli-ar1-diff-t": 1.0768368512250506,
+      "stanli-ar1-diff-t-ladder": 0.9822088339543444,
+      "stanli-ar1-t": 0.999557921390402,
+      "stanli-ar1-t-ladder": 0.9112484030777214,
+      "stanli-rw-drift-t": 1.0523599836445743,
+      "stanli-rw-drift-t-ladder": 0.9563657743092541,
+      "stanli-selected": 1.025356739168496,
+      "stanli-selected-ladder": 0.9349058526758873,
+      "stanli-selected-noskip": 1.0253787147267839,
+      "stanli-selected-noskip-ladder": 0.9350853361396191,
+      "statsmodels": 1.0950963927829351,
+      "statsmodels-ladder": 1.0053695827744316
+    },
+    "JTSHIR:level": {
+      "persistence-ladder": 0.9320716453745858,
+      "stanli-ar1-diff-t": 0.8651744296356882,
+      "stanli-ar1-diff-t-ladder": 0.805813379290452,
+      "stanli-ar1-t": 1.0140010701227038,
+      "stanli-ar1-t-ladder": 0.9557680546541019,
+      "stanli-rw-drift-t": 1.0206220694436705,
+      "stanli-rw-drift-t-ladder": 0.9657870539250615,
+      "stanli-selected": 0.8619470761577666,
+      "stanli-selected-ladder": 0.7997992595700134,
+      "stanli-selected-noskip": 0.8619470761577666,
+      "stanli-selected-noskip-ladder": 0.7997992595700134,
+      "statsmodels": 1.2553143095520685,
+      "statsmodels-ladder": 1.1808947528652223
+    },
+    "JTSJOL:level": {
+      "persistence-ladder": 0.9437810151881274,
+      "stanli-ar1-diff-t": 1.0347321626840946,
+      "stanli-ar1-diff-t-ladder": 0.9825261634327562,
+      "stanli-ar1-t": 1.0138102899035888,
+      "stanli-ar1-t-ladder": 0.9583331457446655,
+      "stanli-rw-drift-t": 1.0077325350512623,
+      "stanli-rw-drift-t-ladder": 0.9534946343370433,
+      "stanli-selected": 1.0210184304777759,
+      "stanli-selected-ladder": 0.9683791445641359,
+      "stanli-selected-noskip": 1.0210184304777759,
+      "stanli-selected-noskip-ladder": 0.9683791445641359,
+      "statsmodels": 1.0037530875238536,
+      "statsmodels-ladder": 0.9542762106227849
+    },
+    "MCUMFN:level": {
+      "persistence-ladder": 0.9209432010084683,
+      "stanli-ar1-diff-t": 1.0732436384381472,
+      "stanli-ar1-diff-t-ladder": 0.9655099082521332,
+      "stanli-ar1-t": 1.0946457916601617,
+      "stanli-ar1-t-ladder": 1.0008784670040596,
+      "stanli-rw-drift-t": 1.094987220953565,
+      "stanli-rw-drift-t-ladder": 0.9755030409703095,
+      "stanli-selected": 1.0937010417585096,
+      "stanli-selected-ladder": 0.9931471846032953,
+      "stanli-selected-noskip": 1.0937010417585096,
+      "stanli-selected-noskip-ladder": 0.9931471846032953,
+      "statsmodels": 1.2974758601216225,
+      "statsmodels-ladder": 1.1570136716861865
+    },
+    "NONREVSLAR:level": {
+      "persistence-ladder": 0.9562343713309213,
+      "stanli-ar1-diff-t": 1.0427595443235462,
+      "stanli-ar1-diff-t-ladder": 0.9791435610644748,
+      "stanli-ar1-t": 0.9261996380080628,
+      "stanli-ar1-t-ladder": 0.8591390997655212,
+      "stanli-rw-drift-t": 1.0353028771675061,
+      "stanli-rw-drift-t-ladder": 0.9766497322704958,
+      "stanli-selected": 0.9790150820883876,
+      "stanli-selected-ladder": 0.9097156985026563,
+      "stanli-selected-noskip": 0.9790150820883876,
+      "stanli-selected-noskip-ladder": 0.9097156985026563,
+      "statsmodels": 1.146132960288574,
+      "statsmodels-ladder": 1.0752696939658184
+    },
+    "PAYEMS:mom_diff": {
+      "persistence-ladder": 0.850677473140843,
+      "stanli-ar1-diff-t": 0.9454448756879416,
+      "stanli-ar1-diff-t-ladder": 0.8305793574211109,
+      "stanli-ar1-t": 0.8885019728227508,
+      "stanli-ar1-t-ladder": 0.7859635465161217,
+      "stanli-rw-drift-t": 1.0233109063440886,
+      "stanli-rw-drift-t-ladder": 0.8921839046963603,
+      "stanli-selected": 0.9325950857215664,
+      "stanli-selected-ladder": 0.8228827985520552,
+      "stanli-selected-noskip": 0.9325950857215664,
+      "stanli-selected-noskip-ladder": 0.8228827985520552,
+      "statsmodels": 2.0232058617448234,
+      "statsmodels-ladder": 1.8215127391693162
+    },
+    "PCEPI:pct_change_1d": {
+      "persistence-ladder": 0.8842863690951844,
+      "stanli-ar1-diff-t": 0.9317137614242381,
+      "stanli-ar1-diff-t-ladder": 0.8621871448409709,
+      "stanli-ar1-t": 0.8298824316665803,
+      "stanli-ar1-t-ladder": 0.7601067326124714,
+      "stanli-rw-drift-t": 0.9944033810410325,
+      "stanli-rw-drift-t-ladder": 0.9242401822204435,
+      "stanli-selected": 0.8298824316665803,
+      "stanli-selected-ladder": 0.7601067326124714,
+      "stanli-selected-noskip": 0.8298824316665803,
+      "stanli-selected-noskip-ladder": 0.7601067326124714,
+      "statsmodels": 1.0412756441597968,
+      "statsmodels-ladder": 0.9779403696174298
+    },
+    "PCEPILFE:pct_change_1d": {
+      "persistence-ladder": 0.9128624334929457,
+      "stanli-ar1-diff-t": 0.999157578756612,
+      "stanli-ar1-diff-t-ladder": 0.9426160960742512,
+      "stanli-ar1-t": 0.8263098681486073,
+      "stanli-ar1-t-ladder": 0.7667281716411899,
+      "stanli-rw-drift-t": 1.0019676155194808,
+      "stanli-rw-drift-t-ladder": 0.9430702848575501,
+      "stanli-selected": 0.8231173692356333,
+      "stanli-selected-ladder": 0.7600234468082017,
+      "stanli-selected-noskip": 0.8231173692356333,
+      "stanli-selected-noskip-ladder": 0.7600234468082017,
+      "statsmodels": 1.0014712751307735,
+      "statsmodels-ladder": 0.9493124558092434
+    },
+    "PERMIT:level": {
+      "persistence-ladder": 0.8713467328269192,
+      "stanli-ar1-diff-t": 0.9229792195871293,
+      "stanli-ar1-diff-t-ladder": 0.8333690799962405,
+      "stanli-ar1-t": 1.0390998734801151,
+      "stanli-ar1-t-ladder": 0.9785400425618133,
+      "stanli-rw-drift-t": 1.0036884667205266,
+      "stanli-rw-drift-t-ladder": 0.9214914283129458,
+      "stanli-selected": 0.9343010750853468,
+      "stanli-selected-ladder": 0.8457774429198168,
+      "stanli-selected-noskip": 0.9343010750853468,
+      "stanli-selected-noskip-ladder": 0.8457774429198168,
+      "statsmodels": 0.9981380602575994,
+      "statsmodels-ladder": 0.921693112888995
+    },
+    "PPIFIS:pct_change_1d": {
+      "persistence-ladder": 1.002518842698125,
+      "stanli-ar1-diff-t": 0.9309155773738393,
+      "stanli-ar1-diff-t-ladder": 0.8778750732224385,
+      "stanli-ar1-t": 0.9159476460953427,
+      "stanli-ar1-t-ladder": 0.8699760688556757,
+      "stanli-rw-drift-t": 1.052497490312803,
+      "stanli-rw-drift-t-ladder": 1.0089554953624702,
+      "stanli-selected": 0.9463917997011088,
+      "stanli-selected-ladder": 0.904219635373792,
+      "stanli-selected-noskip": 0.9463917997011088,
+      "stanli-selected-noskip-ladder": 0.904219635373792,
+      "statsmodels": 1.045753947312783,
+      "statsmodels-ladder": 1.0054762936912256
+    },
+    "PRS85006112:level": {
+      "persistence-ladder": 0.8552118044772498,
+      "stanli-ar1-diff-t": 0.9135270055669634,
+      "stanli-ar1-diff-t-ladder": 0.833377039850632,
+      "stanli-ar1-t": 0.6051596401329651,
+      "stanli-ar1-t-ladder": 0.5321981264153952,
+      "stanli-rw-drift-t": 1.030459677619182,
+      "stanli-rw-drift-t-ladder": 0.9154369928585939,
+      "stanli-selected": 0.6051596401329651,
+      "stanli-selected-ladder": 0.5321981264153952,
+      "stanli-selected-noskip": 0.6051596401329651,
+      "stanli-selected-noskip-ladder": 0.5321981264153952,
+      "statsmodels": 1.0555136074164013,
+      "statsmodels-ladder": 0.9534010236092458
+    },
+    "REVOLSLAR:level": {
+      "persistence-ladder": 1.0034783594825327,
+      "stanli-ar1-diff-t": 0.8926360253161891,
+      "stanli-ar1-diff-t-ladder": 0.8718638319546185,
+      "stanli-ar1-t": 0.7710087073236297,
+      "stanli-ar1-t-ladder": 0.7465972938956199,
+      "stanli-rw-drift-t": 1.0177102637040756,
+      "stanli-rw-drift-t-ladder": 0.9947219451744782,
+      "stanli-selected": 0.7998048794176712,
+      "stanli-selected-ladder": 0.7804086562949367,
+      "stanli-selected-noskip": 0.7998048794176712,
+      "stanli-selected-noskip-ladder": 0.7804086562949367,
+      "statsmodels": 1.0080441403789453,
+      "statsmodels-ladder": 0.9879516529269418
+    },
+    "TCU:level": {
+      "persistence-ladder": 0.9424593391352526,
+      "stanli-ar1-diff-t": 1.0584034103020326,
+      "stanli-ar1-diff-t-ladder": 0.9521488452979441,
+      "stanli-ar1-t": 1.0606250132864796,
+      "stanli-ar1-t-ladder": 0.9745828968443558,
+      "stanli-rw-drift-t": 1.0755471749172325,
+      "stanli-rw-drift-t-ladder": 0.9650887883597165,
+      "stanli-selected": 1.0652186949646394,
+      "stanli-selected-ladder": 0.9703734804185057,
+      "stanli-selected-noskip": 1.0652186949646394,
+      "stanli-selected-noskip-ladder": 0.9703734804185057,
+      "statsmodels": 1.279558892916507,
+      "statsmodels-ladder": 1.1573291894737419
+    },
+    "TOTALSLAR:level": {
+      "persistence-ladder": 1.001804467298741,
+      "stanli-ar1-diff-t": 0.878541302503947,
+      "stanli-ar1-diff-t-ladder": 0.8502601732271355,
+      "stanli-ar1-t": 0.8018623506271454,
+      "stanli-ar1-t-ladder": 0.7682340477297182,
+      "stanli-rw-drift-t": 1.0181124946542552,
+      "stanli-rw-drift-t-ladder": 0.9891317713042511,
+      "stanli-selected": 0.8446512311717957,
+      "stanli-selected-ladder": 0.816348436729861,
+      "stanli-selected-noskip": 0.8446512311717957,
+      "stanli-selected-noskip-ladder": 0.816348436729861,
+      "statsmodels": 1.0004510018266073,
+      "statsmodels-ladder": 0.9740447026241679
+    },
+    "TTLCONS:pct_change_1d": {
+      "persistence-ladder": 0.9081179813495556,
+      "stanli-ar1-diff-t": 0.8822960478493175,
+      "stanli-ar1-diff-t-ladder": 0.7969943282919589,
+      "stanli-ar1-t": 1.073768149672051,
+      "stanli-ar1-t-ladder": 1.019136817311938,
+      "stanli-rw-drift-t": 1.0589191198494832,
+      "stanli-rw-drift-t-ladder": 0.9552031045043361,
+      "stanli-selected": 0.9417380047950064,
+      "stanli-selected-ladder": 0.8635815530240849,
+      "stanli-selected-noskip": 0.9417380047950064,
+      "stanli-selected-noskip-ladder": 0.8635815530240849,
+      "statsmodels": 1.0937057921621118,
+      "statsmodels-ladder": 0.9991374716679173
+    },
+    "U6RATE:level": {
+      "persistence-ladder": 0.9224214958798768,
+      "stanli-ar1-diff-t": 1.0576182209217084,
+      "stanli-ar1-diff-t-ladder": 0.999743473162183,
+      "stanli-ar1-t": 0.8764283712201173,
+      "stanli-ar1-t-ladder": 0.7971816202144159,
+      "stanli-rw-drift-t": 1.044029562304191,
+      "stanli-rw-drift-t-ladder": 0.9297084840158685,
+      "stanli-selected": 0.9117181829909715,
+      "stanli-selected-ladder": 0.8355240492229979,
+      "stanli-selected-noskip": 0.9117181829909715,
+      "stanli-selected-noskip-ladder": 0.8355240492229979,
+      "statsmodels": 1.6689436656815957,
+      "statsmodels-ladder": 1.5259746741702487
+    },
+    "UNRATE:level": {
+      "persistence-ladder": 0.9079579178459523,
+      "stanli-ar1-diff-t": 1.0243177185346994,
+      "stanli-ar1-diff-t-ladder": 0.9130152663960757,
+      "stanli-ar1-t": 0.9533997825798814,
+      "stanli-ar1-t-ladder": 0.8593878926512172,
+      "stanli-rw-drift-t": 1.0641549612634462,
+      "stanli-rw-drift-t-ladder": 0.93292481541447,
+      "stanli-selected": 1.0088427999538512,
+      "stanli-selected-ladder": 0.9078154256117956,
+      "stanli-selected-noskip": 1.0088427999538512,
+      "stanli-selected-noskip-ladder": 0.9078154256117956,
+      "statsmodels": 1.840546824965788,
+      "statsmodels-ladder": 1.6823996090883726
+    },
+    "W055RC1:level": {
+      "persistence-ladder": 0.6480240519621216,
+      "stanli-ar1-diff-t": 0.7943473584269283,
+      "stanli-ar1-diff-t-ladder": 0.7177734427066631,
+      "stanli-ar1-t": 0.8320905271784558,
+      "stanli-ar1-t-ladder": 0.7556858308052907,
+      "stanli-rw-drift-t": 0.7959656371885867,
+      "stanli-rw-drift-t-ladder": 0.6787872250624035,
+      "stanli-selected": 0.875099204269893,
+      "stanli-selected-ladder": 0.7797633170527493,
+      "stanli-selected-noskip": 0.875099204269893,
+      "stanli-selected-noskip-ladder": 0.7797633170527493,
+      "statsmodels": 1.612370623212593,
+      "statsmodels-ladder": 1.4225950684652857
+    },
+    "W729RC1:level": {
+      "persistence-ladder": 0.9657321353676,
+      "stanli-ar1-diff-t": 1.2178191806437364,
+      "stanli-ar1-diff-t-ladder": 1.2498754283026896,
+      "stanli-ar1-t": 0.9924590867518878,
+      "stanli-ar1-t-ladder": 1.0028731987790422,
+      "stanli-rw-drift-t": 0.9477158182551307,
+      "stanli-rw-drift-t-ladder": 0.9577719651338019,
+      "stanli-selected": 1.2178191806437364,
+      "stanli-selected-ladder": 1.2498754283026896,
+      "stanli-selected-noskip": 1.2178191806437364,
+      "stanli-selected-noskip-ladder": 1.2498754283026896,
+      "statsmodels": 0.9507884898487629,
+      "statsmodels-ladder": 0.9620386141778272
+    },
+    "W823RC1:level": {
+      "persistence-ladder": 0.8540321784497542,
+      "stanli-ar1-diff-t": 0.8742081438670423,
+      "stanli-ar1-diff-t-ladder": 0.8111295107454118,
+      "stanli-ar1-t": 0.9357368881047943,
+      "stanli-ar1-t-ladder": 0.8992349972193017,
+      "stanli-rw-drift-t": 0.8731260492031164,
+      "stanli-rw-drift-t-ladder": 0.8078514729105412,
+      "stanli-selected": 0.8689008414504588,
+      "stanli-selected-ladder": 0.8055913357791875,
+      "stanli-selected-noskip": 0.8689008414504588,
+      "stanli-selected-noskip-ladder": 0.8055913357791875,
+      "statsmodels": 1.605764286731375,
+      "statsmodels-ladder": 1.4709329043939148
+    },
+    "W824RC1:level": {
+      "persistence-ladder": 0.4289063102461331,
+      "stanli-ar1-diff-t": 0.055695945671835126,
+      "stanli-ar1-diff-t-ladder": 0.04901839205743909,
+      "stanli-ar1-t": 0.6498800299698152,
+      "stanli-ar1-t-ladder": 0.6731195015454217,
+      "stanli-rw-drift-t": 0.43023080766758887,
+      "stanli-rw-drift-t-ladder": 0.44597739804930964,
+      "stanli-selected": 0.09155615789563672,
+      "stanli-selected-ladder": 0.07966924407415117,
+      "stanli-selected-noskip": 0.055695945671835126,
+      "stanli-selected-noskip-ladder": 0.04901839205743909,
+      "statsmodels": 0.40730285221259976,
+      "statsmodels-ladder": 0.41870812971823446
+    }
+  },
+  "selectionCounts": {
+    "stanli-ar1-diff-t": 414,
+    "stanli-ar1-t": 500,
+    "stanli-rw-drift-t": 133
+  },
+  "selectionCountsWithoutSkip": {
+    "stanli-ar1-diff-t": 416,
+    "stanli-ar1-t": 505,
+    "stanli-rw-drift-t": 126
+  },
+  "series": [
+    {
+      "key": "A063RC1:level",
+      "stems": [
+        "bea.government_social_benefits.level"
+      ]
+    },
+    {
+      "key": "A191RL1Q225SBEA:level",
+      "stems": [
+        "bea.real_gdp.saar"
+      ]
+    },
+    {
+      "key": "A576RC1:level",
+      "stems": [
+        "bea.wages_and_salaries.level"
+      ]
+    },
+    {
+      "key": "AMDMVS:pct_change_1d",
+      "stems": [
+        "census.m3.durable_goods_shipments_mom"
+      ]
+    },
+    {
+      "key": "BOPGSTB:level",
+      "stems": [
+        "bea.trade.goods_services_deficit"
+      ]
+    },
+    {
+      "key": "BUSINV:level",
+      "stems": [
+        "census.mtis.total_business_inventories_level"
+      ]
+    },
+    {
+      "key": "CES0500000003:pct_change_1d",
+      "stems": [
+        "bls.ces.average_hourly_earnings_private"
+      ]
+    },
+    {
+      "key": "CIVPART:level",
+      "stems": [
+        "bls.lns11300000"
+      ]
+    },
+    {
+      "key": "COMPUTSA:level",
+      "stems": [
+        "census.housing.completions_saar"
+      ]
+    },
+    {
+      "key": "CPIAUCSL:pct_change_1d",
+      "stems": [
+        "bls.cpi.u.headline_mom"
+      ]
+    },
+    {
+      "key": "CPILFESL:pct_change_1d",
+      "stems": [
+        "bls.cpi.u.core_mom"
+      ]
+    },
+    {
+      "key": "CUSR0000SAH1:pct_change_1d",
+      "stems": [
+        "bls.cpi.shelter_mom"
+      ]
+    },
+    {
+      "key": "CUSR0000SASL2RS:pct_change_1d",
+      "stems": [
+        "bls.cpi.services_less_rent_shelter_mom"
+      ]
+    },
+    {
+      "key": "CUSR0000SASLE:pct_change_1d",
+      "stems": [
+        "bls.cpi.services_less_energy_mom"
+      ]
+    },
+    {
+      "key": "CUSR0000SEHA:pct_change_1d",
+      "stems": [
+        "bls.cpi.rent_primary_residence_mom"
+      ]
+    },
+    {
+      "key": "CUSR0000SEHC:pct_change_1d",
+      "stems": [
+        "bls.cpi.owners_equivalent_rent_mom"
+      ]
+    },
+    {
+      "key": "DGORDER:pct_change_1d",
+      "stems": [
+        "census.m3.durable_goods_new_orders_mom"
+      ]
+    },
+    {
+      "key": "DSPI:level",
+      "stems": [
+        "bea.disposable_personal_income.level"
+      ]
+    },
+    {
+      "key": "ECICOM:pct_change_1d",
+      "stems": [
+        "bls.eci.total_compensation_private_industry_qoq"
+      ]
+    },
+    {
+      "key": "ECIWAG:pct_change_1d",
+      "stems": [
+        "bls.eci.private_wages_salaries_qoq"
+      ]
+    },
+    {
+      "key": "HOUST:level",
+      "stems": [
+        "census.housing_starts.saar"
+      ]
+    },
+    {
+      "key": "HSN1F:level",
+      "stems": [
+        "census.new_residential_sales.new_single_family_houses_sold_saar"
+      ]
+    },
+    {
+      "key": "INDPRO:pct_change_1d",
+      "stems": [
+        "fed.g17.industrial_production.total_index_mom"
+      ]
+    },
+    {
+      "key": "IPMAN:pct_change_1d",
+      "stems": [
+        "fed.g17.manufacturing_production_mom"
+      ]
+    },
+    {
+      "key": "IQ:pct_change_1d",
+      "stems": [
+        "bls.export_prices.all_commodities_mom"
+      ]
+    },
+    {
+      "key": "IR:pct_change_1d",
+      "stems": [
+        "bls.import_price_index.all_imports_mom"
+      ]
+    },
+    {
+      "key": "JTSHIR:level",
+      "stems": [
+        "bls.jolts.hires_rate"
+      ]
+    },
+    {
+      "key": "JTSJOL:level",
+      "stems": [
+        "bls.jolts.job_openings_total",
+        "bls.jolts.job_openings"
+      ]
+    },
+    {
+      "key": "MCUMFN:level",
+      "stems": [
+        "fed.g17.capacity_utilization.manufacturing"
+      ]
+    },
+    {
+      "key": "NONREVSLAR:level",
+      "stems": [
+        "fed.g19.consumer_credit_nonrevolving_annual_rate"
+      ]
+    },
+    {
+      "key": "PAYEMS:mom_diff",
+      "stems": [
+        "bls.ces.total_nonfarm_payroll_change"
+      ]
+    },
+    {
+      "key": "PCEPI:pct_change_1d",
+      "stems": [
+        "bea.pce_price_index.monthly_change"
+      ]
+    },
+    {
+      "key": "PCEPILFE:pct_change_1d",
+      "stems": [
+        "bea.pce.core_mom",
+        "us.bea.core_pce.mom_sa"
+      ]
+    },
+    {
+      "key": "PERMIT:level",
+      "stems": [
+        "census.housing.permits_saar"
+      ]
+    },
+    {
+      "key": "PPIFIS:pct_change_1d",
+      "stems": [
+        "bls.ppi.final_demand_monthly_change"
+      ]
+    },
+    {
+      "key": "PRS85006112:level",
+      "stems": [
+        "bls.productivity.nonfarm_unit_labor_costs_qoq_prelim"
+      ]
+    },
+    {
+      "key": "REVOLSLAR:level",
+      "stems": [
+        "fed.g19.consumer_credit_revolving_annual_rate"
+      ]
+    },
+    {
+      "key": "TCU:level",
+      "stems": [
+        "fed.g17.capacity_utilization.total_industry"
+      ]
+    },
+    {
+      "key": "TOTALSLAR:level",
+      "stems": [
+        "fed.g19.consumer_credit_total_annual_rate"
+      ]
+    },
+    {
+      "key": "TTLCONS:pct_change_1d",
+      "stems": [
+        "census.construction_spending.total_mom"
+      ]
+    },
+    {
+      "key": "U6RATE:level",
+      "stems": [
+        "bls.cps.u6_underemployment_rate"
+      ]
+    },
+    {
+      "key": "UNRATE:level",
+      "stems": [
+        "bls.cps.unemployment_rate"
+      ]
+    },
+    {
+      "key": "W055RC1:level",
+      "stems": [
+        "bea.personal_current_taxes.level"
+      ]
+    },
+    {
+      "key": "W729RC1:level",
+      "stems": [
+        "bea.government_social_benefits.medicaid"
+      ]
+    },
+    {
+      "key": "W823RC1:level",
+      "stems": [
+        "bea.government_social_benefits.social_security"
+      ]
+    },
+    {
+      "key": "W824RC1:level",
+      "stems": [
+        "bea.government_social_benefits.medicare"
+      ]
+    }
+  ],
+  "versusPersistenceLadder": {
+    "persistence": {
+      "coverage80": 0.8223495702005731,
+      "geometricMeanCrpsRatio": 1.12272431660075,
+      "interval95": {
+        "coverage80": [
+          0.7685703843163153,
+          0.8726765799256505
+        ],
+        "geometricMeanCrpsRatio": [
+          1.0759688134206438,
+          1.181094238918034
+        ],
+        "meanNormalizedCrps": [
+          0.4695786614562932,
+          0.7271189942862583
+        ],
+        "meanNormalizedCrpsDifference": [
+          0.001276842961581046,
+          0.10238547955592912
+        ],
+        "shareBeatingBaseline": [
+          0.3555917552817199,
+          0.4489045732906343
+        ]
+      },
+      "meanNormalizedCrps": 0.5840884349504134,
+      "meanNormalizedCrpsDifference": 0.03880037192094031,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.4040114613180516,
+      "targets": 1047
+    },
+    "persistence-ladder": {
+      "coverage80": 0.7936962750716332,
+      "geometricMeanCrpsRatio": 1.0,
+      "interval95": {
+        "coverage80": [
+          0.7422394561471575,
+          0.8430335330044633
+        ],
+        "geometricMeanCrpsRatio": [
+          1.0,
+          1.0
+        ],
+        "meanNormalizedCrps": [
+          0.45208131320840056,
+          0.6464846358768305
+        ],
+        "meanNormalizedCrpsDifference": [
+          0.0,
+          0.0
+        ],
+        "shareBeatingBaseline": [
+          0.0,
+          0.0
+        ]
+      },
+      "meanNormalizedCrps": 0.5452880630294731,
+      "meanNormalizedCrpsDifference": 0.0,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.0,
+      "targets": 1047
+    },
+    "stanli-ar1-diff-t": {
+      "coverage80": 0.7956064947468959,
+      "geometricMeanCrpsRatio": 0.9774002727349977,
+      "interval95": {
+        "coverage80": [
+          0.7386032753417362,
+          0.8470725919850011
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8777964529422891,
+          1.0476227301504712
+        ],
+        "meanNormalizedCrps": [
+          0.4335989270182687,
+          0.6000478059490092
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.07560165653442669,
+          0.0004921410139856862
+        ],
+        "shareBeatingBaseline": [
+          0.409441956223362,
+          0.4990938661710036
+        ]
+      },
+      "meanNormalizedCrps": 0.5111690113449132,
+      "meanNormalizedCrpsDifference": -0.034119051684559795,
+      "ratioTargets": 1047,
+      "samplerFailures": 10,
+      "series": 46,
+      "shareBeatingBaseline": 0.45272206303724927,
+      "targets": 1047
+    },
+    "stanli-ar1-diff-t-ladder": {
+      "coverage80": 0.7956064947468959,
+      "geometricMeanCrpsRatio": 0.9105610198013833,
+      "interval95": {
+        "coverage80": [
+          0.7386032753417362,
+          0.8470725919850011
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8147634859677608,
+          0.9773484592523104
+        ],
+        "meanNormalizedCrps": [
+          0.42541459101724444,
+          0.5992830865552343
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.0803335631651187,
+          -0.0034156404803828574
+        ],
+        "shareBeatingBaseline": [
+          0.49473698055784887,
+          0.5805509546355979
+        ]
+      },
+      "meanNormalizedCrps": 0.5066481912532785,
+      "meanNormalizedCrpsDifference": -0.03863987177619456,
+      "ratioTargets": 1047,
+      "samplerFailures": 10,
+      "series": 46,
+      "shareBeatingBaseline": 0.5367717287488061,
+      "targets": 1047
+    },
+    "stanli-ar1-t": {
+      "coverage80": 0.7936962750716332,
+      "geometricMeanCrpsRatio": 0.9778914735841605,
+      "interval95": {
+        "coverage80": [
+          0.7335119344917326,
+          0.8489546371167573
+        ],
+        "geometricMeanCrpsRatio": [
+          0.9305904381885401,
+          1.0276401792743257
+        ],
+        "meanNormalizedCrps": [
+          0.4191554656602107,
+          0.6291618352917774
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.061114382372445014,
+          0.0036846746872598803
+        ],
+        "shareBeatingBaseline": [
+          0.43360799486291207,
+          0.5454567477096547
+        ]
+      },
+      "meanNormalizedCrps": 0.514725431384509,
+      "meanNormalizedCrpsDifference": -0.030562631644964162,
+      "ratioTargets": 1047,
+      "samplerFailures": 22,
+      "series": 46,
+      "shareBeatingBaseline": 0.4909264565425024,
+      "targets": 1047
+    },
+    "stanli-ar1-t-ladder": {
+      "coverage80": 0.7936962750716332,
+      "geometricMeanCrpsRatio": 0.9154337356265105,
+      "interval95": {
+        "coverage80": [
+          0.7335119344917326,
+          0.8489546371167573
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8690089638041517,
+          0.9671486723954922
+        ],
+        "meanNormalizedCrps": [
+          0.4119788627091683,
+          0.6318028837742694
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.06496188767894258,
+          0.0034437949194109506
+        ],
+        "shareBeatingBaseline": [
+          0.508828950635768,
+          0.6185880765255058
+        ]
+      },
+      "meanNormalizedCrps": 0.5120234136555565,
+      "meanNormalizedCrpsDifference": -0.03326464937391666,
+      "ratioTargets": 1047,
+      "samplerFailures": 22,
+      "series": 46,
+      "shareBeatingBaseline": 0.5644699140401146,
+      "targets": 1047
+    },
+    "stanli-rw-drift-t": {
+      "coverage80": 0.8013371537726839,
+      "geometricMeanCrpsRatio": 1.0964491759077193,
+      "interval95": {
+        "coverage80": [
+          0.7481051761808655,
+          0.8502847174091109
+        ],
+        "geometricMeanCrpsRatio": [
+          1.077540549072767,
+          1.1158000900033895
+        ],
+        "meanNormalizedCrps": [
+          0.4622637890018651,
+          0.6485628169580853
+        ],
+        "meanNormalizedCrpsDifference": [
+          0.00019021810930874462,
+          0.011545364228925286
+        ],
+        "shareBeatingBaseline": [
+          0.338040116150617,
+          0.428717029871742
+        ]
+      },
+      "meanNormalizedCrps": 0.5513074265433285,
+      "meanNormalizedCrpsDifference": 0.00601936351385543,
+      "ratioTargets": 1047,
+      "samplerFailures": 2,
+      "series": 46,
+      "shareBeatingBaseline": 0.38299904489016234,
+      "targets": 1047
+    },
+    "stanli-rw-drift-t-ladder": {
+      "coverage80": 0.8013371537726839,
+      "geometricMeanCrpsRatio": 1.0226479560269306,
+      "interval95": {
+        "coverage80": [
+          0.7481051761808655,
+          0.8502847174091109
+        ],
+        "geometricMeanCrpsRatio": [
+          1.0111468886562094,
+          1.0328836279250457
+        ],
+        "meanNormalizedCrps": [
+          0.45438246792381154,
+          0.6492501896952977
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.0006497184889405683,
+          0.004880705256606299
+        ],
+        "shareBeatingBaseline": [
+          0.38232558139534883,
+          0.47694132581862053
+        ]
+      },
+      "meanNormalizedCrps": 0.5472075555498532,
+      "meanNormalizedCrpsDifference": 0.001919492520380143,
+      "ratioTargets": 1047,
+      "samplerFailures": 2,
+      "series": 46,
+      "shareBeatingBaseline": 0.4278892072588348,
+      "targets": 1047
+    },
+    "stanli-selected": {
+      "coverage80": 0.792741165234002,
+      "geometricMeanCrpsRatio": 0.9358766159848769,
+      "interval95": {
+        "coverage80": [
+          0.7364124595116481,
+          0.8443208102758153
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8559383068541101,
+          1.002165914002472
+        ],
+        "meanNormalizedCrps": [
+          0.41569359531924654,
+          0.5929688002765324
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.08342005834398691,
+          -0.013709555090583173
+        ],
+        "shareBeatingBaseline": [
+          0.44794224171853264,
+          0.5479181757054418
+        ]
+      },
+      "meanNormalizedCrps": 0.4983649867407914,
+      "meanNormalizedCrpsDifference": -0.046923076288681725,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.498567335243553,
+      "targets": 1047
+    },
+    "stanli-selected-ladder": {
+      "coverage80": 0.792741165234002,
+      "geometricMeanCrpsRatio": 0.8716098231923655,
+      "interval95": {
+        "coverage80": [
+          0.7364124595116481,
+          0.8443208102758153
+        ],
+        "geometricMeanCrpsRatio": [
+          0.7954107653889887,
+          0.935049132752864
+        ],
+        "meanNormalizedCrps": [
+          0.4083373665056748,
+          0.5912764475381103
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.0863480791403903,
+          -0.016181746159305607
+        ],
+        "shareBeatingBaseline": [
+          0.5275874291789417,
+          0.6204071316490621
+        ]
+      },
+      "meanNormalizedCrps": 0.4943913911751228,
+      "meanNormalizedCrpsDifference": -0.05089667185435029,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.5749761222540593,
+      "targets": 1047
+    },
+    "stanli-selected-noskip": {
+      "coverage80": 0.7994269340974212,
+      "geometricMeanCrpsRatio": 0.9246732988057472,
+      "interval95": {
+        "coverage80": [
+          0.7445929130666589,
+          0.8487590994976052
+        ],
+        "geometricMeanCrpsRatio": [
+          0.8267298935765429,
+          1.0014539289868523
+        ],
+        "meanNormalizedCrps": [
+          0.4117953857626834,
+          0.5837468241158796
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.09652566751064466,
+          -0.0146510478866339
+        ],
+        "shareBeatingBaseline": [
+          0.4502796367112811,
+          0.5519065309531738
+        ]
+      },
+      "meanNormalizedCrps": 0.492649209945124,
+      "meanNormalizedCrpsDifference": -0.05263885308434903,
+      "ratioTargets": 1047,
+      "samplerFailures": 13,
+      "series": 46,
+      "shareBeatingBaseline": 0.501432664756447,
+      "targets": 1047
+    },
+    "stanli-selected-noskip-ladder": {
+      "coverage80": 0.7994269340974212,
+      "geometricMeanCrpsRatio": 0.861179889105821,
+      "interval95": {
+        "coverage80": [
+          0.7445929130666589,
+          0.8487590994976052
+        ],
+        "geometricMeanCrpsRatio": [
+          0.7673227885208713,
+          0.9338547122578896
+        ],
+        "meanNormalizedCrps": [
+          0.40446841676557,
+          0.5825207881883244
+        ],
+        "meanNormalizedCrpsDifference": [
+          -0.10129534095163911,
+          -0.017780627445369644
+        ],
+        "shareBeatingBaseline": [
+          0.5299760201563957,
+          0.624434693052291
+        ]
+      },
+      "meanNormalizedCrps": 0.4884490740393974,
+      "meanNormalizedCrpsDifference": -0.056838988990075646,
+      "ratioTargets": 1047,
+      "samplerFailures": 13,
+      "series": 46,
+      "shareBeatingBaseline": 0.5778414517669532,
+      "targets": 1047
+    },
+    "statsmodels": {
+      "coverage80": 0.8404966571155683,
+      "geometricMeanCrpsRatio": 1.3193504470294366,
+      "interval95": {
+        "coverage80": [
+          0.7909002904162633,
+          0.8842026293806113
+        ],
+        "geometricMeanCrpsRatio": [
+          1.2030866799152942,
+          1.468924067878812
+        ],
+        "meanNormalizedCrps": [
+          0.49421944671157847,
+          0.6636272583522352
+        ],
+        "meanNormalizedCrpsDifference": [
+          0.015784359663605734,
+          0.044760351403399845
+        ],
+        "shareBeatingBaseline": [
+          0.2883661805281829,
+          0.40650525270571547
+        ]
+      },
+      "meanNormalizedCrps": 0.5755416730088276,
+      "meanNormalizedCrpsDifference": 0.030253609979354612,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.3467048710601719,
+      "targets": 1047
+    },
+    "statsmodels-ladder": {
+      "coverage80": 0.8404966571155683,
+      "geometricMeanCrpsRatio": 1.2395003183059565,
+      "interval95": {
+        "coverage80": [
+          0.7909002904162633,
+          0.8842026293806113
+        ],
+        "geometricMeanCrpsRatio": [
+          1.1388148091373467,
+          1.3679764029608172
+        ],
+        "meanNormalizedCrps": [
+          0.48101958669833567,
+          0.6588787187638612
+        ],
+        "meanNormalizedCrpsDifference": [
+          0.010876218244641361,
+          0.03183578699200208
+        ],
+        "shareBeatingBaseline": [
+          0.3170843190392098,
+          0.4177915679157936
+        ]
+      },
+      "meanNormalizedCrps": 0.566410654005296,
+      "meanNormalizedCrpsDifference": 0.021122590975822895,
+      "ratioTargets": 1047,
+      "samplerFailures": 0,
+      "series": 46,
+      "shareBeatingBaseline": 0.3667621776504298,
+      "targets": 1047
+    }
+  },
+  "warningSplit": {
+    "stanli-ar1-diff-t": {
+      "persistence-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8938191164532155,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.6191784763221715,
+          "targets": 10
+        }
+      },
+      "stanli-ar1-diff-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8837426079341846,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.1832334147583692,
+          "targets": 10
+        }
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8225957639665816,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.186734522028392,
+          "targets": 10
+        }
+      },
+      "stanli-ar1-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8720917938655637,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.764777869416335,
+          "targets": 10
+        }
+      },
+      "stanli-ar1-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8160529266611612,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.7473959149198233,
+          "targets": 10
+        }
+      },
+      "stanli-rw-drift-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.980808815936289,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.6250312131123725,
+          "targets": 10
+        }
+      },
+      "stanli-rw-drift-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.9142980328135067,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.6164934290576958,
+          "targets": 10
+        }
+      },
+      "stanli-selected": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8358941566372716,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.6250312131123725,
+          "targets": 10
+        }
+      },
+      "stanli-selected-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.7780624739274639,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.6164934290576958,
+          "targets": 10
+        }
+      },
+      "stanli-selected-noskip": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8353461227745274,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.1895955591523138,
+          "targets": 10
+        }
+      },
+      "stanli-selected-noskip-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.7773516969837263,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.19217306950337976,
+          "targets": 10
+        }
+      },
+      "statsmodels": {
+        "clean": {
+          "geometricMeanCrpsRatio": 1.179986098061843,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.7664423244117003,
+          "targets": 10
+        }
+      },
+      "statsmodels-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 1.108116103921681,
+          "targets": 1037
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.751336967940731,
+          "targets": 10
+        }
+      }
+    },
+    "stanli-ar1-t": {
+      "persistence-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8917700552731361,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.8418203088111441,
+          "targets": 22
+        }
+      },
+      "stanli-ar1-diff-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8694461217949944,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9241325427091812,
+          "targets": 22
+        }
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.809974741547357,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.8616564708686039,
+          "targets": 22
+        }
+      },
+      "stanli-ar1-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8691534050058792,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9614620910837061,
+          "targets": 22
+        }
+      },
+      "stanli-ar1-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8137488524132653,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.8944995800402017,
+          "targets": 22
+        }
+      },
+      "stanli-rw-drift-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.9766068329348072,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9761379882099045,
+          "targets": 22
+        }
+      },
+      "stanli-rw-drift-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.9108021318560967,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9136998802321878,
+          "targets": 22
+        }
+      },
+      "stanli-selected": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8311169051332478,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9566167000038339,
+          "targets": 22
+        }
+      },
+      "stanli-selected-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.7739834737667332,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.8941763361190002,
+          "targets": 22
+        }
+      },
+      "stanli-selected-noskip": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8213669172226978,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9345411280091797,
+          "targets": 22
+        }
+      },
+      "stanli-selected-noskip-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.7651195515264899,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.8623278671213495,
+          "targets": 22
+        }
+      },
+      "statsmodels": {
+        "clean": {
+          "geometricMeanCrpsRatio": 1.1782299494554114,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 1.0395198318091803,
+          "targets": 22
+        }
+      },
+      "statsmodels-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 1.1067523277325346,
+          "targets": 1025
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9835543158011225,
+          "targets": 22
+        }
+      }
+    },
+    "stanli-rw-drift-t": {
+      "persistence-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8910602884402594,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.7170723332979693,
+          "targets": 2
+        }
+      },
+      "stanli-ar1-diff-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8707341496623796,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.7847537068474566,
+          "targets": 2
+        }
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8112422283677078,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.7065535639306014,
+          "targets": 2
+        }
+      },
+      "stanli-ar1-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8706110853928094,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 1.0990983240068857,
+          "targets": 2
+        }
+      },
+      "stanli-ar1-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8150461332392731,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 1.002330580964412,
+          "targets": 2
+        }
+      },
+      "stanli-rw-drift-t": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.9765566503260161,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9978981599850016,
+          "targets": 2
+        }
+      },
+      "stanli-rw-drift-t-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.9108463511121796,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9195646469186927,
+          "targets": 2
+        }
+      },
+      "stanli-selected": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8331635318341394,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 1.0799289669698977,
+          "targets": 2
+        }
+      },
+      "stanli-selected-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.7759614749328383,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9980706505624366,
+          "targets": 2
+        }
+      },
+      "stanli-selected-noskip": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.8232742313914277,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 1.0113188729302336,
+          "targets": 2
+        }
+      },
+      "stanli-selected-noskip-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 0.7667621422700611,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9299655735540191,
+          "targets": 2
+        }
+      },
+      "statsmodels": {
+        "clean": {
+          "geometricMeanCrpsRatio": 1.1753692485156877,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 1.0579885336746393,
+          "targets": 2
+        }
+      },
+      "statsmodels-ladder": {
+        "clean": {
+          "geometricMeanCrpsRatio": 1.1042416879496497,
+          "targets": 1045
+        },
+        "warned": {
+          "geometricMeanCrpsRatio": 0.9899696274128632,
+          "targets": 2
+        }
+      }
+    }
+  },
+  "windowsFrom": {
+    "arms": {
+      "persistence": {
+        "coverage80": 0.7835051546391752,
+        "geometricMeanCrpsRatio": 1.0,
+        "meanNormalizedCrps": 0.678048525783699,
+        "meanNormalizedCrpsDifference": 0.0,
+        "series": 42,
+        "shareBeatingBaseline": 0.0,
+        "targets": 97
+      },
+      "persistence-ladder": {
+        "coverage80": 0.7319587628865979,
+        "geometricMeanCrpsRatio": 0.9023716988317121,
+        "meanNormalizedCrps": 0.6455038011033951,
+        "meanNormalizedCrpsDifference": -0.032544724680303956,
+        "series": 42,
+        "shareBeatingBaseline": 0.6185567010309279,
+        "targets": 97
+      },
+      "stanli-ar1-diff-t": {
+        "coverage80": 0.7319587628865979,
+        "geometricMeanCrpsRatio": 0.8589898591146423,
+        "meanNormalizedCrps": 0.6392988940344031,
+        "meanNormalizedCrpsDifference": -0.03874963174929591,
+        "series": 42,
+        "shareBeatingBaseline": 0.5567010309278351,
+        "targets": 97
+      },
+      "stanli-ar1-diff-t-ladder": {
+        "coverage80": 0.7319587628865979,
+        "geometricMeanCrpsRatio": 0.8136402539100303,
+        "meanNormalizedCrps": 0.6374501198910726,
+        "meanNormalizedCrpsDifference": -0.04059840589262644,
+        "series": 42,
+        "shareBeatingBaseline": 0.6391752577319587,
+        "targets": 97
+      },
+      "stanli-ar1-t": {
+        "coverage80": 0.7525773195876289,
+        "geometricMeanCrpsRatio": 0.8768457487383464,
+        "meanNormalizedCrps": 0.6415288738649482,
+        "meanNormalizedCrpsDifference": -0.036519651918750826,
+        "series": 42,
+        "shareBeatingBaseline": 0.6804123711340206,
+        "targets": 97
+      },
+      "stanli-ar1-t-ladder": {
+        "coverage80": 0.7525773195876289,
+        "geometricMeanCrpsRatio": 0.8290608532646832,
+        "meanNormalizedCrps": 0.6414889157252707,
+        "meanNormalizedCrpsDifference": -0.03655961005842834,
+        "series": 42,
+        "shareBeatingBaseline": 0.6701030927835051,
+        "targets": 97
+      },
+      "stanli-rw-drift-t": {
+        "coverage80": 0.7525773195876289,
+        "geometricMeanCrpsRatio": 0.9570442784171582,
+        "meanNormalizedCrps": 0.6475433147151145,
+        "meanNormalizedCrpsDifference": -0.030505211068584573,
+        "series": 42,
+        "shareBeatingBaseline": 0.5360824742268041,
+        "targets": 97
+      },
+      "stanli-rw-drift-t-ladder": {
+        "coverage80": 0.7525773195876289,
+        "geometricMeanCrpsRatio": 0.9119959084777607,
+        "meanNormalizedCrps": 0.6467949443927642,
+        "meanNormalizedCrpsDifference": -0.03125358139093486,
+        "series": 42,
+        "shareBeatingBaseline": 0.6185567010309279,
+        "targets": 97
+      },
+      "stanli-selected": {
+        "coverage80": 0.7525773195876289,
+        "geometricMeanCrpsRatio": 0.8125535056873658,
+        "meanNormalizedCrps": 0.6212854676293466,
+        "meanNormalizedCrpsDifference": -0.05676305815435245,
+        "series": 42,
+        "shareBeatingBaseline": 0.6701030927835051,
+        "targets": 97
+      },
+      "stanli-selected-ladder": {
+        "coverage80": 0.7525773195876289,
+        "geometricMeanCrpsRatio": 0.7693993435629624,
+        "meanNormalizedCrps": 0.6202394771380698,
+        "meanNormalizedCrpsDifference": -0.05780904864562919,
+        "series": 42,
+        "shareBeatingBaseline": 0.6597938144329897,
+        "targets": 97
+      },
+      "stanli-selected-noskip": {
+        "coverage80": 0.7525773195876289,
+        "geometricMeanCrpsRatio": 0.8095592172529567,
+        "meanNormalizedCrps": 0.6205932048620902,
+        "meanNormalizedCrpsDifference": -0.057455320921608856,
+        "series": 42,
+        "shareBeatingBaseline": 0.6701030927835051,
+        "targets": 97
+      },
+      "stanli-selected-noskip-ladder": {
+        "coverage80": 0.7525773195876289,
+        "geometricMeanCrpsRatio": 0.7647909243713955,
+        "meanNormalizedCrps": 0.6192947051277279,
+        "meanNormalizedCrpsDifference": -0.05875382065597118,
+        "series": 42,
+        "shareBeatingBaseline": 0.6597938144329897,
+        "targets": 97
+      },
+      "statsmodels": {
+        "coverage80": 0.8041237113402062,
+        "geometricMeanCrpsRatio": 1.0193487270797867,
+        "meanNormalizedCrps": 0.652254694248448,
+        "meanNormalizedCrpsDifference": -0.02579383153525107,
+        "series": 42,
+        "shareBeatingBaseline": 0.4742268041237113,
+        "targets": 97
+      },
+      "statsmodels-ladder": {
+        "coverage80": 0.8041237113402062,
+        "geometricMeanCrpsRatio": 0.9773230890052813,
+        "meanNormalizedCrps": 0.649450036965122,
+        "meanNormalizedCrpsDifference": -0.028598488818577038,
+        "series": 42,
+        "shareBeatingBaseline": 0.5051546391752577,
+        "targets": 97
+      }
+    },
+    "windowStartFrom": "2021-07"
+  }
+}
