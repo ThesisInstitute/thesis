@@ -96,7 +96,8 @@ Scheduled release is the reference week plus the lag. The resolver's claims
 leg reads the forecast's published `resolutionDate`, waits for that day,
 then reads the ALFRED vintage dated that day
 (`pending_claims_refs` and `fred_advance_value` in
-`scripts/resolve_pending.py`). It never reads the window. DOL revises each
+`scripts/resolve_pending.py`; since #345 the leg reads through
+`ClaimsVintages.first_print`, and `fred_advance_value` is gone). It never reads the window. DOL revises each
 week's figure in the next release, 7 days later.
 
 Status as of 2026-10-12, with the row appended on 2026-10-18. "First print"

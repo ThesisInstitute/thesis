@@ -17,6 +17,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from alfred_vintage import AlfredVintageError, alfred_vintage_label
 from canonical_json import canonical_bytes, canonical_sha256
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -993,7 +994,8 @@ def read_alfred_claims_vintage(
     2026-09-24 (~/reviews/thesis-weekly-claims-2026-10/header_survey/). So a
     response is read as ALFRED's vintage of its label, which must be a real
     date no later than the requested one; a label after it is another
-    vintage and is refused. What a read must show about its label is
+    vintage and is refused (alfred_vintage.alfred_vintage_label, the header
+    reader every ALFRED leg shares). What a read must show about its label is
     judge_claims_first_print's rule, by role.
     """
 
@@ -1004,18 +1006,7 @@ def read_alfred_claims_vintage(
     lines = [line.rstrip("\r") for line in lines]
     while lines and not lines[-1]:
         lines.pop()
-    header = lines[0] if lines else ""
-    match = re.fullmatch(rf"observation_date,{re.escape(series_id)}_(\d{{8}})", header)
-    label = None
-    if match:
-        try:
-            label = datetime.strptime(match.group(1), "%Y%m%d").date()
-        except ValueError:
-            label = None
-    if label is None or label > date.fromisoformat(day):
-        raise ValueError(
-            f"ALFRED {series_id} {day} is not a vintage CSV (header {header[:60]!r})"
-        )
+    label = alfred_vintage_label(raw, series_id, date.fromisoformat(day))
     rows: dict[str, float] = {}
     expected = date.fromisoformat(CLAIMS_SERIES_FIRST_WEEK[series_id])
     for number, line in enumerate(lines[1:], start=2):
@@ -1090,6 +1081,14 @@ CLAIMS_LABEL_LAG = {
     "release_day": (0, "the week as printed on DOL's release day"),
     "vintage_after_release": (1, "the release day's print a day later"),
 }
+# The same rule for the generic ALFRED leg (resolve_pending.ALFRED_ADAPTERS):
+# a cell resolves to the period as ALFRED printed it on the cell's
+# resolutionDate, so its read must be ALFRED's vintage of that very day. An
+# earlier day's vintage may lack the period, or print it before a revision
+# made on that day. resolve_pending.read_alfred_vintage_of takes rows only
+# from such a response, and _verify_resolver_alfred_labels replays the rule
+# on every resolver fact archived from an ALFRED response.
+ALFRED_VINTAGE_LABEL_LAG = 0
 
 
 def claims_vintages_consistent(
@@ -2824,6 +2823,75 @@ def _verify_legacy_derived_without_root(
     )
 
 
+# A response whose header names an ALFRED vintage. The series token takes
+# the archive-name alphabet, so an id with digits, "_" or "." is judged too
+# (backtracking splits PAYEMS_X_20261002 at its last "_"), and
+# alfred_vintage_label then holds the header to exactly that series.
+_ALFRED_VINTAGE_HEADER = re.compile(rb"observation_date,([A-Za-z0-9._-]+)_[0-9]{8}")
+
+
+def _verify_resolver_alfred_labels(run_dir: Path, manifest: dict[str, Any]) -> int:
+    """Each fact read from an ALFRED vintage holds ALFRED's vintage of its day.
+
+    ALFRED sometimes answers a request for one day with an earlier day's
+    vintage and names that day in the header (scripts/alfred_vintage.py).
+    A fact's own response is the read its value came from: the generic leg's
+    read of the resolutionDate (ALFRED_VINTAGE_LABEL_LAG) or, for a weekly
+    claims fact, the claims leg's release-day read
+    (CLAIMS_LABEL_LAG["release_day"]). So a fact's own response whose header
+    names an ALFRED vintage must name its sourceVintage, less that lag, and
+    be archived under its series and sourceVintage. Responses with any other
+    header are another adapter's and are not judged here; the claims leg's
+    other reads are judge_claims_first_print's. Returns how many facts it
+    judged.
+    """
+
+    judged = 0
+    for fact in manifest["facts"]:
+        declared = str(fact["responseArchive"].get("path", ""))
+        relative = _manifest_relative(run_dir, declared, legacy=False)
+        raw = gzip.decompress(_safe_artifact_path(run_dir, relative).read_bytes())
+        # rstrip, as alfred_vintage_label reads the header.
+        header = raw.split(b"\n", 1)[0].rstrip(b"\r")
+        match = _ALFRED_VINTAGE_HEADER.fullmatch(header)
+        if match is None:
+            continue
+        judged += 1
+        series = match.group(1).decode("ascii")
+        record = str(fact.get("dataPointId"))
+        try:
+            # Exactly YYYY-MM-DD, as _verify_first_print_evidence reads it.
+            vintage = datetime.strptime(
+                str(fact.get("sourceVintage")), "%Y-%m-%d"
+            ).date()
+        except ValueError as exc:
+            raise CustodyError(
+                f"resolver fact {record} has no sourceVintage date for its ALFRED "
+                f"response {relative}"
+            ) from exc
+        name = PurePosixPath(relative).name
+        if not name.startswith(f"{series.lower()}-{vintage.isoformat()}-"):
+            raise CustodyError(
+                f"resolver fact {record} archives ALFRED {series} of {vintage} "
+                f"as {relative}"
+            )
+        try:
+            label = alfred_vintage_label(raw, series, vintage)
+        except AlfredVintageError as exc:
+            raise CustodyError(f"resolver fact {record}: {exc}") from exc
+        days = (
+            CLAIMS_LABEL_LAG["release_day"][0]
+            if CLAIMS_RECORD_RE.match(record)
+            else ALFRED_VINTAGE_LABEL_LAG
+        )
+        if label < vintage - timedelta(days=days):
+            raise CustodyError(
+                f"resolver fact {record} keeps ALFRED's {series} vintage of "
+                f"{label} as its vintage of {vintage}: {relative}"
+            )
+    return judged
+
+
 def verify_run(run_dir: Path) -> CustodyVerification:
     run_dir = run_dir.resolve()
     root_path = run_dir / "custody_root.json"
@@ -3055,6 +3123,7 @@ def verify_run(run_dir: Path) -> CustodyVerification:
             _verify_analyst_v2(run_dir, manifest, manifest_entries, normalized_entries)
         elif run_mode == "resolver":
             _verify_resolver_v2(run_dir, manifest, normalized_entries)
+            _verify_resolver_alfred_labels(run_dir, manifest)
         elif run_mode == "ledger_witness":
             _verify_ledger_witness_v2(run_dir, manifest, normalized_entries)
         elif run_mode == "sba_pdf_witness":

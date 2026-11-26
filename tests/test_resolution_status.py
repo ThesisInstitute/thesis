@@ -243,7 +243,7 @@ def test_without_append_evidence_the_status_does_not_claim_the_ledger_lacks_it()
         # R22 finding 3: each line is the resolver's own format; the case
         # beside it is what the reviewer executed through the resolver.
         (
-            # fred_advance_value on HTTP 503 prints "not yet published".
+            # The generic ALFRED leg on HTTP 503 prints "not yet published".
             "not yet published: {ref}",
             "NOT_YET_PUBLISHED",
             "had not published",
@@ -627,6 +627,22 @@ def test_the_resolver_still_prints_the_shapes_this_file_reads():
     heads = {shape[0][1].split(":")[0].strip() for shape in TARGET_TEMPLATES}
     for head in ("CATALOG REFUSED (excluded from append)", "already recorded"):
         assert head in heads
+
+
+def test_the_generic_alfred_heads_are_printed_as_the_reader_names_them():
+    """The main loop spells out each head its ALFRED reader returns, so the
+    differential below reads them, and each spelling is the constant."""
+    import resolve_pending
+
+    heads = {shape[0][1].split(":")[0].strip() for shape in TARGET_TEMPLATES}
+    for head in (
+        resolve_pending.ALFRED_VINTAGE_LAGGED,
+        resolve_pending.ALFRED_VINTAGE_NOT_REACHED,
+        resolve_pending.ALFRED_READ_FAILED,
+    ):
+        assert head in heads
+        state, _code = rs._classify(head)
+        assert state in {"deferred", "fetch_failed"}
 
 
 @settings(max_examples=300, deadline=None)

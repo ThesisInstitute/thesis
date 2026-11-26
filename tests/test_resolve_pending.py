@@ -134,9 +134,12 @@ def test_wave1_bea_first_print_fixtures_are_hash_pinned_and_parse(
     raw = (ROOT / relative_fixture).read_bytes()
     assert len(raw) == byte_length
     assert hashlib.sha256(raw).hexdigest() == sha256
-    assert resolve_pending.parse_fred_vintage_csv(raw, series_id, vintage_date) == {
-        observation_date: value
-    }
+    label, rows = resolve_pending.read_alfred_vintage(
+        raw, series_id, dt.date.fromisoformat(vintage_date)
+    )
+    # Each fixture is ALFRED's vintage of the first-print day it is read for.
+    assert label == dt.date.fromisoformat(vintage_date)
+    assert rows == {observation_date: value}
 
     request = json.loads(
         (ROOT / "drafts" / "ledger-ingestion" / request_name).read_text()
