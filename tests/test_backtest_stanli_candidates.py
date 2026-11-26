@@ -101,6 +101,83 @@ def test_crps_port_matches_the_site_scorer(tmp_path):
         assert pit == site["probabilityIntegralTransform"]
 
 
+@pytest.mark.parametrize(
+    "value, rounded",
+    [
+        # 1 + 2**-12 is 1.000244140625 exactly: a tie at the 13th digit.
+        (1 + 2**-12, 1.00024414063),
+        (-(1 + 2**-12), -1.00024414063),
+        (0.5 + 2**-13, 0.500122070313),
+        (2 / 3, 0.666666666667),
+        (-0.0, 0.0),
+    ],
+)
+def test_round_distribution_number_breaks_exact_ties_away_from_zero(value, rounded):
+    assert backtest.round_distribution_number(value) == rounded
+    assert math.copysign(1, backtest.round_distribution_number(value)) == (
+        math.copysign(1, rounded)
+    )
+
+
+@pytest.mark.skipif(shutil.which("bun") is None, reason="bun missing")
+def test_rounding_and_crps_ports_break_ties_as_javascript_does(tmp_path):
+    # Differential at exact ties, where Python's format rounds to even and
+    # JavaScript's toPrecision rounds away from zero.
+    rng = random.Random(12)
+    values = [
+        1 + 2**-12,
+        -(1 + 2**-12),
+        3 + 2**-12,
+        0.5 + 2**-13,
+        1e21 + 2**20,
+        0.0,
+        *(rng.uniform(-1e6, 1e6) for _ in range(50)),
+        *(rng.uniform(-1, 1) * 10.0 ** rng.randint(-20, 20) for _ in range(50)),
+    ]
+    uniform = {
+        "pointCount": 201,
+        "points": [
+            {"value": 3 * index / 200, "probability": index / 200}
+            for index in range(201)
+        ],
+    }
+    observed = 3 + 2**-12
+    harness = tmp_path / "ties.ts"
+    module = (ROOT / "site/src/data/prediction-distribution.ts").as_posix()
+    harness.write_text(
+        f'import {{ scoreNumericCdfDistribution }} from "{module}";\n'
+        "const input = JSON.parse(await Bun.stdin.text());\n"
+        "console.log(JSON.stringify({\n"
+        "  rounded: input.values.map((v: number) => Number(v.toPrecision(12)) + 0),\n"
+        "  score: scoreNumericCdfDistribution(input.uniform, input.observed),\n"
+        "}));\n"
+    )
+    result = subprocess.run(
+        ["bun", "run", str(harness)],
+        input=json.dumps({"values": values, "uniform": uniform, "observed": observed}),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    site = json.loads(result.stdout)
+
+    assert [backtest.round_distribution_number(v) for v in values] == site["rounded"]
+    crps, pit = backtest.score_numeric_cdf(uniform["points"], observed)
+    assert crps == site["score"]["crps"]
+    assert pit == site["score"]["probabilityIntegralTransform"]
+
+
+def test_step_sd_applies_the_site_relative_floor():
+    # Equal changes leave float residue near 1e-16, which the site refuses.
+    assert backtest.step_sd([1.814, 1.805, 1.796]) is None
+    assert backtest.step_sd([5.0, 5.0, 5.0, 5.0]) is None
+    assert backtest.step_sd([1.0, 2.0]) is None
+    assert backtest.step_sd([1.0, 2.0, 4.0, 5.0]) == statistics.stdev([1.0, 2.0, 1.0])
+    site = (ROOT / "site/src/data/thesis-log.ts").read_text()
+    assert "export const NORMALIZATION_SCALE_RELATIVE_FLOOR = 1e-12;" in site
+    assert backtest.NORMALIZATION_SCALE_RELATIVE_FLOOR == 1e-12
+
+
 def test_persistence_interval_uses_the_80th_percentile_absolute_change():
     # |changes| = 1, 2, 4, 8: the 0.8 quantile interpolates 4 and 8 at 0.4.
     point, low, high = backtest.persistence_interval([0, 1, 3, 7, 15])
@@ -130,6 +207,18 @@ def test_parse_vintage_csv_reads_each_vintage_column():
         "2026-08-01": {"2026-06-01": 4.2},
         "2026-10-01": {"2026-06-01": 4.2, "2026-07-01": 4.1, "2026-08-01": 4.1},
     }
+
+
+def test_parse_vintage_csv_refuses_a_row_cut_short():
+    # Explicit missing cells parse; a row with fewer cells than the header
+    # would otherwise lose its last vintages silently.
+    text = "observation_date,X_20260101,X_20260116\n2025-11-01,.,\n2025-12-01,1\n"
+    with pytest.raises(ValueError, match="row 3 has 2 cells, not the header's 3"):
+        backtest.parse_vintage_csv(text)
+    with pytest.raises(ValueError, match="row 2 has 4 cells"):
+        backtest.parse_vintage_csv(
+            "observation_date,X_20260101,X_20260116\n2025-12-01,1,2,3\n"
+        )
 
 
 def test_adapter_series_dedupes_unit_variants():
@@ -205,6 +294,26 @@ def test_differenced_targets_use_the_release_vintage_for_both_months():
     assert by_period["2024-03"].history == (pytest.approx(1.0),)
     assert by_period["2024-04"].outcome == pytest.approx(0.5)
     assert by_period["2024-05"].outcome == pytest.approx(0.4)
+
+
+def test_a_later_vintage_cannot_change_which_targets_are_one_step_ahead():
+    # Cadence comes from each target's training vintage. Read from the last
+    # vintage, a later one that held only quarters made every monthly target
+    # look two steps ahead.
+    before = real_time("level", VINTAGES)
+    vintages = dict(VINTAGES)
+    vintages["2024-09-16"] = {
+        "2023-07-01": 0.5,
+        "2023-10-01": 0.7,
+        "2024-01-01": 1.0,
+        "2024-04-01": 4.0,
+        "2024-07-01": 4.6,
+    }
+    after = real_time("level", vintages)
+
+    assert [(t.period, t.history, t.outcome) for t in after] == [
+        (t.period, t.history, t.outcome) for t in before
+    ]
 
 
 def test_period_type_reads_quarterly_spacing():
@@ -476,6 +585,40 @@ def test_fetch_vintages_caches_a_download_only_after_it_parses(tmp_path):
     )
 
 
+def test_fetch_vintages_checks_downloads_and_cached_chunks_alike(tmp_path):
+    dates = backtest.vintage_grid(dt.date(2025, 1, 1), dt.date(2025, 2, 1))
+    today = dt.date(2025, 3, 1)
+    header, row = alfred_csv(dates).splitlines()
+    cut_short = f"{header}\n{row.rsplit(',', 1)[0]}\n"
+
+    def truncated(request, timeout):
+        return FakeResponse(cut_short.encode())
+
+    download_dir = tmp_path / "download"
+    with pytest.raises(ValueError, match="cells, not the header's"):
+        backtest.fetch_vintages(
+            "TEST", dates, download_dir, pause=0, today=today, opener=truncated
+        )
+    assert list(download_dir.iterdir()) == []
+
+    def offline(request, timeout):
+        raise AssertionError("a cached chunk must not download again")
+
+    cache_dir = tmp_path / "cache"
+    cache_dir.mkdir()
+    cached = cache_dir / "TEST_2025-01-01_2025-02-01_3.csv"
+    cached.write_text(cut_short)
+    with pytest.raises(ValueError, match="cells, not the header's"):
+        backtest.fetch_vintages(
+            "TEST", dates, cache_dir, pause=0, today=today, opener=offline
+        )
+    cached.write_text(alfred_csv(dates[:-1]))
+    with pytest.raises(ValueError, match="cached file .* holds vintages"):
+        backtest.fetch_vintages(
+            "TEST", dates, cache_dir, pause=0, today=today, opener=offline
+        )
+
+
 def test_fetch_vintages_refuses_a_vintage_that_may_still_change(tmp_path):
     with pytest.raises(ValueError, match="may still change"):
         backtest.fetch_vintages(
@@ -503,6 +646,30 @@ def test_persistence_ladder_rises_strictly_from_the_last_print(steps):
     for index, (level, rung) in enumerate(zip(backtest.QUANTILE_LEVELS, rungs)):
         target = history[-1] + backtest.ts_quantile(changes, level)
         assert target - 1e-9 <= rung <= target + index * nudge + 1e-9
+
+
+@given(
+    magnitude=st.sampled_from([1.0, 1e6, 1e14, 1e15, 2.0**53, 1e300]),
+    steps=st.lists(st.integers(min_value=-2, max_value=2), min_size=2, max_size=20),
+)
+def test_persistence_ladder_rises_strictly_at_any_magnitude(magnitude, steps):
+    # A thousandth of the grid can fall below the float spacing at large
+    # magnitudes, where a tied rung must still move up.
+    history = [magnitude]
+    for step in steps:
+        history.append(history[-1] + step)
+    rungs = backtest.persistence_ladder(history)
+    levels = list(backtest.QUANTILE_LEVELS)
+
+    assert all(math.isfinite(rung) for rung in rungs)
+    assert all(upper > lower for lower, upper in zip(rungs, rungs[1:]))
+    cell = {
+        "pointEstimate": rungs[levels.index(0.5)],
+        "ciLow": rungs[levels.index(0.1)],
+        "ciHigh": rungs[levels.index(0.9)],
+        "thresholdLadder": {"thresholds": rungs, "cumulativeProbabilities": levels},
+    }
+    assert analyst.ladder_validation_errors(cell) == []
 
 
 def test_persistence_ladder_passes_the_analyst_ladder_check():

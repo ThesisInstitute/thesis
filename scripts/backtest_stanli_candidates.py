@@ -56,6 +56,7 @@ import argparse
 import concurrent.futures
 import csv
 import datetime as dt
+import decimal
 import gzip
 import io
 import json
@@ -90,6 +91,10 @@ ALFRED_CSV = (
 VINTAGES_PER_REQUEST = 12
 GENERATED_AT = "2026-11-02T00:00:00Z"
 NORMAL_Z90 = statistics.NormalDist().inv_cdf(0.9)
+# NORMALIZATION_SCALE_RELATIVE_FLOOR in site/src/data/thesis-log.ts: a step
+# scale at or below this fraction of the history's largest absolute print is
+# float residue, not dispersion, and the site gives no normalized score.
+NORMALIZATION_SCALE_RELATIVE_FLOOR = 1e-12
 # Arm pairs the summary compares head to head, in both shapes: the selection
 # rule against a fixed program, and the rule against itself without the skip.
 PAIRED_COMPARISONS = (
@@ -116,9 +121,21 @@ POST_PANDEMIC_WINDOW_START = "2021-07"
 
 
 def round_distribution_number(value: float) -> float:
-    """roundDistributionNumber: JavaScript Number(value.toPrecision(12)) + 0."""
+    """roundDistributionNumber: JavaScript Number(value.toPrecision(12)) + 0.
 
-    return float(format(value, ".12g")) + 0.0
+    toPrecision rounds the exact binary value to 12 significant digits and
+    breaks an exact tie away from zero, where Python's format would round it
+    to even.
+    """
+
+    if not math.isfinite(value) or value == 0:
+        return value + 0.0
+    exact = decimal.Decimal(value)
+    step = decimal.Decimal(1).scaleb(exact.adjusted() - 11)
+    rounded = exact.quantize(
+        step, rounding=decimal.ROUND_HALF_UP, context=decimal.Context(prec=50)
+    )
+    return float(rounded) + 0.0
 
 
 def score_numeric_cdf(
@@ -285,7 +302,14 @@ def parse_vintage_csv(text: str) -> dict[str, dict[str, float]]:
         stamp = column.rsplit("_", 1)[-1]
         vintages.append(f"{stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}")
     rows: dict[str, dict[str, float]] = {vintage: {} for vintage in vintages}
-    for record in reader:
+    for line, record in enumerate(reader, start=2):
+        if len(record) != len(header):
+            # zip would drop the missing cells, so a cut-off row would read as
+            # vintages without that period.
+            raise ValueError(
+                f"ALFRED row {line} has {len(record)} cells, not the header's "
+                f"{len(header)}"
+            )
         for vintage, cell in zip(vintages, record[1:]):
             if cell not in ("", "."):
                 rows[vintage][record[0]] = float(cell)
@@ -304,9 +328,9 @@ def fetch_vintages(
     """Download (or read cached) vintages, VINTAGES_PER_REQUEST at a time.
 
     A past ALFRED vintage never changes, so a cached chunk never goes stale.
-    The script refuses vintage dates from today on, which can still change,
-    and caches a download only after it parses and holds every vintage it
-    asked for.
+    The script refuses vintage dates from today on, which can still change.
+    It checks every chunk, downloaded or cached, for its vintage labels and
+    CSV row widths, and caches a download only after that check passes.
     """
 
     today = today or dt.date.today()
@@ -319,7 +343,8 @@ def fetch_vintages(
     for offset in range(0, len(dates), VINTAGES_PER_REQUEST):
         chunk = dates[offset : offset + VINTAGES_PER_REQUEST]
         path = cache_dir / f"{series}_{chunk[0]}_{chunk[-1]}_{len(chunk)}.csv"
-        if path.exists():
+        cached = path.exists()
+        if cached:
             text = path.read_text()
         else:
             url = ALFRED_CSV.format(
@@ -331,17 +356,18 @@ def fetch_vintages(
             )
             with opener(request, timeout=90) as response:
                 text = response.read().decode()
-            received = sorted(parse_vintage_csv(text))
-            wanted = [date.isoformat() for date in chunk]
-            if received != wanted:
-                raise ValueError(
-                    f"ALFRED sent vintages {received} for {series}, not {wanted}"
-                )
+        parsed = parse_vintage_csv(text)
+        received = sorted(parsed)
+        wanted = [date.isoformat() for date in chunk]
+        if received != wanted:
+            source = f"cached file {path.name} holds" if cached else "ALFRED sent"
+            raise ValueError(f"{source} vintages {received} for {series}, not {wanted}")
+        if not cached:
             partial = path.with_name(path.name + ".partial")
             partial.write_text(text)
             os.replace(partial, path)
             time.sleep(pause)
-        vintages.update(parse_vintage_csv(text))
+        vintages.update(parsed)
     return vintages
 
 
@@ -385,10 +411,12 @@ def real_time_targets(
     ordered = sorted(vintage for vintage, rows in vintages.items() if rows)
     if len(ordered) < 2:
         return []
-    kind = period_type(list(vintages[ordered[-1]]))
     targets: list[Target] = []
     seen: set[str] = set()
     for earlier, later in zip(ordered, ordered[1:]):
+        # The training vintage sets the cadence, so no later vintage can change
+        # which periods count as one step ahead.
+        kind = period_type(list(vintages[earlier]))
         known = {date[:7] for date in vintages[earlier]}
         for date in sorted(vintages[later]):
             period = date[:7]
@@ -453,8 +481,9 @@ def persistence_ladder(history: Sequence[float]) -> list[float]:
     """The last print plus each quantile of the window's one-step changes.
 
     Rounded series repeat changes, so quantiles tie. A tied rung moves to a
-    thousandth of the print grid above the rung below, so the ladder rises
-    strictly, as the analyst's ladder check requires.
+    thousandth of the print grid above the rung below, or to the next float up
+    where that step is too small to register, so the ladder rises strictly, as
+    the analyst's ladder check requires.
     """
 
     changes = [b - a for a, b in zip(history, history[1:])]
@@ -463,7 +492,9 @@ def persistence_ladder(history: Sequence[float]) -> list[float]:
     for level in QUANTILE_LEVELS:
         rung = history[-1] + ts_quantile(changes, level)
         if rungs and rung <= rungs[-1]:
-            rung = rungs[-1] + nudge
+            rung = max(rungs[-1] + nudge, math.nextafter(rungs[-1], math.inf))
+        if not math.isfinite(rung):
+            raise ValueError("persistence-ladder rung is not finite")
         rungs.append(rung)
     return rungs
 
@@ -607,11 +638,21 @@ def forecast_arms(
 
 
 def step_sd(history: Sequence[float]) -> float | None:
-    changes = [b - a for a, b in zip(history, history[1:])]
-    if len(history) < 3 or len(changes) < 2:
+    """The sample SD of the window's one-step changes, or None.
+
+    This is the statistic the site's ledgerStepDispersion computes, applied to
+    the training window. Like targetNormalizationScale, it gives no scale for
+    fewer than 3 prints or for one at or below the relative floor.
+    """
+
+    if len(history) < 3:
         return None
+    changes = [b - a for a, b in zip(history, history[1:])]
     sd = statistics.stdev(changes)
-    return sd if sd > 0 else None
+    magnitude = max(abs(value) for value in history)
+    if not (math.isfinite(sd) and sd > magnitude * NORMALIZATION_SCALE_RELATIVE_FLOOR):
+        return None
+    return sd
 
 
 def score_target(target: Target, arms: dict[str, dict[str, Any]]) -> list[dict]:
