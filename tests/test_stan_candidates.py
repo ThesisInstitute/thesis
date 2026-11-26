@@ -1183,6 +1183,89 @@ def test_cli_replay_refuses_a_program_whose_fit_fails(tmp_path, capsys):
     assert "REFUSED: the fit failed" in capsys.readouterr().out
 
 
+# b30fab99's builder wrote this record from a custom program whose y_next is
+# always 1e14, with a rounding increment of 0.0001. A step of the increment
+# can't move an endpoint off 1e14, so that build left every endpoint on the
+# point, where this version moves each one to the next float out.
+LEGACY_NARROW_CANDIDATE = (
+    Path(__file__).parent / "fixtures" / "stanli_b30fab99_narrow_candidate.json"
+)
+
+
+@requires_stanli
+def test_cli_replays_an_earlier_narrow_candidate_only_when_asked(capsys):
+    path = str(LEGACY_NARROW_CANDIDATE)
+
+    assert main(["--replay-stanli", path]) == 1
+    out = capsys.readouterr().out
+    assert "MISMATCH in quantiles, interval80, interval90;" in out
+    assert "replay it with --legacy-endpoints" in out
+
+    assert main(["--replay-stanli", path, "--legacy-endpoints"]) == 0
+    out = capsys.readouterr().out
+    assert "replayed exactly with the endpoint rule of builds before" in out
+
+
+@requires_stanli
+def test_legacy_endpoint_replay_matches_a_build_whose_endpoints_move(tmp_path):
+    # The two rules agree when an increment step moves every endpoint off the
+    # point, so the option replays an ordinary candidate exactly.
+    record = replay_record(round_increment=0.1)
+    path = tmp_path / "candidate.json"
+    path.write_text(json.dumps(record))
+
+    assert main(["--replay-stanli", str(path), "--legacy-endpoints"]) == 0
+
+
+@requires_stanli
+@pytest.mark.parametrize(
+    "path, value, field",
+    [
+        (("calibrationN",), 99, "calibrationN"),
+        (("diagnostics",), ["edited"], "diagnostics"),
+        # This version's endpoint, which the earlier rule never wrote.
+        (("interval80", "lower"), math.nextafter(1e14, -math.inf), "interval80"),
+        (("quantiles", "p90"), math.nextafter(1e14, math.inf), "quantiles"),
+        (("posteriorPredictive", "draws"), 3999, "posteriorPredictive.draws"),
+    ],
+)
+def test_legacy_endpoint_replay_still_compares_every_field(
+    tmp_path, capsys, path, value, field
+):
+    record = json.loads(LEGACY_NARROW_CANDIDATE.read_text())
+    target = record
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    candidate = tmp_path / "candidate.json"
+    candidate.write_text(json.dumps(record))
+
+    assert main(["--replay-stanli", str(candidate), "--legacy-endpoints"]) == 1
+    assert f"MISMATCH in {field}\n" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "record, touches",
+    [
+        ({"pointEstimate": 1.0, "interval80": {"lower": 1.0, "upper": 2.0}}, True),
+        ({"pointEstimate": 1.0, "interval90": {"lower": 0.0, "upper": 1.0}}, True),
+        (
+            {
+                "pointEstimate": 1.0,
+                "interval80": {"lower": 0.5, "upper": 2.0},
+                "interval90": {"lower": 0.0, "upper": 3.0},
+            },
+            False,
+        ),
+        ({"pointEstimate": 1, "interval80": {"lower": 1, "upper": 2}}, False),
+        ({"pointEstimate": 1.0, "interval80": [1.0, 2.0]}, False),
+        ({}, False),
+    ],
+)
+def test_interval_touches_point_reads_only_float_endpoints(record, touches):
+    assert stan_candidates.interval_touches_point(record) is touches
+
+
 @requires_stanli
 def test_cli_replay_flags_a_top_level_key_spelled_like_a_nested_one(tmp_path, capsys):
     record = replay_record()

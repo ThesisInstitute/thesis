@@ -57,7 +57,7 @@ not declare:
 | `N` | number of prints (at least 3; `stanli-ar1-diff-t` needs 4) |
 | `y` | the raw history |
 | `y_loc` | the last print |
-| `y_scale` | 1.4826 times the median absolute deviation of the one-step changes, falling back to √(π/2) times their mean absolute deviation, then, when every change is the same, the size of the first change, then `y_grid`, then 1. The median absolute deviation, and then the mean absolute deviation, count only when they exceed a noise threshold, a millionth of `y_grid` or 1e-12 of the largest absolute print, whichever is larger, so float error in equal decimal changes does not set the scale |
+| `y_scale` | 1.4826 times the median absolute deviation of the one-step changes, falling back to √(π/2) times their mean absolute deviation. The median absolute deviation, and then the mean absolute deviation, count only when they exceed a noise threshold, a millionth of `y_grid` or 1e-12 of the largest absolute print, whichever is larger, so float error in equal decimal changes does not set the scale. If neither deviation clears the threshold, use the absolute first change, then a positive grid, then 1 |
 | `y_std` | `(y - y_loc) / y_scale` |
 | `y_grid` | the rounding step of the prints (see [Reporting grid](#reporting-grid)) |
 
@@ -74,25 +74,24 @@ value.
 
 The built-ins fit `y_std` under fixed priors. Scaling the history and an
 explicit grid by a power of two scales every predictive quantile exactly, within
-the normal floating-point range, unless the history is flat and the grid is 0,
-where `y_scale` falls back to 1. With the grid held fixed, the noise threshold
-stays a millionth of the grid while 1e-12 of the largest absolute print doesn't
-exceed it, which holds to about a million grid steps. There, a shift that keeps
-every print exact in floating point, as multiples of 1/8 are, leaves `y_scale`
-unchanged and shifts every quantile by the same amount up to float error. Past
-that point, the threshold grows with the largest absolute print, so a shift can
-change which fallback sets `y_scale`, and with it the forecast's width, even
-when every print and change stays exact. The threshold applies to the median and
-mean absolute deviations, not to each change: with a grid of 0.1, `[0, 0, 1]`
-has a `y_scale` of 0.7413, and shifted by 1e12 its deviations fall under the
-threshold and `y_scale` falls to the grid. `[0, 0, 1, 2, 4]` falls to the grid
+the normal floating-point range, when the calculation uses a history- or
+grid-derived scale. When `y_scale` falls back to 1, as for a flat history with a
+grid of 0, it doesn't scale. An exact translation preserves `y_scale` when
+`1e-12 * max_abs_print <= 1e-6 * grid` holds in floating-point arithmetic before
+and after the shift. Otherwise the threshold grows with the largest absolute
+print, so a shift can change which fallback sets `y_scale`, and with it the
+forecast's width, even when every print and change stays exact. The threshold
+applies to the median and mean absolute deviations, not to each change: with a
+grid of 0.1, `[0, 0, 1]` has a `y_scale` of 0.7413, and shifted by 1e12 its
+deviations fall under the threshold and `y_scale` falls to the grid. `[0, 0, 1, 2, 4]` falls to the grid
 when shifted by 2^39, although each of its nonzero deviations, 1, stays above
 that threshold of 0.55. Most decimal prints are not exact: a shift changes their
 float error, and the sampler can amplify that into quantile differences of Monte
-Carlo size. `tests/test_stan_candidates.py` checks exact rescaling, shifts of up
-to 1,000 of flat, drifting and noisy histories on a 1/8 grid, that a shift of up
-to 100,000 keeps `y_scale` up to float error on flat, drifting and noisy
-histories of tenths, and both examples on both sides of the threshold.
+Carlo size. `tests/test_stan_candidates.py` checks exact rescaling and both
+examples on both sides of the threshold. For the histories sampled in the tests,
+shifts of up to 1,000 on a 1/8 grid translate the predictive quantiles up to
+floating-point error. Separate tests preserve `y_scale` up to floating-point
+error for the sampled histories of tenths and shifts up to 100,000.
 
 ## Reporting grid
 
@@ -166,6 +165,16 @@ walk-forward score included when the record has one, and compares the rebuild
 with the record field by field as JSON. So a value the builder would type, name
 or nest differently counts as a mismatch, and so does a missing or extra field.
 It names the fields that differ and exits 1 on any refusal or mismatch.
+
+Builds before commit 22b08c84 left an interval endpoint on the point when a step
+of the rounding increment couldn't move it off, as at `1e14` with an increment
+of 0.0001. This version moves such an endpoint to the next float out, so a
+default replay flags those records. When an endpoint sits on the point, the
+mismatch line names `--legacy-endpoints`. That option rebuilds with the earlier
+rule and changes nothing else, so every field must still match the record.
+`tests/fixtures/stanli_b30fab99_narrow_candidate.json`, built at commit
+b30fab99, replays only with it.
+
 `tests/test_stan_candidates.py` replays every built-in and a custom program
 through a JSON round trip, checks that the rebuild equals the record, and checks
 that replay refuses or flags an edit to each field. Those tests replay on the
@@ -180,11 +189,11 @@ history's reporting grid. Otherwise `backtestScore` is null.
 
 In fast mode, an agent publishes a point and an 80% interval. It takes the
 candidate's point, p10 and p90, and Thesis seeds an `interval_anchor_v1` CDF
-from them. The site rounds each value of that CDF to 12 significant digits, so
-an interval narrower than about 80 steps of the point's 12th significant digit,
-40 on each side, can't seed a valid CDF: at 1e14 the step is 1,000, and 1e14 ±
-1,000 gives 29 distinct values of 201, which the site's validator rejects.
-Quantiles that tie add a warning, but a narrow interval with distinct quantiles
+from them, and the site rounds each of its values to 12 significant digits.
+Rounding to 12 significant digits can merge adjacent CDF values. At
+a point of `1e14`, an interval of `1e14 ± 1,000` gives 29 distinct values among
+201 points and fails validation. Quantiles that tie add a warning, but a narrow
+interval with distinct quantiles
 doesn't: [issue 477](https://github.com/ThesisInstitute/thesis/issues/477)
 tracks refusing such a CDF before it reaches the site.
 

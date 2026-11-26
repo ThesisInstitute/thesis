@@ -292,6 +292,18 @@ def test_parse_vintage_csv_refuses_a_malformed_row(body, message):
         backtest.parse_vintage_csv(HEADER + body, "X")
 
 
+@pytest.mark.parametrize(
+    "cell, value",
+    [("+1", 1.0), ("-2.5", -2.5), ("1e3", 1000.0), (".5", 0.5), ("5.", 5.0)],
+)
+def test_parse_vintage_csv_reads_a_signed_or_bare_decimal(cell, value):
+    parsed = backtest.parse_vintage_csv(HEADER + f"2025-12-01,{cell},{cell}\n", "X")
+    assert parsed == {
+        "2026-01-01": {"2025-12-01": value},
+        "2026-01-16": {"2025-12-01": value},
+    }
+
+
 @pytest.mark.parametrize("stamp", ["20261301", "2026010\u0661", "2026011"])
 def test_parse_vintage_csv_refuses_a_vintage_that_is_not_a_date(stamp):
     with pytest.raises(ValueError, match="is not a X vintage"):

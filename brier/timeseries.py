@@ -613,26 +613,33 @@ def unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     keep the first, so the two could see different records in one file.
     """
 
-    keys = [key for key, _ in pairs]
-    repeated = sorted({key for key in keys if keys.count(key) > 1})
-    if repeated:
-        raise ValueError(f"repeated key {repeated[0]!r} in an object")
+    seen: set[str] = set()
+    for key, _ in pairs:
+        if key in seen:
+            raise ValueError(f"repeated key {key!r} in an object")
+        seen.add(key)
     return dict(pairs)
 
 
-def replay_stanli_records(path: Path) -> int:
+def replay_stanli_records(path: Path, *, legacy_endpoints: bool = False) -> int:
     """Replay the stanli candidates in a candidate or candidate-set JSON file.
 
     Returns 0 when every stanli candidate passes replay's checks and its
     rebuild matches the record field for field. It refuses a file that
     ``json.loads`` can't parse or that repeats a key in an object, a record
-    whose ``modelName`` is
-    not a string, and a record that names a stanli model or carries a posterior
-    predictive block but whose library is not exactly ``stanli``; it skips
-    every other record.
+    whose ``modelName`` is not a string, and a record that names a stanli model
+    or carries a posterior predictive block but whose library is not exactly
+    ``stanli``; it skips every other record. ``legacy_endpoints`` rebuilds
+    with the endpoint rule of builds before commit 22b08c84, and a mismatch
+    without it names the option when an interval endpoint sits on the point.
     """
 
-    from brier.stan_candidates import CUSTOM_MODEL, STAN_PROGRAMS, replay_mismatches
+    from brier.stan_candidates import (
+        CUSTOM_MODEL,
+        STAN_PROGRAMS,
+        interval_touches_point,
+        replay_mismatches,
+    )
 
     try:
         payload = json.loads(path.read_text(), object_pairs_hook=unique_keys)
@@ -679,7 +686,7 @@ def replay_stanli_records(path: Path) -> int:
     for record in records:
         label = record.get("candidateId", "candidate without an id")
         try:
-            mismatched = replay_mismatches(record)
+            mismatched = replay_mismatches(record, legacy_endpoints=legacy_endpoints)
         except KeyError as exc:
             failed += 1
             print(f"{label}: REFUSED: missing field {exc}")
@@ -695,9 +702,17 @@ def replay_stanli_records(path: Path) -> int:
             print(f"{label}: REFUSED: the fit failed: {exc}")
             continue
         failed += bool(mismatched)
-        verdict = (
-            f"MISMATCH in {', '.join(mismatched)}" if mismatched else "replayed exactly"
-        )
+        if not mismatched:
+            verdict = "replayed exactly"
+            if legacy_endpoints:
+                verdict += " with the endpoint rule of builds before 22b08c84"
+        else:
+            verdict = f"MISMATCH in {', '.join(mismatched)}"
+            if not legacy_endpoints and interval_touches_point(record):
+                verdict += (
+                    "; an interval endpoint sits on the point, which only builds "
+                    "before 22b08c84 wrote: replay it with --legacy-endpoints"
+                )
         print(f"{label}: {verdict}")
     return 1 if failed else 0
 
@@ -721,7 +736,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             description="Refit recorded stanli candidates and check what they publish.",
         )
         replayer.add_argument("--replay-stanli", type=Path, required=True)
-        return replay_stanli_records(replayer.parse_args(argv).replay_stanli)
+        replayer.add_argument(
+            "--legacy-endpoints",
+            action="store_true",
+            help=(
+                "rebuild with the endpoint rule of builds before commit 22b08c84, "
+                "which could leave an interval endpoint on the point"
+            ),
+        )
+        replayed = replayer.parse_args(argv)
+        return replay_stanli_records(
+            replayed.replay_stanli, legacy_endpoints=replayed.legacy_endpoints
+        )
 
     parser = argparse.ArgumentParser(
         description="Emit Thesis time-series model candidates with intervals.",

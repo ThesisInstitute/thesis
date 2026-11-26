@@ -20,10 +20,10 @@ which the R-hat check would skip. A program must be one file: the builder and
 replay refuse any ``#include``, even in a comment, so a candidate's JSON
 carries the whole program. The built-in programs fit ``y_std`` under fixed
 priors, so rescaling the history and an explicit grid by a power of two
-rescales their forecast exactly. With the grid held fixed, a shift that keeps
-every print exact in floating point, and 1e-12 of the largest absolute print at
-or below a millionth of the grid (about a million grid steps), leaves
-``y_scale`` unchanged. Past that point, the scale's noise threshold grows with
+rescales their forecast exactly when the calculation uses a history- or
+grid-derived scale. An exact translation preserves ``y_scale`` when
+``1e-12 * max_abs_print <= 1e-6 * grid`` holds in floating-point arithmetic
+before and after the shift. Otherwise the scale's noise threshold grows with
 the largest absolute print, so a shift can change which fallback sets the
 scale, and with it the forecast's width. The forecast shifts by the same amount
 only when the shifted prints are exact in floating point: otherwise the shift
@@ -206,24 +206,22 @@ def standardization(values: Sequence[float], grid: float = 0.0) -> tuple[float, 
     The scale is 1.4826 times the median absolute deviation of the one-step
     changes. Rounded series often repeat a print or a change, which can zero
     the MAD, so the mean absolute deviation (times sqrt(pi/2)) backs it up.
-    When every change is the same, the scale falls back to the size of that
-    change, then to ``grid``, then to 1.
 
     The median absolute deviation, and then the mean absolute deviation, count
     only when they exceed a noise threshold: a millionth of ``grid`` or 1e-12
     of the largest absolute print, whichever is larger. Float error makes equal
     decimal changes differ slightly (``4.1 - 4.0`` and ``104.1 - 104.0`` are
     both one step of 0.1 but differ in the 14th digit), and that error grows
-    with the level, so it must not set the scale. A rescaling of the history
-    and grid by a power of two rescales the scale exactly, unless the history
-    is flat and the grid is 0.
+    with the level, so it must not set the scale. If neither deviation clears
+    the threshold, use the absolute first change, then a positive grid, then 1.
+    A rescaling of the history and grid by a power of two rescales the scale
+    exactly when the calculation uses a history- or grid-derived scale.
 
-    The threshold stays a millionth of ``grid`` while 1e-12 of the largest
-    absolute print doesn't exceed it, which holds to about a million grid
-    steps, so a shift that keeps every print exact and within that range leaves
-    the scale unchanged. Past it, the
-    threshold grows with the largest print, so a shift can change which
-    fallback sets the scale even when every print and change stays exact. The
+    An exact translation preserves the scale when
+    ``1e-12 * max_abs_print <= 1e-6 * grid`` holds in floating-point arithmetic
+    before and after the shift. Otherwise the threshold grows with the largest
+    print, so a shift can change which fallback sets the scale even when every
+    print and change stays exact. The
     threshold applies to the two deviations, not to each change: with grid
     0.1, ``[0, 0, 1]`` has scale 0.7413, and shifted by 1e12 its
     deviations fall under the threshold and the scale falls to the grid.
@@ -313,13 +311,15 @@ def build_stanli_candidate(
     program: str | None = None,
     grid: float | None = None,
     backtest: bool = True,
+    legacy_endpoints: bool = False,
 ) -> ForecastModelCandidate:
     """Fit a stanli program and summarize its posterior predictive draws.
 
     ``model`` names a built-in program, or ``stanli-custom`` with ``program``
     holding Stan source that follows the module's data contract. ``grid`` is
     the increment the history is reported on; by default it is inferred from
-    the prints' decimal places.
+    the prints' decimal places. ``legacy_endpoints`` is for replay only: see
+    :func:`rounded_summary`.
     """
 
     source = resolve_program(model, program)
@@ -348,7 +348,9 @@ def build_stanli_candidate(
     )
 
     quantiles = {level: empirical_quantile(draws, level) for level in QUANTILE_LEVELS}
-    point, p10, p90, p05, p95 = rounded_summary(quantiles, round_increment)
+    point, p10, p90, p05, p95 = rounded_summary(
+        quantiles, round_increment, legacy_endpoints=legacy_endpoints
+    )
 
     latest = normalized_history[-1]
     return ForecastModelCandidate(
@@ -408,7 +410,10 @@ def build_stanli_candidate(
 
 
 def rounded_summary(
-    quantiles: dict[float, float], round_increment: float | None
+    quantiles: dict[float, float],
+    round_increment: float | None,
+    *,
+    legacy_endpoints: bool = False,
 ) -> tuple[float, float, float, float, float]:
     """Round the predictive quantiles a candidate publishes.
 
@@ -416,7 +421,9 @@ def rounded_summary(
     5th and 95th percentiles, with ``p05 <= p10 < point < p90 <= p95``. When a
     step of the rounding increment can't move an endpoint off the point, as at
     1e14 with an increment of 0.0001, the endpoint moves to the next float, and
-    a non-finite endpoint raises ``ValueError``.
+    a non-finite endpoint raises ``ValueError``. With ``legacy_endpoints``,
+    such an endpoint stays on the point, as in builds before commit 22b08c84;
+    replay uses it only when asked, for candidates those builds wrote.
     """
 
     point, p10, p90, p05, p95 = round_values(
@@ -433,9 +440,29 @@ def rounded_summary(
         p10, p90 = widen_equal_interval(point, round_increment)
     p10, p90 = ensure_strictly_brackets_point(point, p10, p90, round_increment)
     p05, p95 = ensure_strictly_brackets_point(point, p05, p95, round_increment)
-    p10, p90 = next_float_outside(point, p10, p90)
-    p05, p95 = next_float_outside(point, p05, p95)
+    if not legacy_endpoints:
+        p10, p90 = next_float_outside(point, p10, p90)
+        p05, p95 = next_float_outside(point, p05, p95)
     return point, p10, p90, min(p05, p10), max(p95, p90)
+
+
+def interval_touches_point(record: dict[str, Any]) -> bool:
+    """Whether a record's 80% or 90% interval has an endpoint on its point.
+
+    This version never builds one, and builds before commit 22b08c84 did when
+    a step of the rounding increment couldn't move the endpoint off the point.
+    """
+
+    point = record.get("pointEstimate")
+    ends = [
+        interval.get(side)
+        for key in ("interval80", "interval90")
+        if isinstance(interval := record.get(key), dict)
+        for side in ("lower", "upper")
+    ]
+    return type(point) is float and any(
+        type(end) is float and end == point for end in ends
+    )
 
 
 def next_float_outside(point: float, lower: float, upper: float) -> tuple[float, float]:
@@ -623,7 +650,9 @@ def sample_next(
     return draws, sampler
 
 
-def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
+def replay_stanli_candidate(
+    record: dict[str, Any], *, legacy_endpoints: bool = False
+) -> dict[str, Any]:
     """Rebuild a stanli candidate from its own JSON.
 
     The record carries everything the fit depends on: the program source, the
@@ -636,6 +665,8 @@ def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
     from the record. It then runs the builder on the record's inputs, with a
     walk-forward score when the record has one, and returns the candidate as
     JSON holds it, for :func:`replay_mismatches` to compare with the record.
+    ``legacy_endpoints`` rebuilds with the endpoint rule of builds before
+    commit 22b08c84 (see :func:`rounded_summary`) and changes nothing else.
     """
 
     block = record["posteriorPredictive"]
@@ -701,6 +732,7 @@ def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
         # A build with backtest=False records no score, so only a recorded
         # score is recomputed.
         backtest=record["backtestScore"] is not None,
+        legacy_endpoints=legacy_endpoints,
     )
     return json.loads(json.dumps(rebuilt.as_dict()))
 
@@ -743,14 +775,19 @@ def field_name(path: tuple[str, ...]) -> str:
     )
 
 
-def replay_mismatches(record: dict[str, Any]) -> list[str]:
+def replay_mismatches(
+    record: dict[str, Any], *, legacy_endpoints: bool = False
+) -> list[str]:
     """Replay a stanli record and name each field that differs from the rebuild.
 
     Fields compare as JSON text, so a string, a boolean or an integer where the
     builder writes a float differs, and so does a field only one side has.
+    ``legacy_endpoints`` passes to :func:`replay_stanli_candidate`.
     """
 
-    replayed = recorded_fields(replay_stanli_candidate(record))
+    replayed = recorded_fields(
+        replay_stanli_candidate(record, legacy_endpoints=legacy_endpoints)
+    )
     recorded = recorded_fields(record)
     paths = [*replayed, *(path for path in recorded if path not in replayed)]
 

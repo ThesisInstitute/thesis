@@ -310,7 +310,7 @@ def parse_vintage_csv(text: str, series: str) -> dict[str, dict[str, float]]:
 
 VINTAGE_STAMP = re.compile(r"[0-9]{8}")
 # Each branch matches a digit run one way only, so a long bad cell fails fast.
-ALFRED_NUMBER = re.compile(r"-?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?")
+ALFRED_NUMBER = re.compile(r"[-+]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?")
 
 
 def real_date(text: str) -> bool:
