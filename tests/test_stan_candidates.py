@@ -270,6 +270,28 @@ def test_a_shift_can_push_a_real_deviation_under_the_noise_threshold():
     assert shifted == 0.1
 
 
+def test_the_mad_check_compares_the_scaled_terms():
+    # The MAD, 7.000000000000001e-06, exceeds the threshold of 7e-06, but
+    # 1.4826 times each rounds to the same float, so the mean absolute
+    # deviation sets the scale.
+    _, scale = standardization([0.0, 0.0, 1.4000000000000001e-05], 7.0)
+
+    assert scale == math.sqrt(math.pi / 2) * 7.000000000000001e-06
+
+
+def test_power_of_two_scaling_is_exact_only_in_the_normal_range():
+    history = [0.0, 0.0, 1.0]
+    assert standardization([2.0 * value for value in history], 0.0)[1] == (
+        2.0 * standardization(history, 0.0)[1]
+    )
+    # Half of 1e-308 is subnormal, so the median of the changes rounds before
+    # it is scaled.
+    tiny = [0.0, 0.0, 1e-308]
+    doubled = standardization([2.0 * value for value in tiny], 0.0)[1]
+
+    assert doubled != 2.0 * standardization(tiny, 0.0)[1]
+
+
 @pytest.mark.parametrize(
     "level, increment", [(1e14, 0.0001), (-1e14, 0.0001), (0.0, 1e-12), (1e300, 1.0)]
 )
@@ -1244,6 +1266,37 @@ def test_legacy_endpoint_replay_still_compares_every_field(
     assert f"MISMATCH in {field}\n" in capsys.readouterr().out
 
 
+# b30fab99's builder wrote this record from four prints of 1.0 with an
+# increment of 0.0001 and a walk-forward score. The program draws 1e14 for the
+# candidate itself and 1.7815e308 at the one walk-forward cutoff, where the
+# earlier rule leaves an infinite p95 that the score never uses and this
+# version refuses.
+LEGACY_SCORED_CANDIDATE = (
+    Path(__file__).parent / "fixtures" / "stanli_b30fab99_scored_candidate.json"
+)
+
+
+@requires_stanli
+def test_cli_replays_an_earlier_scored_candidate_only_when_asked(tmp_path, capsys):
+    path = str(LEGACY_SCORED_CANDIDATE)
+
+    assert main(["--replay-stanli", path]) == 1
+    out = capsys.readouterr().out
+    assert "REFUSED: an interval endpoint is not finite;" in out
+    assert "replay it with --legacy-endpoints" in out
+
+    assert main(["--replay-stanli", path, "--legacy-endpoints"]) == 0
+    assert "replayed exactly" in capsys.readouterr().out
+
+    record = json.loads(LEGACY_SCORED_CANDIDATE.read_text())
+    record["backtestScore"]["interval80Coverage"] = 1.0
+    edited = tmp_path / "candidate.json"
+    edited.write_text(json.dumps(record))
+
+    assert main(["--replay-stanli", str(edited), "--legacy-endpoints"]) == 1
+    assert "MISMATCH in backtestScore\n" in capsys.readouterr().out
+
+
 @pytest.mark.parametrize(
     "record, touches",
     [
@@ -1264,6 +1317,41 @@ def test_legacy_endpoint_replay_still_compares_every_field(
 )
 def test_interval_touches_point_reads_only_float_endpoints(record, touches):
     assert stan_candidates.interval_touches_point(record) is touches
+
+
+@requires_stanli
+def test_the_module_entry_point_builds_a_stanli_candidate():
+    # Run as a module, timeseries.py loads as __main__, a second copy whose
+    # observation class the stanli builder doesn't take.
+    history = [
+        {"period": f"2026-0{month}", "value": float(month)} for month in (1, 2, 3)
+    ]
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "brier.timeseries",
+            "--target-id",
+            "test.series",
+            "--target-period",
+            "2026-04",
+            "--history-json",
+            json.dumps(history),
+            "--models",
+            "stanli-rw-drift-t",
+            "--generated-at",
+            GENERATED_AT,
+        ],
+        capture_output=True,
+        text=True,
+        cwd=Path(__file__).resolve().parents[1],
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    candidates = json.loads(completed.stdout)["candidates"]
+    assert [candidate["library"] for candidate in candidates] == ["stanli"]
 
 
 @requires_stanli

@@ -19,16 +19,19 @@ name, shape and finite draws, and refuses a ``y_next`` declared in parameters,
 which the R-hat check would skip. A program must be one file: the builder and
 replay refuse any ``#include``, even in a comment, so a candidate's JSON
 carries the whole program. The built-in programs fit ``y_std`` under fixed
-priors, so rescaling the history and an explicit grid by a power of two
-rescales their forecast exactly when the calculation uses a history- or
-grid-derived scale. An exact translation preserves ``y_scale`` when
-``1e-12 * max_abs_print <= 1e-6 * grid`` holds in floating-point arithmetic
-before and after the shift. Otherwise the scale's noise threshold grows with
-the largest absolute print, so a shift can change which fallback sets the
-scale, and with it the forecast's width. The forecast shifts by the same amount
-only when the shifted prints are exact in floating point: otherwise the shift
-changes the prints' float error, and the sampler can amplify that into
-differences of Monte Carlo size.
+priors. Multiplying the history and grid by a power of two multiplies a
+history- or grid-derived ``y_scale`` by the same factor when both calculations
+stay in the normal floating-point range, including intermediate arithmetic.
+For the histories sampled in the tests, rescaling the history and an explicit
+grid by a power of two with the same seed rescaled every unrounded predictive
+quantile exactly. With the grid held fixed, an exact translation preserves
+``y_scale`` when ``1e-12 * max_abs_print <= 1e-6 * grid`` holds in
+floating-point arithmetic before and after the shift. Otherwise the scale's
+noise threshold grows with the largest absolute print, so a shift can change
+which fallback sets the scale, and with it the forecast's width. The forecast
+shifts by the same amount only when the shifted prints are exact in floating
+point: otherwise the shift changes the prints' float error, and the sampler can
+amplify that into differences of Monte Carlo size.
 
 Official prints are rounded, and rounded series repeat a print often.
 Repeated prints can make a Student-t likelihood favor scales near zero and
@@ -203,28 +206,31 @@ def stanli_model_names() -> tuple[str, ...]:
 def standardization(values: Sequence[float], grid: float = 0.0) -> tuple[float, float]:
     """Return ``(y_loc, y_scale)``: the last print and a robust step scale.
 
-    The scale is 1.4826 times the median absolute deviation of the one-step
+    The scale comes from the median absolute deviation (MAD) of the one-step
     changes. Rounded series often repeat a print or a change, which can zero
-    the MAD, so the mean absolute deviation (times sqrt(pi/2)) backs it up.
+    the MAD, so the mean absolute deviation backs it up.
 
-    The median absolute deviation, and then the mean absolute deviation, count
-    only when they exceed a noise threshold: a millionth of ``grid`` or 1e-12
+    Both count only past a noise threshold: a millionth of ``grid`` or 1e-12
     of the largest absolute print, whichever is larger. Float error makes equal
     decimal changes differ slightly (``4.1 - 4.0`` and ``104.1 - 104.0`` are
     both one step of 0.1 but differ in the 14th digit), and that error grows
-    with the level, so it must not set the scale. If neither deviation clears
-    the threshold, use the absolute first change, then a positive grid, then 1.
-    A rescaling of the history and grid by a power of two rescales the scale
-    exactly when the calculation uses a history- or grid-derived scale.
+    with the level, so it must not set the scale. Use ``1.4826 * MAD`` when
+    that product exceeds ``1.4826 * threshold`` in floating-point arithmetic.
+    Otherwise, use ``sqrt(pi/2) * mean absolute deviation`` when the unscaled
+    mean absolute deviation exceeds the threshold. If neither check passes,
+    use the absolute first change, then a positive grid, then 1. Multiplying
+    the history and grid by a power of two multiplies a history- or
+    grid-derived scale by the same factor when both calculations stay in the
+    normal floating-point range, including intermediate arithmetic.
 
-    An exact translation preserves the scale when
+    With the grid held fixed, an exact translation preserves the scale when
     ``1e-12 * max_abs_print <= 1e-6 * grid`` holds in floating-point arithmetic
     before and after the shift. Otherwise the threshold grows with the largest
     print, so a shift can change which fallback sets the scale even when every
-    print and change stays exact. The
-    threshold applies to the two deviations, not to each change: with grid
-    0.1, ``[0, 0, 1]`` has scale 0.7413, and shifted by 1e12 its
-    deviations fall under the threshold and the scale falls to the grid.
+    print and change stays exact. The threshold applies to the two deviations,
+    not to each change: with grid 0.1, ``[0, 0, 1]`` has scale 0.7413, and
+    shifted by 1e12 its deviations fall under the threshold and the scale falls
+    to the grid.
     ``[0, 0, 1, 2, 4]`` falls to the grid when shifted by 2**39, although each
     of its nonzero deviations, 1, stays above that threshold of 0.55.
     """
@@ -319,7 +325,7 @@ def build_stanli_candidate(
     holding Stan source that follows the module's data contract. ``grid`` is
     the increment the history is reported on; by default it is inferred from
     the prints' decimal places. ``legacy_endpoints`` is for replay only: see
-    :func:`rounded_summary`.
+    :func:`rounded_summary`. It applies to the walk-forward fits as well.
     """
 
     source = resolve_program(model, program)
@@ -378,6 +384,7 @@ def build_stanli_candidate(
                 program=source,
                 grid=grid,
                 target_data_point_id=f"{target_data_point_id}:{target_period}",
+                legacy_endpoints=legacy_endpoints,
             )
             if backtest
             else None
@@ -666,7 +673,8 @@ def replay_stanli_candidate(
     walk-forward score when the record has one, and returns the candidate as
     JSON holds it, for :func:`replay_mismatches` to compare with the record.
     ``legacy_endpoints`` rebuilds with the endpoint rule of builds before
-    commit 22b08c84 (see :func:`rounded_summary`) and changes nothing else.
+    commit 22b08c84 (see :func:`rounded_summary`), in the candidate's own fit
+    and in each walk-forward fit, and changes nothing else.
     """
 
     block = record["posteriorPredictive"]
@@ -820,12 +828,14 @@ def backtest_stanli(
     grid: float | None = None,
     max_rows: int = BACKTEST_MAX_ROWS,
     target_data_point_id: str = "_backtest",
+    legacy_endpoints: bool = False,
 ) -> BacktestScore | None:
     """Walk forward one step over the most recent ``max_rows`` cutoffs.
 
     Every cutoff fits with the full history's grid when ``grid`` is None.
     Each cutoff's seed comes from ``target_data_point_id`` and the cutoff, so
-    two targets with the same history length draw different seeds.
+    two targets with the same history length draw different seeds. Each
+    cutoff's fit takes ``legacy_endpoints`` too (see :func:`rounded_summary`).
     """
 
     if grid is None:
@@ -850,6 +860,7 @@ def backtest_stanli(
             program=program if model == CUSTOM_MODEL else None,
             grid=grid,
             backtest=False,
+            legacy_endpoints=legacy_endpoints,
         )
         errors.append(abs(actual - candidate.point_estimate))
         interval_hits.append(

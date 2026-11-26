@@ -651,6 +651,15 @@ def replay_stanli_records(path: Path, *, legacy_endpoints: bool = False) -> int:
         kind = type(entries).__name__
         print(f"REFUSED: candidates in {path} is {kind}, not a list")
         return 1
+
+    def legacy_hint(record: dict[str, Any]) -> str:
+        if legacy_endpoints or not interval_touches_point(record):
+            return ""
+        return (
+            "; an interval endpoint sits on the point, which only builds "
+            "before 22b08c84 wrote: replay it with --legacy-endpoints"
+        )
+
     stanli_models = {*STAN_PROGRAMS, CUSTOM_MODEL}
     records = []
     failed = skipped = 0
@@ -694,7 +703,7 @@ def replay_stanli_records(path: Path, *, legacy_endpoints: bool = False) -> int:
         except (TypeError, AttributeError, ValueError, ArithmeticError) as exc:
             failed += 1
             reason = exc if isinstance(exc, ValueError) else f"malformed record: {exc}"
-            print(f"{label}: REFUSED: {reason}")
+            print(f"{label}: REFUSED: {reason}{legacy_hint(record)}")
             continue
         except RuntimeError as exc:
             # The builder fails the same way, so no build produced this record.
@@ -707,12 +716,7 @@ def replay_stanli_records(path: Path, *, legacy_endpoints: bool = False) -> int:
             if legacy_endpoints:
                 verdict += " with the endpoint rule of builds before 22b08c84"
         else:
-            verdict = f"MISMATCH in {', '.join(mismatched)}"
-            if not legacy_endpoints and interval_touches_point(record):
-                verdict += (
-                    "; an interval endpoint sits on the point, which only builds "
-                    "before 22b08c84 wrote: replay it with --legacy-endpoints"
-                )
+            verdict = f"MISMATCH in {', '.join(mismatched)}{legacy_hint(record)}"
         print(f"{label}: {verdict}")
     return 1 if failed else 0
 
@@ -812,4 +816,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    # Run as ``python -m brier.timeseries``, this file loads as ``__main__``, a
+    # second copy whose classes are not ``brier.timeseries``'s, which the stanli
+    # builder checks for. Run the canonical module's main instead.
+    from brier.timeseries import main as canonical_main
+
+    raise SystemExit(canonical_main())
