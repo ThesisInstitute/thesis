@@ -56,7 +56,7 @@ not declare:
 | `N` | number of prints (at least 3; `stanli-ar1-diff-t` needs 4) |
 | `y` | the raw history |
 | `y_loc` | the last print |
-| `y_scale` | 1.4826 times the median absolute deviation of the one-step changes, falling back to √(π/2) times their mean absolute deviation, then, when every change is the same, the size of the first change, then `y_grid`, then 1. A deviation counts as zero unless it exceeds a millionth of `y_grid` and 1e-12 of the largest absolute print, so float error in equal decimal changes does not set the scale |
+| `y_scale` | 1.4826 times the median absolute deviation of the one-step changes, falling back to √(π/2) times their mean absolute deviation, then, when every change is the same, the size of the first change, then `y_grid`, then 1. The median absolute deviation, and then the mean absolute deviation, count only when they exceed a noise threshold, a millionth of `y_grid` or 1e-12 of the largest absolute print, whichever is larger, so float error in equal decimal changes does not set the scale |
 | `y_std` | `(y - y_loc) / y_scale` |
 | `y_grid` | the rounding step of the prints (see [Reporting grid](#reporting-grid)) |
 
@@ -74,20 +74,24 @@ value.
 The built-ins fit `y_std` under fixed priors. Scaling the history and an
 explicit grid by a power of two scales every predictive quantile exactly, within
 the normal floating-point range, unless the history is flat and the grid is 0,
-where `y_scale` falls back to 1. With the grid held fixed, shifting the history
-can change which deviations exceed the scale's noise threshold. The threshold
-grows with the largest absolute print, so a shift can change the forecast's
-width even when it keeps every one-step change exact: `[0, 0, 1]` has a
-`y_scale` of 0.7413, but shifted by 1e12 its deviations fall under the
-threshold and `y_scale` falls to the grid. A shift that leaves every nonzero
-deviation above the threshold leaves `y_scale` unchanged up to float error. It
-shifts every quantile by the same amount only when the shifted prints are exact
-in floating point, as multiples of 1/8 are. Most decimal prints are not: a shift
-changes their float error, and the sampler can amplify that into quantile
-differences of Monte Carlo size. `tests/test_stan_candidates.py` checks exact
-rescaling, shifts of flat, drifting and noisy histories on a 1/8 grid, that a
-shift keeps `y_scale` on flat, drifting and noisy histories of tenths, and the
-`[0, 0, 1]` case on both sides of the threshold.
+where `y_scale` falls back to 1. With the grid held fixed, the noise threshold
+stays a millionth of the grid while the largest absolute print is within a
+million grid steps. There, a shift that keeps every print exact in floating
+point, as multiples of 1/8 are, leaves `y_scale` unchanged and shifts every
+quantile by the same amount up to float error. Past a million grid steps, the
+threshold grows with the largest absolute print, so a shift can change which
+fallback sets `y_scale`, and with it the forecast's width, even when every print
+and change stays exact. The threshold applies to the median and mean absolute
+deviations, not to each change: with a grid of 0.1, `[0, 0, 1]` has a `y_scale`
+of 0.7413, and shifted by 1e12 its deviations fall under the threshold and
+`y_scale` falls to the grid. `[0, 0, 1, 2, 4]` falls to the grid when shifted by
+2^39, although each of its nonzero deviations, 1, stays above that threshold of
+0.55. Most decimal prints are not exact: a shift changes their float error, and
+the sampler can amplify that into quantile differences of Monte Carlo size.
+`tests/test_stan_candidates.py` checks exact rescaling, shifts of up to 1,000 of
+flat, drifting and noisy histories on a 1/8 grid, that a shift of up to 100,000
+keeps `y_scale` up to float error on flat, drifting and noisy histories of
+tenths, and both examples on both sides of the threshold.
 
 ## Reporting grid
 
@@ -151,9 +155,10 @@ produced: a source that doesn't match its hash or model name, a built-in whose
 source isn't this version's program, a source with `#include`, sampler settings
 other than this version's, quantiles at levels other than the 19, or a candidate
 id, seed, standardization or inferred grid that doesn't follow from the record.
-It also refuses a record with a missing field or one it can't read, and a record
-that names a stanli model or carries a posterior predictive block but whose
-library isn't exactly `stanli`. It rebuilds every other candidate from its
+It also refuses a file that isn't valid JSON or repeats a key in an object, a
+record with a missing field, one it can't read or whose fit fails, a record
+whose `modelName` isn't a string, and a record that names a stanli model or
+carries a posterior predictive block but whose library isn't exactly `stanli`. It rebuilds every other candidate from its
 history, grid, rounding increment and program, the walk-forward score included
 when the record has one, and compares the rebuild with the record field by field
 as JSON. So a value the builder would type, name or nest differently counts as a
@@ -172,8 +177,14 @@ history's reporting grid. Otherwise `backtestScore` is null.
 ## Publishing a stanli forecast
 
 In fast mode, an agent publishes a point and an 80% interval. It takes the
-candidate's point, p10 and p90, and Thesis seeds an `interval_anchor_v1` CDF from
-them.
+candidate's point, p10 and p90, and Thesis seeds an `interval_anchor_v1` CDF
+from them. The site rounds each value of that CDF to 12 significant digits, so
+an interval only a few steps of the point's 12th digit wide can't seed a valid
+CDF: at 1e14 the step is 1,000, and 1e14 ± 1,000 gives 29 distinct values of
+201, which the site's validator rejects. Quantiles that tie add a warning, but a
+narrow interval with distinct quantiles doesn't: [issue
+477](https://github.com/ThesisInstitute/thesis/issues/477) tracks refusing such
+a CDF before it reaches the site.
 
 In ladder mode, an agent publishes a threshold ladder, and the 19 posterior
 quantiles form one: the quantile values set the thresholds, probabilities 0.05

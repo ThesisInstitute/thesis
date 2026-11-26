@@ -26,14 +26,18 @@ from brier.stan_candidates import (
     STAN_PROGRAMS,
     backtest_stanli,
     build_stanli_candidate,
+    model_key,
     observation_grid,
+    program_sha256,
     resolve_program,
     standardization,
+    stanli_seed,
 )
 from brier.timeseries import (
     TimeSeriesObservation,
     build_candidate_set,
     build_statsmodels_local_level_candidate,
+    candidate_id,
     main,
     normalize_history,
 )
@@ -251,15 +255,43 @@ def test_a_shift_can_push_a_real_deviation_under_the_noise_threshold():
     assert base == small == pytest.approx(0.7413)
     assert large == 0.1
 
+    # The threshold applies to the median and mean absolute deviations, not to
+    # each change: every nonzero deviation here is 1, above 2**39 * 1e-12.
+    history = [0.0, 0.0, 1.0, 2.0, 4.0]
+    _, base = standardization(history, 0.1)
+    _, shifted = standardization([value + 2.0**39 for value in history], 0.1)
 
-def test_rounded_endpoints_bracket_the_point_where_the_increment_cannot():
+    assert base == pytest.approx(0.7413)
+    assert shifted == 0.1
+
+
+@pytest.mark.parametrize(
+    "level, increment", [(1e14, 0.0001), (-1e14, 0.0001), (0.0, 1e-12), (1e300, 1.0)]
+)
+def test_rounded_endpoints_bracket_the_point_where_the_increment_cannot(
+    level, increment
+):
     # At 1e14 the floats sit 0.0156 apart, so a 0.0001 step moves nothing.
     point, p10, p90, p05, p95 = stan_candidates.rounded_summary(
-        dict.fromkeys(QUANTILE_LEVELS, 1e14), 0.0001
+        dict.fromkeys(QUANTILE_LEVELS, level), increment
     )
 
+    assert point == level
     assert p05 <= p10 < point < p90 <= p95
-    assert (p10, p90) == (math.nextafter(1e14, 0), math.nextafter(1e14, math.inf))
+    if abs(level) == 1e14:
+        assert (p10, p90) == (
+            math.nextafter(level, -math.inf),
+            math.nextafter(level, math.inf),
+        )
+
+
+def test_rounded_endpoints_refuse_to_leave_the_float_range():
+    with pytest.raises(ValueError, match="not finite"):
+        stan_candidates.rounded_summary(
+            dict.fromkeys(QUANTILE_LEVELS, sys.float_info.max), None
+        )
+    with pytest.raises(ValueError, match="too large to round"):
+        stan_candidates.rounded_summary(dict.fromkeys(QUANTILE_LEVELS, 1e300), 1e-12)
 
 
 def test_resolve_program_guards_custom_and_builtin_names():
@@ -920,6 +952,13 @@ def carry_an_include_map(record):
             '"posteriorPredictive.seed"',
             lambda record: record.update({"posteriorPredictive.seed": "bogus seed"}),
         ),
+        (
+            'posteriorPredictive."program.sha256"',
+            lambda record: record["posteriorPredictive"].update(
+                {"program.sha256": "x"}
+            ),
+        ),
+        ('""', lambda record: record.update({"": 1})),
     ],
     ids=[
         "string-prints",
@@ -931,6 +970,8 @@ def carry_an_include_map(record):
         "extra-field",
         "include-map",
         "dotted-extra-field",
+        "dotted-nested-field",
+        "empty-key",
     ],
 )
 def test_replay_flags_a_value_the_builder_would_type_or_name_differently(field, tamper):
@@ -1054,6 +1095,80 @@ def test_cli_replay_refuses_a_malformed_candidate_set(
 
     assert main(["--replay-stanli", str(path)]) == 1
     assert message in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "text",
+    ['{"candidates": [', '{"candidates": ' + "[" * 100000 + "]" * 100000 + "}"],
+    ids=["cut-off", "deep"],
+)
+def test_cli_replay_refuses_a_file_it_cannot_parse(text, tmp_path, capsys):
+    path = tmp_path / "candidates.json"
+    path.write_text(text)
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    assert "is not readable JSON" in capsys.readouterr().out
+
+
+@requires_stanli
+def test_cli_replay_refuses_a_repeated_key(tmp_path, capsys):
+    # json.loads keeps the last value and another reader may keep the first,
+    # so a repeated key could show two readers two records.
+    text = json.dumps(replay_record())
+    path = tmp_path / "candidate.json"
+    path.write_text(text.replace('{"', '{"pointEstimate": 999.0, "', 1))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    assert "repeated key 'pointEstimate'" in capsys.readouterr().out
+
+
+@requires_stanli
+def test_cli_replay_refuses_a_bad_record_and_still_replays_the_next(tmp_path, capsys):
+    record = replay_record()
+    huge = json.loads(json.dumps(record))
+    huge["history"][0]["value"] = 10**400
+    tiny = json.loads(json.dumps(record))
+    tiny["posteriorPredictive"]["roundIncrement"] = 5e-324
+    path = tmp_path / "candidates.json"
+    path.write_text(json.dumps({"candidates": [huge, tiny, record]}))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    output = capsys.readouterr().out.splitlines()
+    assert "REFUSED: non-finite value" in output[0]
+    assert "REFUSED: a value is too large to round" in output[1]
+    assert output[2].endswith("replayed exactly")
+
+
+@requires_stanli
+def test_cli_replay_refuses_a_program_whose_fit_fails(tmp_path, capsys):
+    source = STAN_PROGRAMS["stanli-ar1-t"]
+    data_block = source[: source.index("}") + 1]
+    failing = (
+        data_block
+        + '\nparameters { real mu; }\nmodel { reject("always"); }\n'
+        + "generated quantities { real y_next = mu; }\n"
+    )
+    record = replay_record(CUSTOM_MODEL, STAN_PROGRAMS["stanli-ar1-t"])
+    history = normalize_history(record["history"])
+    program = {
+        "name": CUSTOM_MODEL,
+        "sha256": program_sha256(failing),
+        "source": failing,
+    }
+    record["posteriorPredictive"]["program"] = program
+    record["candidateId"] = candidate_id(
+        record["targetDataPointId"],
+        record["targetPeriod"],
+        "stanli",
+        model_key(CUSTOM_MODEL, failing),
+        history,
+    )
+    record["posteriorPredictive"]["seed"] = stanli_seed(record["candidateId"])
+    path = tmp_path / "candidate.json"
+    path.write_text(json.dumps(record))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    assert "REFUSED: the fit failed" in capsys.readouterr().out
 
 
 @requires_stanli

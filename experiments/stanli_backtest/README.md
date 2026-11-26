@@ -38,7 +38,7 @@ decimal changes affects 15 of the 52,350 distinct training histories that the
 The 15 are 36-print walk-forward prefixes in five targets: CUSR0000SEHA's
 one-month change for 2024-07, CUSR0000SEHC's for 2025-03, 2025-04 and 2025-05,
 and W824RC1's level for 2026-09. Their old scale was float error, between about
-1e-16 and 1e-13. A refit of those five targets changed walk-forward MAE in 50
+8e-17 and 3e-13. A refit of those five targets changed walk-forward MAE in 50
 rows and 80% coverage in 12 of them, and we replaced those fields. No model
 pick, CRPS, PIT or warning changed, and the statistics rebuilt from the patched
 rows match `summary.json`.

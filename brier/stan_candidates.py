@@ -21,10 +21,10 @@ builder and replay refuse any ``#include``, even in a comment, so a
 candidate's JSON carries the whole program. The built-in programs fit
 ``y_std`` under fixed priors, so rescaling the history and an explicit grid by
 a power of two rescales their forecast exactly. With the grid held fixed, a
-shift of the history leaves ``y_scale`` unchanged up to float error while every
-nonzero deviation of the one-step changes stays above the scale's noise
-threshold, which grows with the largest absolute print. A shift large enough to
-push a deviation under that threshold changes the scale, and with it the
+shift that keeps every print exact in floating point and the largest absolute
+print within a million grid steps leaves ``y_scale`` unchanged. Past a million
+grid steps, the scale's noise threshold grows with the largest absolute print,
+so a shift can change which fallback sets the scale, and with it the
 forecast's width. The forecast shifts by the same amount only when the shifted
 prints are exact in floating point: otherwise the shift changes the prints'
 float error, and the sampler can amplify that into differences of Monte Carlo
@@ -208,18 +208,25 @@ def standardization(values: Sequence[float], grid: float = 0.0) -> tuple[float, 
     When every change is the same, the scale falls back to the size of that
     change, then to ``grid``, then to 1.
 
-    A deviation counts as zero unless it exceeds a millionth of ``grid`` and
-    1e-12 of the largest absolute print. Float error makes equal decimal
-    changes differ slightly (``4.1 - 4.0`` and ``104.1 - 104.0`` are both one
-    step of 0.1 but differ in the 14th digit), and that error grows with the
-    level, so it must not set the scale. A rescaling of the history and grid
-    by a power of two rescales the scale exactly, unless the history is flat
-    and the grid is 0. The threshold grows with the largest absolute print, so
-    a shift can change which deviations count, and with them the scale, even
-    when it keeps every one-step change exact: ``[0, 0, 1]`` has scale 0.7413,
-    but shifted by 1e12 its deviations fall under the threshold and the scale
-    falls to ``grid``. A shift that leaves every nonzero deviation above the
-    threshold changes the scale only by float error.
+    The median absolute deviation, and then the mean absolute deviation, count
+    only when they exceed a noise threshold: a millionth of ``grid`` or 1e-12
+    of the largest absolute print, whichever is larger. Float error makes equal
+    decimal changes differ slightly (``4.1 - 4.0`` and ``104.1 - 104.0`` are
+    both one step of 0.1 but differ in the 14th digit), and that error grows
+    with the level, so it must not set the scale. A rescaling of the history
+    and grid by a power of two rescales the scale exactly, unless the history
+    is flat and the grid is 0.
+
+    The threshold stays a millionth of ``grid`` while the largest absolute
+    print is within a million grid steps, so a shift that keeps every print
+    exact and within that range leaves the scale unchanged. Past it, the
+    threshold grows with the largest print, so a shift can change which
+    fallback sets the scale even when every print and change stays exact. The
+    threshold applies to the two deviations, not to each change: with grid
+    0.1, ``[0, 0, 1]`` has scale 0.7413, and shifted by 1e12 its
+    deviations fall under the threshold and the scale falls to the grid.
+    ``[0, 0, 1, 2, 4]`` falls to the grid when shifted by 2**39, although each
+    of its nonzero deviations, 1, stays above that threshold of 0.55.
     """
 
     loc = float(values[-1])
@@ -721,12 +728,15 @@ def recorded_fields(record: dict[str, Any]) -> dict[tuple[str, ...], Any]:
 
 def field_name(path: tuple[str, ...]) -> str:
     """Name a field for a mismatch report: ``posteriorPredictive.seed`` for an
-    entry of the block, and a top-level key as written, quoted if it holds a
-    dot."""
+    entry of the block, and a top-level key as written. A key that is empty or
+    holds a dot, comma, space or quote is JSON-quoted, at either level, so the
+    report can't read as another field or as two."""
 
-    if len(path) == 2:
-        return ".".join(path)
-    return json.dumps(path[0]) if "." in path[0] else path[0]
+    names = [
+        json.dumps(key) if not key or any(mark in key for mark in '., "') else key
+        for key in path
+    ]
+    return ".".join(names)
 
 
 def replay_mismatches(record: dict[str, Any]) -> list[str]:

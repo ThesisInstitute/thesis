@@ -265,14 +265,36 @@ def test_parse_vintage_csv_reads_crlf_and_quoted_cells():
         ("2025-12-01,2,2\n2025-12-01,3,3\n", "repeats observation date"),
         ("2025-13-01,2,2\n", "observation date '2025-13-01'"),
         ("2025-12-1,2,2\n", "observation date '2025-12-1'"),
-        ("2025-12-01,NaN,2\n", "non-finite value 'NaN'"),
-        ("2025-12-01,2,inf\n", "non-finite value 'inf'"),
+        ("2025-12-01,NaN,2\n", "a value 'NaN'"),
+        ("2025-12-01,2,inf\n", "a value 'inf'"),
+        ("2025-12-01,1e400,2\n", "non-finite value '1e400'"),
+        # float() reads each of these, and ALFRED never sends one.
+        ("2025-12-01,1_000,2\n", "a value '1_000'"),
+        ("2025-12-01,\uff12,2\n", "a value '\uff12'"),
+        ("2025-12-01, 2 ,2\n", "a value ' 2 '"),
     ],
-    ids=["open-quote", "repeated-date", "no-such-date", "short-date", "nan", "inf"],
+    ids=[
+        "open-quote",
+        "repeated-date",
+        "no-such-date",
+        "short-date",
+        "nan",
+        "inf",
+        "overflow",
+        "underscore",
+        "fullwidth-digit",
+        "padded",
+    ],
 )
 def test_parse_vintage_csv_refuses_a_malformed_row(body, message):
     with pytest.raises(ValueError, match=message):
         backtest.parse_vintage_csv(HEADER + body, "X")
+
+
+@pytest.mark.parametrize("stamp", ["20261301", "2026010\u0661", "2026011"])
+def test_parse_vintage_csv_refuses_a_vintage_that_is_not_a_date(stamp):
+    with pytest.raises(ValueError, match="is not a X vintage"):
+        backtest.parse_vintage_csv(f"observation_date,X_{stamp}\n2025-12-01,1\n", "X")
 
 
 def test_parse_vintage_csv_keeps_missing_cells_missing():

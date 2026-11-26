@@ -63,6 +63,7 @@ import math
 import os
 import pathlib
 import random
+import re
 import statistics
 import sys
 import time
@@ -293,9 +294,10 @@ def parse_vintage_csv(text: str, series: str) -> dict[str, dict[str, float]]:
 
     It refuses a body that does not end with a line break or has no rows, a
     quote left open, a row whose cell count differs from the header's, a
-    header column that is not ``<series>_YYYYMMDD`` or repeats a vintage, an
-    observation date that is not a real YYYY-MM-DD date or repeats, and a value
-    that is not a finite number. An empty cell or ``.`` marks a missing value.
+    header column that is not ``<series>_YYYYMMDD`` for a real date or repeats
+    a vintage, an observation date that is not a real YYYY-MM-DD date or
+    repeats, and a value that is not a finite decimal number in ASCII, such as
+    ``-2.5`` or ``1e3``. An empty cell or ``.`` marks a missing value.
     A body cut at a line break passes these checks; ``urlopen`` raises
     ``IncompleteRead`` when a download stops short of its stated length.
     """
@@ -304,6 +306,19 @@ def parse_vintage_csv(text: str, series: str) -> dict[str, dict[str, float]]:
         return _parse_vintage_rows(text, series)
     except csv.Error as error:
         raise ValueError(f"ALFRED response for {series} is not valid CSV: {error}")
+
+
+VINTAGE_STAMP = re.compile(r"[0-9]{8}")
+ALFRED_NUMBER = re.compile(r"-?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][-+]?[0-9]+)?")
+
+
+def real_date(text: str) -> bool:
+    """Whether ``text`` is a real date written exactly as YYYY-MM-DD."""
+
+    try:
+        return len(text) == 10 and dt.date.fromisoformat(text).isoformat() == text
+    except ValueError:
+        return False
 
 
 def _parse_vintage_rows(text: str, series: str) -> dict[str, dict[str, float]]:
@@ -317,9 +332,14 @@ def _parse_vintage_rows(text: str, series: str) -> dict[str, dict[str, float]]:
     vintages = []
     for column in header[1:]:
         name, _, stamp = column.rpartition("_")
-        if name != series or len(stamp) != 8 or not stamp.isdigit():
+        vintage = f"{stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}"
+        if (
+            name != series
+            or not VINTAGE_STAMP.fullmatch(stamp)
+            or not real_date(vintage)
+        ):
             raise ValueError(f"ALFRED column {column!r} is not a {series} vintage")
-        vintages.append(f"{stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}")
+        vintages.append(vintage)
     if len(set(vintages)) != len(vintages):
         raise ValueError(f"ALFRED header for {series} repeats a vintage")
     rows: dict[str, dict[str, float]] = {vintage: {} for vintage in vintages}
@@ -335,11 +355,7 @@ def _parse_vintage_rows(text: str, series: str) -> dict[str, dict[str, float]]:
                 f"{len(header)}"
             )
         date = record[0]
-        try:
-            canonical = dt.date.fromisoformat(date).isoformat() == date
-        except ValueError:
-            canonical = False
-        if not canonical or len(date) != 10:
+        if not real_date(date):
             raise ValueError(f"ALFRED row {line} has observation date {date!r}")
         if date in dates:
             # A later row would silently replace the earlier one's values.
@@ -348,6 +364,9 @@ def _parse_vintage_rows(text: str, series: str) -> dict[str, dict[str, float]]:
         for vintage, cell in zip(vintages, record[1:]):
             if cell in ("", "."):
                 continue
+            if not ALFRED_NUMBER.fullmatch(cell):
+                # float() also reads "1_000", " 2 " and non-ASCII digits.
+                raise ValueError(f"ALFRED row {line} has a value {cell!r}")
             value = float(cell)
             if not math.isfinite(value):
                 raise ValueError(f"ALFRED row {line} has a non-finite value {cell!r}")

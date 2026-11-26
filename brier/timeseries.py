@@ -417,8 +417,16 @@ def normalize_history(
             value = point.value
         else:
             period = str(point["period"])
-            value = float(point["value"])
-        if not math.isfinite(value):
+            try:
+                value = float(point["value"])
+            except OverflowError:
+                # float() of an int with more than about 308 digits overflows.
+                value = math.inf
+        try:
+            finite = math.isfinite(value)
+        except OverflowError:
+            finite = False
+        if not finite:
             raise ValueError(f"non-finite value for period {period!r}")
         normalized.append(TimeSeriesObservation(period=period, value=value))
     return tuple(normalized)
@@ -541,10 +549,10 @@ def round_values(
     if increment <= 0:
         raise ValueError("round_increment must be positive")
     places = decimal_places(increment)
-    return tuple(
-        float(f"{(round(value / increment) * increment):.{places}f}")
-        for value in values
-    )
+    ratios = [value / increment for value in values]
+    if not all(math.isfinite(ratio) for ratio in ratios):
+        raise ValueError(f"a value is too large to round to increment {increment!r}")
+    return tuple(float(f"{(round(ratio) * increment):.{places}f}") for ratio in ratios)
 
 
 def widen_equal_interval(point: float, increment: float | None) -> tuple[float, float]:
@@ -598,18 +606,38 @@ def utc_now() -> str:
     )
 
 
+def unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Build a JSON object, refusing a repeated key.
+
+    ``json.loads`` keeps a repeated key's last value, while another reader may
+    keep the first, so the two could see different records in one file.
+    """
+
+    keys = [key for key, _ in pairs]
+    repeated = sorted({key for key in keys if keys.count(key) > 1})
+    if repeated:
+        raise ValueError(f"repeated key {repeated[0]!r} in an object")
+    return dict(pairs)
+
+
 def replay_stanli_records(path: Path) -> int:
     """Replay the stanli candidates in a candidate or candidate-set JSON file.
 
     Returns 0 when every stanli candidate passes replay's checks and its
-    rebuild matches the record field for field. A record that names a stanli
-    model or carries a posterior predictive block, but whose library is not
-    exactly ``stanli``, is refused rather than skipped.
+    rebuild matches the record field for field. It refuses a file that is not
+    valid JSON or repeats a key in an object, a record whose ``modelName`` is
+    not a string, and a record that names a stanli model or carries a posterior
+    predictive block but whose library is not exactly ``stanli``; it skips
+    every other record.
     """
 
     from brier.stan_candidates import CUSTOM_MODEL, STAN_PROGRAMS, replay_mismatches
 
-    payload = json.loads(path.read_text())
+    try:
+        payload = json.loads(path.read_text(), object_pairs_hook=unique_keys)
+    except (ValueError, RecursionError) as exc:
+        print(f"REFUSED: {path} is not readable JSON: {exc}")
+        return 1
     entries = payload.get("candidates", [payload]) if isinstance(payload, dict) else []
     if not isinstance(entries, list):
         kind = type(entries).__name__
@@ -655,10 +683,15 @@ def replay_stanli_records(path: Path) -> int:
             failed += 1
             print(f"{label}: REFUSED: missing field {exc}")
             continue
-        except (TypeError, AttributeError, ValueError) as exc:
+        except (TypeError, AttributeError, ValueError, ArithmeticError) as exc:
             failed += 1
             reason = exc if isinstance(exc, ValueError) else f"malformed record: {exc}"
             print(f"{label}: REFUSED: {reason}")
+            continue
+        except RuntimeError as exc:
+            # The builder fails the same way, so no build produced this record.
+            failed += 1
+            print(f"{label}: REFUSED: the fit failed: {exc}")
             continue
         failed += bool(mismatched)
         verdict = (
