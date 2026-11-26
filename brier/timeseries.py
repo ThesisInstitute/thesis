@@ -630,13 +630,16 @@ def replay_stanli_records(path: Path, *, legacy_endpoints: bool = False) -> int:
     whose ``modelName`` is not a string, and a record that names a stanli model
     or carries a posterior predictive block but whose library is not exactly
     ``stanli``; it skips every other record. ``legacy_endpoints`` rebuilds
-    with the endpoint rule of builds before commit 22b08c84, and a mismatch
-    without it names the option when an interval endpoint sits on the point.
+    the candidate's own fit and each walk-forward fit with the endpoint rule
+    of builds before commit 22b08c84. Without it, a mismatch names the option
+    when an interval endpoint of the record sits on the point, and so does a
+    refusal of a non-finite endpoint.
     """
 
     from brier.stan_candidates import (
         CUSTOM_MODEL,
         STAN_PROGRAMS,
+        NonFiniteEndpointError,
         interval_touches_point,
         replay_mismatches,
     )
@@ -652,13 +655,22 @@ def replay_stanli_records(path: Path, *, legacy_endpoints: bool = False) -> int:
         print(f"REFUSED: candidates in {path} is {kind}, not a list")
         return 1
 
-    def legacy_hint(record: dict[str, Any]) -> str:
-        if legacy_endpoints or not interval_touches_point(record):
+    def legacy_hint(record: dict[str, Any], refusal: Exception | None = None) -> str:
+        # The option changes only the endpoint rule, so name it only where that
+        # rule can explain the result.
+        if legacy_endpoints:
             return ""
-        return (
-            "; an interval endpoint sits on the point, which only builds "
-            "before 22b08c84 wrote: replay it with --legacy-endpoints"
-        )
+        if isinstance(refusal, NonFiniteEndpointError):
+            return (
+                "; only builds before 22b08c84 kept one, as in an unused "
+                "walk-forward p95: replay it with --legacy-endpoints"
+            )
+        if refusal is None and interval_touches_point(record):
+            return (
+                "; an interval endpoint sits on the point, which only builds "
+                "before 22b08c84 wrote: replay it with --legacy-endpoints"
+            )
+        return ""
 
     stanli_models = {*STAN_PROGRAMS, CUSTOM_MODEL}
     records = []
@@ -703,7 +715,7 @@ def replay_stanli_records(path: Path, *, legacy_endpoints: bool = False) -> int:
         except (TypeError, AttributeError, ValueError, ArithmeticError) as exc:
             failed += 1
             reason = exc if isinstance(exc, ValueError) else f"malformed record: {exc}"
-            print(f"{label}: REFUSED: {reason}{legacy_hint(record)}")
+            print(f"{label}: REFUSED: {reason}{legacy_hint(record, exc)}")
             continue
         except RuntimeError as exc:
             # The builder fails the same way, so no build produced this record.
@@ -744,8 +756,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "--legacy-endpoints",
             action="store_true",
             help=(
-                "rebuild with the endpoint rule of builds before commit 22b08c84, "
-                "which could leave an interval endpoint on the point"
+                "rebuild the candidate's fit and each walk-forward fit with the "
+                "endpoint rule of builds before commit 22b08c84, which could leave "
+                "an interval endpoint on the point or keep a non-finite one"
             ),
         )
         replayed = replayer.parse_args(argv)
@@ -819,6 +832,9 @@ if __name__ == "__main__":
     # Run as ``python -m brier.timeseries``, this file loads as ``__main__``, a
     # second copy whose classes are not ``brier.timeseries``'s, which the stanli
     # builder checks for. Run the canonical module's main instead.
-    from brier.timeseries import main as canonical_main
+    try:
+        from brier.timeseries import main as canonical_main
+    except ImportError:  # run by path, with the package not importable
+        canonical_main = main
 
     raise SystemExit(canonical_main())

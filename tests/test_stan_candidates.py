@@ -284,8 +284,8 @@ def test_power_of_two_scaling_is_exact_only_in_the_normal_range():
     assert standardization([2.0 * value for value in history], 0.0)[1] == (
         2.0 * standardization(history, 0.0)[1]
     )
-    # Half of 1e-308 is subnormal, so the median of the changes rounds before
-    # it is scaled.
+    # These changes are subnormal, so 1.4826 times the MAD rounds to fewer
+    # bits than it keeps once the changes are doubled.
     tiny = [0.0, 0.0, 1e-308]
     doubled = standardization([2.0 * value for value in tiny], 0.0)[1]
 
@@ -1295,6 +1295,42 @@ def test_cli_replays_an_earlier_scored_candidate_only_when_asked(tmp_path, capsy
 
     assert main(["--replay-stanli", str(edited), "--legacy-endpoints"]) == 1
     assert "MISMATCH in backtestScore\n" in capsys.readouterr().out
+
+
+# b30fab99's builder wrote this record like the scored one, but unrounded and
+# with a point of 5.0, so its own endpoints sit off the point and only its
+# walk-forward fit had the infinite p95.
+LEGACY_OFFPOINT_CANDIDATE = (
+    Path(__file__).parent / "fixtures" / "stanli_b30fab99_offpoint_candidate.json"
+)
+
+
+@requires_stanli
+def test_cli_names_the_legacy_option_for_a_non_finite_walk_forward_endpoint(capsys):
+    path = str(LEGACY_OFFPOINT_CANDIDATE)
+
+    assert main(["--replay-stanli", path]) == 1
+    out = capsys.readouterr().out
+    assert "REFUSED: an interval endpoint is not finite; only builds before" in out
+    assert "replay it with --legacy-endpoints" in out
+
+    assert main(["--replay-stanli", path, "--legacy-endpoints"]) == 0
+    assert "replayed exactly" in capsys.readouterr().out
+
+
+@requires_stanli
+def test_cli_names_the_legacy_option_only_where_it_can_help(tmp_path, capsys):
+    # The option changes only the endpoint rule, so a seed that doesn't follow
+    # from the id is refused without naming it, endpoint on the point or not.
+    record = json.loads(LEGACY_NARROW_CANDIDATE.read_text())
+    record["posteriorPredictive"]["seed"] += 1
+    path = tmp_path / "candidate.json"
+    path.write_text(json.dumps(record))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    out = capsys.readouterr().out
+    assert "REFUSED: seed does not follow from the candidate id\n" in out
+    assert "--legacy-endpoints" not in out
 
 
 @pytest.mark.parametrize(

@@ -28,10 +28,9 @@ quantile exactly. With the grid held fixed, an exact translation preserves
 ``y_scale`` when ``1e-12 * max_abs_print <= 1e-6 * grid`` holds in
 floating-point arithmetic before and after the shift. Otherwise the scale's
 noise threshold grows with the largest absolute print, so a shift can change
-which fallback sets the scale, and with it the forecast's width. The forecast
-shifts by the same amount only when the shifted prints are exact in floating
-point: otherwise the shift changes the prints' float error, and the sampler can
-amplify that into differences of Monte Carlo size.
+which fallback sets the scale, and with it the forecast's width. When the
+shifted prints aren't exact in floating point, the shift changes their float
+error, and the sampler can amplify that into differences of Monte Carlo size.
 
 Official prints are rounded, and rounded series repeat a print often.
 Repeated prints can make a Student-t likelihood favor scales near zero and
@@ -210,15 +209,19 @@ def standardization(values: Sequence[float], grid: float = 0.0) -> tuple[float, 
     changes. Rounded series often repeat a print or a change, which can zero
     the MAD, so the mean absolute deviation backs it up.
 
-    Both count only past a noise threshold: a millionth of ``grid`` or 1e-12
-    of the largest absolute print, whichever is larger. Float error makes equal
-    decimal changes differ slightly (``4.1 - 4.0`` and ``104.1 - 104.0`` are
-    both one step of 0.1 but differ in the 14th digit), and that error grows
-    with the level, so it must not set the scale. Use ``1.4826 * MAD`` when
+    Both count only past a noise threshold,
+    ``max(1e-6 * grid, 1e-12 * max_abs_print)`` in floating-point arithmetic.
+    Float error makes equal decimal changes differ slightly (``4.1 - 4.0`` and
+    ``104.1 - 104.0`` are both one step of 0.1 but differ in the 14th digit),
+    and that error grows with the level, so it must not make either deviation
+    count. Use ``1.4826 * MAD`` when
     that product exceeds ``1.4826 * threshold`` in floating-point arithmetic.
     Otherwise, use ``sqrt(pi/2) * mean absolute deviation`` when the unscaled
     mean absolute deviation exceeds the threshold. If neither check passes,
-    use the absolute first change, then a positive grid, then 1. Multiplying
+    use the absolute first change, then a positive grid, then 1. The absolute
+    first change has no threshold, so a computed history such as
+    ``[0.3, 0.1 + 0.2, 0.1 + 0.2]`` takes its float error, about 5.6e-17, as
+    the scale. Multiplying
     the history and grid by a power of two multiplies a history- or
     grid-derived scale by the same factor when both calculations stay in the
     normal floating-point range, including intermediate arithmetic.
@@ -429,7 +432,8 @@ def rounded_summary(
     step of the rounding increment can't move an endpoint off the point, as at
     1e14 with an increment of 0.0001, the endpoint moves to the next float, and
     a non-finite endpoint raises ``ValueError``. With ``legacy_endpoints``,
-    such an endpoint stays on the point, as in builds before commit 22b08c84;
+    such an endpoint stays on the point and a non-finite endpoint is returned
+    rather than refused, as in builds before commit 22b08c84;
     replay uses it only when asked, for candidates those builds wrote.
     """
 
@@ -456,8 +460,9 @@ def rounded_summary(
 def interval_touches_point(record: dict[str, Any]) -> bool:
     """Whether a record's 80% or 90% interval has an endpoint on its point.
 
-    This version never builds one, and builds before commit 22b08c84 did when
-    a step of the rounding increment couldn't move the endpoint off the point.
+    This version builds one only with ``legacy_endpoints``, as builds before
+    commit 22b08c84 did when a step of the rounding increment couldn't move the
+    endpoint off the point.
     """
 
     point = record.get("pointEstimate")
@@ -472,6 +477,11 @@ def interval_touches_point(record: dict[str, Any]) -> bool:
     )
 
 
+class NonFiniteEndpointError(ValueError):
+    """An interval endpoint is not finite. Builds before commit 22b08c84 kept
+    such an endpoint, so replay names ``--legacy-endpoints`` on this refusal."""
+
+
 def next_float_outside(point: float, lower: float, upper: float) -> tuple[float, float]:
     """Move an endpoint that still touches the point to the next float out."""
 
@@ -480,7 +490,7 @@ def next_float_outside(point: float, lower: float, upper: float) -> tuple[float,
     if not upper > point:
         upper = math.nextafter(point, math.inf)
     if not (math.isfinite(lower) and math.isfinite(upper)):
-        raise ValueError("an interval endpoint is not finite")
+        raise NonFiniteEndpointError("an interval endpoint is not finite")
     return lower, upper
 
 

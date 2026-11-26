@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "thesis_model_candidate_v1",
+  "candidateId": "model_candidate.9217d7bda96aa82a",
+  "targetDataPointId": "legacy-offpoint",
+  "targetPeriod": "2026-05",
+  "generatedAt": "2026-11-26T00:00:00Z",
+  "trainCutoff": "2026-04",
+  "library": "stanli",
+  "libraryVersion": "0.25.0",
+  "modelName": "stanli-custom",
+  "pointEstimate": 5.0,
+  "quantiles": {
+    "p10": 4.0,
+    "p50": 5.0,
+    "p90": 6.0
+  },
+  "interval80": {
+    "lower": 4.0,
+    "upper": 6.0,
+    "level": 0.8
+  },
+  "interval90": {
+    "lower": 4.0,
+    "upper": 6.0,
+    "level": 0.9
+  },
+  "intervalMethod": "posterior_predictive",
+  "calibrationN": 4,
+  "history": [
+    {
+      "period": "2026-01",
+      "value": 1.0
+    },
+    {
+      "period": "2026-02",
+      "value": 1.0
+    },
+    {
+      "period": "2026-03",
+      "value": 1.0
+    },
+    {
+      "period": "2026-04",
+      "value": 1.0
+    }
+  ],
+  "backtestScore": {
+    "method": "walk_forward_1_step",
+    "rows": 1,
+    "meanAbsoluteError": 1.7815e+308,
+    "interval80Coverage": 0.0,
+    "meanInterval80Width": 1.7815000000000274e+306
+  },
+  "diagnostics": [
+    "stanli stanli-custom: NUTS, 4 chains x 1000 draws after 1000 warmup, seed 100550498",
+    "posterior predictive quantiles from 4000 draws of y_next",
+    "sampler: 0 divergent transitions; no parameter varies across draws",
+    "WARNING: posterior predictive quantiles tie, so they do not form a valid ladder"
+  ],
+  "posteriorPredictive": {
+    "draws": 4000,
+    "chains": 4,
+    "warmup": 1000,
+    "samplesPerChain": 1000,
+    "seed": 100550498,
+    "quantiles": [
+      {
+        "probability": 0.05,
+        "value": 5.0
+      },
+      {
+        "probability": 0.1,
+        "value": 5.0
+      },
+      {
+        "probability": 0.15,
+        "value": 5.0
+      },
+      {
+        "probability": 0.2,
+        "value": 5.0
+      },
+      {
+        "probability": 0.25,
+        "value": 5.0
+      },
+      {
+        "probability": 0.3,
+        "value": 5.0
+      },
+      {
+        "probability": 0.35,
+        "value": 5.0
+      },
+      {
+        "probability": 0.4,
+        "value": 5.0
+      },
+      {
+        "probability": 0.45,
+        "value": 5.0
+      },
+      {
+        "probability": 0.5,
+        "value": 5.0
+      },
+      {
+        "probability": 0.55,
+        "value": 5.0
+      },
+      {
+        "probability": 0.6,
+        "value": 5.0
+      },
+      {
+        "probability": 0.65,
+        "value": 5.0
+      },
+      {
+        "probability": 0.7,
+        "value": 5.0
+      },
+      {
+        "probability": 0.75,
+        "value": 5.0
+      },
+      {
+        "probability": 0.8,
+        "value": 5.0
+      },
+      {
+        "probability": 0.85,
+        "value": 5.0
+      },
+      {
+        "probability": 0.9,
+        "value": 5.0
+      },
+      {
+        "probability": 0.95,
+        "value": 5.0
+      }
+    ],
+    "standardization": {
+      "yLoc": 1.0,
+      "yScale": 1.0,
+      "yGrid": 1.0,
+      "gridInferred": true
+    },
+    "roundIncrement": null,
+    "sampler": {
+      "divergences": 0,
+      "maxRhat": null,
+      "minEssBulk": null,
+      "nonFiniteRhat": 0
+    },
+    "program": {
+      "name": "stanli-custom",
+      "sha256": "d8c0393c7d0e1a691ff5ab8c3b1c4a92b0235cd43178ea38e29d1b2a3f5c744f",
+      "source": "data {\n  int<lower=3> N;\n  vector[N] y_std;\n  real y_loc;\n  real<lower=0> y_scale;\n  real<lower=0> y_grid;\n}\ngenerated quantities {\n  real y_next = N == 3 ? 1.7815e308 : 5.0;\n}\n"
+    }
+  }
+}

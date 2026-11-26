@@ -57,7 +57,7 @@ not declare:
 | `N` | number of prints (at least 3; `stanli-ar1-diff-t` needs 4) |
 | `y` | the raw history |
 | `y_loc` | the last print |
-| `y_scale` | a robust scale of the one-step changes. Use `1.4826 × MAD` (their median absolute deviation) when that product exceeds `1.4826 × threshold` in floating-point arithmetic. Otherwise, use `√(π/2) × mean absolute deviation` when the unscaled mean absolute deviation exceeds the threshold. If neither check passes, use the absolute first change, then a positive grid, then 1. The threshold is a millionth of `y_grid` or 1e-12 of the largest absolute print, whichever is larger, so float error in equal decimal changes does not set the scale |
+| `y_scale` | a robust scale of the one-step changes. Use `1.4826 × MAD` (their median absolute deviation) when that product exceeds `1.4826 × threshold` in floating-point arithmetic. Otherwise, use `√(π/2) × mean absolute deviation` when the unscaled mean absolute deviation exceeds the threshold. If neither check passes, use the absolute first change, then a positive grid, then 1. The threshold is `max(1e-6 * y_grid, 1e-12 * max_abs_print)` in floating-point arithmetic, so float error in equal decimal changes can't make either deviation count. The absolute first change has no threshold, so a computed history such as `[0.3, 0.1 + 0.2, 0.1 + 0.2]` takes its float error, about 5.6e-17, as `y_scale` |
 | `y_std` | `(y - y_loc) / y_scale` |
 | `y_grid` | the rounding step of the prints (see [Reporting grid](#reporting-grid)) |
 
@@ -79,8 +79,8 @@ intermediate arithmetic. When `y_scale` falls back to 1, as for a flat history
 with a grid of 0, it doesn't scale. For the histories sampled in the tests,
 rescaling the history and an explicit grid by a power of two with the same seed
 rescaled every unrounded predictive quantile exactly. The seed comes from the
-candidate id, which hashes the periods and not the values, so a rescaling keeps
-it. With the grid held fixed, an exact translation preserves `y_scale` when
+candidate id, which hashes the target, the model, the last period and the
+history's length but not its values, so a rescaling keeps it. With the grid held fixed, an exact translation preserves `y_scale` when
 `1e-12 * max_abs_print <= 1e-6 * grid` holds in floating-point arithmetic before
 and after the shift. Otherwise the threshold grows with the largest absolute
 print, so a shift can change which fallback sets `y_scale`, and with it the
@@ -175,14 +175,16 @@ of the rounding increment couldn't move it off, as at `1e14` with an increment
 of 0.0001. This version moves such an endpoint to the next float out and
 refuses an endpoint that isn't finite, in the candidate's own fit and in each
 walk-forward fit, so a default replay flags or refuses those records. When an
-endpoint of the record sits on the point, the mismatch or refusal line names
-`--legacy-endpoints`. A record built before that commit can need the option even
+endpoint of the record sits on the point, the mismatch line names
+`--legacy-endpoints`, and a refusal of a non-finite endpoint always names it. A
+record built before that commit can need the option even
 when its own endpoints sit off the point, since its walk-forward fits followed
 the earlier rule too. The option rebuilds the candidate's own fit and each
 walk-forward fit with the earlier rule and changes nothing else, so every field
 must still match the record. The fixtures
-`tests/fixtures/stanli_b30fab99_narrow_candidate.json` and
-`tests/fixtures/stanli_b30fab99_scored_candidate.json`, built at commit
+`tests/fixtures/stanli_b30fab99_narrow_candidate.json`,
+`tests/fixtures/stanli_b30fab99_scored_candidate.json` and
+`tests/fixtures/stanli_b30fab99_offpoint_candidate.json`, built at commit
 b30fab99, replay only with it.
 
 `tests/test_stan_candidates.py` replays every built-in and a custom program
