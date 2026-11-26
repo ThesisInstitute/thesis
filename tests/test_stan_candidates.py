@@ -157,17 +157,47 @@ def test_float_noise_leaves_the_grid_alone(places, units, noise):
     ),
     power=st.integers(min_value=-8, max_value=8),
 )
-def test_standardization_is_positive_and_scales_exactly(units, power):
+def test_standardization_is_positive_shift_free_and_scales_exactly(units, power):
     values = [unit / 1024 for unit in units]
-    loc, scale = standardization(values)
+    grid = 1 / 1024
+    loc, scale = standardization(values, grid)
     assert loc == values[-1]
     assert scale > 0 and math.isfinite(scale)
 
     factor = 2.0**power
-    scaled_loc, scaled_scale = standardization([factor * value for value in values])
+    scaled_loc, scaled_scale = standardization(
+        [factor * value for value in values], factor * grid
+    )
     assert scaled_loc == factor * loc
-    if any(values):
-        assert scaled_scale == factor * scale
+    assert scaled_scale == factor * scale
+    # The values are multiples of 1/1024 below 2**11, so every shift is exact.
+    shifted = [value + 1000 for value in values]
+    assert standardization(shifted, grid) == (loc + 1000, scale)
+
+
+@given(
+    start=st.integers(min_value=-(2**12), max_value=2**12),
+    step=st.integers(min_value=-64, max_value=64),
+    length=st.integers(min_value=3, max_value=40),
+    shift=st.integers(min_value=-1000, max_value=1000),
+    power=st.integers(min_value=-8, max_value=8),
+)
+def test_constant_changes_set_a_scale_that_ignores_the_level(
+    start, step, length, shift, power
+):
+    # Flat and constant-drift histories zero both deviations of the changes,
+    # so the scale falls back to the change, then the grid, never the level.
+    values = [(start + step * index) / 8 for index in range(length)]
+    grid = 0.125
+    _, scale = standardization(values, grid)
+
+    assert scale == (abs(step) / 8 if step else grid)
+    assert standardization([value + shift for value in values], grid)[1] == scale
+    factor = 2.0**power
+    assert (
+        standardization([factor * value for value in values], factor * grid)[1]
+        == factor * scale
+    )
 
 
 def test_resolve_program_guards_custom_and_builtin_names():
@@ -180,6 +210,20 @@ def test_resolve_program_guards_custom_and_builtin_names():
     with pytest.raises(ValueError, match="Unsupported stanli model"):
         resolve_program("stanli-nope", None)
     assert resolve_program("stanli-ar1-t", None) == STAN_PROGRAMS["stanli-ar1-t"]
+
+
+@pytest.mark.parametrize(
+    "line", ["#include gen.stan", "  #include <gen.stan>", '\t#include "gen.stan"']
+)
+def test_custom_programs_must_be_one_file(line):
+    # The candidate JSON records the source, not the files it includes.
+    source = STAN_PROGRAMS["stanli-ar1-t"].replace(
+        "generated quantities {", f"generated quantities {{\n{line}", 1
+    )
+    with pytest.raises(ValueError, match="must be one file"):
+        resolve_program(CUSTOM_MODEL, source)
+    commented = STAN_PROGRAMS["stanli-ar1-t"] + "\n// #include gen.stan\n"
+    assert resolve_program(CUSTOM_MODEL, commented) == commented
 
 
 @pytest.mark.parametrize("model", sorted(STAN_PROGRAMS))
@@ -381,6 +425,35 @@ def test_shifting_history_shifts_the_forecast(steps, shift, model):
     ):
         assert moved == pytest.approx(
             original + shift, rel=0, abs=1e-9 * (1 + abs(original) + abs(shift))
+        )
+
+
+@requires_stanli
+@pytest.mark.parametrize("model", sorted(STAN_PROGRAMS))
+@pytest.mark.parametrize(
+    "values",
+    [[4.0] * 6, [4.0 + 0.25 * index for index in range(6)]],
+    ids=["flat", "drift"],
+)
+def test_shifting_a_flat_or_constant_drift_history_shifts_the_forecast(model, values):
+    # These histories reach the scale's fallbacks, which once read the level.
+    base = build(model, history=as_history(values), grid=0.125, backtest=False)
+    shifted = build(
+        model,
+        history=as_history([value + 100 for value in values]),
+        grid=0.125,
+        backtest=False,
+    )
+
+    assert (
+        shifted.posterior_predictive["standardization"]["yScale"]
+        == (base.posterior_predictive["standardization"]["yScale"])
+    )
+    for original, moved in zip(
+        predictive_quantiles(base), predictive_quantiles(shifted)
+    ):
+        assert moved == pytest.approx(
+            original + 100, rel=0, abs=1e-9 * (101 + abs(original))
         )
 
 
@@ -626,6 +699,24 @@ def edit_the_source(record):
     record["posteriorPredictive"]["program"]["source"] += "\n"
 
 
+def rehash(record):
+    program = record["posteriorPredictive"]["program"]
+    program["sha256"] = hashlib.sha256(program["source"].encode()).hexdigest()
+
+
+def swap_in_another_program(record):
+    # A forecast near 77 under the built-in's name, with a matching hash.
+    program = record["posteriorPredictive"]["program"]
+    program["source"] = program["source"].replace(
+        "real y_next = y_loc", "real y_next = 77 + y_loc"
+    )
+    rehash(record)
+
+
+def shorten_the_sampler(record):
+    record["posteriorPredictive"].update(chains=6, warmup=0, samplesPerChain=10)
+
+
 @requires_stanli
 @pytest.mark.parametrize(
     "tamper, message",
@@ -639,6 +730,8 @@ def edit_the_source(record):
         (coarsen_the_inferred_grid, "inferred grid does not follow"),
         (relabel_the_program, "program name"),
         (edit_the_source, "does not match its recorded hash"),
+        (swap_in_another_program, "not this version's built-in"),
+        (shorten_the_sampler, "sampler settings"),
     ],
 )
 def test_replay_refuses_a_record_no_build_could_produce(tamper, message):
@@ -681,6 +774,13 @@ def test_replay_refuses_a_record_no_build_could_produce(tamper, message):
                 divergences=0, maxRhat=1.0
             ),
         ),
+        ("libraryVersion", lambda record: record.update(libraryVersion="0.0.1")),
+        ("trainCutoff", lambda record: record.update(trainCutoff="t999")),
+        ("calibrationN", lambda record: record.update(calibrationN=99)),
+        (
+            "intervalMethod",
+            lambda record: record.update(intervalMethod="split_conformal"),
+        ),
     ],
 )
 def test_replay_names_each_edited_field(field, tamper):
@@ -688,6 +788,35 @@ def test_replay_names_each_edited_field(field, tamper):
     tamper(record)
 
     assert stan_candidates.replay_mismatches(record) == [field]
+
+
+@requires_stanli
+def test_replay_refuses_a_custom_program_that_includes_a_file():
+    record = replay_record(CUSTOM_MODEL, STAN_PROGRAMS["stanli-ar1-t"])
+    program = record["posteriorPredictive"]["program"]
+    program["source"] = "#include gen.stan\n" + program["source"]
+    rehash(record)
+    record["candidateId"] = stan_candidates.candidate_id(
+        record["targetDataPointId"],
+        record["targetPeriod"],
+        "stanli",
+        stan_candidates.model_key(CUSTOM_MODEL, program["source"]),
+        normalize_history(record["history"]),
+    )
+
+    with pytest.raises(ValueError, match="must be one file"):
+        stan_candidates.replay_stanli_candidate(record)
+
+
+@requires_stanli
+def test_replay_recomputes_a_recorded_walk_forward_score():
+    candidate = build(history=rounded_walk(9))
+    record = json.loads(json.dumps(candidate.as_dict()))
+    assert record["backtestScore"]["rows"] == 6
+
+    assert stan_candidates.replay_mismatches(record) == []
+    record["backtestScore"]["meanAbsoluteError"] = 0.0
+    assert stan_candidates.replay_mismatches(record) == ["backtestScore"]
 
 
 @requires_stanli
@@ -744,6 +873,33 @@ def test_cli_replays_a_candidate_set_and_flags_a_changed_record(tmp_path, capsys
 
     assert main(["--replay-stanli", str(path)]) == 1
     assert "REFUSED: missing field 'roundIncrement'" in capsys.readouterr().out
+
+
+@requires_stanli
+def test_cli_replay_refuses_a_swapped_program_and_flags_an_edited_score(
+    tmp_path, capsys
+):
+    # The two edits round 1 of the review made: another program under a
+    # built-in's name, and a zeroed walk-forward error with a shorter sampler.
+    candidate_set = build_candidate_set(
+        target_data_point_id="test.series",
+        target_period="next",
+        history=rounded_walk(9),
+        models=["stanli-rw-drift-t", "stanli-ar1-t", "stanli-ar1-diff-t"],
+        generated_at=GENERATED_AT,
+    )
+    swap_in_another_program(candidate_set["candidates"][0])
+    candidate_set["candidates"][1]["backtestScore"]["meanAbsoluteError"] = 0.0
+    shorten_the_sampler(candidate_set["candidates"][2])
+    path = tmp_path / "candidates.json"
+    path.write_text(json.dumps(candidate_set))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    out = capsys.readouterr().out
+    assert "REFUSED: recorded source is not this version's built-in" in out
+    assert "MISMATCH in backtestScore" in out
+    assert "REFUSED: recorded sampler settings" in out
+    assert "replayed exactly" not in out
 
 
 @requires_stanli

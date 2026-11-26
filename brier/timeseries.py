@@ -601,8 +601,8 @@ def utc_now() -> str:
 def replay_stanli_records(path: Path) -> int:
     """Replay the stanli candidates in a candidate or candidate-set JSON file.
 
-    Returns 0 when every candidate's published forecast, quantiles and
-    diagnostics come out exactly as recorded.
+    Returns 0 when every candidate passes replay's checks and every field
+    replay rebuilds comes out exactly as recorded.
     """
 
     from brier.stan_candidates import replay_mismatches

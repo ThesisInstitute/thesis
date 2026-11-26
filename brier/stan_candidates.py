@@ -12,28 +12,31 @@ Every program receives the same data: ``N``, the raw history ``y``, its
 standardized form ``y_std = (y - y_loc) / y_scale``, ``y_loc``, ``y_scale`` and
 ``y_grid``. ``y_loc`` is the last print, ``y_scale`` a robust scale of the
 one-step changes, and ``y_grid`` the increment the prints are reported on (0
-when unknown). A program must define the generated quantity ``y_next``: one
-posterior predictive draw of the next print, in raw units. The built-in
-programs fit ``y_std`` under fixed priors, so a positive rescaling or a shift
-of the history (and its grid) moves their forecast by the same rescaling or
-shift.
+when unknown). A program must expose a finite scalar output named ``y_next``,
+in raw units, and should define it in generated quantities as one draw from
+the next print's posterior predictive distribution. The builder checks the
+output's name, shape and finite draws, not the block that declares it. A
+program must be one file: the builder and replay reject ``#include``, so a
+candidate's JSON carries the whole program. The built-in programs fit
+``y_std`` under fixed priors, so a power-of-two rescaling or a shift of the
+history (and its grid) moves their forecast by the same rescaling or shift.
 
-Official prints are rounded, and rounded series repeat a print often. When
-more than half of the one-step changes are exactly zero, a Student-t
-likelihood grows without bound as its scale shrinks to zero, and the
-posterior collapses onto the last print.
-The built-in programs treat each print as the latent value plus rounding error
-uniform on half a grid step either way (variance ``y_grid**2 / 12``) and add
-that variance, for every print a residual involves, to the residual scale.
-While ``y_grid`` is positive, that keeps the likelihood bounded. The programs
-ignore the correlation that shared rounding errors induce across neighboring
-residuals.
+Official prints are rounded, and rounded series repeat a print often.
+Repeated prints can make a Student-t likelihood favor scales near zero and
+produce a nearly degenerate forecast. The built-in programs treat each print
+as the latent value plus rounding error uniform on half a grid step either way
+(variance ``y_grid**2 / 12``), and approximate that noise by adding its
+contribution, for every print a residual involves, to the squared Student-t
+scale. A positive ``y_grid`` keeps that scale bounded away from zero. The
+programs ignore the correlation that shared rounding errors induce across
+neighboring residuals.
 """
 
 from __future__ import annotations
 
 import hashlib
 import math
+import re
 from decimal import Decimal
 from statistics import median
 from typing import Any, Sequence
@@ -187,17 +190,21 @@ def stanli_model_names() -> tuple[str, ...]:
     return (*STAN_PROGRAMS, CUSTOM_MODEL)
 
 
-def standardization(values: Sequence[float]) -> tuple[float, float]:
+def standardization(values: Sequence[float], grid: float = 0.0) -> tuple[float, float]:
     """Return ``(y_loc, y_scale)``: the last print and a robust step scale.
 
     The scale is 1.4826 times the median absolute deviation of the one-step
     changes. Rounded series often repeat a print, which can zero the MAD, so
-    the mean absolute deviation (times sqrt(pi/2)) backs it up, then 1% of the
-    last print, then 1.
+    the mean absolute deviation (times sqrt(pi/2)) backs it up. When every
+    change is the same, the scale falls back to the size of that change, then
+    to ``grid``, then to 1. Only the changes and the grid set the scale, so a
+    shift of the history leaves it alone, and a rescaling of the history and
+    grid rescales it, unless the history is flat and the grid is 0.
     """
 
     loc = float(values[-1])
     diffs = [values[index] - values[index - 1] for index in range(1, len(values))]
+    scale = 0.0
     if diffs:
         center = median(diffs)
         scale = 1.4826 * median(abs(diff - center) for diff in diffs)
@@ -206,10 +213,10 @@ def standardization(values: Sequence[float]) -> tuple[float, float]:
             scale = math.sqrt(math.pi / 2) * (
                 sum(abs(diff - average) for diff in diffs) / len(diffs)
             )
-    else:
-        scale = 0.0
+        if not scale > 0:
+            scale = abs(diffs[0])
     if not scale > 0:
-        scale = abs(loc) * 0.01 if loc != 0 else 1.0
+        scale = grid if grid > 0 else 1.0
     return loc, scale
 
 
@@ -283,12 +290,12 @@ def build_stanli_candidate(
     )
     seed = stanli_seed(identifier)
     values = [observation.value for observation in normalized_history]
-    loc, scale = standardization(values)
     grid_inferred = grid is None
     if grid is None:
         grid = observation_grid(values)
     elif not (math.isfinite(grid) and grid >= 0):
         raise ValueError("grid must be a finite non-negative increment")
+    loc, scale = standardization(values, grid)
     draws, sampler = sample_next(
         source, normalized_history, loc=loc, scale=scale, grid=grid, seed=seed
     )
@@ -430,10 +437,24 @@ def diagnostic_lines(
     return lines
 
 
+_INCLUDE = re.compile(r"^[ \t]*#include\b", re.MULTILINE)
+
+
+def reject_includes(source: str) -> None:
+    """Refuse a program that pulls in another file, which its JSON can't carry."""
+
+    if _INCLUDE.search(source):
+        raise ValueError(
+            "Stan programs must be one file: the runner rejects #include so the "
+            "candidate JSON carries the whole program"
+        )
+
+
 def resolve_program(model: str, program: str | None) -> str:
     if model == CUSTOM_MODEL:
         if not program or not program.strip():
             raise ValueError(f"{CUSTOM_MODEL} needs a Stan program")
+        reject_includes(program)
         return program
     if program is not None:
         raise ValueError(f"{model} is a built-in program; pass {CUSTOM_MODEL} instead")
@@ -534,23 +555,41 @@ def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
     The record carries everything the fit depends on: the program source, the
     history, the grid and the rounding increment. Replay derives the candidate
     id, the seed and the standardization from the record itself, refits, and
-    returns every field the fit determines, keyed as :func:`recorded_fields`
-    keys them. It raises a ``ValueError`` for a record no build could have
-    produced: a source that does not match its recorded hash, quantile levels
-    other than the 19, or a candidate id, seed, standardization or inferred
-    grid that does not follow from the record.
+    returns every field the fit or the history determines, keyed as
+    :func:`recorded_fields` keys them, including the walk-forward score when
+    the record has one. It raises a ``ValueError`` for a record no build of
+    this version could have produced: a source that does not match its
+    recorded hash, model name or, for a built-in, this version's program; a
+    source with ``#include``; sampler settings other than this version's;
+    quantile levels other than the 19; or a candidate id, seed,
+    standardization or inferred grid that does not follow from the record.
     """
 
     block = record["posteriorPredictive"]
     source = block["program"]["source"]
     if program_sha256(source) != block["program"]["sha256"]:
         raise ValueError("recorded Stan source does not match its recorded hash")
-    levels = tuple(row["probability"] for row in block["quantiles"])
-    if levels != QUANTILE_LEVELS:
-        raise ValueError("recorded quantiles must list the 19 levels 0.05 to 0.95")
     model = record["modelName"]
     if block["program"]["name"] != model:
         raise ValueError("recorded program name does not match the model name")
+    if model in STAN_PROGRAMS:
+        if source != STAN_PROGRAMS[model]:
+            raise ValueError(
+                f"recorded source is not this version's built-in {model} program"
+            )
+    elif model == CUSTOM_MODEL:
+        reject_includes(source)
+    else:
+        raise ValueError(f"Unsupported stanli model {model!r}")
+    settings = (block["chains"], block["warmup"], block["samplesPerChain"])
+    if settings != (CHAINS, WARMUP, SAMPLES_PER_CHAIN):
+        raise ValueError(
+            "recorded sampler settings are not this version's "
+            f"{CHAINS} chains, {WARMUP} warmup and {SAMPLES_PER_CHAIN} draws per chain"
+        )
+    levels = tuple(row["probability"] for row in block["quantiles"])
+    if levels != QUANTILE_LEVELS:
+        raise ValueError("recorded quantiles must list the 19 levels 0.05 to 0.95")
     history = normalize_history(record["history"])
     identifier = candidate_id(
         record["targetDataPointId"],
@@ -565,22 +604,41 @@ def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
     if block["seed"] != seed:
         raise ValueError("seed does not follow from the candidate id")
     values = [observation.value for observation in history]
-    loc, scale = standardization(values)
     scaling = block["standardization"]
-    if (scaling["yLoc"], scaling["yScale"]) != (loc, scale):
-        raise ValueError("standardization does not follow from the history")
     grid = scaling["yGrid"]
+    if not (isinstance(grid, (int, float)) and math.isfinite(grid) and grid >= 0):
+        raise ValueError("grid must be a finite non-negative increment")
     if scaling["gridInferred"] and grid != observation_grid(values):
         raise ValueError("inferred grid does not follow from the history")
-    if not (math.isfinite(grid) and grid >= 0):
-        raise ValueError("grid must be a finite non-negative increment")
+    loc, scale = standardization(values, grid)
+    if (scaling["yLoc"], scaling["yScale"]) != (loc, scale):
+        raise ValueError("standardization does not follow from the history")
 
     draws, sampler = sample_next(
         source, history, loc=loc, scale=scale, grid=grid, seed=seed
     )
     quantiles = {level: empirical_quantile(draws, level) for level in QUANTILE_LEVELS}
     point, p10, p90, p05, p95 = rounded_summary(quantiles, block["roundIncrement"])
+    score = None
+    if record["backtestScore"] is not None:
+        # A build with backtest=False records no score, so only a recorded
+        # score is recomputed.
+        replayed_score = backtest_stanli(
+            model,
+            history,
+            program=source,
+            grid=grid,
+            target_data_point_id=(
+                f"{record['targetDataPointId']}:{record['targetPeriod']}"
+            ),
+        )
+        score = replayed_score.as_dict() if replayed_score else None
     return {
+        "libraryVersion": package_version("stanli"),
+        "trainCutoff": history[-1].period,
+        "calibrationN": len(history),
+        "intervalMethod": "posterior_predictive",
+        "backtestScore": score,
         "pointEstimate": point,
         "quantiles": {"p10": p10, "p50": point, "p90": p90},
         "interval80": ForecastInterval(lower=p10, upper=p90, level=0.8).as_dict(),
@@ -597,6 +655,11 @@ def recorded_fields(record: dict[str, Any]) -> dict[str, Any]:
 
     block = record["posteriorPredictive"]
     return {
+        "libraryVersion": record["libraryVersion"],
+        "trainCutoff": record["trainCutoff"],
+        "calibrationN": record["calibrationN"],
+        "intervalMethod": record["intervalMethod"],
+        "backtestScore": record["backtestScore"],
         "pointEstimate": record["pointEstimate"],
         "quantiles": record["quantiles"],
         "interval80": record["interval80"],
