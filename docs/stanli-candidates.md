@@ -74,14 +74,20 @@ value.
 The built-ins fit `y_std` under fixed priors. Scaling the history and an
 explicit grid by a power of two scales every predictive quantile exactly, within
 the normal floating-point range, unless the history is flat and the grid is 0,
-where `y_scale` falls back to 1. With the grid held fixed, a shift of the
-history leaves `y_scale` unchanged up to float error. It shifts every
-quantile by the same amount only when the shifted prints are exact in floating
-point, as multiples of 1/8 are. Most decimal prints are not: a shift changes
-their float error, and the sampler can amplify that into quantile differences of
-Monte Carlo size. `tests/test_stan_candidates.py` checks exact rescaling,
-shifts of flat, drifting and noisy histories on a 1/8 grid, and that a shift
-keeps `y_scale` on flat, drifting and noisy histories of tenths.
+where `y_scale` falls back to 1. With the grid held fixed, shifting the history
+can change which deviations exceed the scale's noise threshold. The threshold
+grows with the largest absolute print, so a shift can change the forecast's
+width even when it keeps every one-step change exact: `[0, 0, 1]` has a
+`y_scale` of 0.7413, but shifted by 1e12 its deviations fall under the
+threshold and `y_scale` falls to the grid. A shift that leaves every nonzero
+deviation above the threshold leaves `y_scale` unchanged up to float error. It
+shifts every quantile by the same amount only when the shifted prints are exact
+in floating point, as multiples of 1/8 are. Most decimal prints are not: a shift
+changes their float error, and the sampler can amplify that into quantile
+differences of Monte Carlo size. `tests/test_stan_candidates.py` checks exact
+rescaling, shifts of flat, drifting and noisy histories on a 1/8 grid, that a
+shift keeps `y_scale` on flat, drifting and noisy histories of tenths, and the
+`[0, 0, 1]` case on both sides of the threshold.
 
 ## Reporting grid
 
@@ -99,19 +105,21 @@ that repeats its print in 40 of 47 changes. With the grid, every fit keeps its
 grid of 0, every fit squeezes them into less than 0.01 and ends its diagnostics
 with a warning.
 
-The runner rounds every print to 12 significant digits at the scale of the
-largest, then sets the grid to `10^-d`, where d counts the most decimal places
-any print shows, trailing zeros dropped. Whole-number prints get a grid of 1, and
-float noise such as `0.1 + 0.2` leaves the grid alone. Python callers can pass
-`grid=` to `build_stanli_candidate` instead, and a grid of 0 turns the rounding
-term off.
+To infer the grid, the runner rounds each print at the scale of the largest
+absolute print, keeping 12 significant digits at that scale. It then sets the
+grid to `10^-d`, where d counts the most decimal places among the rounded
+prints, trailing zeros dropped. The fit uses the original values. Whole-number
+prints get a grid of 1, and float noise such as `0.1 + 0.2` leaves the grid
+alone. Python callers can pass `grid=` to `build_stanli_candidate` instead, and
+a grid of 0 turns the rounding term off.
 
 ## Output
 
 A stanli candidate follows `thesis_model_candidate_v1` with `library`
 `stanli`, `intervalMethod` `posterior_predictive`, and point, p10 and p90 at
 the predictive median, 10th and 90th percentiles (rounded to
-`--round-increment` when given, then widened to bracket the point strictly).
+`--round-increment` when given, then widened to bracket the point strictly,
+by the next float where a step of the increment can't move an endpoint).
 It adds a `posteriorPredictive` block:
 
 - `quantiles`: 19 predictive quantiles at probabilities 0.05 to 0.95, unrounded;
@@ -157,8 +165,9 @@ each field. Those tests replay on the
 machine that fitted, and no test compares platforms. Replay flags a record from
 another stanli version, and the JSON records no platform.
 
-Each candidate also carries a one-step walk-forward score over its last 24
-cutoffs, whose fits use the full history's grid.
+When walk-forward scoring is on and the history is long enough, the builder
+also scores up to 24 trailing one-step cutoffs. Each fit uses the full training
+history's reporting grid. Otherwise `backtestScore` is null.
 
 ## Publishing a stanli forecast
 
@@ -180,19 +189,23 @@ can tie neighboring rungs, which the ladder check rejects.
 adapter resolves (46 after merging unit variants of the same FRED series) in
 real time:
 
-- It downloads ALFRED vintages on the 1st and 16th of each month from
-  2024-06-01 through 2026-11-01. It caches a download only after parsing it,
-  and parses a cached file the same way when it reads it. The parser refuses a
-  header column that isn't one vintage of the series, a repeated vintage, a row
-  whose cell count differs from the header's, a body without a final line break,
-  and a body with no rows. A body cut exactly at a line break passes these
-  checks; `urlopen` raises `IncompleteRead` when a download stops short of its
-  stated length.
+- It downloads ALFRED vintages on the 1st and 16th of each month from 2024-06-01
+  through 2026-11-01. It caches a download only after parsing it, and parses a
+  cached file the same way when it reads it. The parser refuses a header column
+  that isn't one vintage of the series, a repeated vintage, a quote left open, a
+  row whose cell count differs from the header's, an observation date that isn't
+  a real YYYY-MM-DD date or repeats, a value that isn't a finite number, a body
+  without a final line break, and a body with no rows. An empty cell or `.`
+  marks a missing value. A body cut exactly at a line break passes these checks;
+  `urlopen` raises `IncompleteRead` when a download stops short of its stated
+  length.
 - For each period it trains on the last sampled vintage without the period,
   reads the period's cadence from that vintage, and transforms that vintage's
   prints as the resolver does. It scores against the earliest sampled vintage
   that holds the period. Vintages are sampled twice a month, so that vintage can
-  include revisions published after the first print.
+  include revisions published after the first print. A period that any earlier
+  sample held is never a new release, even when a later sample drops it and the
+  next restores it.
 - The models treat adjacent available prints as consecutive steps. In each run,
   111 training windows in 12 series contain a calendar gap: the latest vintage
   has no October 2025 print for UNRATE, U6RATE and CIVPART, and no October or
@@ -310,13 +323,13 @@ with 36. On the 24 level series other than W824RC1, it scores 0.955 and 0.965,
 
 W824RC1, Medicare benefits at a seasonally adjusted annual rate, moves by a
 near-constant step. In the November 1, 2026 ALFRED vintage, its last 60 monthly
-prints rise by an average of $7.6 billion at an annual rate each month, and in
-54 of 58 consecutive pairs of monthly changes, the two changes differ by $0.5
-billion or less. `stanli-ar1-diff-t` can learn to repeat
-the last change, and there it scores 0.056 of persistence's CRPS with 60 prints
-and 0.051 with 36, while `stanli-ar1-t-ladder` scores 1.57 and 2.06 times
-`persistence-ladder`'s. `stanli-selected` used `stanli-ar1-diff-t` on 18 of the
-series' 24 targets with 60 prints and 15 with 36.
+prints rise by an average of $7.6 billion each month, and in 54 of 58
+consecutive pairs of monthly changes, the two changes differ by $0.5 billion or
+less. `stanli-ar1-diff-t` can learn to repeat the last change, and there it
+scores 0.056 of persistence's CRPS with 60 prints and 0.051 with 36, while
+`stanli-ar1-t-ladder` scores 1.57 and 2.06 times `persistence-ladder`'s.
+`stanli-selected` used `stanli-ar1-diff-t` on 18 of the series' 24 targets with
+60 prints and 15 with 36.
 
 That one series supplies the rule's whole lead over `stanli-ar1-t`. Without it,
 the paired ladder ratio moves from 0.952 to 1.000 (0.978, 1.023) with 60 prints
@@ -386,10 +399,12 @@ with 36. `stanli-selected-ladder` scores between 0.864 and 0.904, and between
 - The backtest compares models and leaves agents untested. The analyst's prompt
   tells it to anchor on the strongest benchmark and move off it only with current
   evidence, so these gains need not carry over.
-- Every target falls in one period, 2024-04 through 2026-09.
+- The backtest covers target periods from April 2024 through September 2026
+  only.
 - The series overlap (CPI and PCE price indexes, BEA benefit lines, consumer
-  credit). The bootstrap resamples them as independent, so its intervals
-  understate the uncertainty when they move together.
+  credit). The bootstrap resamples each series independently, so when paired
+  score differences move together across related series, its intervals can be
+  too narrow.
 - We compare 14 arms over two windows with no multiple-comparison correction,
   and we chose every subset above (W824RC1, the warning split, the period
   halves, the late windows and the transforms) after reading the full runs'
@@ -437,10 +452,10 @@ Both assume about 23 targets per series, as in the backtest. A 5%
 reduction takes about 2,250 targets or 104 series with 60 prints, and 3,710
 targets or 163 series with 36, more than the 46 series here. The paired agent
 study will need its own power calculation for mean normalized CRPS, the gate's
-primary metric. Across all 1,047 targets, the
-program's ladder scores 8.5% below `persistence-ladder` in geometric-mean CRPS
-with 60 prints and 9.6% with 36, and an agent that anchors on the candidate only
-in part would gain less.
+primary metric. Across all 1,047 model-backtest targets, the fixed ladder cuts
+geometric-mean CRPS by 8.5% with 60 prints and 9.6% with 36 against
+`persistence-ladder`. The paired agent study will estimate the effect of giving
+agents this candidate.
 
 ### Draft pack skill
 
@@ -478,8 +493,8 @@ against the rule's 56. With 36 prints, the two need about 39 and 40.
 >
 > Do not use this for a series with fewer than 36 prints, a target more than one
 > step past the last print, a series with a known recent break, or a series that
-> moves by a near-constant step each print, where repeating the last change does
-> better. Expect its 80% intervals on levels to run narrow.
+> moves by a near-constant step each print. Expect its 80% intervals on levels
+> to run narrow.
 
 ## Limitations
 
@@ -490,8 +505,8 @@ against the rule's 56. With 36 prints, the two need about 39 and 40.
 - A sampler warning flags a candidate but doesn't drop it. The draft skill falls
   back when one appears.
 - No run covers a history longer than 60 prints or shorter than 36.
-- The backtest approximates the agent's information set: the vintage grid
-  samples twice a month, so a revision published within two weeks of a first
-  print counts as part of it.
+- The backtest scores each target against the earliest sampled ALFRED vintage
+  that contains it. Vintages are sampled twice a month, so that sample can
+  already include a revision to the first release.
 - We have fit the programs under a macOS deny-write sandbox and on CI's Ubuntu
   runner, but not in the analyst's Linux sandbox.

@@ -32,30 +32,27 @@ walk-forward scores, the stanli rows matched the 60-print run exactly, and 19 of
 the 164 `statsmodels` and `statsmodels-ladder` rows differed in CRPS or PIT by
 less than one part in 100 million.
 
-Later commits fix the script's CSV checks, cadence inference, tie rounding,
-normalization floor and ladder tie step, and the stanli scale's fallbacks for
-constant changes and for decimal changes that are equal up to float error. From
-the same cache, the code that wrote these rows and the fixed code build the same
-2,094 targets, the same persistence and `persistence-ladder` scores and
-normalizers, and the same standardization for all but 15 of the 52,350 distinct
-histories the 157,050 stanli fits see, walk-forward prefixes included. The 15
-are 36-print walk-forward prefixes in five targets: CUSR0000SEHA's one-month
-change for 2024-07, CUSR0000SEHC's for 2025-03, 2025-04 and 2025-05, and
-W824RC1's level for 2026-09. Their equal decimal changes had set the old scale
-at float error, between about 1e-16 and 1e-13. We refit those five targets with
-the fixed code. Only the stanli rows' walk-forward MAE and coverage changed, and
-no pick, CRPS, PIT or warning moved, so we replaced those two fields in the 50
-affected rows. The statistics rebuilt from the patched rows match
-`summary.json`.
+The 36-print rows use the current stanli scale. Correcting float error in equal
+decimal changes affects 15 of the 52,350 distinct training histories that the
+157,050 stanli fits see, walk-forward prefixes included, and 45 of those fits.
+The 15 are 36-print walk-forward prefixes in five targets: CUSR0000SEHA's
+one-month change for 2024-07, CUSR0000SEHC's for 2025-03, 2025-04 and 2025-05,
+and W824RC1's level for 2026-09. Their old scale was float error, between about
+1e-16 and 1e-13. A refit of those five targets changed walk-forward MAE in 50
+rows and 80% coverage in 12 of them, and we replaced those fields. No model
+pick, CRPS, PIT or warning changed, and the statistics rebuilt from the patched
+rows match `summary.json`.
 
-The rescored persistence rows match the committed rows, apart from two 36-print
-`persistence-ladder` CRPS values, for CUSR0000SAH1 in 2025-02 and PPIFIS in
-2026-03. They differ in the 12th significant digit because the merge with main
-changed how the runner coalesces CDF knots within 1e-12. Code at ec45aa8c still
-reproduces every committed persistence row exactly. We didn't refit the other
-arms to see whether the knot change moves them. The tie-rounding fix changes a
-score only when its unrounded value is an exact tie at the 13th digit. No
-persistence row has one, and we didn't refit the other arms to look.
+From the same cache, the code that wrote these rows and the current code build
+the same 1,047 targets and the same normalization scales in each window. All
+`persistence` scores match. Two 36-print `persistence-ladder` rows,
+CUSR0000SAH1 for 2025-02 and PPIFIS for 2026-03, differ in raw and normalized
+CRPS in the 12th significant digit, because the merge with main changed how the
+runner coalesces CDF knots within 1e-12. Code at ec45aa8c reproduces every
+committed persistence row. We didn't refit the other arms to see whether the
+knot change moves them. The tie-rounding fix changes a score only when its
+unrounded value is an exact tie at the 13th digit. No persistence row has one,
+and we didn't refit the other arms to look.
 
 Every comparison in the doc comes from these rows. `summary.json` holds the full
 runs' statistics. For subsets, such as the comparisons without W824RC1, we

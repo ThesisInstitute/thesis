@@ -31,6 +31,7 @@ from brier.stan_candidates import (
     standardization,
 )
 from brier.timeseries import (
+    TimeSeriesObservation,
     build_candidate_set,
     build_statsmodels_local_level_candidate,
     main,
@@ -238,6 +239,27 @@ def test_shifting_a_decimal_history_keeps_its_scale(tenths, start, shift):
 
     assert base > 0.01
     assert moved == pytest.approx(base, rel=1e-9)
+
+
+def test_a_shift_can_push_a_real_deviation_under_the_noise_threshold():
+    # The threshold is 1e-12 of the largest print, so a large enough shift
+    # hides a deviation even when it keeps every change exact.
+    _, base = standardization([0.0, 0.0, 1.0], 0.1)
+    _, small = standardization([2.0**20, 2.0**20, 2.0**20 + 1], 0.1)
+    _, large = standardization([1e12, 1e12, 1e12 + 1], 0.1)
+
+    assert base == small == pytest.approx(0.7413)
+    assert large == 0.1
+
+
+def test_rounded_endpoints_bracket_the_point_where_the_increment_cannot():
+    # At 1e14 the floats sit 0.0156 apart, so a 0.0001 step moves nothing.
+    point, p10, p90, p05, p95 = stan_candidates.rounded_summary(
+        dict.fromkeys(QUANTILE_LEVELS, 1e14), 0.0001
+    )
+
+    assert p05 <= p10 < point < p90 <= p95
+    assert (p10, p90) == (math.nextafter(1e14, 0), math.nextafter(1e14, math.inf))
 
 
 def test_resolve_program_guards_custom_and_builtin_names():
@@ -894,6 +916,10 @@ def carry_an_include_map(record):
             lambda record: record.update(pointEstimateOverride=77),
         ),
         ("posteriorPredictive.program", carry_an_include_map),
+        (
+            '"posteriorPredictive.seed"',
+            lambda record: record.update({"posteriorPredictive.seed": "bogus seed"}),
+        ),
     ],
     ids=[
         "string-prints",
@@ -904,6 +930,7 @@ def carry_an_include_map(record):
         "schema",
         "extra-field",
         "include-map",
+        "dotted-extra-field",
     ],
 )
 def test_replay_flags_a_value_the_builder_would_type_or_name_differently(field, tamper):
@@ -913,6 +940,35 @@ def test_replay_flags_a_value_the_builder_would_type_or_name_differently(field, 
     tamper(record)
 
     assert stan_candidates.replay_mismatches(record) == [field]
+
+
+@requires_stanli
+def test_replay_passes_a_python_build_from_integer_prints(tmp_path, capsys):
+    # Observation objects keep a Python int; the record must hold what replay
+    # reads back from JSON, a float.
+    history = [
+        TimeSeriesObservation(period=f"t{index:03d}", value=value)
+        for index, value in enumerate([4, 4, 5, 5, 6, 5, 6, 7])
+    ]
+    candidate = build(history=history, backtest=False)
+    record = json.loads(json.dumps(candidate.as_dict()))
+
+    assert [point["value"] for point in record["history"]] == [
+        4.0,
+        4.0,
+        5.0,
+        5.0,
+        6.0,
+        5.0,
+        6.0,
+        7.0,
+    ]
+    assert all(isinstance(point["value"], float) for point in record["history"])
+    assert stan_candidates.replay_mismatches(record) == []
+    path = tmp_path / "candidate.json"
+    path.write_text(json.dumps(record))
+    assert main(["--replay-stanli", str(path)]) == 0
+    assert "replayed exactly" in capsys.readouterr().out
 
 
 @requires_stanli
@@ -979,6 +1035,36 @@ def test_replay_refits_with_a_supplied_grid_and_flags_an_edited_one():
     assert stan_candidates.replay_mismatches(record) == []
     record["posteriorPredictive"]["standardization"]["yGrid"] = 0.5
     assert "posteriorPredictive.quantiles" in stan_candidates.replay_mismatches(record)
+
+
+@pytest.mark.parametrize(
+    "payload, message",
+    [
+        ({"candidates": None}, "candidates in"),
+        ({"candidates": {"modelName": "stanli-ar1-t"}}, "is dict, not a list"),
+        ({"candidates": [{"modelName": []}]}, "REFUSED: modelName is list"),
+    ],
+    ids=["null", "object", "list-label"],
+)
+def test_cli_replay_refuses_a_malformed_candidate_set(
+    payload, message, tmp_path, capsys
+):
+    path = tmp_path / "candidates.json"
+    path.write_text(json.dumps(payload))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    assert message in capsys.readouterr().out
+
+
+@requires_stanli
+def test_cli_replay_flags_a_top_level_key_spelled_like_a_nested_one(tmp_path, capsys):
+    record = replay_record()
+    record["posteriorPredictive.seed"] = "bogus seed"
+    path = tmp_path / "candidate.json"
+    path.write_text(json.dumps(record))
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    assert 'MISMATCH in "posteriorPredictive.seed"' in capsys.readouterr().out
 
 
 @requires_stanli

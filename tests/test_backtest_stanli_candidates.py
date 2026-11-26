@@ -17,7 +17,7 @@ from importlib.util import find_spec
 from pathlib import Path
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -256,6 +256,33 @@ def test_parse_vintage_csv_reads_crlf_and_quoted_cells():
     }
 
 
+@pytest.mark.parametrize(
+    "body, message",
+    [
+        # The final line break sits inside a quote that never closes.
+        ('2025-12-01,"2,1\n', "not valid CSV"),
+        # A later row would silently replace the first one's values.
+        ("2025-12-01,2,2\n2025-12-01,3,3\n", "repeats observation date"),
+        ("2025-13-01,2,2\n", "observation date '2025-13-01'"),
+        ("2025-12-1,2,2\n", "observation date '2025-12-1'"),
+        ("2025-12-01,NaN,2\n", "non-finite value 'NaN'"),
+        ("2025-12-01,2,inf\n", "non-finite value 'inf'"),
+    ],
+    ids=["open-quote", "repeated-date", "no-such-date", "short-date", "nan", "inf"],
+)
+def test_parse_vintage_csv_refuses_a_malformed_row(body, message):
+    with pytest.raises(ValueError, match=message):
+        backtest.parse_vintage_csv(HEADER + body, "X")
+
+
+def test_parse_vintage_csv_keeps_missing_cells_missing():
+    text = HEADER + "2025-11-01,.,\n2025-12-01,,1.5\n"
+    assert backtest.parse_vintage_csv(text, "X") == {
+        "2026-01-01": {},
+        "2026-01-16": {"2025-12-01": 1.5},
+    }
+
+
 def test_adapter_series_dedupes_unit_variants():
     specs = backtest.adapter_series(resolver.ALFRED_ADAPTERS)
     keys = [spec.key for spec in specs]
@@ -351,6 +378,28 @@ def test_a_later_vintage_cannot_change_which_targets_are_one_step_ahead():
     ]
 
 
+def test_a_print_that_drops_out_and_returns_is_no_new_release():
+    # The first sample's April print, dropped by the next sample and restored,
+    # once came back as a target scored against the restored value.
+    vintages = {
+        "2024-05-01": {
+            "2024-01-01": 1.0,
+            "2024-02-01": 2.0,
+            "2024-03-01": 3.0,
+            "2024-04-01": 4.0,
+        },
+        "2024-05-16": {"2024-01-01": 1.0, "2024-02-01": 2.0, "2024-03-01": 3.0},
+        "2024-06-01": {
+            "2024-01-01": 1.0,
+            "2024-02-01": 2.0,
+            "2024-03-01": 3.0,
+            "2024-04-01": 40.0,
+        },
+    }
+
+    assert real_time("level", vintages) == []
+
+
 def test_period_type_reads_quarterly_spacing():
     assert backtest.period_type(["2024-01-01", "2024-04-01", "2024-07-01"]) == (
         "quarter"
@@ -386,6 +435,37 @@ def test_summary_pairs_each_arm_with_persistence():
         pytest.approx(0.5),
     ]
     assert summary["arms"]["persistence"]["geometricMeanCrpsRatio"] == 1.0
+
+
+def test_persistence_endpoints_round_ties_as_the_site_does():
+    # 1000000010.125 is an exact tie at 12 significant digits: format() rounds
+    # it to even, and the site's toPrecision(12) away from zero.
+    _, _, high = backtest.persistence_interval([999999979.75, 999999989.875, 1e9])
+
+    assert high == 1000000010.13
+
+
+def test_an_unavailable_statistic_is_null_in_the_summary_and_na_in_the_table():
+    rows = [
+        {
+            "series": "A",
+            "period": "p1",
+            "arm": "persistence",
+            "crps": 1.0,
+            "normalizedCrps": None,
+            "covered80": True,
+            "samplerFailed": False,
+        }
+    ]
+    summary = backtest.summarize(rows, draws=1)
+    text = json.dumps(backtest.json_ready(summary), allow_nan=False)
+    persistence = json.loads(text)["arms"]["persistence"]
+
+    assert persistence["meanNormalizedCrps"] is None
+    assert persistence["meanNormalizedCrpsDifference"] is None
+    assert "| persistence | 1 | n/a | n/a (n/a, n/a) |" in backtest.markdown_table(
+        summary
+    )
 
 
 @pytest.mark.skipif(find_spec("stanli") is None, reason="stan extra missing")
@@ -888,6 +968,9 @@ def test_ablation_power_matches_a_hand_computed_design_effect():
     assert power["seriesNeeded"] == pytest.approx((z * 1.0 / -math.log(0.9)) ** 2)
 
 
+# A numerical property, so a slow host shouldn't fail it on Hypothesis's
+# per-example deadline.
+@settings(deadline=None)
 @given(
     st.lists(
         st.lists(st.floats(min_value=-2, max_value=2), min_size=1, max_size=6),

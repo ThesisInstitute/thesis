@@ -20,11 +20,15 @@ parameters, which the R-hat check would skip. A program must be one file: the
 builder and replay refuse any ``#include``, even in a comment, so a
 candidate's JSON carries the whole program. The built-in programs fit
 ``y_std`` under fixed priors, so rescaling the history and an explicit grid by
-a power of two rescales their forecast exactly. A shift of the history leaves
-``y_scale`` unchanged up to float error. The forecast shifts by the same amount
-only when the shifted prints are exact in floating point: otherwise the shift
-changes the prints' float error, and the sampler can amplify that into
-differences of Monte Carlo size.
+a power of two rescales their forecast exactly. With the grid held fixed, a
+shift of the history leaves ``y_scale`` unchanged up to float error while every
+nonzero deviation of the one-step changes stays above the scale's noise
+threshold, which grows with the largest absolute print. A shift large enough to
+push a deviation under that threshold changes the scale, and with it the
+forecast's width. The forecast shifts by the same amount only when the shifted
+prints are exact in floating point: otherwise the shift changes the prints'
+float error, and the sampler can amplify that into differences of Monte Carlo
+size.
 
 Official prints are rounded, and rounded series repeat a print often.
 Repeated prints can make a Student-t likelihood favor scales near zero and
@@ -210,7 +214,12 @@ def standardization(values: Sequence[float], grid: float = 0.0) -> tuple[float, 
     step of 0.1 but differ in the 14th digit), and that error grows with the
     level, so it must not set the scale. A rescaling of the history and grid
     by a power of two rescales the scale exactly, unless the history is flat
-    and the grid is 0. A shift changes it only by float error.
+    and the grid is 0. The threshold grows with the largest absolute print, so
+    a shift can change which deviations count, and with them the scale, even
+    when it keeps every one-step change exact: ``[0, 0, 1]`` has scale 0.7413,
+    but shifted by 1e12 its deviations fall under the threshold and the scale
+    falls to ``grid``. A shift that leaves every nonzero deviation above the
+    threshold changes the scale only by float error.
     """
 
     loc = float(values[-1])
@@ -266,6 +275,24 @@ def model_key(model: str, source: str) -> str:
     return model if model != CUSTOM_MODEL else f"{model}.{program_sha256(source)}"
 
 
+def stanli_history(
+    history: Sequence[TimeSeriesObservation | dict[str, Any]],
+) -> tuple[TimeSeriesObservation, ...]:
+    """Validate a history and write each period as a string and each value as a
+    float.
+
+    Replay reads a record's history back from JSON, where a period is a string
+    and a value a float, so the builder records exactly that. An observation
+    passed from Python with an integer value would otherwise record ``4`` where
+    replay rebuilds ``4.0``.
+    """
+
+    return tuple(
+        TimeSeriesObservation(period=str(point.period), value=float(point.value))
+        for point in normalize_history(history)
+    )
+
+
 def build_stanli_candidate(
     *,
     model: str,
@@ -287,7 +314,7 @@ def build_stanli_candidate(
     """
 
     source = resolve_program(model, program)
-    normalized_history = normalize_history(history)
+    normalized_history = stanli_history(history)
     minimum = MIN_OBSERVATIONS[model]
     if len(normalized_history) < minimum:
         raise ValueError(f"{model} needs at least {minimum} observations")
@@ -377,7 +404,10 @@ def rounded_summary(
     """Round the predictive quantiles a candidate publishes.
 
     Returns ``(point, p10, p90, p05, p95)`` from the median and the 10th, 90th,
-    5th and 95th percentiles, with ``p05 <= p10 < point < p90 <= p95``.
+    5th and 95th percentiles, with ``p05 <= p10 < point < p90 <= p95``. When a
+    step of the rounding increment can't move an endpoint off the point, as at
+    1e14 with an increment of 0.0001, the endpoint moves to the next float, and
+    a non-finite endpoint raises ``ValueError``.
     """
 
     point, p10, p90, p05, p95 = round_values(
@@ -394,7 +424,21 @@ def rounded_summary(
         p10, p90 = widen_equal_interval(point, round_increment)
     p10, p90 = ensure_strictly_brackets_point(point, p10, p90, round_increment)
     p05, p95 = ensure_strictly_brackets_point(point, p05, p95, round_increment)
+    p10, p90 = next_float_outside(point, p10, p90)
+    p05, p95 = next_float_outside(point, p05, p95)
     return point, p10, p90, min(p05, p10), max(p95, p90)
+
+
+def next_float_outside(point: float, lower: float, upper: float) -> tuple[float, float]:
+    """Move an endpoint that still touches the point to the next float out."""
+
+    if not lower < point:
+        lower = math.nextafter(point, -math.inf)
+    if not upper > point:
+        upper = math.nextafter(point, math.inf)
+    if not (math.isfinite(lower) and math.isfinite(upper)):
+        raise ValueError("an interval endpoint is not finite")
+    return lower, upper
 
 
 def quantile_rows(quantiles: dict[float, float]) -> list[dict[str, float]]:
@@ -610,7 +654,7 @@ def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
     levels = tuple(row["probability"] for row in block["quantiles"])
     if levels != QUANTILE_LEVELS:
         raise ValueError("recorded quantiles must list the 19 levels 0.05 to 0.95")
-    history = normalize_history(record["history"])
+    history = stanli_history(record["history"])
     identifier = candidate_id(
         record["targetDataPointId"],
         record["targetPeriod"],
@@ -652,24 +696,37 @@ def replay_stanli_candidate(record: dict[str, Any]) -> dict[str, Any]:
     return json.loads(json.dumps(rebuilt.as_dict()))
 
 
-def recorded_fields(record: dict[str, Any]) -> dict[str, Any]:
-    """A candidate's fields as replay compares them.
+def recorded_fields(record: dict[str, Any]) -> dict[tuple[str, ...], Any]:
+    """A candidate's fields as replay compares them, keyed by their path.
 
-    Each top-level field is one, except that each entry of the posterior
-    predictive block is its own field, such as ``posteriorPredictive.seed``.
+    Each top-level field is one, keyed ``(name,)``, except that each entry of
+    the posterior predictive block is its own field, keyed
+    ``("posteriorPredictive", name)``. Paths keep the two levels apart, so a
+    top-level key spelled ``"posteriorPredictive.seed"`` can't stand in for the
+    block's seed.
     """
 
-    fields = {
-        key: value for key, value in record.items() if key != "posteriorPredictive"
+    fields: dict[tuple[str, ...], Any] = {
+        (key,): value for key, value in record.items() if key != "posteriorPredictive"
     }
     block = record.get("posteriorPredictive")
     if isinstance(block, dict):
         fields.update(
-            {f"posteriorPredictive.{key}": value for key, value in block.items()}
+            {("posteriorPredictive", key): value for key, value in block.items()}
         )
     elif "posteriorPredictive" in record:
-        fields["posteriorPredictive"] = block
+        fields[("posteriorPredictive",)] = block
     return fields
+
+
+def field_name(path: tuple[str, ...]) -> str:
+    """Name a field for a mismatch report: ``posteriorPredictive.seed`` for an
+    entry of the block, and a top-level key as written, quoted if it holds a
+    dot."""
+
+    if len(path) == 2:
+        return ".".join(path)
+    return json.dumps(path[0]) if "." in path[0] else path[0]
 
 
 def replay_mismatches(record: dict[str, Any]) -> list[str]:
@@ -681,12 +738,16 @@ def replay_mismatches(record: dict[str, Any]) -> list[str]:
 
     replayed = recorded_fields(replay_stanli_candidate(record))
     recorded = recorded_fields(record)
-    names = [*replayed, *(name for name in recorded if name not in replayed)]
+    paths = [*replayed, *(path for path in recorded if path not in replayed)]
 
-    def text(fields: dict[str, Any], name: str) -> str | None:
-        return json.dumps(fields[name], sort_keys=True) if name in fields else None
+    def text(fields: dict[tuple[str, ...], Any], path: tuple[str, ...]) -> str | None:
+        return json.dumps(fields[path], sort_keys=True) if path in fields else None
 
-    return [name for name in names if text(replayed, name) != text(recorded, name)]
+    return [
+        field_name(path)
+        for path in paths
+        if text(replayed, path) != text(recorded, path)
+    ]
 
 
 def empirical_quantile(values: Sequence[float], probability: float) -> float:

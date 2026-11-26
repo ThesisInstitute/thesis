@@ -611,6 +611,10 @@ def replay_stanli_records(path: Path) -> int:
 
     payload = json.loads(path.read_text())
     entries = payload.get("candidates", [payload]) if isinstance(payload, dict) else []
+    if not isinstance(entries, list):
+        kind = type(entries).__name__
+        print(f"REFUSED: candidates in {path} is {kind}, not a list")
+        return 1
     stanli_models = {*STAN_PROGRAMS, CUSTOM_MODEL}
     records = []
     failed = skipped = 0
@@ -620,6 +624,11 @@ def replay_stanli_records(path: Path) -> int:
             print(
                 f"REFUSED: a candidate entry is {type(record).__name__}, not an object"
             )
+        elif not isinstance(record.get("modelName", ""), str):
+            failed += 1
+            label = record.get("candidateId", "candidate without an id")
+            kind = type(record["modelName"]).__name__
+            print(f"{label}: REFUSED: modelName is {kind}, not a string")
         elif record.get("library") == "stanli":
             records.append(record)
         elif (
@@ -704,8 +713,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=Path,
         help=(
             "Stan program for the stanli-custom model, in one file with no "
-            "#include. It must define y_next in generated quantities "
-            "(see docs/stanli-candidates.md)."
+            "#include. Expose a finite scalar y_next in raw units, not declared "
+            "in parameters, and define it in generated quantities to draw the "
+            "next print (see docs/stanli-candidates.md)."
         ),
     )
     parser.add_argument("--round-increment", type=float)

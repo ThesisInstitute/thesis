@@ -211,14 +211,18 @@ def ts_quantile(values: Sequence[float], probability: float) -> float:
 
 
 def persistence_interval(history: Sequence[float]) -> tuple[float, float, float]:
-    """buildLastPrintPriorInterval: last print +/- p80 of |one-step changes|."""
+    """buildLastPrintPriorInterval: last print +/- p80 of |one-step changes|.
+
+    The site rounds each endpoint with roundComparable, JavaScript's
+    ``Number(value.toPrecision(12))``, which breaks an exact tie away from zero.
+    """
 
     point = history[-1]
     half_width = ts_quantile([abs(b - a) for a, b in zip(history, history[1:])], 0.8)
     return (
         point,
-        float(format(point - half_width, ".12g")),
-        float(format(point + half_width, ".12g")),
+        round_distribution_number(point - half_width),
+        round_distribution_number(point + half_width),
     )
 
 
@@ -288,13 +292,22 @@ def parse_vintage_csv(text: str, series: str) -> dict[str, dict[str, float]]:
     """Map each vintage (YYYY-MM-DD) to its {observation_date: value} rows.
 
     It refuses a body that does not end with a line break or has no rows, a
-    row whose cell count differs from the header's, and a header column that
-    is not ``<series>_YYYYMMDD`` or repeats a vintage. A body cut at a line
-    break passes these checks; ``urlopen`` raises ``IncompleteRead`` when a
-    download stops short of its stated length.
+    quote left open, a row whose cell count differs from the header's, a
+    header column that is not ``<series>_YYYYMMDD`` or repeats a vintage, an
+    observation date that is not a real YYYY-MM-DD date or repeats, and a value
+    that is not a finite number. An empty cell or ``.`` marks a missing value.
+    A body cut at a line break passes these checks; ``urlopen`` raises
+    ``IncompleteRead`` when a download stops short of its stated length.
     """
 
-    reader = csv.reader(io.StringIO(text))
+    try:
+        return _parse_vintage_rows(text, series)
+    except csv.Error as error:
+        raise ValueError(f"ALFRED response for {series} is not valid CSV: {error}")
+
+
+def _parse_vintage_rows(text: str, series: str) -> dict[str, dict[str, float]]:
+    reader = csv.reader(io.StringIO(text), strict=True)
     header = next(reader, [])
     if not header or header[0] != "observation_date":
         raise ValueError(f"unexpected ALFRED header {header[:3]!r}")
@@ -310,6 +323,7 @@ def parse_vintage_csv(text: str, series: str) -> dict[str, dict[str, float]]:
     if len(set(vintages)) != len(vintages):
         raise ValueError(f"ALFRED header for {series} repeats a vintage")
     rows: dict[str, dict[str, float]] = {vintage: {} for vintage in vintages}
+    dates: set[str] = set()
     count = 0
     for line, record in enumerate(reader, start=2):
         count += 1
@@ -320,9 +334,24 @@ def parse_vintage_csv(text: str, series: str) -> dict[str, dict[str, float]]:
                 f"ALFRED row {line} has {len(record)} cells, not the header's "
                 f"{len(header)}"
             )
+        date = record[0]
+        try:
+            canonical = dt.date.fromisoformat(date).isoformat() == date
+        except ValueError:
+            canonical = False
+        if not canonical or len(date) != 10:
+            raise ValueError(f"ALFRED row {line} has observation date {date!r}")
+        if date in dates:
+            # A later row would silently replace the earlier one's values.
+            raise ValueError(f"ALFRED row {line} repeats observation date {date}")
+        dates.add(date)
         for vintage, cell in zip(vintages, record[1:]):
-            if cell not in ("", "."):
-                rows[vintage][record[0]] = float(cell)
+            if cell in ("", "."):
+                continue
+            value = float(cell)
+            if not math.isfinite(value):
+                raise ValueError(f"ALFRED row {line} has a non-finite value {cell!r}")
+            rows[vintage][date] = value
     if not count:
         raise ValueError(f"ALFRED response for {series} has no rows")
     return rows
@@ -430,10 +459,12 @@ def real_time_targets(
         # The training vintage sets the cadence, so no later vintage can change
         # which periods count as one step ahead.
         kind = period_type(list(vintages[earlier]))
-        known = {date[:7] for date in vintages[earlier]}
+        # A period any earlier sample held is no new release, even when a later
+        # sample drops it and the next restores it.
+        seen |= {date[:7] for date in vintages[earlier]}
         for date in sorted(vintages[later]):
             period = date[:7]
-            if period in known or period in seen:
+            if period in seen:
                 continue
             seen.add(period)
             history = transformed_series(vintages[earlier], spec, kind, apply_transform)
@@ -513,7 +544,7 @@ def persistence_ladder(history: Sequence[float]) -> list[float]:
 
 
 def select_model(scores: dict[str, dict[str, Any]], *, skip_warned: bool = True) -> str:
-    """Apply the draft pack skill's rule to each model's walk-forward score.
+    """Choose a stanli program for the backtest's selection arms.
 
     Skip a model whose diagnostics warn, take the lowest walk-forward MAE, and
     break exact ties by coverage nearest 0.8, then by name. When every model
@@ -1148,6 +1179,27 @@ def ablation_power(
     }
 
 
+def json_ready(value: Any) -> Any:
+    """Replace each non-finite float with None, so the JSON holds null for an
+    unavailable statistic, such as a mean over no normalized targets."""
+
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {key: json_ready(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_ready(item) for item in value]
+    return value
+
+
+def shown(value: float | None, spec: str) -> str:
+    """Format a statistic for the table, or n/a when it is unavailable."""
+
+    if value is None or not math.isfinite(value):
+        return "n/a"
+    return format(value, spec)
+
+
 def markdown_table(summary: dict[str, Any]) -> str:
     lines = [
         "| arm | targets | mean normalized CRPS | difference vs persistence "
@@ -1155,19 +1207,25 @@ def markdown_table(summary: dict[str, Any]) -> str:
         "80% coverage |",
         "|---|---:|---:|---:|---:|---:|---:|",
     ]
-    for arm, stats in sorted(
-        summary["arms"].items(), key=lambda item: item[1]["meanNormalizedCrps"]
-    ):
+
+    def order(item: tuple[str, dict[str, Any]]) -> tuple[int, float]:
+        mean = item[1]["meanNormalizedCrps"]
+        available = mean is not None and math.isfinite(mean)
+        return (0, mean) if available else (1, 0.0)
+
+    for arm, stats in sorted(summary["arms"].items(), key=order):
         ci = stats["interval95"]
-        difference = ci.get("meanNormalizedCrpsDifference", [math.nan, math.nan])
-        ratio = ci.get("geometricMeanCrpsRatio", [math.nan, math.nan])
+        difference = ci.get("meanNormalizedCrpsDifference", [None, None])
+        ratio = ci.get("geometricMeanCrpsRatio", [None, None])
         lines.append(
-            f"| {arm} | {stats['targets']} | {stats['meanNormalizedCrps']:.3f} | "
-            f"{stats['meanNormalizedCrpsDifference']:+.3f} "
-            f"({difference[0]:+.3f}, {difference[1]:+.3f}) | "
-            f"{stats['geometricMeanCrpsRatio']:.3f} "
-            f"({ratio[0]:.3f}, {ratio[1]:.3f}) | "
-            f"{stats['shareBeatingBaseline']:.0%} | {stats['coverage80']:.0%} |"
+            f"| {arm} | {stats['targets']} | "
+            f"{shown(stats['meanNormalizedCrps'], '.3f')} | "
+            f"{shown(stats['meanNormalizedCrpsDifference'], '+.3f')} "
+            f"({shown(difference[0], '+.3f')}, {shown(difference[1], '+.3f')}) | "
+            f"{shown(stats['geometricMeanCrpsRatio'], '.3f')} "
+            f"({shown(ratio[0], '.3f')}, {shown(ratio[1], '.3f')}) | "
+            f"{shown(stats['shareBeatingBaseline'], '.0%')} | "
+            f"{shown(stats['coverage80'], '.0%')} |"
         )
     return "\n".join(lines)
 
@@ -1285,7 +1343,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "summary.json").write_text(
-        json.dumps(summary, indent=2, sort_keys=True) + "\n"
+        json.dumps(json_ready(summary), indent=2, sort_keys=True, allow_nan=False)
+        + "\n"
     )
     table = markdown_table(summary)
     (args.output_dir / "table.md").write_text(table + "\n")
@@ -1303,7 +1362,8 @@ def write_rows(path: pathlib.Path, rows: Sequence[dict]) -> None:
         gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as handle,
     ):
         for row in rows:
-            handle.write((json.dumps(row, sort_keys=True) + "\n").encode())
+            text = json.dumps(json_ready(row), sort_keys=True, allow_nan=False)
+            handle.write((text + "\n").encode())
 
 
 if __name__ == "__main__":
