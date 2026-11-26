@@ -241,14 +241,14 @@ precision that were not available at the historical cutoffs.
 Commit 33a078aa records the three programs and their priors, specifies a
 60-print backtest, and proposes choosing among programs by walk-forward MAE and
 coverage for series with at least 12 prints. We made it after a pilot on four
-series, about four minutes into a first full run that we stopped unfinished. A
+series, about four minutes into a first full run, which stopped unfinished. A
 second full run scored the three programs on both windows, and we read its
 results before commit 9f3d82b9 made coverage break exact MAE ties. Commit
 0fb35048 first reports both windows, and its draft skill sets the 36-print
-minimum. We later changed grid inference and seed derivation, added the
-`persistence-ladder` and `noskip` arms, and, after reading those reruns, chose a
-fixed `stanli-ar1-t` for the [draft skill](#draft-pack-skill), which fits up to
-60 prints.
+minimum and fits the last 60 prints. We later changed grid inference and seed
+derivation, added the `persistence-ladder` and `noskip` arms, and, after reading
+those reruns, chose a fixed `stanli-ar1-t` for the
+[draft skill](#draft-pack-skill).
 
 ### Results
 
