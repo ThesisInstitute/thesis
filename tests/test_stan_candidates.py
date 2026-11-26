@@ -1131,17 +1131,42 @@ def test_cli_replay_refuses_a_malformed_candidate_set(
     assert message in capsys.readouterr().out
 
 
-@pytest.mark.parametrize(
-    "text",
-    ['{"candidates": [', '{"candidates": ' + "[" * 100000 + "]" * 100000 + "}"],
-    ids=["cut-off", "deep"],
-)
-def test_cli_replay_refuses_a_file_it_cannot_parse(text, tmp_path, capsys):
+def test_cli_replay_refuses_a_file_it_cannot_parse(tmp_path, capsys):
     path = tmp_path / "candidates.json"
-    path.write_text(text)
+    path.write_text('{"candidates": [')
 
     assert main(["--replay-stanli", str(path)]) == 1
     assert "is not readable JSON" in capsys.readouterr().out
+
+
+def test_cli_replay_refuses_a_file_too_deep_to_parse(tmp_path, capsys, monkeypatch):
+    # How deep json.loads can nest depends on the platform's stack: 100,000
+    # levels overflow it on macOS but parse on GitHub's Linux runners. So the
+    # parser's RecursionError is simulated here.
+    def too_deep(*args, **kwargs):
+        raise RecursionError("maximum recursion depth exceeded")
+
+    path = tmp_path / "candidates.json"
+    path.write_text('{"candidates": []}')
+    monkeypatch.setattr(json, "loads", too_deep)
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    assert "is not readable JSON" in capsys.readouterr().out
+
+
+def test_cli_replay_refuses_a_deeply_nested_file(tmp_path, capsys):
+    # Whether or not the platform can parse it, replay refuses the file
+    # without a traceback: as unreadable, or for an entry that isn't an object.
+    path = tmp_path / "candidates.json"
+    path.write_text('{"candidates": ' + "[" * 100000 + "]" * 100000 + "}")
+
+    assert main(["--replay-stanli", str(path)]) == 1
+    out = capsys.readouterr().out
+    assert out.startswith("REFUSED: ")
+    assert (
+        "is not readable JSON" in out
+        or "a candidate entry is list, not an object" in out
+    )
 
 
 @requires_stanli
