@@ -32,10 +32,24 @@ walk-forward scores, the stanli rows matched the 60-print run exactly, and 19 of
 the 164 `statsmodels` and `statsmodels-ladder` rows differed in CRPS or PIT by
 less than one part in 100 million.
 
+Later commits fix the script's CSV checks, cadence inference, tie rounding,
+normalization floor and ladder tie step, and the stanli scale's fallback for
+constant changes. We checked, without refitting, that the CSV, cadence, floor,
+ladder and scale fixes change no committed row. From the same cache, the old and new code build the
+same 2,094 targets, the same persistence and `persistence-ladder` scores and
+normalizers, and the same standardization for all 152,862 histories a stanli fit
+sees, walk-forward prefixes included. Those rescored persistence rows match the
+committed rows, apart from two 36-print `persistence-ladder` CRPS values, for
+CUSR0000SAH1 in 2025-02 and PPIFIS in 2026-03. They differ in the 12th
+significant digit, and the old and new code agree on them. The tie-rounding fix
+changes a score only when its unrounded value is an exact tie at the 13th
+digit. No persistence row has one, and we didn't refit the other arms to look.
+
 Every comparison in the doc comes from these rows. `summary.json` holds the full
 runs' statistics. For subsets, such as the comparisons without W824RC1, we
 applied the script's own functions to filtered rows. Run this from the
-repository root to recompute one subset and the power calculation:
+repository root to recompute the 60-print result without W824RC1 and the full
+60-print power estimate:
 
 ```python
 import gzip, json, sys
