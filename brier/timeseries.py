@@ -624,8 +624,9 @@ def replay_stanli_records(path: Path) -> int:
     """Replay the stanli candidates in a candidate or candidate-set JSON file.
 
     Returns 0 when every stanli candidate passes replay's checks and its
-    rebuild matches the record field for field. It refuses a file that is not
-    valid JSON or repeats a key in an object, a record whose ``modelName`` is
+    rebuild matches the record field for field. It refuses a file that
+    ``json.loads`` can't parse or that repeats a key in an object, a record
+    whose ``modelName`` is
     not a string, and a record that names a stanli model or carries a posterior
     predictive block but whose library is not exactly ``stanli``; it skips
     every other record.

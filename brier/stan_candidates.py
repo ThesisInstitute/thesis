@@ -13,22 +13,22 @@ standardized form ``y_std = (y - y_loc) / y_scale``, ``y_loc``, ``y_scale`` and
 ``y_grid``. ``y_loc`` is the last print, ``y_scale`` a robust scale of the
 one-step changes, and ``y_grid`` the increment the prints are reported on (0
 when unknown). A program must expose a finite scalar output named ``y_next``,
-in raw units, and should define it in generated quantities as one draw from
-the next print's posterior predictive distribution. The builder checks the
-output's name, shape and finite draws, and refuses a ``y_next`` declared in
-parameters, which the R-hat check would skip. A program must be one file: the
-builder and replay refuse any ``#include``, even in a comment, so a
-candidate's JSON carries the whole program. The built-in programs fit
-``y_std`` under fixed priors, so rescaling the history and an explicit grid by
-a power of two rescales their forecast exactly. With the grid held fixed, a
-shift that keeps every print exact in floating point and the largest absolute
-print within a million grid steps leaves ``y_scale`` unchanged. Past a million
-grid steps, the scale's noise threshold grows with the largest absolute print,
-so a shift can change which fallback sets the scale, and with it the
-forecast's width. The forecast shifts by the same amount only when the shifted
-prints are exact in floating point: otherwise the shift changes the prints'
-float error, and the sampler can amplify that into differences of Monte Carlo
-size.
+in raw units, and should define it in generated quantities as one draw from the
+next print's posterior predictive distribution. The builder checks the output's
+name, shape and finite draws, and refuses a ``y_next`` declared in parameters,
+which the R-hat check would skip. A program must be one file: the builder and
+replay refuse any ``#include``, even in a comment, so a candidate's JSON
+carries the whole program. The built-in programs fit ``y_std`` under fixed
+priors, so rescaling the history and an explicit grid by a power of two
+rescales their forecast exactly. With the grid held fixed, a shift that keeps
+every print exact in floating point, and 1e-12 of the largest absolute print at
+or below a millionth of the grid (about a million grid steps), leaves
+``y_scale`` unchanged. Past that point, the scale's noise threshold grows with
+the largest absolute print, so a shift can change which fallback sets the
+scale, and with it the forecast's width. The forecast shifts by the same amount
+only when the shifted prints are exact in floating point: otherwise the shift
+changes the prints' float error, and the sampler can amplify that into
+differences of Monte Carlo size.
 
 Official prints are rounded, and rounded series repeat a print often.
 Repeated prints can make a Student-t likelihood favor scales near zero and
@@ -46,6 +46,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 from decimal import Decimal
 from statistics import median
 from typing import Any, Sequence
@@ -217,9 +218,10 @@ def standardization(values: Sequence[float], grid: float = 0.0) -> tuple[float, 
     and grid by a power of two rescales the scale exactly, unless the history
     is flat and the grid is 0.
 
-    The threshold stays a millionth of ``grid`` while the largest absolute
-    print is within a million grid steps, so a shift that keeps every print
-    exact and within that range leaves the scale unchanged. Past it, the
+    The threshold stays a millionth of ``grid`` while 1e-12 of the largest
+    absolute print doesn't exceed it, which holds to about a million grid
+    steps, so a shift that keeps every print exact and within that range leaves
+    the scale unchanged. Past it, the
     threshold grows with the largest print, so a shift can change which
     fallback sets the scale even when every print and change stays exact. The
     threshold applies to the two deviations, not to each change: with grid
@@ -726,17 +728,19 @@ def recorded_fields(record: dict[str, Any]) -> dict[tuple[str, ...], Any]:
     return fields
 
 
+PLAIN_KEY = re.compile(r"[A-Za-z0-9_]+")
+
+
 def field_name(path: tuple[str, ...]) -> str:
     """Name a field for a mismatch report: ``posteriorPredictive.seed`` for an
-    entry of the block, and a top-level key as written. A key that is empty or
-    holds a dot, comma, space or quote is JSON-quoted, at either level, so the
-    report can't read as another field or as two."""
+    entry of the block, and a top-level key as written. A key that isn't plain
+    ASCII letters, digits and underscores is JSON-quoted, at either level, with
+    other characters escaped, so the report can't read as another field or as
+    two."""
 
-    names = [
-        json.dumps(key) if not key or any(mark in key for mark in '., "') else key
-        for key in path
-    ]
-    return ".".join(names)
+    return ".".join(
+        key if PLAIN_KEY.fullmatch(key) else json.dumps(key) for key in path
+    )
 
 
 def replay_mismatches(record: dict[str, Any]) -> list[str]:

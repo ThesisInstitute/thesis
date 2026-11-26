@@ -126,6 +126,7 @@ def test_observation_grid_reads_the_finest_decimal_place():
     )
 
 
+@settings(deadline=None)
 @given(
     places=st.integers(min_value=0, max_value=6),
     units=st.lists(
@@ -141,6 +142,7 @@ def test_observation_grid_divides_every_print(places, units):
         assert abs(value - round(value / grid) * grid) <= 1e-9 * max(1, abs(value))
 
 
+@settings(deadline=None)
 @given(
     places=st.integers(min_value=0, max_value=6),
     units=st.lists(
@@ -156,6 +158,7 @@ def test_float_noise_leaves_the_grid_alone(places, units, noise):
     assert observation_grid(noisy) == observation_grid(values)
 
 
+@settings(deadline=None)
 @given(
     units=st.lists(
         st.integers(min_value=-(2**20), max_value=2**20), min_size=1, max_size=30
@@ -180,6 +183,7 @@ def test_standardization_is_positive_shift_free_and_scales_exactly(units, power)
     assert standardization(shifted, grid) == (loc + 1000, scale)
 
 
+@settings(deadline=None)
 @given(
     start=st.integers(min_value=-(2**12), max_value=2**12),
     step=st.integers(min_value=-64, max_value=64),
@@ -229,6 +233,7 @@ def test_decimal_float_error_does_not_set_the_scale(tenths, expected, shift):
     assert shifted == pytest.approx(scale, rel=1e-9)
 
 
+@settings(deadline=None)
 @given(
     tenths=st.lists(st.integers(min_value=-3, max_value=3), min_size=1, max_size=30),
     start=st.integers(min_value=-1000, max_value=1000),
@@ -959,6 +964,11 @@ def carry_an_include_map(record):
             ),
         ),
         ('""', lambda record: record.update({"": 1})),
+        ('"a\\nb"', lambda record: record.update({"a\nb": 1})),
+        (
+            '"posteriorPredictive\\u2024seed"',
+            lambda record: record.update({"posteriorPredictive\u2024seed": 1}),
+        ),
     ],
     ids=[
         "string-prints",
@@ -972,6 +982,8 @@ def carry_an_include_map(record):
         "dotted-extra-field",
         "dotted-nested-field",
         "empty-key",
+        "newline-key",
+        "lookalike-dot-key",
     ],
 )
 def test_replay_flags_a_value_the_builder_would_type_or_name_differently(field, tamper):

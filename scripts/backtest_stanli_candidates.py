@@ -309,7 +309,8 @@ def parse_vintage_csv(text: str, series: str) -> dict[str, dict[str, float]]:
 
 
 VINTAGE_STAMP = re.compile(r"[0-9]{8}")
-ALFRED_NUMBER = re.compile(r"-?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][-+]?[0-9]+)?")
+# Each branch matches a digit run one way only, so a long bad cell fails fast.
+ALFRED_NUMBER = re.compile(r"-?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?")
 
 
 def real_date(text: str) -> bool:
@@ -1361,15 +1362,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    (args.output_dir / "summary.json").write_text(
-        json.dumps(json_ready(summary), indent=2, sort_keys=True, allow_nan=False)
-        + "\n"
-    )
+    write_summary(args.output_dir / "summary.json", summary)
     table = markdown_table(summary)
     (args.output_dir / "table.md").write_text(table + "\n")
     write_rows(args.output_dir / "targets.jsonl.gz", rows)
     print(table)
     return 0
+
+
+def write_summary(path: pathlib.Path, summary: dict[str, Any]) -> None:
+    """Write the summary as strict JSON, with null for an unavailable statistic."""
+
+    text = json.dumps(json_ready(summary), indent=2, sort_keys=True, allow_nan=False)
+    path.write_text(text + "\n")
 
 
 def write_rows(path: pathlib.Path, rows: Sequence[dict]) -> None:

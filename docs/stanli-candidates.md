@@ -1,13 +1,14 @@
 # stanli model candidates
 
-`brier/stan_candidates.py` adds Bayesian model candidates to
-`scripts/run_time_series_models.py`. Each candidate fits a Stan program with
-[stanli](https://github.com/seantalts/stanli) and reports the posterior
-predictive distribution of the next print. stanli, by Sean Talts (BSD-3), ships
-the Stan compiler, Stan Math and a NUTS sampler in one Python package, so it runs
-a Stan program with no per-model C++ compile.
+Fit a Stan program in the time-series runner
+(`scripts/run_time_series_models.py`) to forecast the next print and record its
+posterior predictive distribution as a model candidate.
+`brier/stan_candidates.py` runs the program with
+[stanli](https://github.com/seantalts/stanli). stanli, by Sean Talts (BSD-3),
+ships the Stan compiler, Stan Math and a NUTS sampler in one Python package, so
+it runs a Stan program with no per-model C++ compile.
 
-The runner still defaults to `persistence,statsmodels-local-level`, and no agent
+The runner defaults to `persistence,statsmodels-local-level`, and no agent
 prompt or skill names these candidates. Before analysts use them by default, the
 pack has to pass the ablation that `docs/pack-promotion.md` sets out (see
 [Ablation plan](#ablation-plan)).
@@ -75,23 +76,23 @@ The built-ins fit `y_std` under fixed priors. Scaling the history and an
 explicit grid by a power of two scales every predictive quantile exactly, within
 the normal floating-point range, unless the history is flat and the grid is 0,
 where `y_scale` falls back to 1. With the grid held fixed, the noise threshold
-stays a millionth of the grid while the largest absolute print is within a
-million grid steps. There, a shift that keeps every print exact in floating
-point, as multiples of 1/8 are, leaves `y_scale` unchanged and shifts every
-quantile by the same amount up to float error. Past a million grid steps, the
-threshold grows with the largest absolute print, so a shift can change which
-fallback sets `y_scale`, and with it the forecast's width, even when every print
-and change stays exact. The threshold applies to the median and mean absolute
-deviations, not to each change: with a grid of 0.1, `[0, 0, 1]` has a `y_scale`
-of 0.7413, and shifted by 1e12 its deviations fall under the threshold and
-`y_scale` falls to the grid. `[0, 0, 1, 2, 4]` falls to the grid when shifted by
-2^39, although each of its nonzero deviations, 1, stays above that threshold of
-0.55. Most decimal prints are not exact: a shift changes their float error, and
-the sampler can amplify that into quantile differences of Monte Carlo size.
-`tests/test_stan_candidates.py` checks exact rescaling, shifts of up to 1,000 of
-flat, drifting and noisy histories on a 1/8 grid, that a shift of up to 100,000
-keeps `y_scale` up to float error on flat, drifting and noisy histories of
-tenths, and both examples on both sides of the threshold.
+stays a millionth of the grid while 1e-12 of the largest absolute print doesn't
+exceed it, which holds to about a million grid steps. There, a shift that keeps
+every print exact in floating point, as multiples of 1/8 are, leaves `y_scale`
+unchanged and shifts every quantile by the same amount up to float error. Past
+that point, the threshold grows with the largest absolute print, so a shift can
+change which fallback sets `y_scale`, and with it the forecast's width, even
+when every print and change stays exact. The threshold applies to the median and
+mean absolute deviations, not to each change: with a grid of 0.1, `[0, 0, 1]`
+has a `y_scale` of 0.7413, and shifted by 1e12 its deviations fall under the
+threshold and `y_scale` falls to the grid. `[0, 0, 1, 2, 4]` falls to the grid
+when shifted by 2^39, although each of its nonzero deviations, 1, stays above
+that threshold of 0.55. Most decimal prints are not exact: a shift changes their
+float error, and the sampler can amplify that into quantile differences of Monte
+Carlo size. `tests/test_stan_candidates.py` checks exact rescaling, shifts of up
+to 1,000 of flat, drifting and noisy histories on a 1/8 grid, that a shift of up
+to 100,000 keeps `y_scale` up to float error on flat, drifting and noisy
+histories of tenths, and both examples on both sides of the threshold.
 
 ## Reporting grid
 
@@ -155,18 +156,19 @@ produced: a source that doesn't match its hash or model name, a built-in whose
 source isn't this version's program, a source with `#include`, sampler settings
 other than this version's, quantiles at levels other than the 19, or a candidate
 id, seed, standardization or inferred grid that doesn't follow from the record.
-It also refuses a file that isn't valid JSON or repeats a key in an object, a
-record with a missing field, one it can't read or whose fit fails, a record
-whose `modelName` isn't a string, and a record that names a stanli model or
-carries a posterior predictive block but whose library isn't exactly `stanli`. It rebuilds every other candidate from its
-history, grid, rounding increment and program, the walk-forward score included
-when the record has one, and compares the rebuild with the record field by field
-as JSON. So a value the builder would type, name or nest differently counts as a
-mismatch, and so does a missing or extra field. It names the fields that differ
-and exits 1 on any refusal or mismatch. `tests/test_stan_candidates.py` replays
-every built-in and a custom program through a JSON round trip, checks that the
-rebuild equals the record, and checks that replay refuses or flags an edit to
-each field. Those tests replay on the
+It also refuses a file that `json.loads` can't parse or that repeats a key in an
+object. In the file, it refuses a record with a missing field, one it can't read
+and one whose fit fails. It also refuses a record whose `modelName` isn't a
+string, and one that names a stanli model or carries a posterior predictive
+block but whose library isn't exactly `stanli`. It rebuilds every other
+candidate from its history, grid, rounding increment and program, the
+walk-forward score included when the record has one, and compares the rebuild
+with the record field by field as JSON. So a value the builder would type, name
+or nest differently counts as a mismatch, and so does a missing or extra field.
+It names the fields that differ and exits 1 on any refusal or mismatch.
+`tests/test_stan_candidates.py` replays every built-in and a custom program
+through a JSON round trip, checks that the rebuild equals the record, and checks
+that replay refuses or flags an edit to each field. Those tests replay on the
 machine that fitted, and no test compares platforms. Replay flags a record from
 another stanli version, and the JSON records no platform.
 
@@ -179,12 +181,12 @@ history's reporting grid. Otherwise `backtestScore` is null.
 In fast mode, an agent publishes a point and an 80% interval. It takes the
 candidate's point, p10 and p90, and Thesis seeds an `interval_anchor_v1` CDF
 from them. The site rounds each value of that CDF to 12 significant digits, so
-an interval only a few steps of the point's 12th digit wide can't seed a valid
-CDF: at 1e14 the step is 1,000, and 1e14 ± 1,000 gives 29 distinct values of
-201, which the site's validator rejects. Quantiles that tie add a warning, but a
-narrow interval with distinct quantiles doesn't: [issue
-477](https://github.com/ThesisInstitute/thesis/issues/477) tracks refusing such
-a CDF before it reaches the site.
+an interval narrower than about 80 steps of the point's 12th significant digit,
+40 on each side, can't seed a valid CDF: at 1e14 the step is 1,000, and 1e14 ±
+1,000 gives 29 distinct values of 201, which the site's validator rejects.
+Quantiles that tie add a warning, but a narrow interval with distinct quantiles
+doesn't: [issue 477](https://github.com/ThesisInstitute/thesis/issues/477)
+tracks refusing such a CDF before it reaches the site.
 
 In ladder mode, an agent publishes a threshold ladder, and the 19 posterior
 quantiles form one: the quantile values set the thresholds, probabilities 0.05
@@ -203,13 +205,13 @@ real time:
 - It downloads ALFRED vintages on the 1st and 16th of each month from 2024-06-01
   through 2026-11-01. It caches a download only after parsing it, and parses a
   cached file the same way when it reads it. The parser refuses a header column
-  that isn't one vintage of the series, a repeated vintage, a quote left open, a
-  row whose cell count differs from the header's, an observation date that isn't
-  a real YYYY-MM-DD date or repeats, a value that isn't a finite number, a body
-  without a final line break, and a body with no rows. An empty cell or `.`
-  marks a missing value. A body cut exactly at a line break passes these checks;
-  `urlopen` raises `IncompleteRead` when a download stops short of its stated
-  length.
+  that isn't one vintage of the series on a real date, a repeated vintage, a
+  quote left open, a row whose cell count differs from the header's, an
+  observation date that isn't a real YYYY-MM-DD date or repeats, a value that
+  isn't a finite ASCII decimal such as `-2.5` or `1e3`, a body without a final
+  line break, and a body with no rows. An empty cell or `.` marks a missing
+  value. A body cut exactly at a line break passes these checks; `urlopen`
+  raises `IncompleteRead` when a download stops short of its stated length.
 - For each period it trains on the last sampled vintage without the period,
   reads the period's cadence from that vintage, and transforms that vintage's
   prints as the resolver does. It scores against the earliest sampled vintage
@@ -410,8 +412,7 @@ with 36. `stanli-selected-ladder` scores between 0.864 and 0.904, and between
 - The backtest compares models and leaves agents untested. The analyst's prompt
   tells it to anchor on the strongest benchmark and move off it only with current
   evidence, so these gains need not carry over.
-- The backtest covers target periods from April 2024 through September 2026
-  only.
+- The backtest covers target periods from April 2024 through September 2026.
 - The series overlap (CPI and PCE price indexes, BEA benefit lines, consumer
   credit). The bootstrap resamples each series independently, so when paired
   score differences move together across related series, its intervals can be

@@ -45,14 +45,14 @@ rows match `summary.json`.
 
 From the same cache, the code that wrote these rows and the current code build
 the same 1,047 targets and the same normalization scales in each window. All
-`persistence` scores match. Two 36-print `persistence-ladder` rows,
-CUSR0000SAH1 for 2025-02 and PPIFIS for 2026-03, differ in raw and normalized
-CRPS in the 12th significant digit, because the merge with main changed how the
-runner coalesces CDF knots within 1e-12. Code at ec45aa8c reproduces every
-committed persistence row. We didn't refit the other arms to see whether the
-knot change moves them. The tie-rounding fix changes a score only when its
-unrounded value is an exact tie at the 13th digit. No persistence row has one,
-and we didn't refit the other arms to look.
+`persistence` scores match. Two 36-print `persistence-ladder` rows, CUSR0000SAH1
+for 2025-02 and PPIFIS for 2026-03, differ in raw and normalized CRPS in the
+12th significant digit, because the merge with main changed how the runner
+coalesces CDF knots within 1e-12. Code at ec45aa8c reproduces every committed
+persistence row. We didn't refit the other arms to see whether the knot change
+moves them. Rounding exact ties away from zero changes a score only when its
+unrounded value ties at the 13th digit. No persistence row has one, and we
+didn't refit the other arms to look.
 
 Every comparison in the doc comes from these rows. `summary.json` holds the full
 runs' statistics. For subsets, such as the comparisons without W824RC1, we

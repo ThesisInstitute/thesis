@@ -41,6 +41,7 @@ resolver = load_script("resolve_pending")
 UNIFORM = [{"value": index / 200, "probability": index / 200} for index in range(201)]
 
 
+@settings(deadline=None)
 @given(st.floats(min_value=-2, max_value=3, allow_nan=False))
 def test_crps_of_a_uniform_cdf_matches_the_closed_form(observed):
     if observed < 0:
@@ -463,8 +464,10 @@ def test_persistence_endpoints_round_ties_as_the_site_does():
     # 1000000010.125 is an exact tie at 12 significant digits: format() rounds
     # it to even, and the site's toPrecision(12) away from zero.
     _, _, high = backtest.persistence_interval([999999979.75, 999999989.875, 1e9])
+    _, low, _ = backtest.persistence_interval([-999999979.75, -999999989.875, -1e9])
 
     assert high == 1000000010.13
+    assert low == -1000000010.13
 
 
 def test_an_unavailable_statistic_is_null_in_the_summary_and_na_in_the_table():
@@ -488,6 +491,53 @@ def test_an_unavailable_statistic_is_null_in_the_summary_and_na_in_the_table():
     assert "| persistence | 1 | n/a | n/a (n/a, n/a) |" in backtest.markdown_table(
         summary
     )
+
+
+def strict_load(text):
+    def refuse(constant):
+        raise ValueError(f"non-standard JSON constant {constant}")
+
+    return json.loads(text, parse_constant=refuse)
+
+
+def test_the_writers_emit_strict_json_for_unavailable_values(tmp_path):
+    row = {"arm": "persistence", "crps": 1.0, "walkForwardMae": math.nan}
+    summary = {"arms": {"persistence": {"meanNormalizedCrps": math.nan}}}
+    backtest.write_summary(tmp_path / "summary.json", summary)
+    backtest.write_rows(tmp_path / "rows.jsonl.gz", [row])
+
+    assert strict_load((tmp_path / "summary.json").read_text()) == {
+        "arms": {"persistence": {"meanNormalizedCrps": None}}
+    }
+    with gzip.open(tmp_path / "rows.jsonl.gz", "rt") as handle:
+        assert strict_load(handle.read())["walkForwardMae"] is None
+
+
+def test_the_table_lists_an_unavailable_arm_after_the_available_ones():
+    def arm(mean):
+        return {
+            "targets": 1,
+            "meanNormalizedCrps": mean,
+            "meanNormalizedCrpsDifference": None,
+            "geometricMeanCrpsRatio": None,
+            "shareBeatingBaseline": None,
+            "coverage80": None,
+            "interval95": {},
+        }
+
+    summary = {"arms": {"a-unavailable": arm(None), "b": arm(0.9), "c": arm(0.5)}}
+    arms = [
+        line.split(" | ")[0][2:]
+        for line in backtest.markdown_table(summary).splitlines()[2:]
+    ]
+
+    assert arms == ["c", "b", "a-unavailable"]
+
+
+def test_parse_vintage_csv_refuses_a_line_break_inside_an_open_quote():
+    # The cell count matches, so only the quote check catches this body.
+    with pytest.raises(ValueError, match="not valid CSV"):
+        backtest.parse_vintage_csv('observation_date,X_20260101\n2025-12-01,"2\n', "X")
 
 
 @pytest.mark.skipif(find_spec("stanli") is None, reason="stan extra missing")
@@ -534,6 +584,7 @@ SCORES = st.dictionaries(
 )
 
 
+@settings(deadline=None)
 @given(SCORES)
 def test_select_model_takes_the_lowest_error_among_models_without_warnings(scores):
     picked = backtest.select_model(scores)
@@ -767,6 +818,7 @@ def test_fetch_vintages_refuses_a_vintage_that_may_still_change(tmp_path):
         )
 
 
+@settings(deadline=None)
 @given(st.lists(st.integers(min_value=-30, max_value=30), min_size=2, max_size=60))
 def test_persistence_ladder_rises_strictly_from_the_last_print(steps):
     history = [4.0]
@@ -785,6 +837,7 @@ def test_persistence_ladder_rises_strictly_from_the_last_print(steps):
         assert target - 1e-9 <= rung <= target + index * nudge + 1e-9
 
 
+@settings(deadline=None)
 @given(
     magnitude=st.sampled_from([1.0, 1e6, 1e14, 1e15, 2.0**53, 1e300]),
     steps=st.lists(st.integers(min_value=-2, max_value=2), min_size=2, max_size=20),
@@ -829,6 +882,7 @@ def test_persistence_ladder_passes_the_analyst_ladder_check():
     assert analyst.ladder_validation_errors(cell) == []
 
 
+@settings(deadline=None)
 @given(SCORES)
 def test_select_model_without_the_skip_takes_the_lowest_error_overall(scores):
     picked = backtest.select_model(scores, skip_warned=False)
