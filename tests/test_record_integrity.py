@@ -611,7 +611,10 @@ def synthetic_custody_run(tmp_path: pathlib.Path) -> pathlib.Path:
             run_dir,
             "command",
             "command.json",
-            json.dumps({"backend": "external_command", "argv": ["agent"]}, indent=2),
+            json.dumps(
+                {"backend": "external_command", "argv": ["agent"], "returnCode": 0},
+                indent=2,
+            ),
             created_at,
         ),
         write_artifact(run_dir, "stdout", "stdout.txt", "model output\n", created_at),
@@ -691,7 +694,9 @@ def four_file_v2_run(tmp_path: pathlib.Path) -> pathlib.Path:
             run_dir,
             "command",
             "command.json",
-            json.dumps({"backend": "external_command", "argv": ["agent"]}),
+            json.dumps(
+                {"backend": "external_command", "argv": ["agent"], "returnCode": 0}
+            ),
             created_at,
         ),
         write_artifact(
